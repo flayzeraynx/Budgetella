@@ -1,0 +1,20 @@
+# Deny access to data directory
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^data/ - [F,L]
+</IfModule>
+
+# Prevent directory listing
+Options -Indexes
+
+# Deny access to .htaccess files
+<Files ".htaccess">
+  Order Allow,Deny
+  Deny from all
+</Files>
+
+# Deny access to files with extensions .json
+<FilesMatch "\.(json)$">
+  Order Allow,Deny
+  Deny from all
+</FilesMatch>
