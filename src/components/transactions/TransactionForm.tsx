@@ -127,16 +127,12 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       
       await onSubmit(transactionData);
       
-      // Show success toast
-      showToast(
-        'success', 
-        initialData 
-          ? t.transactionUpdated || 'Transaction updated successfully' 
-          : t.transactionAdded || 'Transaction added successfully'
-      );
-      
-      // Reset form if not editing
+      // Only show success toast for adding, not for updating
+      // (Update success is handled in the parent component)
       if (!initialData) {
+        showToast('success', t.transactionAdded || 'Transaction added successfully');
+        
+        // Reset form if not editing
         setAmount('');
         setDescription('');
         setDate(new Date().toISOString().split('T')[0]);

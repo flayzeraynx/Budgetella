@@ -61,7 +61,10 @@ const Transactions: React.FC = () => {
           // Update only locally if user is not logged in
           await db.transactions.update(editingTransaction.id, transaction);
         }
+        // Only close the dialog if the update was successful
         setEditingTransaction(null);
+        // Only show success toast here, not in the TransactionForm
+        showToast('success', t.transactionUpdated || 'Transaction updated successfully');
       } catch (error) {
         console.error('Error updating transaction:', error);
         showToast('error', t.errorSavingTransaction || 'Error updating transaction');

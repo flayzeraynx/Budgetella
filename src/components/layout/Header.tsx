@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Wallet, BarChart2, Settings, Menu, X, EyeOff, Eye, LogIn, LogOut, Globe } from 'lucide-react';
+import { Wallet, BarChart2, Settings, Menu, X, EyeOff, Eye, LogIn, LogOut, Globe, Home, User, ChevronDown } from 'lucide-react';
 import LoginDialog from '../auth/LoginDialog';
 import LanguageDialog from '../settings/LanguageDialog';
 import LogoutConfirmationDialog from '../auth/LogoutConfirmationDialog';
@@ -23,11 +23,28 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
   const { t } = useTranslation();
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
   const [isLogoutConfirmationOpen, setIsLogoutConfirmationOpen] = useState(false);
   const { currentUser, signOut } = useAuth();
   const settings = useLiveQuery(() => db.settings.toArray()) || [{ currency: 'TRY' }];
   const currency = settings[0]?.currency || 'TRY';
+  
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  
+  // Close user menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    }
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [userMenuRef]);
   
   // Get language code based on currency
   const getLanguageCode = () => {
@@ -50,6 +67,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
 
   const handleLogoutClick = () => {
     setIsLogoutConfirmationOpen(true);
+    setIsUserMenuOpen(false);
   };
 
   const handleConfirmLogout = () => {
@@ -71,29 +89,21 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsLanguageDialogOpen(true)}
-              className="flex items-center px-2 py-2 rounded-md text-sm font-medium transition-colors text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800"
-              aria-label="Language"
-              title={t.selectLanguage}
+            {/* Home */}
+            <Link
+              to="/"
+              className={`flex items-center px-2 py-2 rounded-md text-sm font-medium transition-colors ${
+                isActive('/')
+                  ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
+                  : 'text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800'
+              }`}
+              aria-label="Home"
+              title={t.dashboard}
             >
-              <Globe className="w-5 h-5" />
-              <span className="ml-1 font-bold">{getLanguageCode()}</span>
-            </Button>
+              <Home className="w-5 h-5" />
+            </Link>
             
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleAmountVisibility}
-              aria-label={hideAmounts ? 'Show amounts' : 'Hide amounts'}
-              className="px-2"
-              title={hideAmounts ? 'Show amounts' : 'Hide amounts'}
-            >
-              {hideAmounts ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-            </Button>
-            
+            {/* Settings */}
             <Link
               to="/settings"
               className={`flex items-center px-2 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -107,17 +117,83 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
               <Settings className="w-5 h-5" />
             </Link>
             
+            {/* Hide/Show Values */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleAmountVisibility}
+              aria-label={hideAmounts ? 'Show amounts' : 'Hide amounts'}
+              className="px-2"
+              title={hideAmounts ? 'Show amounts' : 'Hide amounts'}
+            >
+              {hideAmounts ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </Button>
+            
+            {/* Language */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsLanguageDialogOpen(true)}
+              className="flex items-center px-2 py-2 rounded-md text-sm font-medium transition-colors text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800"
+              aria-label="Language"
+              title={t.selectLanguage}
+            >
+              <Globe className="w-5 h-5" />
+              <span className="ml-1 font-bold">{getLanguageCode()}</span>
+            </Button>
+            
+            {/* User Avatar / Login */}
             {currentUser ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogoutClick}
-                className="px-2 py-2 rounded-md text-sm font-medium transition-colors text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800"
-                aria-label="Sign Out"
-                title={t.signedOutSuccessfully}
-              >
-                <LogOut className="w-5 h-5" />
-              </Button>
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center px-2 py-2 rounded-md text-sm font-medium transition-colors text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800"
+                  aria-label="User Menu"
+                >
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-primary-200 dark:border-primary-800 mr-2">
+                      {currentUser.photoURL ? (
+                        <img 
+                          src={currentUser.photoURL} 
+                          alt="Profile" 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center">
+                          <User className="w-5 h-5 text-primary-600 dark:text-primary-300" />
+                        </div>
+                      )}
+                    </div>
+                    <ChevronDown className="w-4 h-4 ml-1" />
+                  </div>
+                </Button>
+                
+                {/* User Dropdown Menu */}
+                {isUserMenuOpen && (
+                  <div 
+                    className="absolute right-0 mt-2 w-48 bg-white dark:bg-secondary-800 rounded-md shadow-lg py-1 z-20 border border-secondary-200 dark:border-secondary-700"
+                    ref={userMenuRef}
+                  >
+                    <div className="px-4 py-2 border-b border-secondary-200 dark:border-secondary-700">
+                      <p className="text-sm font-medium text-secondary-900 dark:text-white truncate">
+                        {currentUser.displayName || 'User'}
+                      </p>
+                      <p className="text-xs text-secondary-500 dark:text-secondary-400 truncate">
+                        {currentUser.email}
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleLogoutClick}
+                      className="w-full text-left px-4 py-2 text-sm text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-700 flex items-center"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      {t.signOut}
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <Button
                 variant="ghost"
@@ -163,18 +239,21 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
       {isMenuOpen && (
         <div className="md:hidden bg-white dark:bg-secondary-900 shadow-lg animate-fade-in">
           <div className="px-2 pt-2 pb-3 space-y-1">
-            <button
-              onClick={() => {
-                setIsLanguageDialogOpen(true);
-                setIsMenuOpen(false);
-              }}
-              className="flex w-full items-center px-3 py-2 rounded-md text-base font-medium text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800"
-              title={t.selectLanguage}
+            {/* Home */}
+            <Link
+              to="/"
+              className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${
+                isActive('/')
+                  ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
+                  : 'text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800'
+              }`}
+              onClick={() => setIsMenuOpen(false)}
             >
-              <Globe className="w-5 h-5 mr-3" />
-              <span className="font-bold">{getLanguageCode()}</span>
-            </button>
+              <Home className="w-5 h-5 mr-3" />
+              {t.dashboard}
+            </Link>
             
+            {/* Settings */}
             <Link
               to="/settings"
               className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${
@@ -188,15 +267,54 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
               {t.settings}
             </Link>
             
+            {/* Language */}
+            <button
+              onClick={() => {
+                setIsLanguageDialogOpen(true);
+                setIsMenuOpen(false);
+              }}
+              className="flex w-full items-center px-3 py-2 rounded-md text-base font-medium text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800"
+              title={t.selectLanguage}
+            >
+              <Globe className="w-5 h-5 mr-3" />
+              <span className="font-bold">{getLanguageCode()}</span>
+            </button>
+            
+            {/* User Profile / Login */}
             {currentUser ? (
-              <button
-                onClick={handleLogoutClick}
-                className="flex w-full items-center px-3 py-2 rounded-md text-base font-medium text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800"
-                title={t.signedOutSuccessfully}
-              >
-                <LogOut className="w-5 h-5 mr-3" />
-                {t.signedOutSuccessfully}
-              </button>
+              <>
+                <div className="flex items-center px-3 py-2 text-base font-medium text-secondary-600 dark:text-secondary-300 border-t border-secondary-200 dark:border-secondary-700 mt-2 pt-2">
+                  <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-primary-200 dark:border-primary-800 mr-3">
+                    {currentUser.photoURL ? (
+                      <img 
+                        src={currentUser.photoURL} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center">
+                        <User className="w-5 h-5 text-primary-600 dark:text-primary-300" />
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-secondary-900 dark:text-white truncate">
+                      {currentUser.displayName || 'User'}
+                    </p>
+                    <p className="text-xs text-secondary-500 dark:text-secondary-400 truncate">
+                      {currentUser.email}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleLogoutClick}
+                  className="flex w-full items-center px-3 py-2 rounded-md text-base font-medium text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800"
+                  title={t.signedOutSuccessfully || 'Sign Out'}
+                >
+                  <LogOut className="w-5 h-5 mr-3" />
+                  {t.signedOutSuccessfully || 'Sign Out'}
+                </button>
+              </>
             ) : (
               <button
                 onClick={() => {

@@ -59,17 +59,34 @@ export const addTransaction = async (userId: string, transaction: Omit<Transacti
 export const updateTransaction = async (userId: string, transactionId: string, transaction: Partial<Transaction>) => {
   const transactionRef = doc(db, `users/${userId}/transactions/${transactionId}`);
   
-  // Convert Date objects to Firestore Timestamps
-  const firestoreTransaction = {
-    ...transaction,
-    date: transaction.date ? Timestamp.fromDate(transaction.date) : undefined,
-    recurrenceEndDate: transaction.recurrenceEndDate 
-      ? Timestamp.fromDate(transaction.recurrenceEndDate) 
-      : undefined,
-    updatedAt: serverTimestamp()
-  };
+  // Create a clean object without undefined values
+  const cleanTransaction: Record<string, any> = {};
   
-  return updateDoc(transactionRef, firestoreTransaction);
+  // Only add defined fields to the update object
+  Object.entries(transaction).forEach(([key, value]) => {
+    if (value !== undefined) {
+      cleanTransaction[key] = value;
+    }
+  });
+  
+  // Convert Date objects to Firestore Timestamps
+  if (cleanTransaction.date) {
+    cleanTransaction.date = Timestamp.fromDate(cleanTransaction.date);
+  }
+  
+  if (cleanTransaction.recurrenceEndDate) {
+    cleanTransaction.recurrenceEndDate = Timestamp.fromDate(cleanTransaction.recurrenceEndDate);
+  } else if (cleanTransaction.recurrenceEndDate === null) {
+    // Explicitly set to null if it's null (not undefined)
+    cleanTransaction.recurrenceEndDate = null;
+  }
+  
+  // Always add updatedAt timestamp
+  cleanTransaction.updatedAt = serverTimestamp();
+  
+  console.log('Updating transaction with clean data:', cleanTransaction);
+  
+  return updateDoc(transactionRef, cleanTransaction);
 };
 
 export const deleteTransaction = async (userId: string, transactionId: string) => {

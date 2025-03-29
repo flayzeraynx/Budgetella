@@ -5,14 +5,15 @@ import { Download, Upload, Save, FileSpreadsheet, AlertCircle, Check, X, Trash2 
 import { useTranslation } from '../../context/TranslationContext';
 import { useAuth } from '../../context/AuthContext';
 import { useFirebase } from '../../context/FirebaseContext';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { useToast } from '../../context/ToastContext';
+import { collection, getDocs, deleteDoc, doc, addDoc, Timestamp, serverTimestamp } from 'firebase/firestore';
 import { db as firebaseDb } from '../../firebase/config';
-// FirebaseMigration component is no longer needed
 
 const DataManagement: React.FC = () => {
   const { t } = useTranslation();
   const { currentUser } = useAuth();
   const { addTransaction } = useFirebase();
+  const { showToast } = useToast();
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
@@ -36,6 +37,8 @@ const DataManagement: React.FC = () => {
     settings: Settings[],
     savingsTips: SavingsTip[]
   } | null>(null);
+  const [importProgress, setImportProgress] = useState(0);
+  const [showImportOverlay, setShowImportOverlay] = useState(false);
 
   // Convert data to CSV format
   const convertToCSV = (data: any[], headers: string[]): string => {
@@ -263,10 +266,84 @@ const DataManagement: React.FC = () => {
     try {
       if (!importData) return;
       
+      // Show import overlay with progress bar
+      setShowImportOverlay(true);
+      setImportProgress(0);
+      
       // Clear existing data based on what's being imported
       if (importData.transactions.length > 0) {
         await db.transactions.clear();
         await db.transactions.bulkAdd(importData.transactions);
+        setImportProgress(20); // 20% progress after local DB update
+        
+        // If user is logged in, sync transactions to Firebase
+        if (currentUser) {
+          console.log('Syncing imported transactions to Firebase...');
+          try {
+            // First, clear existing transactions in Firebase
+            const transactionsRef = collection(firebaseDb, `users/${currentUser.uid}/transactions`);
+            const snapshot = await getDocs(transactionsRef);
+            
+            // Delete transactions in batches
+            const batchSize = 20;
+            const totalDocs = snapshot.docs.length;
+            
+            for (let i = 0; i < totalDocs; i += batchSize) {
+              const batch = snapshot.docs.slice(i, i + batchSize);
+              const batchPromises = batch.map(docSnapshot => {
+                return deleteDoc(doc(firebaseDb, `users/${currentUser.uid}/transactions/${docSnapshot.id}`));
+              });
+              
+              await Promise.all(batchPromises);
+              console.log(`Deleted batch ${i/batchSize + 1} of ${Math.ceil(totalDocs/batchSize)}`);
+              
+              // Update progress (from 20% to 50% during deletion)
+              const deletionProgress = Math.min(20 + Math.floor((i + batch.length) / totalDocs * 30), 50);
+              setImportProgress(deletionProgress);
+            }
+            
+            // Now add imported transactions to Firebase
+            // We'll use the Firebase DB directly to avoid showing toast messages for each transaction
+            const totalTransactions = importData.transactions.length;
+            const addBatchSize = 10; // Smaller batch size for adding to avoid timeouts
+            
+            for (let i = 0; i < totalTransactions; i += addBatchSize) {
+              const batch = importData.transactions.slice(i, i + addBatchSize);
+              const batchPromises = batch.map(transaction => {
+                // Use Firebase DB directly instead of addTransaction to avoid toast messages
+                const transactionsRef = collection(firebaseDb, `users/${currentUser.uid}/transactions`);
+                return addDoc(transactionsRef, {
+                  amount: transaction.amount,
+                  type: transaction.type,
+                  category: transaction.category,
+                  description: transaction.description,
+                  date: Timestamp.fromDate(transaction.date),
+                  isRecurring: transaction.isRecurring || false,
+                  recurrenceInterval: transaction.recurrenceInterval || 'none',
+                  recurrenceEndDate: transaction.recurrenceEndDate ? Timestamp.fromDate(transaction.recurrenceEndDate) : null,
+                  parentTransactionId: transaction.parentTransactionId || null,
+                  status: transaction.status || 'completed',
+                  createdAt: serverTimestamp(),
+                  updatedAt: serverTimestamp()
+                });
+              });
+              
+              await Promise.all(batchPromises);
+              
+              // Update progress (from 50% to 90% during addition)
+              const additionProgress = Math.min(50 + Math.floor((i + batch.length) / totalTransactions * 40), 90);
+              setImportProgress(additionProgress);
+            }
+            
+            console.log(`Added ${totalTransactions} transactions to Firebase`);
+          } catch (firebaseError) {
+            console.error('Error syncing transactions to Firebase:', firebaseError);
+            throw new Error('Failed to sync transactions to Firebase');
+          }
+        } else {
+          // If not logged in, we can skip to 90% progress
+          setImportProgress(90);
+        }
       }
       
       if (importData.settings.length > 0) {
@@ -279,13 +356,27 @@ const DataManagement: React.FC = () => {
         await db.savingsTips.bulkAdd(importData.savingsTips);
       }
       
+      // Final progress update
+      setImportProgress(100);
+      
+      // Show success message
+      showToast('success', t.importSuccess || 'Data imported successfully');
+      
+      // Clean up
       setImportSuccess(true);
       setShowConfirmation(false);
       setImportData(null);
       setCurrentData(null);
+      
+      // Hide overlay after a short delay to show 100% completion
+      setTimeout(() => {
+        setShowImportOverlay(false);
+      }, 500);
     } catch (error) {
       console.error('Error applying import:', error);
       setImportError('Error applying import');
+      showToast('error', 'Error importing data');
+      setShowImportOverlay(false);
     } finally {
       setIsImporting(false);
     }
@@ -474,6 +565,32 @@ const DataManagement: React.FC = () => {
       // Ensure isClearing is set to false even if there's an error
       setIsClearing(false);
     }
+  };
+
+  // Render import progress overlay
+  const renderImportOverlay = () => {
+    if (!showImportOverlay) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+        <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg max-w-md w-full p-6">
+          <h3 className="text-lg font-medium mb-4">Importing Data</h3>
+          
+          <div className="w-full bg-secondary-200 dark:bg-secondary-700 rounded-full h-2.5 mb-4">
+            <div 
+              className="bg-primary-600 h-2.5 rounded-full transition-all duration-300 ease-in-out" 
+              style={{ width: `${importProgress}%` }}
+            ></div>
+          </div>
+          
+          <p className="text-sm text-secondary-500 dark:text-secondary-400">
+            {importProgress < 100 
+              ? 'Please wait while your data is being imported...' 
+              : 'Import complete!'}
+          </p>
+        </div>
+      </div>
+    );
   };
 
   // Render import confirmation dialog
@@ -775,6 +892,7 @@ const DataManagement: React.FC = () => {
       {renderExportOptionsDialog()}
       {renderImportOptionsDialog()}
       {renderClearConfirmationDialog()}
+      {renderImportOverlay()}
       
       {importError && (
         <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-md border border-red-200 dark:border-red-800">

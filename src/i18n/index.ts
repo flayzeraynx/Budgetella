@@ -8,6 +8,21 @@ export interface Translations {
   transactions: string;
   settings: string;
   
+  // Feedback form
+  feedbackForm: string;
+  feedbackFormError: string;
+  feedbackSent: string;
+  feedbackError: string;
+  name: string;
+  enterName: string;
+  email: string;
+  enterEmail: string;
+  subject: string;
+  enterSubject: string;
+  message: string;
+  enterMessage: string;
+  send: string;
+  
   // Toast messages
   transactionAdded: string;
   transactionUpdated: string;
@@ -49,6 +64,7 @@ export interface Translations {
   logoutConfirmation: string;
   logoutConfirmationMessage: string;
   confirmLogout: string;
+  signOut: string;
   
   // Months
   jan: string;
@@ -203,6 +219,21 @@ export const en: Translations = {
   transactions: 'Transactions',
   settings: 'Settings',
   
+  // Feedback form
+  feedbackForm: 'Feedback Form',
+  feedbackFormError: 'Please fill in all required fields',
+  feedbackSent: 'Feedback sent successfully. Your message has been received.',
+  feedbackError: 'Failed to send feedback. Your message has been logged and will be reviewed.',
+  name: 'Name',
+  enterName: 'Enter your name',
+  email: 'Email',
+  enterEmail: 'Enter your email',
+  subject: 'Subject',
+  enterSubject: 'Enter subject',
+  message: 'Message',
+  enterMessage: 'Enter your message',
+  send: 'Send',
+  
   // Toast messages
   transactionAdded: 'Transaction added successfully',
   transactionUpdated: 'Transaction updated successfully',
@@ -244,6 +275,7 @@ export const en: Translations = {
   logoutConfirmation: 'Confirm Logout',
   logoutConfirmationMessage: 'Are you sure you want to log out? Your data will be cleared from this device.',
   confirmLogout: 'Yes, Log Out',
+  signOut: 'Sign Out',
   
   // Months
   jan: 'Jan',
@@ -398,6 +430,21 @@ export const tr: Translations = {
   transactions: 'İşlemler',
   settings: 'Ayarlar',
   
+  // Feedback form
+  feedbackForm: 'Geri Bildirim Formu',
+  feedbackFormError: 'Lütfen tüm gerekli alanları doldurun',
+  feedbackSent: 'Geri bildirim başarıyla gönderildi. Mesajınız alındı.',
+  feedbackError: 'Geri bildirim gönderilemedi. Mesajınız kaydedildi ve incelenecektir.',
+  name: 'İsim',
+  enterName: 'İsminizi girin',
+  email: 'E-posta',
+  enterEmail: 'E-posta adresinizi girin',
+  subject: 'Konu',
+  enterSubject: 'Konuyu girin',
+  message: 'Mesaj',
+  enterMessage: 'Mesajınızı girin',
+  send: 'Gönder',
+  
   // Toast messages
   transactionAdded: 'İşlem başarıyla eklendi',
   transactionUpdated: 'İşlem başarıyla güncellendi',
@@ -439,6 +486,7 @@ export const tr: Translations = {
   logoutConfirmation: 'Çıkışı Onayla',
   logoutConfirmationMessage: 'Çıkış yapmak istediğinizden emin misiniz? Verileriniz bu cihazdan silinecektir.',
   confirmLogout: 'Evet, Çıkış Yap',
+  signOut: 'Çıkış Yap',
   
   // Months
   jan: 'Oca',
@@ -593,6 +641,21 @@ export const de: Translations = {
   transactions: 'Transaktionen',
   settings: 'Einstellungen',
   
+  // Feedback form
+  feedbackForm: 'Feedback-Formular',
+  feedbackFormError: 'Bitte füllen Sie alle erforderlichen Felder aus',
+  feedbackSent: 'Feedback erfolgreich gesendet. Ihre Nachricht wurde empfangen.',
+  feedbackError: 'Feedback konnte nicht gesendet werden. Ihre Nachricht wurde protokolliert und wird überprüft.',
+  name: 'Name',
+  enterName: 'Geben Sie Ihren Namen ein',
+  email: 'E-Mail',
+  enterEmail: 'Geben Sie Ihre E-Mail-Adresse ein',
+  subject: 'Betreff',
+  enterSubject: 'Betreff eingeben',
+  message: 'Nachricht',
+  enterMessage: 'Geben Sie Ihre Nachricht ein',
+  send: 'Senden',
+  
   // Toast messages
   transactionAdded: 'Transaktion erfolgreich hinzugefügt',
   transactionUpdated: 'Transaktion erfolgreich aktualisiert',
@@ -634,6 +697,7 @@ export const de: Translations = {
   logoutConfirmation: 'Abmeldung bestätigen',
   logoutConfirmationMessage: 'Sind Sie sicher, dass Sie sich abmelden möchten? Ihre Daten werden von diesem Gerät gelöscht.',
   confirmLogout: 'Ja, abmelden',
+  signOut: 'Abmelden',
   
   // Months
   jan: 'Jan',

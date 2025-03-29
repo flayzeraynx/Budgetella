@@ -1,18 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import CategoryManager from '../components/settings/CategoryManager';
 import DataManagement from '../components/settings/DataManagement';
 import CurrencySelector from '../components/settings/CurrencySelector';
+import FeedbackDialog from '../components/settings/FeedbackDialog';
 import Card, { CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../context/TranslationContext';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/ui/Button';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, MessageSquare } from 'lucide-react';
 
 const Settings: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation();
   const { currentUser } = useAuth();
+  const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -57,7 +59,7 @@ const Settings: React.FC = () => {
           <p className="text-secondary-600 dark:text-secondary-400 mb-4">
             {t.aboutDescription || `${t.appName} is a privacy-first personal finance tracker. All your data is stored locally on your device and never sent to any server.`}
           </p>
-          <div className="space-y-2">
+          <div className="space-y-2 mb-4">
             <div className="flex">
               <span className="font-medium w-24">{t.version || 'Version'}:</span>
               <span>1.0.0</span>
@@ -71,8 +73,20 @@ const Settings: React.FC = () => {
               <span>{t.privacyDescription}</span>
             </div>
           </div>
+          
+          <Button
+            onClick={() => setIsFeedbackDialogOpen(true)}
+            leftIcon={<MessageSquare className="w-4 h-4" />}
+          >
+            {t.feedbackForm || 'Feedback Form'}
+          </Button>
         </CardContent>
       </Card>
+      
+      <FeedbackDialog 
+        isOpen={isFeedbackDialogOpen} 
+        onClose={() => setIsFeedbackDialogOpen(false)} 
+      />
     </div>
   );
 };

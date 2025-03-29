@@ -11,6 +11,7 @@ interface LanguageDialogProps {
 }
 
 const LanguageDialog: React.FC<LanguageDialogProps> = ({ isOpen, onClose }) => {
+  const { t } = useTranslation();
   const settings = useLiveQuery(() => db.settings.toArray()) || [{ currency: 'TRY' }];
   const currentCurrency = settings[0]?.currency || 'TRY';
   
@@ -35,7 +36,7 @@ const LanguageDialog: React.FC<LanguageDialogProps> = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg max-w-md w-full">
         <div className="flex justify-between items-center p-4 border-b border-secondary-200 dark:border-secondary-700">
-          <h3 className="text-lg font-medium">Select Language</h3>
+          <h3 className="text-lg font-medium">{t.selectLanguage}</h3>
           <Button
             variant="ghost"
             size="sm"
