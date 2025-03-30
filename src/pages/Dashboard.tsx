@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import AuthDialog from '../components/auth/AuthDialog';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, Transaction, formatCurrency } from '../db';
 import { useAuth } from '../context/AuthContext';
@@ -13,15 +14,16 @@ import CombinedFinancialChart from '../components/dashboard/CombinedFinancialCha
 import Card, { CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { Dialog } from '@headlessui/react';
 import Button from '../components/ui/Button';
-import { Plus, ArrowUpRight, ArrowDownRight, ChevronDown } from 'lucide-react';
+import { Plus, ArrowUpRight, ArrowDownRight, ChevronDown, LogIn } from 'lucide-react';
 import { useTranslation } from '../context/TranslationContext';
 import { useAmountVisibility } from '../context/AmountVisibilityContext';
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
   const { hideAmounts } = useAmountVisibility();
-  const { currentUser, signInWithGoogle } = useAuth();
+  const { currentUser } = useAuth();
   const { addTransaction, updateTransaction, deleteTransaction } = useFirebase();
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   
   // Always fetch data from local database, regardless of authentication status
   const transactions = useLiveQuery(() => db.transactions.toArray()) || [];
@@ -101,35 +103,23 @@ const Dashboard: React.FC = () => {
   const renderAuthWarning = () => {
     if (!currentUser) {
       return (
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-lg mb-6">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-amber-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-            </div>
-
-            <div className="ml-3 flex-grow">
-              <h3 className="text-sm font-medium text-amber-800 dark:text-amber-300">
-                {t.signInRequired}
-              </h3>
-              <div className="mt-1 text-sm text-amber-700 dark:text-amber-200">
-                <p>{t.signInRequiredMessage}</p>
-              </div>
-              <div className="mt-3">
-                <Button
-                  type="button"
-                  onClick={signInWithGoogle}
-                  size="sm"
-                  className="bg-amber-600 hover:bg-amber-700 text-white"
-                >
-                  {t.signInWithGoogle || 'Sign in with Google'}
-                </Button>
-              </div>
-            </div>
-
-
-          </div>
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-md border border-yellow-200 dark:border-yellow-800 mb-6">
+          <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">
+            {t.notSignedIn}
+          </h3>
+          <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-3">
+            {t.localDataWarning}
+          </p>
+          <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-3">
+            {t.signInToSync}
+          </p>
+          <Button
+            onClick={() => setIsAuthDialogOpen(true)}
+            size="sm"
+            leftIcon={<LogIn className="w-4 h-4" />}
+          >
+            {t.signInToBudgetella}
+          </Button>
         </div>
       );
     }
@@ -314,6 +304,12 @@ const Dashboard: React.FC = () => {
           </Dialog.Panel>
         </div>
       </Dialog>
+      
+      <AuthDialog
+        initialView="signin"
+        isOpen={isAuthDialogOpen}
+        onClose={() => setIsAuthDialogOpen(false)}
+      />
     </div>
   );
 };
