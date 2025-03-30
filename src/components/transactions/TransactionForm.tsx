@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { PlusCircle, Repeat, AlertTriangle } from 'lucide-react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -26,6 +26,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   
   const [type, setType] = useState<'income' | 'expense'>(initialData?.type || 'expense');
   const [amount, setAmount] = useState(initialData?.amount.toString() || '');
+  // Initialize categoryId as null
   const [categoryId, setCategoryId] = useState<number | null>(null);
   const [category, setCategory] = useState(initialData?.category || '');
   const [description, setDescription] = useState(initialData?.description || '');
@@ -58,32 +59,68 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   const settings = useLiveQuery(() => db.settings.toArray()) || [{ currency: 'USD' }];
   const currency = settings[0]?.currency || 'USD';
 
+  // Set initial category only once when component loads or when editing a transaction
   useEffect(() => {
-    if (type && categories.length > 0 && !categoryId) {
-      const id = categories[0].id;
-      setCategoryId(id !== undefined ? (typeof id === 'string' ? Number(id) : id) : null);
-      setCategory(categories[0].name);
+    // Skip if no categories or if categoryId is already set
+    if (categories.length === 0 || categoryId !== null) {
+      return;
     }
-  }, [categories, categoryId, type]);
-
-  // Reset category when type changes
-  useEffect(() => {
-    if (categories.length > 0) {
-      const id = categories[0].id;
-      setCategoryId(id !== undefined ? (typeof id === 'string' ? Number(id) : id) : null);
-      setCategory(categories[0].name);
-    }
-  }, [type, categories]);
-
-  // Find category by ID
-  useEffect(() => {
-    if (categoryId) {
-      const selectedCategory = categories.find(c => c.id === categoryId);
-      if (selectedCategory) {
-        setCategory(selectedCategory.name);
+    
+    // If we have initialData with a category, try to find and use it
+    if (initialData?.category) {
+      const matchingCategory = categories.find(c => c.name === initialData.category);
+      if (matchingCategory && matchingCategory.id) {
+        const id = matchingCategory.id;
+        setCategoryId(typeof id === 'string' ? Number(id) : id);
+        setCategory(matchingCategory.name);
+        return;
       }
     }
-  }, [categoryId, categories]);
+    
+    // Otherwise use the first category
+    const id = categories[0].id;
+    setCategoryId(id !== undefined ? (typeof id === 'string' ? Number(id) : id) : null);
+    setCategory(categories[0].name);
+  }, [categories, categoryId, initialData]); // Dependencies properly listed
+
+  // Create ref at the top level of the component
+  const isInitialTypeChange = useRef(true);
+  
+  // Track if user has manually selected a category
+  const [userSelectedCategory, setUserSelectedCategory] = useState(false);
+  
+  // Only reset category when transaction type changes and user hasn't manually selected a category
+  useEffect(() => {
+    // Skip this effect on initial render
+    if (isInitialTypeChange.current) {
+      isInitialTypeChange.current = false;
+      return;
+    }
+    
+    // Skip if user has manually selected a category
+    if (userSelectedCategory) {
+      return;
+    }
+    
+    if (categories.length > 0) {
+      // If editing a transaction and changing type, try to find a category with the same name in the new type
+      if (initialData && initialData.type !== type) {
+        const matchingCategory = categories.find(c => c.name === category);
+        if (matchingCategory && matchingCategory.id) {
+          const id = matchingCategory.id;
+          setCategoryId(typeof id === 'string' ? Number(id) : id);
+          return;
+        }
+      }
+      
+      // Otherwise use the first category of the new type
+      const id = categories[0].id;
+      setCategoryId(id !== undefined ? (typeof id === 'string' ? Number(id) : id) : null);
+      setCategory(categories[0].name);
+    }
+  }, [type, categories, initialData, userSelectedCategory]); // Removed 'category' from dependencies
+
+  // We no longer need this effect since we're handling category updates directly in the onChange handler
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -242,7 +279,20 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
             value={categoryId?.toString() || ''}
             onChange={(e) => {
               const value = e.target.value;
-              setCategoryId(value ? Number(value) : null);
+              if (value) {
+                const selectedId = Number(value);
+                setCategoryId(selectedId);
+                
+                // Find the category name from the selected ID
+                const selectedCategory = categories.find(c => c.id === selectedId);
+                if (selectedCategory) {
+                  setCategory(selectedCategory.name);
+                  // Mark that user has manually selected a category
+                  setUserSelectedCategory(true);
+                }
+              } else {
+                setCategoryId(null);
+              }
             }}
             options={categories.map(cat => ({ value: cat.id?.toString() || '', label: cat.name }))}
             fullWidth

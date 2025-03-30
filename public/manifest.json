@@ -2,8 +2,10 @@
   "name": "Budgetella",
   "short_name": "Budgetella",
   "description": "Secure personal finance tracker with cloud sync",
-  "start_url": "/budgetella/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#0f172a",
   "icons": [

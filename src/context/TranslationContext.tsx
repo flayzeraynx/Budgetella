@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, getCurrentSettings } from '../db';
+import { db, getCurrentSettings, updateDefaultCategoryNames } from '../db';
 import { getTranslations, Translations, en } from '../i18n';
 
 interface TranslationContextType {
@@ -28,6 +28,9 @@ export const TranslationProvider: React.FC<{ children: React.ReactNode }> = ({ c
         const currency = currentSettings.currency || 'USD';
         setCurrentCurrency(currency);
         setTranslations(getTranslations(currency));
+        
+        // Update default category names on initial load
+        await updateDefaultCategoryNames();
       } catch (error) {
         console.error('Error loading settings:', error);
       }
@@ -39,8 +42,15 @@ export const TranslationProvider: React.FC<{ children: React.ReactNode }> = ({ c
   useEffect(() => {
     if (settings && settings[0]?.currency) {
       const currency = settings[0].currency;
+      
+      // Update currency and translations
       setCurrentCurrency(currency);
       setTranslations(getTranslations(currency));
+      
+      // Update default category names when currency/language changes
+      updateDefaultCategoryNames().catch(error => {
+        console.error('Error updating category names:', error);
+      });
     }
   }, [settings]);
   

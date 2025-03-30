@@ -248,7 +248,7 @@ const Dashboard: React.FC = () => {
           <Dialog.Panel className="mx-auto max-w-md w-full rounded-lg bg-white dark:bg-secondary-800 p-6 shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <Dialog.Title className="text-lg font-medium text-secondary-900 dark:text-white">
-                {editingTransaction ? 'Edit Transaction' : 'Add New Transaction'}
+                {editingTransaction ? t.editTransaction : t.addTransaction}
               </Dialog.Title>
               <button
                 onClick={() => {
@@ -287,12 +287,12 @@ const Dashboard: React.FC = () => {
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Dialog.Panel className="mx-auto max-w-sm rounded-lg bg-white dark:bg-secondary-800 p-6 shadow-xl">
             <Dialog.Title className="text-lg font-medium text-secondary-900 dark:text-white">
-              Confirm Deletion
+              {t.confirmDeletion}
             </Dialog.Title>
             
             <div className="mt-2">
               <p className="text-secondary-600 dark:text-secondary-300">
-                Are you sure you want to delete this transaction? This action cannot be undone.
+                {t.deleteConfirmMessage}
               </p>
             </div>
             
@@ -301,13 +301,13 @@ const Dashboard: React.FC = () => {
                 variant="secondary" 
                 onClick={() => setIsDeleteDialogOpen(false)}
               >
-                Cancel
+                {t.cancel}
               </Button>
               <Button 
                 variant="danger" 
                 onClick={confirmDelete}
               >
-                Delete
+                {t.delete}
               </Button>
             </div>
           </Dialog.Panel>
