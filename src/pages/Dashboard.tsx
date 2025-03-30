@@ -265,6 +265,7 @@ const Dashboard: React.FC = () => {
             </div>
             
             <TransactionForm 
+              key={`transaction-form-${editingTransaction?.id || 'new'}`}
               onSubmit={editingTransaction ? handleUpdateTransaction : handleAddTransaction}
               initialData={editingTransaction || undefined}
               onCancel={() => {

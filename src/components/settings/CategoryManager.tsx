@@ -26,22 +26,22 @@ const CategoryManager: React.FC = () => {
   const { categories, addCategory, updateCategory, deleteCategory } = useFirebase();
   const { currentUser } = useAuth();
   
-  // Default categories when user is not logged in
+  // Default categories when user is not logged in - using translations
   const defaultCategories: Category[] = [
     // Income categories
-    { id: 1, name: 'Salary', type: 'income', color: '#4CAF50' },
-    { id: 2, name: 'Freelance', type: 'income', color: '#8BC34A' },
-    { id: 3, name: 'Investments', type: 'income', color: '#009688' },
-    { id: 4, name: 'Gifts', type: 'income', color: '#00BCD4' },
+    { id: 1, name: t.salary || 'Salary', type: 'income', color: '#4CAF50' },
+    { id: 2, name: t.freelance || 'Freelance', type: 'income', color: '#8BC34A' },
+    { id: 3, name: t.investments || 'Investments', type: 'income', color: '#009688' },
+    { id: 4, name: t.gifts || 'Gifts', type: 'income', color: '#00BCD4' },
     
     // Expense categories
-    { id: 5, name: 'Food', type: 'expense', color: '#F44336' },
-    { id: 6, name: 'Housing', type: 'expense', color: '#E91E63' },
-    { id: 7, name: 'Transportation', type: 'expense', color: '#9C27B0' },
-    { id: 8, name: 'Entertainment', type: 'expense', color: '#673AB7' },
-    { id: 9, name: 'Healthcare', type: 'expense', color: '#3F51B5' },
-    { id: 10, name: 'Shopping', type: 'expense', color: '#2196F3' },
-    { id: 11, name: 'Utilities', type: 'expense', color: '#FF9800' },
+    { id: 5, name: t.food || 'Food', type: 'expense', color: '#F44336' },
+    { id: 6, name: t.housing || 'Housing', type: 'expense', color: '#E91E63' },
+    { id: 7, name: t.transportation || 'Transportation', type: 'expense', color: '#9C27B0' },
+    { id: 8, name: t.entertainment || 'Entertainment', type: 'expense', color: '#673AB7' },
+    { id: 9, name: t.healthcare || 'Healthcare', type: 'expense', color: '#3F51B5' },
+    { id: 10, name: t.shopping || 'Shopping', type: 'expense', color: '#2196F3' },
+    { id: 11, name: t.utilities || 'Utilities', type: 'expense', color: '#FF9800' },
     { id: 12, name: 'Other', type: 'expense', color: '#795548' }
   ];
   

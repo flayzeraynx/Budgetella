@@ -330,6 +330,57 @@ export const onSettingsChange = (
   });
 };
 
+// Function to get translations based on currency
+const getTranslationsForCurrency = (currency: string) => {
+  // This is a simplified version of the translations
+  const translations = {
+    'USD': {
+      salary: 'Salary',
+      freelance: 'Freelance',
+      investments: 'Investments',
+      gifts: 'Gifts',
+      food: 'Food',
+      housing: 'Housing',
+      transportation: 'Transportation',
+      entertainment: 'Entertainment',
+      shopping: 'Shopping',
+      utilities: 'Utilities',
+      healthcare: 'Healthcare',
+      education: 'Education'
+    },
+    'TRY': {
+      salary: 'Maaş',
+      freelance: 'Serbest Çalışma',
+      investments: 'Yatırımlar',
+      gifts: 'Hediyeler',
+      food: 'Yiyecek',
+      housing: 'Konut',
+      transportation: 'Ulaşım',
+      entertainment: 'Eğlence',
+      shopping: 'Alışveriş',
+      utilities: 'Faturalar',
+      healthcare: 'Sağlık',
+      education: 'Eğitim'
+    },
+    'EUR': {
+      salary: 'Gehalt',
+      freelance: 'Freiberuflich',
+      investments: 'Investitionen',
+      gifts: 'Geschenke',
+      food: 'Lebensmittel',
+      housing: 'Wohnen',
+      transportation: 'Transport',
+      entertainment: 'Unterhaltung',
+      shopping: 'Einkaufen',
+      utilities: 'Nebenkosten',
+      healthcare: 'Gesundheitswesen',
+      education: 'Bildung'
+    }
+  };
+  
+  return translations[currency as keyof typeof translations] || translations['USD'];
+};
+
 // Initialize default data for new users
 export const initializeUserData = async (userId: string) => {
   // Check if user already has data
@@ -337,31 +388,34 @@ export const initializeUserData = async (userId: string) => {
   const categoriesSnapshot = await getDocs(categoriesRef);
   
   if (categoriesSnapshot.empty) {
-    // Add default categories
+    // Get current settings from local database to determine language
+    const { db: localDB } = await import('../db');
+    const currentSettings = await localDB.settings.toArray();
+    const currentCurrency = currentSettings.length > 0 ? currentSettings[0].currency : 'USD';
+    
+    // Get translations based on currency
+    const translations = getTranslationsForCurrency(currentCurrency);
+    
+    // Add default categories with translated names
     const defaultCategories: Omit<Category, 'id'>[] = [
-      { name: 'Salary', type: 'income', color: '#10b981' },
-      { name: 'Freelance', type: 'income', color: '#3b82f6' },
-      { name: 'Investments', type: 'income', color: '#6366f1' },
-      { name: 'Gifts', type: 'income', color: '#ec4899' },
+      { name: translations.salary, type: 'income', color: '#10b981' },
+      { name: translations.freelance, type: 'income', color: '#3b82f6' },
+      { name: translations.investments, type: 'income', color: '#6366f1' },
+      { name: translations.gifts, type: 'income', color: '#ec4899' },
       
-      { name: 'Food', type: 'expense', color: '#f59e0b' },
-      { name: 'Housing', type: 'expense', color: '#ef4444' },
-      { name: 'Transportation', type: 'expense', color: '#8b5cf6' },
-      { name: 'Entertainment', type: 'expense', color: '#06b6d4' },
-      { name: 'Shopping', type: 'expense', color: '#f43f5e' },
-      { name: 'Utilities', type: 'expense', color: '#84cc16' },
-      { name: 'Healthcare', type: 'expense', color: '#14b8a6' },
-      { name: 'Education', type: 'expense', color: '#6366f1' }
+      { name: translations.food, type: 'expense', color: '#f59e0b' },
+      { name: translations.housing, type: 'expense', color: '#ef4444' },
+      { name: translations.transportation, type: 'expense', color: '#8b5cf6' },
+      { name: translations.entertainment, type: 'expense', color: '#06b6d4' },
+      { name: translations.shopping, type: 'expense', color: '#f43f5e' },
+      { name: translations.utilities, type: 'expense', color: '#84cc16' },
+      { name: translations.healthcare, type: 'expense', color: '#14b8a6' },
+      { name: translations.education, type: 'expense', color: '#6366f1' }
     ];
     
     for (const category of defaultCategories) {
       await addCategory(userId, category);
     }
-    
-    // Get current settings from local database to preserve language preference
-    const { db: localDB } = await import('../db');
-    const currentSettings = await localDB.settings.toArray();
-    const currentCurrency = currentSettings.length > 0 ? currentSettings[0].currency : 'USD';
     
     // Add default settings with the current currency
     await updateSettings(userId, { currency: currentCurrency });

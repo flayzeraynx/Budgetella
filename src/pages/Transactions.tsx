@@ -138,6 +138,7 @@ const Transactions: React.FC = () => {
             </Dialog.Title>
             
             <TransactionForm 
+              key={`transaction-form-${editingTransaction?.id || 'new'}`}
               onSubmit={editingTransaction ? handleUpdateTransaction : handleAddTransaction}
               initialData={editingTransaction || undefined}
               onCancel={() => {

@@ -6,10 +6,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="description" content="Budgetella - A secure personal finance tracker with cloud sync and privacy features" />
     <meta name="theme-color" content="#0f172a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Budgetella" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>Budgetella - Secure Finance Tracker</title>
-    <script type="module" crossorigin src="/assets/index-VDrx2vSF.js"></script>
+    <style>
+      /* Fix for standalone mode display issues */
+      @media all and (display-mode: standalone) {
+        html, body {
+          height: 100%;
+          width: 100%;
+          overflow-x: hidden;
+          position: fixed;
+        }
+        #root {
+          height: 100%;
+          width: 100%;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/index-lZu1elr1.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/cookie-Ddo6p1Qn.js">
     <link rel="modulepreload" crossorigin href="/assets/react-CfxNGAg2.js">
     <link rel="modulepreload" crossorigin href="/assets/scheduler-DYLXRpC5.js">
@@ -31,6 +52,6 @@
     <link rel="stylesheet" crossorigin href="/assets/index-Ig5tKAfv.css">
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"></div>
   </body>
 </html>

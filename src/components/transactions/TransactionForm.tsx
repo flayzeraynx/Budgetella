@@ -25,10 +25,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   const { currentUser, signInWithGoogle } = useAuth();
   
   const [type, setType] = useState<'income' | 'expense'>(initialData?.type || 'expense');
-  const [amount, setAmount] = useState(initialData?.amount.toString() || '');
-  // Initialize categoryId as null
-  const [categoryId, setCategoryId] = useState<number | null>(null);
-  const [category, setCategory] = useState(initialData?.category || '');
+  const [amount, setAmount] = useState(initialData?.amount?.toString() || '');
   const [description, setDescription] = useState(initialData?.description || '');
   const [date, setDate] = useState(
     initialData?.date 
@@ -51,76 +48,142 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // IMPORTANT: Use a single state for category to avoid synchronization issues
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  
+  // Debug counter to track re-renders
+  const renderCount = useRef(0);
+  
+  // Debug log function
+  const logDebug = (message: string, data?: any) => {
+    console.log(`[TransactionForm ${renderCount.current}] ${message}`, data || '');
+  };
+  
+  // Track component renders
+  useEffect(() => {
+    renderCount.current++;
+    logDebug('Component rendered', { 
+      selectedCategory: selectedCategory?.name, 
+      selectedCategoryId: selectedCategory?.id,
+      initialCategory: initialData?.category
+    });
+  });
+
   const categories = useLiveQuery(
     () => db.categories.where('type').equals(type).toArray(),
     [type]
   ) || [];
   
+  // Log raw category data when categories change
+  useEffect(() => {
+    if (categories.length > 0) {
+      const rawData = categories.map(c => ({
+        id: c.id,
+        idType: typeof c.id,
+        name: c.name,
+        type: c.type
+      }));
+      
+      logDebug('Raw categories data', rawData);
+    }
+  }, [categories]);
+  
   const settings = useLiveQuery(() => db.settings.toArray()) || [{ currency: 'USD' }];
   const currency = settings[0]?.currency || 'USD';
 
-  // Set initial category only once when component loads or when editing a transaction
+  // Track when selectedCategory changes
   useEffect(() => {
-    // Skip if no categories or if categoryId is already set
-    if (categories.length === 0 || categoryId !== null) {
+    logDebug('Selected category changed', { 
+      selectedCategory: selectedCategory?.name, 
+      selectedCategoryId: selectedCategory?.id 
+    });
+  }, [selectedCategory]);
+  
+  // Set initial category when categories load or when editing a transaction
+  useEffect(() => {
+    if (categories.length === 0) {
+      logDebug('No categories available');
       return;
     }
-    
-    // If we have initialData with a category, try to find and use it
+
+    logDebug('Setting initial category', { 
+      initialCategory: initialData?.category,
+      hasSelectedCategory: selectedCategory !== null,
+      categoriesCount: categories.length
+    });
+
+    // If editing a transaction, try to find the matching category
     if (initialData?.category) {
       const matchingCategory = categories.find(c => c.name === initialData.category);
-      if (matchingCategory && matchingCategory.id) {
-        const id = matchingCategory.id;
-        setCategoryId(typeof id === 'string' ? Number(id) : id);
-        setCategory(matchingCategory.name);
+      if (matchingCategory) {
+        logDebug('Found matching category for initialData', { 
+          category: matchingCategory,
+          id: matchingCategory.id,
+          idType: typeof matchingCategory.id
+        });
+        setSelectedCategory(matchingCategory);
         return;
+      } else {
+        logDebug('No matching category found for initialData', { 
+          initialCategory: initialData.category,
+          availableCategories: categories.map(c => c.name)
+        });
       }
     }
     
-    // Otherwise use the first category
-    const id = categories[0].id;
-    setCategoryId(id !== undefined ? (typeof id === 'string' ? Number(id) : id) : null);
-    setCategory(categories[0].name);
-  }, [categories, categoryId, initialData]); // Dependencies properly listed
+    // If no category is selected yet, use the first category
+    if (!selectedCategory) {
+      const firstCategory = categories[0];
+      logDebug('Setting default category', { 
+        category: firstCategory,
+        id: firstCategory.id,
+        idType: typeof firstCategory.id
+      });
+      setSelectedCategory(firstCategory);
+    }
+  }, [categories, initialData, selectedCategory]);
 
-  // Create ref at the top level of the component
-  const isInitialTypeChange = useRef(true);
-  
-  // Track if user has manually selected a category
-  const [userSelectedCategory, setUserSelectedCategory] = useState(false);
-  
-  // Only reset category when transaction type changes and user hasn't manually selected a category
+  // When transaction type changes, try to find a matching category in the new type
   useEffect(() => {
-    // Skip this effect on initial render
-    if (isInitialTypeChange.current) {
-      isInitialTypeChange.current = false;
+    if (categories.length === 0) {
+      logDebug('No categories available for type change');
       return;
     }
     
-    // Skip if user has manually selected a category
-    if (userSelectedCategory) {
-      return;
-    }
+    logDebug('Transaction type changed', { 
+      type, 
+      currentCategory: selectedCategory?.name,
+      categoriesForType: categories.map(c => c.name)
+    });
     
-    if (categories.length > 0) {
-      // If editing a transaction and changing type, try to find a category with the same name in the new type
-      if (initialData && initialData.type !== type) {
-        const matchingCategory = categories.find(c => c.name === category);
-        if (matchingCategory && matchingCategory.id) {
-          const id = matchingCategory.id;
-          setCategoryId(typeof id === 'string' ? Number(id) : id);
-          return;
-        }
+    // If we have a selected category, try to find a matching one in the new type
+    if (selectedCategory) {
+      const matchingCategory = categories.find(c => c.name === selectedCategory.name);
+      if (matchingCategory) {
+        logDebug('Found matching category after type change', { 
+          category: matchingCategory,
+          id: matchingCategory.id,
+          idType: typeof matchingCategory.id
+        });
+        setSelectedCategory(matchingCategory);
+        return;
+      } else {
+        logDebug('No matching category found after type change', {
+          currentCategory: selectedCategory.name,
+          availableCategories: categories.map(c => c.name)
+        });
       }
-      
-      // Otherwise use the first category of the new type
-      const id = categories[0].id;
-      setCategoryId(id !== undefined ? (typeof id === 'string' ? Number(id) : id) : null);
-      setCategory(categories[0].name);
     }
-  }, [type, categories, initialData, userSelectedCategory]); // Removed 'category' from dependencies
-
-  // We no longer need this effect since we're handling category updates directly in the onChange handler
+    
+    // If no matching category, use the first category of the new type
+    const firstCategory = categories[0];
+    logDebug('Setting to first category after type change', { 
+      category: firstCategory,
+      id: firstCategory.id,
+      idType: typeof firstCategory.id
+    });
+    setSelectedCategory(firstCategory);
+  }, [type, categories, selectedCategory]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -129,7 +192,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       newErrors.amount = 'Please enter a valid amount greater than zero';
     }
     
-    if (!category) {
+    if (!selectedCategory) {
       newErrors.category = 'Please select a category';
     }
     
@@ -144,15 +207,28 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      logDebug('Form validation failed', errors);
+      return;
+    }
     
     setIsSubmitting(true);
     
     try {
+      // Log the category being submitted
+      logDebug('Submitting transaction', { 
+        category: selectedCategory?.name,
+        categoryId: selectedCategory?.id,
+        type,
+        amount,
+        date,
+        status
+      });
+      
       const transactionData: Omit<Transaction, 'id'> = {
         type,
         amount: Number(amount),
-        category,
+        category: selectedCategory?.name || '',
         description,
         date: new Date(date),
         isRecurring,
@@ -181,6 +257,41 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       setIsSubmitting(false);
     }
   };
+
+  // Function to handle category selection directly
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    
+    // Log the raw value from the select
+    logDebug('Raw select value', { value, valueType: typeof value });
+    
+    if (value) {
+      // Find the category by index instead of ID
+      const index = parseInt(value, 10);
+      if (!isNaN(index) && index >= 0 && index < categories.length) {
+        const category = categories[index];
+        
+        logDebug('User selected category by index', { 
+          index,
+          category,
+          id: category.id,
+          idType: typeof category.id,
+          previousCategory: selectedCategory?.name
+        });
+        
+        // Set the selected category
+        setSelectedCategory(category);
+      } else {
+        logDebug('Invalid category index', { value, index, categoriesLength: categories.length });
+      }
+    }
+  };
+
+  // Find the index of the selected category in the categories array
+  const selectedCategoryIndex = categories.findIndex(c => 
+    c.id !== undefined && selectedCategory?.id !== undefined && 
+    c.id.toString() === selectedCategory.id.toString()
+  );
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto">
@@ -274,30 +385,31 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
             {errors.amount && <p className="mt-1 text-sm text-red-600">{errors.amount}</p>}
           </div>
           
-          <Select
-            label={t.category}
-            value={categoryId?.toString() || ''}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value) {
-                const selectedId = Number(value);
-                setCategoryId(selectedId);
-                
-                // Find the category name from the selected ID
-                const selectedCategory = categories.find(c => c.id === selectedId);
-                if (selectedCategory) {
-                  setCategory(selectedCategory.name);
-                  // Mark that user has manually selected a category
-                  setUserSelectedCategory(true);
-                }
-              } else {
-                setCategoryId(null);
-              }
-            }}
-            options={categories.map(cat => ({ value: cat.id?.toString() || '', label: cat.name }))}
-            fullWidth
-            error={errors.category}
-          />
+          {/* Category Selection */}
+          <div>
+            <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
+              {t.category}
+            </label>
+            <div className="relative">
+              <select
+                value={selectedCategoryIndex >= 0 ? selectedCategoryIndex.toString() : '0'}
+                onChange={handleCategoryChange}
+                className="block w-full rounded-md border border-secondary-300 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-secondary-900 dark:text-white focus:ring-primary-500 focus:border-primary-500 px-4 py-2 appearance-none"
+              >
+                {categories.map((cat, index) => (
+                  <option key={index} value={index.toString()}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-secondary-500">
+                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            {errors.category && <p className="mt-1 text-sm text-red-600">{errors.category}</p>}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -393,23 +505,25 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
           )}
         </div>
 
-        <div className="flex justify-end space-x-3 pt-4">
-          {onCancel && (
+        <div className="pt-4">
+          <div className="flex justify-end space-x-3">
+            {onCancel && (
+              <Button 
+                type="button" 
+                variant="secondary" 
+                onClick={onCancel}
+              >
+                {t.cancel}
+              </Button>
+            )}
             <Button 
-              type="button" 
-              variant="secondary" 
-              onClick={onCancel}
+              type="submit" 
+              isLoading={isSubmitting}
+              leftIcon={isRecurring ? <Repeat className="w-4 h-4" /> : <PlusCircle className="w-4 h-4" />}
             >
-              {t.cancel}
+              {initialData ? t.update : t.save}
             </Button>
-          )}
-          <Button 
-            type="submit" 
-            isLoading={isSubmitting}
-            leftIcon={isRecurring ? <Repeat className="w-4 h-4" /> : <PlusCircle className="w-4 h-4" />}
-          >
-            {initialData ? t.update : t.save}
-          </Button>
+          </div>
         </div>
       </div>
     </form>
