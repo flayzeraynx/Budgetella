@@ -4,6 +4,7 @@ import { Wallet, BarChart2, Settings, Menu, X, EyeOff, Eye, LogIn, LogOut, Globe
 import LoginDialog from '../auth/LoginDialog';
 import LanguageDialog from '../settings/LanguageDialog';
 import LogoutConfirmationDialog from '../auth/LogoutConfirmationDialog';
+import UserAvatar from '../auth/UserAvatar';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../context/TranslationContext';
@@ -153,19 +154,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
                   aria-label="User Menu"
                 >
                   <div className="flex items-center">
-                    <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-primary-200 dark:border-primary-800 mr-2">
-                      {currentUser.photoURL ? (
-                        <img 
-                          src={currentUser.photoURL} 
-                          alt="Profile" 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center">
-                          <User className="w-5 h-5 text-primary-600 dark:text-primary-300" />
-                        </div>
-                      )}
-                    </div>
+                    <UserAvatar size="sm" className="mr-2" />
                     <ChevronDown className="w-4 h-4 ml-1" />
                   </div>
                 </Button>
@@ -284,19 +273,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
             {currentUser ? (
               <>
                 <div className="flex items-center px-3 py-2 text-base font-medium text-secondary-600 dark:text-secondary-300 border-t border-secondary-200 dark:border-secondary-700 mt-2 pt-2">
-                  <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-primary-200 dark:border-primary-800 mr-3">
-                    {currentUser.photoURL ? (
-                      <img 
-                        src={currentUser.photoURL} 
-                        alt="Profile" 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center">
-                        <User className="w-5 h-5 text-primary-600 dark:text-primary-300" />
-                      </div>
-                    )}
-                  </div>
+                  <UserAvatar size="sm" className="mr-3" />
                   <div>
                     <p className="text-sm font-medium text-secondary-900 dark:text-white truncate">
                       {currentUser.displayName || 'User'}
@@ -344,6 +321,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
       <LogoutConfirmationDialog
         isOpen={isLogoutConfirmationOpen}
         onClose={() => setIsLogoutConfirmationOpen(false)}
+        onCancel={() => setIsLogoutConfirmationOpen(false)}
         onConfirm={handleConfirmLogout}
       />
     </header>

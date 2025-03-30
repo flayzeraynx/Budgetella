@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import CategoryManager from '../components/settings/CategoryManager';
 import DataManagement from '../components/settings/DataManagement';
 import CurrencySelector from '../components/settings/CurrencySelector';
+import UserManagement from '../components/settings/UserManagement';
 import FeedbackDialog from '../components/settings/FeedbackDialog';
 import Card, { CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { useTheme } from '../context/ThemeContext';
@@ -19,6 +20,8 @@ const Settings: React.FC = () => {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">{t.settings}</h1>
+      
+      <UserManagement />
       
       <Card>
         <CardHeader>

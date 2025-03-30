@@ -8,6 +8,60 @@ export interface Translations {
   transactions: string;
   settings: string;
   
+  // Authentication - Email/Password
+  emailSignIn: string;
+  emailSignUp: string;
+  passwordSignIn: string;
+  magicLinkSignIn: string;
+  signIn: string;
+  signInWithMagicLink: string;
+  signInWithMagicLinkDescription: string;
+  createAccount: string;
+  alreadyHaveAccount: string;
+  dontHaveAccount: string;
+  noAccount: string;
+  createOne: string;
+  forgotPassword: string;
+  resetPassword: string;
+  sendResetLink: string;
+  rememberPassword: string;
+  backToSignIn: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+  confirmPassword: string;
+  currentPassword: string;
+  newPassword: string;
+  passwordRequirements: string;
+  passwordMinLength: string;
+  passwordUppercase: string;
+  passwordLowercase: string;
+  passwordNumber: string;
+  passwordSpecial: string;
+  emailCannotBeChanged: string;
+  updateProfile: string;
+  changePassword: string;
+  userProfile: string;
+  profileInformation: string;
+  connectedAccounts: string;
+  notConnected: string;
+  connect: string;
+  disconnect: string;
+  dangerZone: string;
+  deleteAccount: string;
+  emailAccount: string;
+  googleAccount: string;
+  passwordUpdated: string;
+  profileUpdated: string;
+  checkYourEmail: string;
+  passwordResetSent: string;
+  invalidEmail: string;
+  invalidPassword: string;
+  passwordsDontMatch: string;
+  accountCreated: string;
+  or: string;
+  required: string;
+  
   // Feedback form
   feedbackForm: string;
   feedbackFormError: string;
@@ -218,6 +272,60 @@ export const en: Translations = {
   dashboard: 'Dashboard',
   transactions: 'Transactions',
   settings: 'Settings',
+  
+  // Authentication - Email/Password
+  emailSignIn: 'Email Sign In',
+  emailSignUp: 'Email Sign Up',
+  passwordSignIn: 'Sign in with Email & Password',
+  magicLinkSignIn: 'Sign in with Magic Link',
+  signIn: 'SIGN IN',
+  signInWithMagicLink: 'Sign in with magic link',
+  signInWithMagicLinkDescription: 'We\'ll send you a magic link to your email that will sign you in instantly. No password required!',
+  createAccount: 'Create an Account',
+  alreadyHaveAccount: 'Already have an account?',
+  dontHaveAccount: 'Don\'t have an account?',
+  noAccount: 'No account?',
+  createOne: 'Create one',
+  forgotPassword: 'Forgot password?',
+  resetPassword: 'Reset Your Password',
+  sendResetLink: 'Send Reset Link',
+  rememberPassword: 'Remember your password?',
+  backToSignIn: 'Back to sign in',
+  firstName: 'First Name',
+  lastName: 'Last Name',
+  password: 'Password',
+  confirmPassword: 'Confirm Password',
+  currentPassword: 'Current Password',
+  newPassword: 'New Password',
+  passwordRequirements: 'Password must:',
+  passwordMinLength: 'Be at least 8 characters',
+  passwordUppercase: 'Include uppercase letter',
+  passwordLowercase: 'Include lowercase letter',
+  passwordNumber: 'Include number',
+  passwordSpecial: 'Include special character',
+  emailCannotBeChanged: 'Email address cannot be changed',
+  updateProfile: 'Update Profile',
+  changePassword: 'Change Password',
+  userProfile: 'User Profile',
+  profileInformation: 'Profile Information',
+  connectedAccounts: 'Connected Accounts',
+  notConnected: 'Not connected',
+  connect: 'Connect',
+  disconnect: 'Disconnect',
+  dangerZone: 'Danger Zone',
+  deleteAccount: 'Delete Account',
+  emailAccount: 'Email Account',
+  googleAccount: 'Google Account',
+  passwordUpdated: 'Password updated successfully',
+  profileUpdated: 'Profile updated successfully',
+  checkYourEmail: 'Check your email',
+  passwordResetSent: 'We\'ve sent a password reset link to your email',
+  invalidEmail: 'Please enter a valid email address',
+  invalidPassword: 'Password doesn\'t meet requirements',
+  passwordsDontMatch: 'Passwords don\'t match',
+  accountCreated: 'Account created successfully',
+  or: 'or',
+  required: 'is required',
   
   // Feedback form
   feedbackForm: 'Feedback Form',
@@ -430,6 +538,60 @@ export const tr: Translations = {
   transactions: 'İşlemler',
   settings: 'Ayarlar',
   
+  // Authentication - Email/Password
+  emailSignIn: 'E-posta ile Giriş',
+  emailSignUp: 'E-posta ile Kayıt',
+  passwordSignIn: 'E-posta ve Şifre ile Giriş',
+  magicLinkSignIn: 'Sihirli Bağlantı ile Giriş',
+  signIn: 'GİRİŞ YAP',
+  signInWithMagicLink: 'Sihirli bağlantı ile giriş yap',
+  signInWithMagicLinkDescription: 'Size anında giriş yapmanızı sağlayacak bir sihirli bağlantı göndereceğiz. Şifre gerekmez!',
+  createAccount: 'Hesap Oluştur',
+  alreadyHaveAccount: 'Zaten hesabınız var mı?',
+  dontHaveAccount: 'Hesabınız yok mu?',
+  noAccount: 'Hesabınız yok mu?',
+  createOne: 'Oluşturun',
+  forgotPassword: 'Şifrenizi mi unuttunuz?',
+  resetPassword: 'Şifrenizi Sıfırlayın',
+  sendResetLink: 'Sıfırlama Bağlantısı Gönder',
+  rememberPassword: 'Şifrenizi hatırladınız mı?',
+  backToSignIn: 'Giriş sayfasına dön',
+  firstName: 'Ad',
+  lastName: 'Soyad',
+  password: 'Şifre',
+  confirmPassword: 'Şifreyi Onayla',
+  currentPassword: 'Mevcut Şifre',
+  newPassword: 'Yeni Şifre',
+  passwordRequirements: 'Şifre gereksinimleri:',
+  passwordMinLength: 'En az 8 karakter olmalı',
+  passwordUppercase: 'Büyük harf içermeli',
+  passwordLowercase: 'Küçük harf içermeli',
+  passwordNumber: 'Rakam içermeli',
+  passwordSpecial: 'Özel karakter içermeli',
+  emailCannotBeChanged: 'E-posta adresi değiştirilemez',
+  updateProfile: 'Profili Güncelle',
+  changePassword: 'Şifre Değiştir',
+  userProfile: 'Kullanıcı Profili',
+  profileInformation: 'Profil Bilgileri',
+  connectedAccounts: 'Bağlı Hesaplar',
+  notConnected: 'Bağlı değil',
+  connect: 'Bağlan',
+  disconnect: 'Bağlantıyı Kes',
+  dangerZone: 'Tehlikeli Bölge',
+  deleteAccount: 'Hesabı Sil',
+  emailAccount: 'E-posta Hesabı',
+  googleAccount: 'Google Hesabı',
+  passwordUpdated: 'Şifre başarıyla güncellendi',
+  profileUpdated: 'Profil başarıyla güncellendi',
+  checkYourEmail: 'E-postanızı kontrol edin',
+  passwordResetSent: 'E-posta adresinize bir şifre sıfırlama bağlantısı gönderdik',
+  invalidEmail: 'Lütfen geçerli bir e-posta adresi girin',
+  invalidPassword: 'Şifre gereksinimleri karşılanmıyor',
+  passwordsDontMatch: 'Şifreler eşleşmiyor',
+  accountCreated: 'Hesap başarıyla oluşturuldu',
+  or: 'veya',
+  required: 'gerekli',
+  
   // Feedback form
   feedbackForm: 'Geri Bildirim Formu',
   feedbackFormError: 'Lütfen tüm gerekli alanları doldurun',
@@ -640,6 +802,60 @@ export const de: Translations = {
   dashboard: 'Dashboard',
   transactions: 'Transaktionen',
   settings: 'Einstellungen',
+  
+  // Authentication - Email/Password
+  emailSignIn: 'E-Mail-Anmeldung',
+  emailSignUp: 'E-Mail-Registrierung',
+  passwordSignIn: 'Mit E-Mail und Passwort anmelden',
+  magicLinkSignIn: 'Mit Magic Link anmelden',
+  signIn: 'ANMELDEN',
+  signInWithMagicLink: 'Mit Magic Link anmelden',
+  signInWithMagicLinkDescription: 'Wir senden Ihnen einen Magic Link an Ihre E-Mail, mit dem Sie sich sofort anmelden können. Kein Passwort erforderlich!',
+  createAccount: 'Konto erstellen',
+  alreadyHaveAccount: 'Haben Sie bereits ein Konto?',
+  dontHaveAccount: 'Haben Sie noch kein Konto?',
+  noAccount: 'Kein Konto?',
+  createOne: 'Erstellen Sie eins',
+  forgotPassword: 'Passwort vergessen?',
+  resetPassword: 'Passwort zurücksetzen',
+  sendResetLink: 'Link zum Zurücksetzen senden',
+  rememberPassword: 'Erinnern Sie sich an Ihr Passwort?',
+  backToSignIn: 'Zurück zur Anmeldung',
+  firstName: 'Vorname',
+  lastName: 'Nachname',
+  password: 'Passwort',
+  confirmPassword: 'Passwort bestätigen',
+  currentPassword: 'Aktuelles Passwort',
+  newPassword: 'Neues Passwort',
+  passwordRequirements: 'Passwort muss:',
+  passwordMinLength: 'Mindestens 8 Zeichen lang sein',
+  passwordUppercase: 'Großbuchstaben enthalten',
+  passwordLowercase: 'Kleinbuchstaben enthalten',
+  passwordNumber: 'Zahlen enthalten',
+  passwordSpecial: 'Sonderzeichen enthalten',
+  emailCannotBeChanged: 'E-Mail-Adresse kann nicht geändert werden',
+  updateProfile: 'Profil aktualisieren',
+  changePassword: 'Passwort ändern',
+  userProfile: 'Benutzerprofil',
+  profileInformation: 'Profilinformationen',
+  connectedAccounts: 'Verbundene Konten',
+  notConnected: 'Nicht verbunden',
+  connect: 'Verbinden',
+  disconnect: 'Trennen',
+  dangerZone: 'Gefahrenzone',
+  deleteAccount: 'Konto löschen',
+  emailAccount: 'E-Mail-Konto',
+  googleAccount: 'Google-Konto',
+  passwordUpdated: 'Passwort erfolgreich aktualisiert',
+  profileUpdated: 'Profil erfolgreich aktualisiert',
+  checkYourEmail: 'Überprüfen Sie Ihre E-Mail',
+  passwordResetSent: 'Wir haben einen Link zum Zurücksetzen des Passworts an Ihre E-Mail gesendet',
+  invalidEmail: 'Bitte geben Sie eine gültige E-Mail-Adresse ein',
+  invalidPassword: 'Passwort erfüllt nicht die Anforderungen',
+  passwordsDontMatch: 'Passwörter stimmen nicht überein',
+  accountCreated: 'Konto erfolgreich erstellt',
+  or: 'oder',
+  required: 'erforderlich',
   
   // Feedback form
   feedbackForm: 'Feedback-Formular',

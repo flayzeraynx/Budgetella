@@ -5,7 +5,17 @@ import {
   OAuthProvider, 
   signInWithPopup, 
   signOut as firebaseSignOut,
-  onAuthStateChanged 
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  sendSignInLinkToEmail,
+  isSignInWithEmailLink,
+  signInWithEmailLink,
+  updatePassword,
+  updateProfile,
+  EmailAuthProvider,
+  reauthenticateWithCredential
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { useToast } from './ToastContext';
@@ -17,6 +27,13 @@ interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
+  sendSignInLink: (email: string) => Promise<void>;
+  signInWithEmailLink: (email: string, link: string) => Promise<void>;
+  sendPasswordResetEmail: (email: string) => Promise<void>;
+  updateUserPassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  updateUserProfile: (firstName: string, lastName: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -25,6 +42,13 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   error: null,
   signInWithGoogle: async () => {},
+  signInWithEmail: async () => {},
+  signUpWithEmail: async () => {},
+  sendSignInLink: async () => {},
+  signInWithEmailLink: async () => {},
+  sendPasswordResetEmail: async () => {},
+  updateUserPassword: async () => {},
+  updateUserProfile: async () => {},
   signOut: async () => {}
 });
 
@@ -109,6 +133,164 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const signInWithEmail = async (email: string, password: string) => {
+    try {
+      setError(null);
+      setIsLoading(true);
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      console.error('Error signing in with email:', error);
+      setError('Failed to sign in with email');
+      showToast('error', t.failedToSignIn || 'Failed to sign in with email');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signUpWithEmail = async (email: string, password: string, firstName: string, lastName: string) => {
+    try {
+      setError(null);
+      setIsLoading(true);
+      
+      // Create user with email and password
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // Update profile with display name
+      await updateProfile(userCredential.user, {
+        displayName: `${firstName} ${lastName}`
+      });
+      
+      showToast('success', t.accountCreated || 'Account created successfully');
+    } catch (error) {
+      console.error('Error signing up with email:', error);
+      setError('Failed to sign up with email');
+      showToast('error', t.failedToSignIn || 'Failed to create account');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const sendSignInLink = async (email: string) => {
+    try {
+      setError(null);
+      setIsLoading(true);
+      
+      const actionCodeSettings = {
+        url: window.location.origin,
+        handleCodeInApp: true
+      };
+      
+      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+      
+      // Save the email locally to remember the user when they return
+      localStorage.setItem('emailForSignIn', email);
+      
+      showToast('success', t.passwordResetSent || 'Magic link sent to your email');
+    } catch (error) {
+      console.error('Error sending sign-in link:', error);
+      setError('Failed to send sign-in link');
+      showToast('error', t.failedToSignIn || 'Failed to send magic link');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignInWithEmailLink = async (email: string, link: string) => {
+    try {
+      setError(null);
+      setIsLoading(true);
+      
+      if (isSignInWithEmailLink(auth, link)) {
+        // Use the Firebase function
+        await signInWithEmailLink(auth, email, link);
+        
+        // Clear email from storage
+        localStorage.removeItem('emailForSignIn');
+      } else {
+        throw new Error('Invalid sign-in link');
+      }
+    } catch (error) {
+      console.error('Error signing in with email link:', error);
+      setError('Failed to sign in with email link');
+      showToast('error', t.failedToSignIn || 'Failed to sign in with magic link');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async (email: string) => {
+    try {
+      setError(null);
+      setIsLoading(true);
+      // Use the Firebase function
+      await sendPasswordResetEmail(auth, email);
+      showToast('success', t.passwordResetSent || 'Password reset email sent');
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+      setError('Failed to send password reset email');
+      showToast('error', t.failedToSignIn || 'Failed to send password reset email');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateUserPassword = async (currentPassword: string, newPassword: string) => {
+    try {
+      setError(null);
+      setIsLoading(true);
+      
+      if (!currentUser || !currentUser.email) {
+        throw new Error('User not authenticated');
+      }
+      
+      // Re-authenticate user before changing password
+      const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
+      await reauthenticateWithCredential(currentUser, credential);
+      
+      // Update password
+      await updatePassword(currentUser, newPassword);
+      
+      showToast('success', t.passwordUpdated || 'Password updated successfully');
+    } catch (error) {
+      console.error('Error updating password:', error);
+      setError('Failed to update password');
+      showToast('error', t.failedToSignIn || 'Failed to update password');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateUserProfile = async (firstName: string, lastName: string) => {
+    try {
+      setError(null);
+      setIsLoading(true);
+      
+      if (!currentUser) {
+        throw new Error('User not authenticated');
+      }
+      
+      // Update profile
+      await updateProfile(currentUser, {
+        displayName: `${firstName} ${lastName}`
+      });
+      
+      showToast('success', t.profileUpdated || 'Profile updated successfully');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setError('Failed to update profile');
+      showToast('error', t.failedToSignIn || 'Failed to update profile');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const signOut = async () => {
     try {
       setError(null);
@@ -128,6 +310,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isLoading,
         error,
         signInWithGoogle,
+        signInWithEmail,
+        signUpWithEmail,
+        sendSignInLink,
+        signInWithEmailLink: handleSignInWithEmailLink,
+        sendPasswordResetEmail: handlePasswordReset,
+        updateUserPassword,
+        updateUserProfile,
         signOut
       }}
     >
