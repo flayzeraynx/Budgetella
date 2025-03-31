@@ -8,6 +8,25 @@ export interface Translations {
   transactions: string;
   settings: string;
   
+  // Premium features
+  premium: string;
+  premiumFeature: string;
+  premiumFeatureDescription: string;
+  upgradeNow: string;
+  pricing: string;
+  oneTimePayment: string;
+  monthlySubscription: string;
+  freeFeatures: string;
+  premiumFeatures: string;
+  subscriptionManagement: string;
+  currentPlan: string;
+  cancelSubscription: string;
+  confirmCancelSubscription: string;
+  forever: string;
+  recommended: string;
+  oneTime: string;
+  monthlyLabel: string;
+  
   // Authentication - Email/Password
   emailSignIn: string;
   emailSignUp: string;
@@ -265,13 +284,32 @@ export interface Translations {
   smallExpensesDesc: string;
 }
 
-  // English translations (default)
+// English translations (default)
 export const en: Translations = {
   // Common
   appName: 'Budgetella',
   dashboard: 'Dashboard',
   transactions: 'Transactions',
   settings: 'Settings',
+  
+  // Premium features
+  premium: 'Premium',
+  premiumFeature: 'Premium Feature',
+  premiumFeatureDescription: 'This feature is available to premium users only.',
+  upgradeNow: 'Upgrade Now',
+  pricing: 'Pricing',
+  oneTimePayment: 'One-time Payment',
+  monthlySubscription: 'Monthly Subscription',
+  freeFeatures: 'Free Features',
+  premiumFeatures: 'Premium Features',
+  subscriptionManagement: 'Subscription Management',
+  currentPlan: 'Current Plan',
+  cancelSubscription: 'Cancel Subscription',
+  confirmCancelSubscription: 'Are you sure you want to cancel your subscription?',
+  forever: 'forever',
+  recommended: 'Recommended',
+  oneTime: 'one-time',
+  monthlyLabel: 'month',
   
   // Authentication - Email/Password
   emailSignIn: 'Email Sign In',
@@ -538,6 +576,25 @@ export const tr: Translations = {
   transactions: 'İşlemler',
   settings: 'Ayarlar',
   
+  // Premium features
+  premium: 'Premium',
+  premiumFeature: 'Premium Özellik',
+  premiumFeatureDescription: 'Bu özellik yalnızca premium kullanıcılar için kullanılabilir.',
+  upgradeNow: 'Şimdi Yükselt',
+  pricing: 'Fiyatlandırma',
+  oneTimePayment: 'Tek Seferlik Ödeme',
+  monthlySubscription: 'Aylık Abonelik',
+  freeFeatures: 'Ücretsiz Özellikler',
+  premiumFeatures: 'Premium Özellikler',
+  subscriptionManagement: 'Abonelik Yönetimi',
+  currentPlan: 'Mevcut Plan',
+  cancelSubscription: 'Aboneliği İptal Et',
+  confirmCancelSubscription: 'Aboneliğinizi iptal etmek istediğinizden emin misiniz?',
+  forever: 'süresiz',
+  recommended: 'Önerilen',
+  oneTime: 'tek seferlik',
+  monthlyLabel: 'ay',
+  
   // Authentication - Email/Password
   emailSignIn: 'E-posta ile Giriş',
   emailSignUp: 'E-posta ile Kayıt',
@@ -646,7 +703,7 @@ export const tr: Translations = {
   selectImportFormat: 'İçe aktarma formatını seçin',
   selectExportData: 'Dışa aktarmak istediğiniz verileri seçin',
   logoutConfirmation: 'Çıkışı Onayla',
-  logoutConfirmationMessage: 'Çıkış yapmak istediğinizden emin misiniz? Verileriniz bu cihazdan silinecektir.',
+  logoutConfirmationMessage: 'Çıkış yapmak istediğinizden emin misiniz? Verileriniz bu cihazdan temizlenecektir.',
   confirmLogout: 'Evet, Çıkış Yap',
   signOut: 'Çıkış Yap',
   
@@ -677,10 +734,10 @@ export const tr: Translations = {
   expense: 'Gider',
   recentTransactions: 'Son İşlemler',
   savingsTips: 'Tasarruf İpuçları',
-  viewAll: 'Tümünü Gör',
+  viewAll: 'Tümünü Görüntüle',
   noTransactions: 'İşlem bulunamadı',
-  totalMoneyIn: 'Toplam gelen para',
-  totalMoneyOut: 'Toplam giden para',
+  totalMoneyIn: 'Toplam para girişi',
+  totalMoneyOut: 'Toplam para çıkışı',
   
   // Transactions
   addTransaction: 'İşlem Ekle',
@@ -702,7 +759,7 @@ export const tr: Translations = {
   type: 'Tür',
   add: 'Ekle',
   allTypes: 'Tüm Türler',
-  noSearchResults: 'Aramanızla eşleşen işlem bulunamadı',
+  noSearchResults: 'Aramanızla eşleşen işlem yok',
   addFirstTransaction: 'İlk İşleminizi Ekleyin',
   noDescription: 'Açıklama yok',
   enterDescription: 'Açıklama girin',
@@ -744,17 +801,17 @@ export const tr: Translations = {
   exportData: 'Verileri Dışa Aktar',
   exportDescription: 'Verilerinizi JSON veya CSV dosyası olarak indirin',
   importData: 'Verileri İçe Aktar',
-  importDescription: 'Verilerinizi yedek dosyasından geri yükleyin',
+  importDescription: 'Verilerinizi bir yedekleme dosyasından geri yükleyin',
   localStorageBackup: 'Yerel Depolama Yedeklemesi',
   localStorageDescription: 'Verilerinizi oturumlar arasında kalıcılık için tarayıcı depolamasına kaydedin',
   saveToLocalStorage: 'Yerel Depolamaya Kaydet',
   loadFromLocalStorage: 'Yerel Depolamadan Yükle',
   importSuccess: 'Veriler başarıyla içe aktarıldı',
-  saveSuccess: 'Veriler başarıyla yerel depolamaya kaydedildi',
+  saveSuccess: 'Veriler yerel depolamaya başarıyla kaydedildi',
   theme: 'Tema',
   themeDescription: 'Aydınlık ve karanlık mod arasında seçim yapın',
   about: 'Hakkında',
-  aboutDescription: 'Budgetella, bulut senkronizasyonlu güvenli bir kişisel finans takipçisidir. Verileriniz Firebase\'de güvenli bir şekilde saklanır ve yalnızca sizin tarafınızdan erişilebilir.',
+  aboutDescription: 'Budgetella, bulut senkronizasyonuna sahip güvenli bir kişisel finans takipçisidir. Verileriniz Firebase\'de güvenli bir şekilde saklanır ve yalnızca sizin tarafınızdan erişilebilir.',
   version: 'Sürüm',
   storage: 'Depolama',
   storageType: 'Firebase (Bulut)',
@@ -774,7 +831,7 @@ export const tr: Translations = {
   weekly: 'Haftalık',
   monthly: 'Aylık',
   yearly: 'Yıllık',
-  none: 'Hiçbiri',
+  none: 'Yok',
   endDate: 'Bitiş Tarihi',
   noEndDate: 'Bitiş Tarihi Yok',
   nextOccurrence: 'Sonraki Oluşum',
@@ -782,17 +839,17 @@ export const tr: Translations = {
   // Savings Tips
   savingsTip: 'Tasarruf İpucu',
   emergencyFundTitle: 'Acil durum fonu oluşturun',
-  emergencyFundDesc: 'Beklenmedik durumlar için 3-6 aylık temel giderlerinizi karşılayacak bir acil durum fonu oluşturmayı hedefleyin.',
+  emergencyFundDesc: 'Beklenmedik durumlar için 3-6 aylık temel giderlerinizi acil durum fonunda biriktirmeyi hedefleyin.',
   budgetRuleTitle: '50/30/20 kuralını kullanın',
-  budgetRuleDesc: 'Gelirinizin %50\'sini ihtiyaçlara, %30\'unu isteklere ve %20\'sini tasarruf ve borç ödemelerine ayırmayı deneyin.',
+  budgetRuleDesc: 'Gelirinizin %50\'sini ihtiyaçlara, %30\'unu isteklere ve %20\'sini tasarruf ve borç ödemesine ayırmayı deneyin.',
   trackSpendingTitle: 'Harcamalarınızı takip edin',
-  trackSpendingDesc: 'Düzenli olarak giderlerinizi gözden geçirerek harcama modellerinizi ve kısabileceğiniz alanları belirleyin.',
+  trackSpendingDesc: 'Desenleri ve kısabileceğiniz alanları belirlemek için harcamalarınızı düzenli olarak gözden geçirin.',
   payYourselfTitle: 'Önce kendinize ödeme yapın',
-  payYourselfDesc: 'Maaş gününde harcama fırsatı bulmadan önce tasarruf hesabınıza otomatik transfer ayarlayın.',
+  payYourselfDesc: 'Maaş gününde, harcama şansınız olmadan önce tasarruf hesabınıza otomatik transferler ayarlayın.',
   highSpendingTitle: '{category} kategorisinde yüksek harcama',
-  highSpendingDesc: 'Bütçenizin %{percent}\'ini {category} için harcıyorsunuz. Bu kategori için bir bütçe limiti belirlemeyi düşünün.',
+  highSpendingDesc: 'Bütçenizin %{percent}\'sini {category} için harcıyorsunuz. Bu kategori için bir bütçe limiti belirlemeyi düşünün.',
   smallExpensesTitle: 'Küçük harcamalara dikkat edin',
-  smallExpensesDesc: '20$ altında birçok küçük harcamanız var. Bunlar hızla birikebilir. Nerelerde kısabileceğinizi görmek için bir hafta boyunca takip etmeyi deneyin.'
+  smallExpensesDesc: '20 TL\'nin altında birçok küçük harcamanız var. Bunlar hızla birikebilir. Nerede kısabileceğinizi görmek için bir hafta boyunca bunları takip etmeyi deneyin.'
 };
 
 // German translations
@@ -803,22 +860,41 @@ export const de: Translations = {
   transactions: 'Transaktionen',
   settings: 'Einstellungen',
   
+  // Premium features
+  premium: 'Premium',
+  premiumFeature: 'Premium-Funktion',
+  premiumFeatureDescription: 'Diese Funktion ist nur für Premium-Benutzer verfügbar.',
+  upgradeNow: 'Jetzt upgraden',
+  pricing: 'Preise',
+  oneTimePayment: 'Einmalige Zahlung',
+  monthlySubscription: 'Monatliches Abonnement',
+  freeFeatures: 'Kostenlose Funktionen',
+  premiumFeatures: 'Premium-Funktionen',
+  subscriptionManagement: 'Abonnementverwaltung',
+  currentPlan: 'Aktueller Plan',
+  cancelSubscription: 'Abonnement kündigen',
+  confirmCancelSubscription: 'Sind Sie sicher, dass Sie Ihr Abonnement kündigen möchten?',
+  forever: 'für immer',
+  recommended: 'Empfohlen',
+  oneTime: 'einmalig',
+  monthlyLabel: 'Monat',
+  
   // Authentication - Email/Password
   emailSignIn: 'E-Mail-Anmeldung',
   emailSignUp: 'E-Mail-Registrierung',
-  passwordSignIn: 'Mit E-Mail und Passwort anmelden',
+  passwordSignIn: 'Mit E-Mail & Passwort anmelden',
   magicLinkSignIn: 'Mit Magic Link anmelden',
   signIn: 'ANMELDEN',
   signInWithMagicLink: 'Mit Magic Link anmelden',
   signInWithMagicLinkDescription: 'Wir senden Ihnen einen Magic Link an Ihre E-Mail, mit dem Sie sich sofort anmelden können. Kein Passwort erforderlich!',
   createAccount: 'Konto erstellen',
   alreadyHaveAccount: 'Haben Sie bereits ein Konto?',
-  dontHaveAccount: 'Haben Sie noch kein Konto?',
+  dontHaveAccount: 'Haben Sie kein Konto?',
   noAccount: 'Kein Konto?',
-  createOne: 'Erstellen Sie eins',
+  createOne: 'Erstellen Sie eines',
   forgotPassword: 'Passwort vergessen?',
   resetPassword: 'Passwort zurücksetzen',
-  sendResetLink: 'Link zum Zurücksetzen senden',
+  sendResetLink: 'Reset-Link senden',
   rememberPassword: 'Erinnern Sie sich an Ihr Passwort?',
   backToSignIn: 'Zurück zur Anmeldung',
   firstName: 'Vorname',
@@ -855,7 +931,7 @@ export const de: Translations = {
   passwordsDontMatch: 'Passwörter stimmen nicht überein',
   accountCreated: 'Konto erfolgreich erstellt',
   or: 'oder',
-  required: 'erforderlich',
+  required: 'ist erforderlich',
   
   // Feedback form
   feedbackForm: 'Feedback-Formular',
@@ -865,9 +941,9 @@ export const de: Translations = {
   name: 'Name',
   enterName: 'Geben Sie Ihren Namen ein',
   email: 'E-Mail',
-  enterEmail: 'Geben Sie Ihre E-Mail-Adresse ein',
+  enterEmail: 'Geben Sie Ihre E-Mail ein',
   subject: 'Betreff',
-  enterSubject: 'Betreff eingeben',
+  enterSubject: 'Geben Sie den Betreff ein',
   message: 'Nachricht',
   enterMessage: 'Geben Sie Ihre Nachricht ein',
   send: 'Senden',
@@ -902,11 +978,11 @@ export const de: Translations = {
   defaultCategories: 'Standardkategorien',
   securelyStored: 'Sicher gespeichert und verschlüsselt in Firebase von Google',
   clearData: 'Daten löschen',
-  permanentlyDelete: 'Löschen Sie dauerhaft alle Ihre Transaktionen',
+  permanentlyDelete: 'Löschen Sie alle Ihre Transaktionen dauerhaft',
   clearAllTransactions: 'Alle Transaktionen löschen',
-  exportOptions: 'Export-Optionen',
+  exportOptions: 'Exportoptionen',
   quickCsvExport: 'Schneller CSV-Export',
-  importOptions: 'Import-Optionen',
+  importOptions: 'Importoptionen',
   quickCsvImport: 'Schneller CSV-Import',
   selectImportFormat: 'Importformat auswählen',
   selectExportData: 'Wählen Sie aus, welche Daten Sie exportieren möchten',
@@ -936,10 +1012,10 @@ export const de: Translations = {
   planned: 'Geplant',
   
   // Dashboard
-  balanceSummary: 'Kontostand Übersicht',
-  totalBalance: 'Gesamtbilanz',
+  balanceSummary: 'Kontostand-Übersicht',
+  totalBalance: 'Gesamtkontostand',
   income: 'Einkommen',
-  expense: 'Ausgaben',
+  expense: 'Ausgabe',
   recentTransactions: 'Letzte Transaktionen',
   savingsTips: 'Spartipps',
   viewAll: 'Alle anzeigen',
@@ -969,7 +1045,7 @@ export const de: Translations = {
   allTypes: 'Alle Typen',
   noSearchResults: 'Keine Transaktionen entsprechen Ihrer Suche',
   addFirstTransaction: 'Fügen Sie Ihre erste Transaktion hinzu',
-  noDescription: 'Keine Beschreibung vorhanden',
+  noDescription: 'Keine Beschreibung angegeben',
   enterDescription: 'Beschreibung eingeben',
   
   // Transaction types
@@ -987,7 +1063,7 @@ export const de: Translations = {
   entertainment: 'Unterhaltung',
   shopping: 'Einkaufen',
   utilities: 'Nebenkosten',
-  healthcare: 'Gesundheitswesen',
+  healthcare: 'Gesundheit',
   education: 'Bildung',
   noIncomeCategories: 'Noch keine Einkommenskategorien.',
   noExpenseCategories: 'Noch keine Ausgabenkategorien.',
@@ -1007,7 +1083,7 @@ export const de: Translations = {
   dataManagement: 'Datenverwaltung',
   dataManagementDescription: 'Sichern und Wiederherstellen Ihrer Finanzdaten',
   exportData: 'Daten exportieren',
-  exportDescription: 'Laden Sie Ihre Daten als JSON oder CSV-Datei herunter',
+  exportDescription: 'Laden Sie Ihre Daten als JSON- oder CSV-Datei herunter',
   importData: 'Daten importieren',
   importDescription: 'Stellen Sie Ihre Daten aus einer Sicherungsdatei wieder her',
   localStorageBackup: 'Lokale Speichersicherung',
@@ -1049,7 +1125,7 @@ export const de: Translations = {
   emergencyFundTitle: 'Starten Sie einen Notfallfonds',
   emergencyFundDesc: 'Versuchen Sie, 3-6 Monate wesentlicher Ausgaben in einem Notfallfonds für unerwartete Situationen zu sparen.',
   budgetRuleTitle: 'Verwenden Sie die 50/30/20-Regel',
-  budgetRuleDesc: 'Versuchen Sie, 50% Ihres Einkommens für Bedürfnisse, 30% für Wünsche und 20% für Ersparnisse und Schuldenrückzahlung zu verwenden.',
+  budgetRuleDesc: 'Versuchen Sie, 50% Ihres Einkommens für Bedürfnisse, 30% für Wünsche und 20% für Ersparnisse und Schuldenrückzahlung zuzuweisen.',
   trackSpendingTitle: 'Verfolgen Sie Ihre Ausgaben',
   trackSpendingDesc: 'Überprüfen Sie regelmäßig Ihre Ausgaben, um Muster und Bereiche zu identifizieren, in denen Sie einsparen können.',
   payYourselfTitle: 'Zahlen Sie sich zuerst',
@@ -1057,20 +1133,18 @@ export const de: Translations = {
   highSpendingTitle: 'Hohe Ausgaben in {category}',
   highSpendingDesc: 'Sie geben {percent}% Ihres Budgets für {category} aus. Erwägen Sie, ein Budgetlimit für diese Kategorie festzulegen.',
   smallExpensesTitle: 'Achten Sie auf kleine Ausgaben',
-  smallExpensesDesc: 'Sie haben viele kleine Ausgaben unter 20$. Diese können sich schnell summieren. Versuchen Sie, sie eine Woche lang zu verfolgen, um zu sehen, wo Sie einsparen können.'
+  smallExpensesDesc: 'Sie haben viele kleine Ausgaben unter 20 €. Diese können sich schnell summieren. Versuchen Sie, sie eine Woche lang zu verfolgen, um zu sehen, wo Sie einsparen können.'
 };
 
 // Function to get translations based on currency
-export const getTranslations = (currency: string): Translations => {
+export function getTranslations(currency: string): Translations {
   switch (currency) {
     case 'USD':
       return en;
     case 'EUR':
-      // For Euro, we'll use German translations
       return de;
     case 'TRY':
     default:
-      // Default to Turkish
       return tr;
   }
-};
+}

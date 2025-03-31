@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { HeaderWithLoginDialog } from './Header';
 import { useTranslation } from '../../context/TranslationContext';
 
@@ -16,9 +17,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </main>
       <footer className="bg-white dark:bg-secondary-900 border-t border-secondary-200 dark:border-secondary-800 py-4 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-sm text-secondary-500 dark:text-secondary-400">
+          <p className="text-center text-sm text-secondary-500 dark:text-secondary-400 mb-2">
             {t.footerText}
           </p>
+          <div className="flex justify-center space-x-4 text-xs text-primary-600 dark:text-primary-400">
+            <Link to="/terms" className="hover:underline">Terms and Conditions</Link>
+            <span>•</span>
+            <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
+          </div>
         </div>
       </footer>
     </div>

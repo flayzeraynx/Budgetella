@@ -472,7 +472,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                 options={[
                   { value: 'daily', label: t.daily },
                   { value: 'weekly', label: t.weekly },
-                  { value: 'monthly', label: t.monthly },
+                  { value: 'monthly', label: t.monthlyLabel },
                   { value: 'yearly', label: t.yearly }
                 ]}
                 fullWidth

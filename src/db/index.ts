@@ -37,11 +37,21 @@ export interface Settings {
   currency: string;
 }
 
+export interface User {
+  uid: string;
+  isPremium: boolean;
+  subscriptionType: 'none' | 'one-time' | 'monthly';
+  subscriptionId?: string;
+  subscriptionEndDate?: Date | null;
+  isAdmin?: boolean;
+}
+
 export class FinVaultDatabase extends Dexie {
   transactions!: Table<Transaction>;
   categories!: Table<Category>;
   savingsTips!: Table<SavingsTip>;
   settings!: Table<Settings>;
+  users!: Table<User>;
 
   constructor() {
     super('finVaultDB_v1');
@@ -73,6 +83,11 @@ export class FinVaultDatabase extends Dexie {
       return tx.table('transactions').toCollection().modify(transaction => {
         transaction.status = 'completed';
       });
+    });
+    
+    // Add users table in version 4
+    this.version(4).stores({
+      users: 'uid, isPremium, subscriptionType'
     });
   }
 }

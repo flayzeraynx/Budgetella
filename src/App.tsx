@@ -9,6 +9,9 @@ import { ToastProvider } from './context/ToastContext';
 import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
+import Pricing from './pages/Pricing';
+import TermsAndConditions from './pages/TermsAndConditions';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import {
   db,
   initializeDefaultCategories,
@@ -61,6 +64,9 @@ function App() {
                       <Routes>
                         <Route path="/" element={<Dashboard />} />
                         <Route path="/settings" element={<Settings />} />
+                        <Route path="/pricing" element={<Pricing />} />
+                        <Route path="/terms" element={<TermsAndConditions />} />
+                        <Route path="/privacy" element={<PrivacyPolicy />} />
                         <Route path="/login" element={<Navigate to="/" replace />} />
                       </Routes>
                     </Layout>
