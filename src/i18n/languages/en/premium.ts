@@ -26,7 +26,7 @@ export const premium: PremiumTranslations = {
   
   // Premium feature descriptions
   basicExpenseTracking: 'Basic expense tracking',
-  limitedTransactionHistory: 'Limited transaction history (3 months)',
+  limitedTransactionHistory: 'Limited transaction history (1 month)',
   basicReportsAndCharts: 'Basic reports and charts',
   defaultCategories: 'Default categories',
   singleDeviceUsage: 'Single device usage',

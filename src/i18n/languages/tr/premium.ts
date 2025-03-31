@@ -28,7 +28,7 @@ export const premium: PremiumTranslations = {
   
   // Premium feature descriptions
   basicExpenseTracking: 'Temel gider takibi',
-  limitedTransactionHistory: 'Sınırlı işlem geçmişi (3 ay)',
+  limitedTransactionHistory: 'Sınırlı işlem geçmişi (1 ay)',
   basicReportsAndCharts: 'Temel raporlar ve grafikler',
   defaultCategories: 'Varsayılan kategoriler',
   singleDeviceUsage: 'Tek cihaz kullanımı',

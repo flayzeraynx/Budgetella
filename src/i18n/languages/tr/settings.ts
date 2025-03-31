@@ -43,8 +43,11 @@ export const settings: SettingsTranslations = {
   settingsSaved: 'Ayarlar başarıyla kaydedildi',
   
   // CSV Export/Import
-  exportAsJSON: 'JSON',
-  exportAsCSV: 'CSV',
-  importJSON: 'JSON',
-  importCSV: 'CSV'
+  exportAsJSON: 'JSON Olarak Dışa Aktar',
+  exportAsCSV: 'CSV Olarak Dışa Aktar',
+  importJSON: 'JSON İçe Aktar',
+  importCSV: 'CSV İçe Aktar',
+  
+  // Data Management
+  dataManagementPremium: 'Veri yönetimi premium bir özelliktir. Verilerinizi dışa aktarmak, içe aktarmak veya temizlemek için premium hesaba yükseltin.'
 };

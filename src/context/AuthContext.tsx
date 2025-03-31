@@ -294,6 +294,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const signOut = async () => {
     try {
       setError(null);
+      // Clear local data before signing out
+      await clearLocalData();
       await firebaseSignOut(auth);
       // Navigate to dashboard after signing out
       window.location.href = '/';

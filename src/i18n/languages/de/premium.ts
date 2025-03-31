@@ -28,7 +28,7 @@ export const premium: PremiumTranslations = {
   
   // Premium feature descriptions
   basicExpenseTracking: 'Grundlegende Ausgabenverfolgung',
-  limitedTransactionHistory: 'Begrenzter Transaktionsverlauf (3 Monate)',
+  limitedTransactionHistory: 'Begrenzter Transaktionsverlauf (1 Monate)',
   basicReportsAndCharts: 'Grundlegende Berichte und Diagramme',
   defaultCategories: 'Standardkategorien',
   singleDeviceUsage: 'Nutzung auf einem Gerät',

@@ -12,6 +12,7 @@ export const settings: SettingsTranslations = {
   currencyHelp: 'Wählen Sie die Währung, die für alle Ihre Transaktionen verwendet werden soll',
   dataManagement: 'Datenverwaltung',
   dataManagementDescription: 'Exportieren, importieren oder löschen Sie Ihre Daten',
+  dataManagementPremium: 'Datenverwaltung ist eine Premium-Funktion. Upgraden Sie auf Premium, um Ihre Daten zu exportieren, importieren oder zu löschen.',
   exportData: 'Daten exportieren',
   exportDescription: 'Laden Sie Ihre Daten als JSON- oder CSV-Datei herunter',
   importData: 'Daten importieren',

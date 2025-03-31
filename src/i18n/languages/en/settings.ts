@@ -10,6 +10,7 @@ export const settings: SettingsTranslations = {
   currencyHelp: 'Select your preferred currency for displaying amounts',
   dataManagement: 'Data Management',
   dataManagementDescription: 'Backup and restore your financial data',
+  dataManagementPremium: 'Data management is a premium feature. Upgrade to premium to export, import, or clear your data.',
   exportData: 'Export Data',
   exportDescription: 'Download your data as a JSON or CSV file',
   importData: 'Import Data',

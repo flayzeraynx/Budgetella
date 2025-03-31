@@ -8,6 +8,7 @@ import { useFirebase } from '../../context/FirebaseContext';
 import { useToast } from '../../context/ToastContext';
 import { collection, getDocs, deleteDoc, doc, addDoc, Timestamp, serverTimestamp } from 'firebase/firestore';
 import { db as firebaseDb } from '../../firebase/config';
+import PremiumFeatureGate from '../subscription/PremiumFeatureGate';
 
 const DataManagement: React.FC = () => {
   const { t } = useTranslation();
@@ -906,7 +907,7 @@ const DataManagement: React.FC = () => {
         </div>
       )}
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="p-4 border border-secondary-200 dark:border-secondary-700 rounded-lg">
           <h4 className="font-medium mb-2">{t.settings.exportData}</h4>
           <p className="text-sm text-secondary-500 dark:text-secondary-400 mb-4">
@@ -938,23 +939,35 @@ const DataManagement: React.FC = () => {
             
           </div>
         </div>
-      </div>
       
-      <div className="p-4 border border-secondary-200 dark:border-secondary-700 rounded-lg">
-        <h4 className="font-medium mb-2 text-red-600 dark:text-red-400">{t.settings.clearData}</h4>
-        <p className="text-sm text-secondary-500 dark:text-secondary-400 mb-4">
-          {t.settings.permanentlyDelete}
-        </p>
-        <Button
-          onClick={() => setShowClearConfirmation(true)}
-          variant="danger"
-          leftIcon={<Trash2 className="w-4 h-4" />}
-        >
-              {t.settings.clearAllTransactions}
-        </Button>
+        <div className="p-4 border border-secondary-200 dark:border-secondary-700 rounded-lg">
+          <h4 className="font-medium mb-2 text-red-600 dark:text-red-400">{t.settings.clearData}</h4>
+          <p className="text-sm text-secondary-500 dark:text-secondary-400 mb-4">
+            {t.settings.permanentlyDelete}
+          </p>
+          <Button
+            onClick={() => setShowClearConfirmation(true)}
+            variant="danger"
+            leftIcon={<Trash2 className="w-4 h-4" />}
+          >
+                {t.settings.clearAllTransactions}
+          </Button>
+        </div>
+
       </div>
     </div>
   );
 };
 
-export default DataManagement;
+// Wrap the component with PremiumFeatureGate to make it a premium feature
+const DataManagementWithPremiumGate: React.FC = () => {
+  const { t } = useTranslation();
+  
+  return (
+    <PremiumFeatureGate>
+      <DataManagement />
+    </PremiumFeatureGate>
+  );
+};
+
+export default DataManagementWithPremiumGate;

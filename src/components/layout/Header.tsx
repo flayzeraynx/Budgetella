@@ -119,7 +119,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
                   : 'text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800'
               }`}
               aria-label="Pricing"
-              title="Pricing"
+              title={t.premium.pricing}
             >
               <Crown className="w-5 h-5" />
             </Link>
@@ -302,7 +302,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
               onClick={() => setIsMenuOpen(false)}
             >
               <Crown className="w-5 h-5 mr-3" />
-              Pricing
+              {t.premium.pricing}
             </Link>
             
             {/* Language */}

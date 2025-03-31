@@ -203,6 +203,7 @@ export interface SettingsTranslations {
   currencyHelp: string;
   dataManagement: string;
   dataManagementDescription: string;
+  dataManagementPremium: string;
   exportData: string;
   exportDescription: string;
   importData: string;
