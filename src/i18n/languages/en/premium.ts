@@ -20,6 +20,23 @@ export const premium: PremiumTranslations = {
   monthlyLabel: 'month',
   alreadyHavePremium: 'You already have premium access! Enjoy all the premium features.',
   
+  // Subscription management
+  status: 'Status',
+  active: 'Active',
+  inactive: 'Inactive',
+  subscriptionType: 'Subscription Type',
+  none: 'None',
+  expirationDate: 'Expiration Date',
+  noActiveSubscription: 'You don\'t have an active subscription. Upgrade to premium to access all features.',
+  oneTimeSubscriptionActive: 'Your one-time payment subscription is active. You have lifetime access to premium features.',
+  monthlySubscriptionActive: 'Your monthly subscription is active. You will be billed monthly for premium access.',
+  subscriptionActive: 'Your subscription is active. Enjoy all premium features!',
+  noSubscriptionToCancel: 'You don\'t have an active subscription to cancel.',
+  confirmCancellation: 'Are you sure you want to cancel your subscription? You will lose access to premium features at the end of your billing period.',
+  subscriptionCancelled: 'Your subscription has been cancelled successfully.',
+  errorCancellingSubscription: 'There was an error cancelling your subscription. Please try again later.',
+  cancelling: 'Cancelling...',
+  
   // Free account limitations
   freeAccountLimitation: 'Free Account Limitation',
   freeAccountLimitationMessage: 'Free accounts can only view transactions from the current month. Upgrade to Premium to access your complete transaction history.',

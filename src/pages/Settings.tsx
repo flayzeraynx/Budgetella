@@ -3,6 +3,7 @@ import CategoryManager from '../components/settings/CategoryManager';
 import DataManagement from '../components/settings/DataManagement';
 import CurrencySelector from '../components/settings/CurrencySelector';
 import UserManagement from '../components/settings/UserManagement';
+import SubscriptionManagement from '../components/settings/SubscriptionManagement';
 import FeedbackDialog from '../components/settings/FeedbackDialog';
 import LanguageDialog from '../components/settings/LanguageDialog';
 import Card, { CardHeader, CardTitle, CardContent } from '../components/ui/Card';
@@ -24,6 +25,8 @@ const Settings: React.FC = () => {
       <h1 className="text-2xl font-bold">{t.common.settings}</h1>
       
       <UserManagement />
+      
+      <SubscriptionManagement />
       
       <Card>
         <CardHeader>

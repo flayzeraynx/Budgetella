@@ -48,11 +48,52 @@ const Pricing: React.FC = () => {
 
     try {
       setIsProcessing(true);
-      const checkoutUrl = await initiateOneTimePayment();
-      // In a real implementation, this would redirect to Stripe
-      window.location.href = checkoutUrl;
-    } catch (error) {
+      console.log('Initiating one-time payment...');
+      console.log('Firebase Functions URL:', import.meta.env.VITE_FIREBASE_FUNCTIONS_URL || 'https://us-central1-budgetella-d1d41.cloudfunctions.net');
+      
+      // Call Firebase Function directly to avoid any issues
+      const functionsUrl = import.meta.env.VITE_FIREBASE_FUNCTIONS_URL || 'https://us-central1-budgetella-d1d41.cloudfunctions.net';
+      
+      const response = await fetch(`${functionsUrl}/createCheckoutSession`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: currentUser.uid,
+          subscriptionType: 'one-time',
+          successUrl: 'http://localhost:5174/settings?payment=success',
+          cancelUrl: 'http://localhost:5174/pricing?payment=canceled',
+        }),
+      });
+      
+      console.log('Response status:', response.status);
+      
+      if (!response.ok) {
+        let errorMessage = 'Failed to create checkout session';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          console.error('Error parsing error response:', e);
+        }
+        throw new Error(errorMessage);
+      }
+      
+      const data = await response.json();
+      console.log('Checkout session created:', data);
+      
+      // Redirect to Stripe Checkout
+      if (data.url && data.url.startsWith('http')) {
+        window.location.href = data.url;
+      } else {
+        console.error('Invalid checkout URL:', data.url);
+        alert('Failed to initiate payment. Invalid checkout URL.');
+      }
+    } catch (error: any) {
       console.error('Error initiating payment:', error);
+      // Show error message
+      alert(`Failed to initiate payment: ${error.message || 'Unknown error'}`);
     } finally {
       setIsProcessing(false);
     }
@@ -67,11 +108,52 @@ const Pricing: React.FC = () => {
 
     try {
       setIsProcessing(true);
-      const checkoutUrl = await initiateMonthlySubscription();
-      // In a real implementation, this would redirect to Stripe
-      window.location.href = checkoutUrl;
-    } catch (error) {
+      console.log('Initiating monthly subscription...');
+      console.log('Firebase Functions URL:', import.meta.env.VITE_FIREBASE_FUNCTIONS_URL || 'https://us-central1-budgetella-d1d41.cloudfunctions.net');
+      
+      // Call Firebase Function directly to avoid any issues
+      const functionsUrl = import.meta.env.VITE_FIREBASE_FUNCTIONS_URL || 'https://us-central1-budgetella-d1d41.cloudfunctions.net';
+      
+      const response = await fetch(`${functionsUrl}/createCheckoutSession`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: currentUser.uid,
+          subscriptionType: 'monthly',
+          successUrl: 'http://localhost:5174/settings?payment=success',
+          cancelUrl: 'http://localhost:5174/pricing?payment=canceled',
+        }),
+      });
+      
+      console.log('Response status:', response.status);
+      
+      if (!response.ok) {
+        let errorMessage = 'Failed to create checkout session';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          console.error('Error parsing error response:', e);
+        }
+        throw new Error(errorMessage);
+      }
+      
+      const data = await response.json();
+      console.log('Checkout session created:', data);
+      
+      // Redirect to Stripe Checkout
+      if (data.url && data.url.startsWith('http')) {
+        window.location.href = data.url;
+      } else {
+        console.error('Invalid checkout URL:', data.url);
+        alert('Failed to initiate subscription. Invalid checkout URL.');
+      }
+    } catch (error: any) {
       console.error('Error initiating subscription:', error);
+      // Show error message
+      alert(`Failed to initiate subscription: ${error.message || 'Unknown error'}`);
     } finally {
       setIsProcessing(false);
     }

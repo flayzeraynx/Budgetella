@@ -44,6 +44,8 @@ export interface User {
   subscriptionType: 'none' | 'one-time' | 'monthly';
   subscriptionId?: string;
   subscriptionEndDate?: Date | null;
+  subscriptionStatus?: string; // 'active', 'canceled', 'past_due', etc.
+  customerId?: string; // Stripe customer ID
   isAdmin?: boolean;
 }
 

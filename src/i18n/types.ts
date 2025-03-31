@@ -262,6 +262,23 @@ export interface PremiumTranslations {
   monthlyLabel: string;
   alreadyHavePremium: string;
   
+  // Subscription management
+  status: string;
+  active: string;
+  inactive: string;
+  subscriptionType: string;
+  none: string;
+  expirationDate: string;
+  noActiveSubscription: string;
+  oneTimeSubscriptionActive: string;
+  monthlySubscriptionActive: string;
+  subscriptionActive: string;
+  noSubscriptionToCancel: string;
+  confirmCancellation: string;
+  subscriptionCancelled: string;
+  errorCancellingSubscription: string;
+  cancelling: string;
+  
   // Free account limitations
   freeAccountLimitation: string;
   freeAccountLimitationMessage: string;

@@ -36,8 +36,8 @@ To enable Google Drive integration in finVault, you need to create a Google Clou
 2. Click "Create Credentials" and select "OAuth client ID"
 3. Select "Web application" as the application type
 4. Name: "finVault Web Client"
-5. Authorized JavaScript origins: Add `http://localhost:5173` (for development) and your production URL if you have one
-6. Authorized redirect URIs: Add `http://localhost:5173` (for development) and your production URL if you have one
+5. Authorized JavaScript origins: Add `http://localhost:5174` (for development) and your production URL if you have one
+6. Authorized redirect URIs: Add `http://localhost:5174` (for development) and your production URL if you have one
 7. Click "Create"
 8. Note down the "Client ID" and "Client Secret" (you'll need the Client ID)
 

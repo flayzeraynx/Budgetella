@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Cancelled</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      text-align: center;
+    }
+    .cancelled {
+      color: #f44336;
+      font-size: 24px;
+      margin: 20px 0;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Payment Cancelled</h1>
+  
+  <div class="cancelled">
+    Your payment was cancelled.
+  </div>
+  
+  <p>
+    You have cancelled the payment process. If you change your mind, you can always upgrade later.
+  </p>
+  
+  <button onclick="window.location.href='/'">Return to Dashboard</button>
+  <button onclick="window.location.href='/pricing'">Try Again</button>
+</body>
+</html>

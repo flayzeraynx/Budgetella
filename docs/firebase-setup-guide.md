@@ -181,7 +181,7 @@ This guide will walk you through the complete process of setting up Firebase for
    npm run dev
    ```
 
-3. Open your browser and navigate to the local development server (usually http://localhost:5173/budgetella/)
+3. Open your browser and navigate to the local development server (usually http://localhost:5174/budgetella/)
 
 4. Test the following features:
    - Sign in with Google (and Apple if configured)

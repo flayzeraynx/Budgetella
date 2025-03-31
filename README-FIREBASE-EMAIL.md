@@ -104,7 +104,7 @@ The Cloud Function is configured to allow requests from the following origins:
 - https://budgetella-d1d41.firebaseapp.com
 - http://localhost:3000
 - http://localhost:5000
-- http://localhost:5173
+- http://localhost:5174
 
 If you're deploying to a different domain or using a different local development port, you'll need to update the CORS configuration in `budgetella_functions/index.js`.
 

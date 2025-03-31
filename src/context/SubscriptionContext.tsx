@@ -9,6 +9,7 @@ export interface SubscriptionStatus {
   subscriptionType: User['subscriptionType'];
   subscriptionId?: string;
   subscriptionEndDate?: Date | null;
+  subscriptionStatus?: string; // 'active', 'canceled', 'past_due', etc.
 }
 
 // Define context interface
@@ -111,6 +112,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
         subscriptionType: userData.subscriptionType || 'none',
         subscriptionId: userData.subscriptionId,
         subscriptionEndDate: userData.subscriptionEndDate,
+        subscriptionStatus: userData.subscriptionStatus,
       });
       setIsLoading(false);
     }
@@ -137,10 +139,45 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!currentUser) throw new Error('User must be logged in');
     
     try {
-      // This would typically call a backend API to create a payment intent
-      // For now, we'll return a placeholder URL
-      // In a real implementation, this would redirect to a Stripe Checkout page
-      return `/api/create-checkout-session?type=one-time&userId=${currentUser.uid}`;
+      console.log('Initiating one-time payment...');
+      const functionsUrl = import.meta.env.VITE_FIREBASE_FUNCTIONS_URL || 'https://us-central1-budgetella-d1d41.cloudfunctions.net';
+      console.log('Using Firebase Functions URL:', functionsUrl);
+      
+      // Call Firebase Function to create a checkout session
+      const response = await fetch(`${functionsUrl}/createCheckoutSession`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+          body: JSON.stringify({
+            userId: currentUser.uid,
+            subscriptionType: 'one-time',
+            successUrl: 'http://localhost:5174/settings?payment=success',
+            cancelUrl: 'http://localhost:5174/pricing?payment=canceled',
+          }),
+      });
+      
+      console.log('Response status:', response.status);
+      
+      if (!response.ok) {
+        let errorMessage = 'Failed to create checkout session';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          console.error('Error parsing error response:', e);
+        }
+        throw new Error(errorMessage);
+      }
+      
+      const data = await response.json();
+      console.log('Checkout session created:', data);
+      
+      if (!data.url) {
+        throw new Error('No checkout URL returned from server');
+      }
+      
+      return data.url;
     } catch (error) {
       console.error('Error initiating one-time payment:', error);
       throw error;
@@ -152,10 +189,45 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!currentUser) throw new Error('User must be logged in');
     
     try {
-      // This would typically call a backend API to create a subscription
-      // For now, we'll return a placeholder URL
-      // In a real implementation, this would redirect to a Stripe Checkout page
-      return `/api/create-checkout-session?type=monthly&userId=${currentUser.uid}`;
+      console.log('Initiating monthly subscription...');
+      const functionsUrl = import.meta.env.VITE_FIREBASE_FUNCTIONS_URL || 'https://us-central1-budgetella-d1d41.cloudfunctions.net';
+      console.log('Using Firebase Functions URL:', functionsUrl);
+      
+      // Call Firebase Function to create a checkout session
+      const response = await fetch(`${functionsUrl}/createCheckoutSession`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+          body: JSON.stringify({
+            userId: currentUser.uid,
+            subscriptionType: 'monthly',
+            successUrl: 'http://localhost:5174/settings?payment=success',
+            cancelUrl: 'http://localhost:5174/pricing?payment=canceled',
+          }),
+      });
+      
+      console.log('Response status:', response.status);
+      
+      if (!response.ok) {
+        let errorMessage = 'Failed to create checkout session';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          console.error('Error parsing error response:', e);
+        }
+        throw new Error(errorMessage);
+      }
+      
+      const data = await response.json();
+      console.log('Checkout session created:', data);
+      
+      if (!data.url) {
+        throw new Error('No checkout URL returned from server');
+      }
+      
+      return data.url;
     } catch (error) {
       console.error('Error initiating monthly subscription:', error);
       throw error;
@@ -168,14 +240,30 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!subscriptionStatus.subscriptionId) throw new Error('No active subscription');
     
     try {
-      // This would typically call a backend API to cancel the subscription
-      // For now, we'll just update the local state
-      // In a real implementation, this would call the Stripe API
+      // Call Firebase Function to cancel subscription
+      const response = await fetch(`${import.meta.env.VITE_FIREBASE_FUNCTIONS_URL || 'https://us-central1-budgetella-d1d41.cloudfunctions.net'}/cancelSubscription`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: currentUser.uid,
+          subscriptionId: subscriptionStatus.subscriptionId,
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to cancel subscription');
+      }
+      
+      // Update local state
       await db.users.update(currentUser.uid, {
         isPremium: false,
         subscriptionType: 'none',
         subscriptionId: undefined,
         subscriptionEndDate: undefined,
+        subscriptionStatus: 'canceled',
       });
     } catch (error) {
       console.error('Error canceling subscription:', error);
