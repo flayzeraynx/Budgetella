@@ -130,7 +130,7 @@ const SubscriptionManagement: React.FC = () => {
             {!subscriptionStatus.isPremium && (
               <Button
                 className="w-full"
-                onClick={() => window.location.href = '/pricing'}
+                onClick={() => window.location.href = window.location.origin + '/pricing'}
               >
                 {t.premium.upgradeToPremium}
               </Button>

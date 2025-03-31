@@ -26,7 +26,8 @@ const Settings: React.FC = () => {
       
       <UserManagement />
       
-      <SubscriptionManagement />
+      {/* Only show subscription management for signed-in users */}
+      {currentUser && <SubscriptionManagement />}
       
       <Card>
         <CardHeader>

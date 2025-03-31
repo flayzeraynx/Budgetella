@@ -64,11 +64,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Clear local data when signing out
   const clearLocalData = async () => {
     try {
-      // Clear all tables
+      // Clear all tables except settings to preserve language preference
       await db.transactions.clear();
       await db.categories.clear();
-      await db.settings.clear();
-      console.log('Local data cleared successfully');
+      // Don't clear settings to preserve language preference
+      console.log('Local data cleared successfully (preserving settings)');
     } catch (error) {
       console.error('Error clearing local data:', error);
     }
@@ -85,11 +85,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Show toast message when sign-in state changes
       if (!wasSignedIn && isSignedIn) {
         // Don't reload the page on sign-in, let the FirebaseContext handle data syncing
-        showToast('success', t.signedInSuccessfully || `Signed in as ${user.displayName || user.email}`);
+        showToast('success', t.auth.signedInSuccessfully || `Signed in as ${user.displayName || user.email}`);
       } else if (wasSignedIn && !isSignedIn) {
         // Clear local data when signing out
         clearLocalData().then(() => {
-          showToast('success', t.signedOutSuccessfully || 'Signed out successfully');
+          showToast('success', t.auth.signedOutSuccessfully || 'Signed out successfully');
         });
       }
     });
@@ -112,7 +112,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       console.error('Error signing in with Google:', error);
       setError('Failed to sign in with Google');
-      showToast('error', t.failedToSignIn || 'Failed to sign in with Google');
+      showToast('error', t.auth.failedToSignIn || 'Failed to sign in with Google');
     } finally {
       setIsLoading(false);
     }
@@ -127,7 +127,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       console.error('Error signing in with Apple:', error);
       setError('Failed to sign in with Apple');
-      showToast('error', t.failedToSignIn || 'Failed to sign in with Apple');
+      showToast('error', t.auth.failedToSignIn || 'Failed to sign in with Apple');
     } finally {
       setIsLoading(false);
     }
@@ -141,7 +141,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       console.error('Error signing in with email:', error);
       setError('Failed to sign in with email');
-      showToast('error', t.failedToSignIn || 'Failed to sign in with email');
+      showToast('error', t.auth.failedToSignIn || 'Failed to sign in with email');
       throw error;
     } finally {
       setIsLoading(false);
@@ -160,12 +160,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       await updateProfile(userCredential.user, {
         displayName: `${firstName} ${lastName}`
       });
-      
+      showToast('success', 'Account created successfully');
       showToast('success', t.accountCreated || 'Account created successfully');
     } catch (error) {
       console.error('Error signing up with email:', error);
       setError('Failed to sign up with email');
-      showToast('error', t.failedToSignIn || 'Failed to create account');
+      showToast('error', t.auth.failedToSignIn || 'Failed to create account');
       throw error;
     } finally {
       setIsLoading(false);
@@ -186,12 +186,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       // Save the email locally to remember the user when they return
       localStorage.setItem('emailForSignIn', email);
-      
+      showToast('success', 'Magic link sent to your email');
       showToast('success', t.passwordResetSent || 'Magic link sent to your email');
     } catch (error) {
       console.error('Error sending sign-in link:', error);
       setError('Failed to send sign-in link');
-      showToast('error', t.failedToSignIn || 'Failed to send magic link');
+      showToast('error', t.auth.failedToSignIn || 'Failed to send magic link');
       throw error;
     } finally {
       setIsLoading(false);
@@ -215,7 +215,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       console.error('Error signing in with email link:', error);
       setError('Failed to sign in with email link');
-      showToast('error', t.failedToSignIn || 'Failed to sign in with magic link');
+      showToast('error', t.auth.failedToSignIn || 'Failed to sign in with magic link');
       throw error;
     } finally {
       setIsLoading(false);
@@ -228,11 +228,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(true);
       // Use the Firebase function
       await sendPasswordResetEmail(auth, email);
-      showToast('success', t.passwordResetSent || 'Password reset email sent');
+      showToast('success', 'Password reset email sent');
     } catch (error) {
       console.error('Error sending password reset email:', error);
       setError('Failed to send password reset email');
-      showToast('error', t.failedToSignIn || 'Failed to send password reset email');
+      showToast('error', t.auth.failedToSignIn || 'Failed to send password reset email');
       throw error;
     } finally {
       setIsLoading(false);
@@ -254,12 +254,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       // Update password
       await updatePassword(currentUser, newPassword);
-      
+      showToast('success', 'Password updated successfully');
       showToast('success', t.passwordUpdated || 'Password updated successfully');
     } catch (error) {
       console.error('Error updating password:', error);
       setError('Failed to update password');
-      showToast('error', t.failedToSignIn || 'Failed to update password');
+      showToast('error', t.auth.failedToSignIn || 'Failed to update password');
       throw error;
     } finally {
       setIsLoading(false);
@@ -279,12 +279,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       await updateProfile(currentUser, {
         displayName: `${firstName} ${lastName}`
       });
-      
+      showToast('success', 'Profile updated successfully');
       showToast('success', t.profileUpdated || 'Profile updated successfully');
     } catch (error) {
       console.error('Error updating profile:', error);
       setError('Failed to update profile');
-      showToast('error', t.failedToSignIn || 'Failed to update profile');
+      showToast('error', t.auth.failedToSignIn || 'Failed to update profile');
       throw error;
     } finally {
       setIsLoading(false);
@@ -303,7 +303,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       console.error('Error signing out:', error);
       setError('Failed to sign out');
-      showToast('error', t.failedToSignOut || 'Failed to sign out');
+      showToast('error', t.auth.failedToSignOut || 'Failed to sign out');
     }
   };
 

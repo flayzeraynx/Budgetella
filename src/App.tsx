@@ -72,6 +72,7 @@ function App() {
                           <Route path="/terms" element={<TermsAndConditions />} />
                           <Route path="/privacy" element={<PrivacyPolicy />} />
                           <Route path="/login" element={<Navigate to="/" replace />} />
+                          
                         </Routes>
                       </Layout>
                     </Router>

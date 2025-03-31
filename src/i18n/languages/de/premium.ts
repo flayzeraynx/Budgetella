@@ -2,7 +2,6 @@ import { PremiumTranslations } from '../../types';
 import { premium as enPremium } from '../en/premium';
 
 export const premium: PremiumTranslations = {
-  ...enPremium,
   premium: 'Premium',
   premiumFeature: 'Premium-Funktion',
   premiumFeatureDescription: 'Diese Funktion ist nur für Premium-Benutzer verfügbar.',
@@ -21,6 +20,23 @@ export const premium: PremiumTranslations = {
   oneTime: 'einmalig',
   monthlyLabel: 'Monat',
   alreadyHavePremium: 'Sie haben bereits Premium-Zugang! Genießen Sie alle Premium-Funktionen.',
+  
+  // Subscription management
+  status: 'Status',
+  active: 'Aktiv',
+  inactive: 'Inaktiv',
+  subscriptionType: 'Abonnementtyp',
+  none: 'Keins',
+  expirationDate: 'Ablaufdatum',
+  noActiveSubscription: 'Sie haben kein aktives Abonnement. Upgraden Sie auf Premium, um auf alle Funktionen zuzugreifen.',
+  oneTimeSubscriptionActive: 'Ihre einmalige Zahlung ist aktiv. Sie haben lebenslangen Zugriff auf Premium-Funktionen.',
+  monthlySubscriptionActive: 'Ihr monatliches Abonnement ist aktiv. Ihnen wird monatlich für den Premium-Zugang in Rechnung gestellt.',
+  subscriptionActive: 'Ihr Abonnement ist aktiv. Genießen Sie alle Premium-Funktionen!',
+  noSubscriptionToCancel: 'Sie haben kein aktives Abonnement zum Kündigen.',
+  confirmCancellation: 'Sind Sie sicher, dass Sie Ihr Abonnement kündigen möchten? Sie verlieren am Ende Ihres Abrechnungszeitraums den Zugriff auf Premium-Funktionen.',
+  subscriptionCancelled: 'Ihr Abonnement wurde erfolgreich gekündigt.',
+  errorCancellingSubscription: 'Beim Kündigen Ihres Abonnements ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.',
+  cancelling: 'Kündigung...',
   
   // Free account limitations
   freeAccountLimitation: 'Einschränkung des kostenlosen Kontos',

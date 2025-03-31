@@ -139,9 +139,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!currentUser) throw new Error('User must be logged in');
     
     try {
-      console.log('Initiating one-time payment...');
       const functionsUrl = import.meta.env.VITE_FIREBASE_FUNCTIONS_URL || 'https://us-central1-budgetella-d1d41.cloudfunctions.net';
-      console.log('Using Firebase Functions URL:', functionsUrl);
       
       // Call Firebase Function to create a checkout session
       const response = await fetch(`${functionsUrl}/createCheckoutSession`, {
@@ -152,12 +150,10 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
           body: JSON.stringify({
             userId: currentUser.uid,
             subscriptionType: 'one-time',
-            successUrl: 'http://localhost:5174/settings?payment=success',
-            cancelUrl: 'http://localhost:5174/pricing?payment=canceled',
+            successUrl: window.location.origin + '/settings?payment=success',
+            cancelUrl: window.location.origin + '/pricing?payment=canceled',
           }),
       });
-      
-      console.log('Response status:', response.status);
       
       if (!response.ok) {
         let errorMessage = 'Failed to create checkout session';
@@ -169,9 +165,8 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
         }
         throw new Error(errorMessage);
       }
-      
       const data = await response.json();
-      console.log('Checkout session created:', data);
+      
       
       if (!data.url) {
         throw new Error('No checkout URL returned from server');
@@ -189,9 +184,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!currentUser) throw new Error('User must be logged in');
     
     try {
-      console.log('Initiating monthly subscription...');
       const functionsUrl = import.meta.env.VITE_FIREBASE_FUNCTIONS_URL || 'https://us-central1-budgetella-d1d41.cloudfunctions.net';
-      console.log('Using Firebase Functions URL:', functionsUrl);
       
       // Call Firebase Function to create a checkout session
       const response = await fetch(`${functionsUrl}/createCheckoutSession`, {
@@ -202,12 +195,10 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
           body: JSON.stringify({
             userId: currentUser.uid,
             subscriptionType: 'monthly',
-            successUrl: 'http://localhost:5174/settings?payment=success',
-            cancelUrl: 'http://localhost:5174/pricing?payment=canceled',
+            successUrl: window.location.origin + '/settings?payment=success',
+            cancelUrl: window.location.origin + '/pricing?payment=canceled',
           }),
       });
-      
-      console.log('Response status:', response.status);
       
       if (!response.ok) {
         let errorMessage = 'Failed to create checkout session';
@@ -219,9 +210,8 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
         }
         throw new Error(errorMessage);
       }
-      
       const data = await response.json();
-      console.log('Checkout session created:', data);
+      
       
       if (!data.url) {
         throw new Error('No checkout URL returned from server');

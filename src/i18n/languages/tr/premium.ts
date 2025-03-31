@@ -2,7 +2,6 @@ import { PremiumTranslations } from '../../types';
 import { premium as enPremium } from '../en/premium';
 
 export const premium: PremiumTranslations = {
-  ...enPremium,
   premium: 'Premium',
   premiumFeature: 'Premium Özellik',
   premiumFeatureDescription: 'Bu özellik yalnızca premium kullanıcılar için kullanılabilir.',
@@ -21,6 +20,23 @@ export const premium: PremiumTranslations = {
   oneTime: 'tek seferlik',
   monthlyLabel: 'ay',
   alreadyHavePremium: 'Zaten premium erişiminiz var! Tüm premium özelliklerin keyfini çıkarın.',
+  
+  // Subscription management
+  status: 'Durum',
+  active: 'Aktif',
+  inactive: 'Pasif',
+  subscriptionType: 'Abonelik Türü',
+  none: 'Yok',
+  expirationDate: 'Bitiş Tarihi',
+  noActiveSubscription: 'Aktif bir aboneliğiniz yok. Tüm özelliklere erişmek için premium\'a yükseltin.',
+  oneTimeSubscriptionActive: 'Tek seferlik ödeme aboneliğiniz aktif. Premium özelliklere ömür boyu erişiminiz var.',
+  monthlySubscriptionActive: 'Aylık aboneliğiniz aktif. Premium erişim için aylık olarak ücretlendirileceksiniz.',
+  subscriptionActive: 'Aboneliğiniz aktif. Tüm premium özelliklerin keyfini çıkarın!',
+  noSubscriptionToCancel: 'İptal edilecek aktif bir aboneliğiniz yok.',
+  confirmCancellation: 'Aboneliğinizi iptal etmek istediğinizden emin misiniz? Fatura döneminin sonunda premium özelliklere erişiminizi kaybedeceksiniz.',
+  subscriptionCancelled: 'Aboneliğiniz başarıyla iptal edildi.',
+  errorCancellingSubscription: 'Aboneliğinizi iptal ederken bir hata oluştu. Lütfen daha sonra tekrar deneyin.',
+  cancelling: 'İptal ediliyor...',
   
   // Free account limitations
   freeAccountLimitation: 'Ücretsiz Hesap Sınırlaması',

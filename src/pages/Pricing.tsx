@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { Check, X, CreditCard, Calendar } from 'lucide-react';
+import LoginDialog from '../components/auth/LoginDialog';
 
 const Pricing: React.FC = () => {
   const { t } = useTranslation();
@@ -17,6 +18,7 @@ const Pricing: React.FC = () => {
   } = useSubscription();
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
 
   // Free features list
   const freeFeatures = [
@@ -42,56 +44,24 @@ const Pricing: React.FC = () => {
   // Handle one-time payment
   const handleOneTimePayment = async () => {
     if (!currentUser) {
-      navigate('/login');
+      // Show login dialog instead of redirecting
+      setIsLoginDialogOpen(true);
       return;
     }
 
     try {
       setIsProcessing(true);
-      console.log('Initiating one-time payment...');
-      console.log('Firebase Functions URL:', import.meta.env.VITE_FIREBASE_FUNCTIONS_URL || 'https://us-central1-budgetella-d1d41.cloudfunctions.net');
       
-      // Call Firebase Function directly to avoid any issues
-      const functionsUrl = import.meta.env.VITE_FIREBASE_FUNCTIONS_URL || 'https://us-central1-budgetella-d1d41.cloudfunctions.net';
-      
-      const response = await fetch(`${functionsUrl}/createCheckoutSession`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: currentUser.uid,
-          subscriptionType: 'one-time',
-          successUrl: 'http://localhost:5174/settings?payment=success',
-          cancelUrl: 'http://localhost:5174/pricing?payment=canceled',
-        }),
-      });
-      
-      console.log('Response status:', response.status);
-      
-      if (!response.ok) {
-        let errorMessage = 'Failed to create checkout session';
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorMessage;
-        } catch (e) {
-          console.error('Error parsing error response:', e);
-        }
-        throw new Error(errorMessage);
-      }
-      
-      const data = await response.json();
-      console.log('Checkout session created:', data);
+      // Use the function from SubscriptionContext
+      const checkoutUrl = await initiateOneTimePayment();
       
       // Redirect to Stripe Checkout
-      if (data.url && data.url.startsWith('http')) {
-        window.location.href = data.url;
+      if (checkoutUrl && checkoutUrl.startsWith('http')) {
+        window.location.href = checkoutUrl;
       } else {
-        console.error('Invalid checkout URL:', data.url);
         alert('Failed to initiate payment. Invalid checkout URL.');
       }
     } catch (error: any) {
-      console.error('Error initiating payment:', error);
       // Show error message
       alert(`Failed to initiate payment: ${error.message || 'Unknown error'}`);
     } finally {
@@ -102,56 +72,24 @@ const Pricing: React.FC = () => {
   // Handle monthly subscription
   const handleMonthlySubscription = async () => {
     if (!currentUser) {
-      navigate('/login');
+      // Show login dialog instead of redirecting
+      setIsLoginDialogOpen(true);
       return;
     }
 
     try {
       setIsProcessing(true);
-      console.log('Initiating monthly subscription...');
-      console.log('Firebase Functions URL:', import.meta.env.VITE_FIREBASE_FUNCTIONS_URL || 'https://us-central1-budgetella-d1d41.cloudfunctions.net');
       
-      // Call Firebase Function directly to avoid any issues
-      const functionsUrl = import.meta.env.VITE_FIREBASE_FUNCTIONS_URL || 'https://us-central1-budgetella-d1d41.cloudfunctions.net';
-      
-      const response = await fetch(`${functionsUrl}/createCheckoutSession`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: currentUser.uid,
-          subscriptionType: 'monthly',
-          successUrl: 'http://localhost:5174/settings?payment=success',
-          cancelUrl: 'http://localhost:5174/pricing?payment=canceled',
-        }),
-      });
-      
-      console.log('Response status:', response.status);
-      
-      if (!response.ok) {
-        let errorMessage = 'Failed to create checkout session';
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorMessage;
-        } catch (e) {
-          console.error('Error parsing error response:', e);
-        }
-        throw new Error(errorMessage);
-      }
-      
-      const data = await response.json();
-      console.log('Checkout session created:', data);
+      // Use the function from SubscriptionContext
+      const checkoutUrl = await initiateMonthlySubscription();
       
       // Redirect to Stripe Checkout
-      if (data.url && data.url.startsWith('http')) {
-        window.location.href = data.url;
+      if (checkoutUrl && checkoutUrl.startsWith('http')) {
+        window.location.href = checkoutUrl;
       } else {
-        console.error('Invalid checkout URL:', data.url);
         alert('Failed to initiate subscription. Invalid checkout URL.');
       }
     } catch (error: any) {
-      console.error('Error initiating subscription:', error);
       // Show error message
       alert(`Failed to initiate subscription: ${error.message || 'Unknown error'}`);
     } finally {
@@ -270,6 +208,12 @@ const Pricing: React.FC = () => {
           {t.premium.contactSupport}
         </p>
       </div>
+      
+      {/* Login Dialog */}
+      <LoginDialog
+        isOpen={isLoginDialogOpen}
+        onClose={() => setIsLoginDialogOpen(false)}
+      />
     </div>
   );
 };
