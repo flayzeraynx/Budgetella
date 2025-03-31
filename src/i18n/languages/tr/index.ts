@@ -1,24 +1,22 @@
 import { Translations } from '../../types';
 import { common } from './common';
+import { auth } from './auth';
 import { dashboard } from './dashboard';
 import { transactions } from './transactions';
-import { months } from './months';
+import { categories } from './categories';
+import { settings } from './settings';
 import { premium } from './premium';
-
-// Import English translations for fallback
-import { auth as enAuth } from '../en/auth';
-import { categories as enCategories } from '../en/categories';
-import { settings as enSettings } from '../en/settings';
-import { feedback as enFeedback } from '../en/feedback';
+import { feedback } from './feedback';
+import { months } from './months';
 
 export const tr: Translations = {
   common,
-  auth: enAuth,
+  auth,
   dashboard,
   transactions,
-  categories: enCategories,
-  settings: enSettings,
+  categories,
+  settings,
   premium,
-  feedback: enFeedback,
+  feedback,
   months,
 };

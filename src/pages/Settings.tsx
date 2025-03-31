@@ -32,9 +32,9 @@ const Settings: React.FC = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <h3 className="text-lg font-medium mb-2">{t.settings.theme || 'Theme'}</h3>
+              <h3 className="text-lg font-medium mb-2">{t.settings.theme}</h3>
               <p className="text-secondary-600 dark:text-secondary-400 mb-4">
-                {t.settings.themeDescription || 'Choose between light and dark mode'}
+                {t.settings.themeDescription}
               </p>
               <Button
                 onClick={toggleTheme}
@@ -46,16 +46,16 @@ const Settings: React.FC = () => {
             </div>
             
             <div className="md:border-l md:border-secondary-200 md:dark:border-secondary-700 md:pl-6">
-              <h3 className="text-lg font-medium mb-2">{t.settings.language || 'Language'}</h3>
+              <h3 className="text-lg font-medium mb-2">{t.settings.language}</h3>
               <p className="text-secondary-600 dark:text-secondary-400 mb-4">
-                {t.common.selectLanguage || 'Select your preferred language'}
+                {t.common.selectLanguage}
               </p>
               <Button
                 onClick={() => setIsLanguageDialogOpen(true)}
                 variant="outline"
                 leftIcon={<Globe className="w-4 h-4" />}
               >
-                {t.common.selectLanguage || 'Select Language'}
+                {t.common.selectLanguage}
               </Button>
             </div>
             
@@ -72,23 +72,23 @@ const Settings: React.FC = () => {
       
       <Card>
         <CardHeader>
-          <CardTitle>{t.settings.about || 'About'}</CardTitle>
+          <CardTitle>{t.settings.about}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-secondary-600 dark:text-secondary-400 mb-4">
-            {t.settings.aboutDescription || `${t.common.appName} is a privacy-first personal finance tracker. All your data is stored locally on your device and never sent to any server.`}
+            {t.settings.aboutDescription}
           </p>
           <div className="space-y-2 mb-4">
             <div className="flex">
-              <span className="font-medium w-24">{t.settings.version || 'Version'}:</span>
+              <span className="font-medium w-24">{t.settings.version}:</span>
               <span>1.0.0</span>
             </div>
             <div className="flex">
-              <span className="font-medium w-24">{t.settings.storage || 'Storage'}:</span>
+              <span className="font-medium w-24">{t.settings.storage}:</span>
               <span>{t.auth.dataSecurityInfo}</span>
             </div>
             <div className="flex">
-              <span className="font-medium w-24">{t.settings.privacy || 'Privacy'}:</span>
+              <span className="font-medium w-24">{t.settings.privacy}:</span>
               <span>{t.settings.privacyDescription}</span>
             </div>
           </div>
@@ -97,7 +97,7 @@ const Settings: React.FC = () => {
             onClick={() => setIsFeedbackDialogOpen(true)}
             leftIcon={<MessageSquare className="w-4 h-4" />}
           >
-            {t.feedback.feedbackForm || 'Feedback Form'}
+            {t.feedback.feedbackForm}
           </Button>
         </CardContent>
       </Card>
