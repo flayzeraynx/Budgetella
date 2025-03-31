@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { PlusCircle, Repeat, AlertTriangle } from 'lucide-react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
+import GoogleIcon from '../icons/GoogleIcon';
 import Select from '../ui/Select';
 import { db, Category, Transaction, formatCurrency, RecurrenceInterval } from '../../db';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -313,7 +314,9 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                   type="button"
                   size="sm"
                   onClick={signInWithGoogle}
-                  className="py-0.5 px-2 text-xs"
+                  className="py-0.5 px-2 text-xs font-medium"
+                  variant="google"
+                  leftIcon={<GoogleIcon className="w-4 h-4 mr-1" />}
                 >
                   {t.auth.signInWithGoogle || 'Sign in with Google'}
                 </Button>
@@ -379,7 +382,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                 }}
                 placeholder="0.00"
                 required
-                className="block w-full pl-10 pr-4 py-2 rounded-md border border-secondary-300 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-secondary-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
+                className="block w-full pl-10 pr-4 py-2 rounded-md border border-secondary-400 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-secondary-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
               />
             </div>
             {errors.amount && <p className="mt-1 text-sm text-red-600">{errors.amount}</p>}
@@ -394,7 +397,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
               <select
                 value={selectedCategoryIndex >= 0 ? selectedCategoryIndex.toString() : '0'}
                 onChange={handleCategoryChange}
-                className="block w-full rounded-md border border-secondary-300 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-secondary-900 dark:text-white focus:ring-primary-500 focus:border-primary-500 px-4 py-2 appearance-none"
+                className="block w-full rounded-md border border-secondary-400 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-secondary-900 dark:text-white focus:ring-primary-500 focus:border-primary-500 px-4 py-2 appearance-none"
               >
                 {categories.map((cat, index) => (
                   <option key={index} value={index.toString()}>
@@ -444,7 +447,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
             onChange={(e) => setDescription(e.target.value)}
             placeholder={t.transactions.enterDescription || "Enter description"}
             rows={3}
-            className="block w-full rounded-md border border-secondary-300 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-secondary-900 dark:text-white focus:ring-primary-500 focus:border-primary-500 px-4 py-2"
+            className="block w-full rounded-md border border-secondary-400 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-secondary-900 dark:text-white focus:ring-primary-500 focus:border-primary-500 px-4 py-2"
           />
         </div>
 

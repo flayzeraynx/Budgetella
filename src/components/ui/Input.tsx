@@ -26,9 +26,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             className={`
-              block rounded-md shadow-sm border-secondary-300 dark:border-secondary-700 
+              block rounded-md shadow-sm border border-secondary-400 dark:border-secondary-700
               bg-white dark:bg-secondary-900 text-secondary-900 dark:text-white
-              focus:ring-primary-500 focus:border-primary-500 
+              focus:ring-primary-500 focus:border-primary-500
               disabled:opacity-70 disabled:cursor-not-allowed
               ${leftIcon ? 'pl-10' : 'pl-4'} 
               ${rightIcon ? 'pr-10' : 'pr-4'} 

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useTranslation } from '../../context/TranslationContext';
 import { useAuth } from '../../context/AuthContext';
-import { Mail, Lock, AlertCircle, LogIn } from 'lucide-react';
+import { Mail, Lock, AlertCircle } from 'lucide-react';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
+import GoogleIcon from '../icons/GoogleIcon';
 
 interface EmailSignInProps {
   onSuccess?: () => void;
@@ -143,12 +144,12 @@ const EmailSignIn: React.FC<EmailSignInProps> = ({
           <span className="flex-shrink mx-3 text-secondary-500 dark:text-secondary-400 text-sm">{t.common.or}</span>
           <div className="flex-grow border-t border-secondary-300 dark:border-secondary-700"></div>
         </div>
-        
         <Button
           onClick={handleSignInWithGoogle}
           fullWidth
-          variant="secondary"
-          leftIcon={<LogIn className="w-4 h-4" />}
+          variant="google"
+          leftIcon={<GoogleIcon className="w-5 h-5 mr-1" />}
+          className="font-medium"
         >
           {t.auth.signInWithGoogle}
         </Button>

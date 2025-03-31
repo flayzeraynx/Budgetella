@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../ui/Button';
-import { LogIn } from 'lucide-react';
+import GoogleIcon from '../icons/GoogleIcon';
 
 const Login: React.FC = () => {
   const { signInWithGoogle, isLoading, error } = useAuth();
@@ -19,8 +19,10 @@ const Login: React.FC = () => {
       <Button
         onClick={signInWithGoogle}
         isLoading={isLoading}
-        leftIcon={<LogIn className="w-4 h-4" />}
+        leftIcon={<GoogleIcon className="w-5 h-5 mr-1" />}
         fullWidth
+        variant="google"
+        className="font-medium"
       >
         Sign in with Google
       </Button>
