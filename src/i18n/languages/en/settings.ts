@@ -40,6 +40,7 @@ export const settings: SettingsTranslations = {
   selectImportFormat: 'Select import format',
   selectExportData: 'Select what data you want to export',
   settingsSaved: 'Settings saved successfully',
+  dataSyncSuccess: 'Data synchronized successfully',
   
   // CSV Export/Import
   exportAsJSON: 'Export as JSON',

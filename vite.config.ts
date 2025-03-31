@@ -13,6 +13,10 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: '/', // Base URL for the application (root path for Firebase hosting)
+  server: {
+    port: 5174, // Force development server to run on port 5174
+    strictPort: true, // Fail if port is already in use
+  },
   // ... other config options
   build: {
     rollupOptions: {

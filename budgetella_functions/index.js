@@ -402,6 +402,7 @@ exports.handleStripeWebhook = functions.https.onRequest(async (req, res) => {
           await admin.firestore().collection('users').doc(userId).set({
             isPremium: true,
             subscriptionType: 'one-time',
+            subscriptionStatus: 'active',
             subscriptionEndDate: admin.firestore.Timestamp.fromDate(
               new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year from now
             )
@@ -659,7 +660,8 @@ exports.getSubscriptionStatus = functions.https.onRequest((req, res) => {
           type: userData.subscriptionType || 'none',
           isPremium: userData.isPremium || false,
           status: userData.subscriptionStatus || 'none',
-          endDate: userData.subscriptionEndDate ? userData.subscriptionEndDate.toDate() : null
+          endDate: userData.subscriptionEndDate ? userData.subscriptionEndDate.toDate() : null,
+          id: userData.subscriptionId || null
         }
       });
     } catch (error) {

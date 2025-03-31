@@ -93,19 +93,22 @@ const SubscriptionManagement: React.FC = () => {
         // Update the local database with the subscription data from Firestore
         const db = (await import('../../db')).db;
         
-        // Determine subscription type based on subscription ID format
+        // Determine subscription type based on subscription ID format or the type from server
         let subscriptionType = data.subscription.type || 'none';
         
         // If we have a subscription ID that starts with 'sub_', it's a monthly subscription
         if (data.subscription.id && data.subscription.id.startsWith('sub_')) {
           subscriptionType = 'monthly';
+        } else if (data.subscription.type === 'one-time') {
+          subscriptionType = 'one-time';
         }
         
         // Make sure we're setting isPremium correctly
         const isPremium = data.subscription.isPremium === true ||
                          subscriptionType === 'one-time' ||
                          subscriptionType === 'monthly' ||
-                         (data.subscription.status === 'active' && data.subscription.id);
+                         (data.subscription.status === 'active' && data.subscription.id) ||
+                         (data.subscription.type === 'one-time');
         
         const updateData = {
           isPremium: isPremium,
@@ -120,7 +123,7 @@ const SubscriptionManagement: React.FC = () => {
         await db.users.update(currentUser.uid, updateData);
         
         
-        showToast('success', 'Subscription data synced successfully');
+        showToast('success', t.settings.dataSyncSuccess);
         
         // Force a page reload to update the UI
         window.location.reload();
@@ -137,19 +140,47 @@ const SubscriptionManagement: React.FC = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const paymentStatus = urlParams.get('payment');
+    const paymentType = urlParams.get('type');
     
     if (paymentStatus === 'success') {
-      // Payment was successful, sync subscription data
-      syncSubscriptionData();
+      // Payment was successful
+      if (paymentType === 'one-time') {
+        // For one-time payments, directly update the local database
+        (async () => {
+          try {
+            if (!currentUser) return;
+            
+            const db = (await import('../../db')).db;
+            await db.users.update(currentUser.uid, {
+              isPremium: true,
+              subscriptionType: 'one-time',
+              subscriptionStatus: 'active',
+              subscriptionEndDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year from now
+            });
+            
+            showToast('success', 'Premium status updated successfully');
+            
+            // Force a page reload to update the UI after a short delay
+            setTimeout(() => window.location.reload(), 1000);
+          } catch (error: any) {
+            setError(error.message || 'Failed to update premium status');
+            showToast('error', 'Failed to update premium status');
+          }
+        })();
+      } else {
+        // For monthly subscriptions, sync with the server
+        syncSubscriptionData();
+      }
       
       // Remove the query parameter from the URL
       const newUrl = window.location.pathname;
       window.history.replaceState({}, document.title, newUrl);
     }
-  }, []);
+  }, [currentUser, showToast]);
 
   return (
     <Card className="mb-6">
+      <div className="p-3">
         <h2 className="text-xl font-semibold mb-3 text-secondary-900 dark:text-white">
           {t.premium.subscriptionManagement}
         </h2>
@@ -175,7 +206,7 @@ const SubscriptionManagement: React.FC = () => {
                   {t.premium.active}
                 </span>
               ) : (
-                <span>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">
                   {t.premium.inactive}
                 </span>
               )}
@@ -221,7 +252,7 @@ const SubscriptionManagement: React.FC = () => {
             <div className="border-t border-secondary-200 dark:border-secondary-700 my-2"></div>
           )}
           
-          {/* Force update button */}
+          {/* Force update button for active subscription */}
           {subscriptionStatus.subscriptionId && subscriptionStatus.subscriptionStatus === 'active' && !subscriptionStatus.isPremium && (
             <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
               <p className="text-yellow-700 dark:text-yellow-300 mb-2">
@@ -230,6 +261,11 @@ const SubscriptionManagement: React.FC = () => {
               <Button
                 onClick={async () => {
                   try {
+                    if (!currentUser) {
+                      showToast('error', 'You must be logged in to update your premium status');
+                      return;
+                    }
+                    
                     const db = (await import('../../db')).db;
                     await db.users.update(currentUser.uid, {
                       isPremium: true,
@@ -253,6 +289,42 @@ const SubscriptionManagement: React.FC = () => {
             </div>
           )}
           
+          {/* Force update button for one-time payment */}
+          <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <p className="text-blue-700 dark:text-blue-300 mb-2">
+              If you've made a one-time payment but your subscription status hasn't updated, click the button below to manually update your status.
+            </p>
+            <Button
+              onClick={async () => {
+                try {
+                  if (!currentUser) {
+                    showToast('error', 'You must be logged in to update your premium status');
+                    return;
+                  }
+                  
+                  const db = (await import('../../db')).db;
+                  await db.users.update(currentUser.uid, {
+                    isPremium: true,
+                    subscriptionType: 'one-time',
+                    subscriptionStatus: 'active',
+                    subscriptionEndDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year from now
+                  });
+                  
+                  showToast('success', 'Premium status updated successfully');
+                  
+                  // Force a page reload to update the UI
+                  window.location.reload();
+                } catch (error: any) {
+                  setError(error.message || 'Failed to update premium status');
+                  showToast('error', 'Failed to update premium status');
+                }
+              }}
+              className="w-full mt-2"
+            >
+              Update to One-Time Premium
+            </Button>
+          </div>
+          
 
           <div className="pt-3 space-y-3">
             <p className="text-secondary-700 dark:text-secondary-300 mb-2">
@@ -260,26 +332,29 @@ const SubscriptionManagement: React.FC = () => {
             </p>
 
             {subscriptionStatus.isPremium && subscriptionStatus.subscriptionType === 'monthly' && (
-              <Button
-                variant="danger"
-                className="w-full"
-                onClick={handleCancelSubscription}
-                disabled={isLoading || !subscriptionStatus.subscriptionId}
-              >
-                {isLoading ? t.premium.cancelling : t.premium.cancelSubscription}
-              </Button>
+              <div className="space-y-4">
+                <Button
+                  variant="danger"
+                  className="w-full"
+                  onClick={handleCancelSubscription}
+                  disabled={isLoading || !subscriptionStatus.subscriptionId}
+                >
+                  {isLoading ? t.premium.cancelling : t.premium.cancelSubscription}
+                </Button>
+                
+                <Button
+                  className="w-full"
+                  onClick={() => window.location.href = '/pricing'}
+                >
+                  {t.premium.switchToOneTimePayment}
+                </Button>
+              </div>
             )}
-
-            {!subscriptionStatus.isPremium && (
-              <Button
-                className="w-full"
-                onClick={() => window.location.href = window.location.origin + '/pricing'}
-              >
-                {t.premium.upgradeToPremium}
-              </Button>
-            )}
+            
+            {/* Removed upgrade premium link from bottom of subscription status */}
           </div>
         </div>
+      </div>
     </Card>
   );
 };

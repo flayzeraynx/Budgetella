@@ -44,9 +44,13 @@ const FirebaseContext = createContext<FirebaseContextType>({
 
 export const useFirebase = () => useContext(FirebaseContext);
 
+// Import translation context
+import { useTranslation } from './TranslationContext';
+
 export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentUser } = useAuth();
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [settings, setSettings] = useState<Settings>({ currency: 'USD' });
@@ -108,8 +112,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         await db.settings.add(defaultSettings);
         setSettings(defaultSettings);
       }
-      
-      showToast('success', 'Data synchronized successfully');
+      showToast('success', t.settings.dataSyncSuccess);
       
       // Update state
       setTransactions(userTransactions);

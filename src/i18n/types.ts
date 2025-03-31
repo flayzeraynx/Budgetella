@@ -233,6 +233,7 @@ export interface SettingsTranslations {
   selectImportFormat: string;
   selectExportData: string;
   settingsSaved: string;
+  dataSyncSuccess: string;
   
   // CSV Export/Import
   exportAsJSON: string;
@@ -261,6 +262,7 @@ export interface PremiumTranslations {
   oneTime: string;
   monthlyLabel: string;
   alreadyHavePremium: string;
+  monthlyToOneTimeMessage: string;
   
   // Subscription management
   status: string;
@@ -278,6 +280,7 @@ export interface PremiumTranslations {
   subscriptionCancelled: string;
   errorCancellingSubscription: string;
   cancelling: string;
+  switchToOneTimePayment: string;
   
   // Free account limitations
   freeAccountLimitation: string;

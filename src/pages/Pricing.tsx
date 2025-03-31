@@ -97,8 +97,10 @@ const Pricing: React.FC = () => {
     }
   };
 
-  // Check if user already has premium access
+  // Check subscription status
   const isPremium = subscriptionStatus.isPremium;
+  const isOneTimeSubscription = subscriptionStatus.subscriptionType === 'one-time';
+  const isMonthlySubscription = subscriptionStatus.subscriptionType === 'monthly';
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
@@ -106,10 +108,35 @@ const Pricing: React.FC = () => {
         {t.premium.pricing}
       </h1>
 
-      {isPremium && (
+      {/* Redirect to dashboard if user already has one-time subscription */}
+      {isOneTimeSubscription && (
         <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-4 mb-8 text-center">
           <p className="text-primary-700 dark:text-primary-300">
             {t.premium.alreadyHavePremium}
+          </p>
+          <Button
+            className="mt-4"
+            onClick={() => navigate('/dashboard')}
+          >
+            Go to Dashboard
+          </Button>
+        </div>
+      )}
+      
+      {/* Show message for monthly subscribers */}
+      {isMonthlySubscription && !isOneTimeSubscription && (
+        <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-4 mb-8 text-center">
+          <p className="text-primary-700 dark:text-primary-300">
+            {t.premium.monthlyToOneTimeMessage}
+          </p>
+        </div>
+      )}
+      
+      {/* Show message for free users */}
+      {!isPremium && (
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-8 text-center">
+          <p className="text-yellow-700 dark:text-yellow-300">
+            Upgrade to premium to unlock all features and get unlimited access to your financial data.
           </p>
         </div>
       )}
@@ -132,13 +159,16 @@ const Pricing: React.FC = () => {
                 </div>
               ))}
             </div>
-            <Button
-              variant="outline"
-              className="w-full"
-              disabled={true}
-            >
-              {t.premium.currentPlan}
-            </Button>
+            {/* Only show the current plan button if the user doesn't have any subscription */}
+            {!isPremium && (
+              <Button
+                variant="outline"
+                className="w-full"
+                disabled={true}
+              >
+                {t.premium.currentPlan}
+              </Button>
+            )}
           </div>
         </Card>
 
@@ -165,9 +195,13 @@ const Pricing: React.FC = () => {
                 <Button
                   className="w-full"
                   onClick={handleOneTimePayment}
-                  disabled={isPremium || isProcessing}
+                  disabled={isOneTimeSubscription || isProcessing}
                 >
-                  {isPremium ? t.premium.currentPlan : t.premium.upgradeNow}
+                  {isOneTimeSubscription
+                    ? t.premium.currentPlan
+                    : isMonthlySubscription
+                      ? t.premium.switchToOneTimePayment
+                      : t.premium.upgradeNow}
                 </Button>
               </div>
               
@@ -186,7 +220,7 @@ const Pricing: React.FC = () => {
                   onClick={handleMonthlySubscription}
                   disabled={isPremium || isProcessing}
                 >
-                  {isPremium ? t.premium.currentPlan : t.premium.upgradeNow}
+                  {isMonthlySubscription ? t.premium.currentPlan : t.premium.upgradeNow}
                 </Button>
               </div>
             </div>

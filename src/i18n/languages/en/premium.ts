@@ -19,6 +19,7 @@ export const premium: PremiumTranslations = {
   oneTime: 'one-time',
   monthlyLabel: 'month',
   alreadyHavePremium: 'You already have premium access! Enjoy all the premium features.',
+  monthlyToOneTimeMessage: 'You currently have a monthly subscription. You can upgrade to a one-time payment for lifetime access.',
   
   // Subscription management
   status: 'Status',
@@ -36,6 +37,7 @@ export const premium: PremiumTranslations = {
   subscriptionCancelled: 'Your subscription has been cancelled successfully.',
   errorCancellingSubscription: 'There was an error cancelling your subscription. Please try again later.',
   cancelling: 'Cancelling...',
+  switchToOneTimePayment: 'Switch to One-time Payment',
   
   // Free account limitations
   freeAccountLimitation: 'Free Account Limitation',

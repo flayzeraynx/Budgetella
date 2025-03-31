@@ -20,6 +20,7 @@ export const premium: PremiumTranslations = {
   oneTime: 'tek seferlik',
   monthlyLabel: 'ay',
   alreadyHavePremium: 'Zaten premium erişiminiz var! Tüm premium özelliklerin keyfini çıkarın.',
+  monthlyToOneTimeMessage: 'Şu anda aylık aboneliğiniz var. Ömür boyu erişim için tek seferlik ödemeye yükseltebilirsiniz.',
   
   // Subscription management
   status: 'Durum',
@@ -37,6 +38,7 @@ export const premium: PremiumTranslations = {
   subscriptionCancelled: 'Aboneliğiniz başarıyla iptal edildi.',
   errorCancellingSubscription: 'Aboneliğinizi iptal ederken bir hata oluştu. Lütfen daha sonra tekrar deneyin.',
   cancelling: 'İptal ediliyor...',
+  switchToOneTimePayment: 'Tek Seferlik Ödemeye Geç',
   
   // Free account limitations
   freeAccountLimitation: 'Ücretsiz Hesap Sınırlaması',
@@ -53,7 +55,7 @@ export const premium: PremiumTranslations = {
   customCategoriesPremiumMessage: 'Özel kategoriler yalnızca premium kullanıcılar için kullanılabilir. Kendi kategorilerinizi oluşturmak, düzenlemek ve yönetmek için yükseltin.',
   unlockCustomCategories: 'Özel kategorileri açın',
   upgradeToPremium: 'Premium\'a yükseltin',
-  contactSupport: 'Sorular? Bize support@budgetella.com adresinden ulaşın',
+  contactSupport: 'Sorunuz mu var? Bize support@budgetella.com adresinden ulaşın',
   
   // Premium features list
   unlimitedTransactionHistory: 'Sınırsız işlem geçmişi',

@@ -20,6 +20,7 @@ export const premium: PremiumTranslations = {
   oneTime: 'einmalig',
   monthlyLabel: 'Monat',
   alreadyHavePremium: 'Sie haben bereits Premium-Zugang! Genießen Sie alle Premium-Funktionen.',
+  monthlyToOneTimeMessage: 'Sie haben derzeit ein monatliches Abonnement. Sie können auf eine einmalige Zahlung für lebenslangen Zugriff upgraden.',
   
   // Subscription management
   status: 'Status',
@@ -37,6 +38,7 @@ export const premium: PremiumTranslations = {
   subscriptionCancelled: 'Ihr Abonnement wurde erfolgreich gekündigt.',
   errorCancellingSubscription: 'Beim Kündigen Ihres Abonnements ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.',
   cancelling: 'Kündigung...',
+  switchToOneTimePayment: 'Zu einmaliger Zahlung wechseln',
   
   // Free account limitations
   freeAccountLimitation: 'Einschränkung des kostenlosen Kontos',

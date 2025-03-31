@@ -42,6 +42,7 @@ export const settings: SettingsTranslations = {
   selectImportFormat: 'Wählen Sie das Importformat',
   selectExportData: 'Wählen Sie die zu exportierenden Daten',
   settingsSaved: 'Einstellungen erfolgreich gespeichert',
+  dataSyncSuccess: 'Daten erfolgreich synchronisiert',
   
   // CSV Export/Import
   exportAsJSON: 'Als JSON exportieren',

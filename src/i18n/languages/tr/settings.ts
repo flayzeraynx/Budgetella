@@ -41,6 +41,7 @@ export const settings: SettingsTranslations = {
   selectImportFormat: 'İçe aktarma formatını seçin',
   selectExportData: 'Dışa aktarılacak verileri seçin',
   settingsSaved: 'Ayarlar başarıyla kaydedildi',
+  dataSyncSuccess: 'Veriler başarıyla senkronize edildi',
   
   // CSV Export/Import
   exportAsJSON: 'JSON Olarak Dışa Aktar',

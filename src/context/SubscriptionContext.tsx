@@ -112,19 +112,22 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
           const userRecord = await db.users.get(currentUser.uid);
           
           if (userRecord) {
-            // Determine subscription type based on subscription ID format
+            // Determine subscription type based on subscription ID format or the type from server
             let subscriptionType = data.subscription.type || 'none';
             
             // If we have a subscription ID that starts with 'sub_', it's a monthly subscription
             if (data.subscription.id && data.subscription.id.startsWith('sub_')) {
               subscriptionType = 'monthly';
+            } else if (data.subscription.type === 'one-time') {
+              subscriptionType = 'one-time';
             }
             
             // Make sure we're setting isPremium correctly
             const isPremium = data.subscription.isPremium === true ||
                              subscriptionType === 'one-time' ||
                              subscriptionType === 'monthly' ||
-                             (data.subscription.status === 'active' && data.subscription.id);
+                             (data.subscription.status === 'active' && data.subscription.id) ||
+                             (data.subscription.type === 'one-time');
             
             const updateData = {
               isPremium: isPremium,
@@ -220,7 +223,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
           body: JSON.stringify({
             userId: currentUser.uid,
             subscriptionType: 'one-time',
-            successUrl: window.location.origin + '/settings?payment=success',
+            successUrl: window.location.origin + '/settings?payment=success&type=one-time',
             cancelUrl: window.location.origin + '/pricing?payment=canceled',
           }),
       });
@@ -265,7 +268,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
           body: JSON.stringify({
             userId: currentUser.uid,
             subscriptionType: 'monthly',
-            successUrl: window.location.origin + '/settings?payment=success',
+            successUrl: window.location.origin + '/settings?payment=success&type=monthly',
             cancelUrl: window.location.origin + '/pricing?payment=canceled',
           }),
       });
