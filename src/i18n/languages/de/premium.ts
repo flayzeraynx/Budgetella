@@ -20,6 +20,7 @@ export const premium: PremiumTranslations = {
   recommended: 'Empfohlen',
   oneTime: 'einmalig',
   monthlyLabel: 'Monat',
+  alreadyHavePremium: 'Sie haben bereits Premium-Zugang! Genießen Sie alle Premium-Funktionen.',
   
   // Free account limitations
   freeAccountLimitation: 'Einschränkung des kostenlosen Kontos',

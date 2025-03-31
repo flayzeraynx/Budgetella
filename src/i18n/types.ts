@@ -259,6 +259,7 @@ export interface PremiumTranslations {
   recommended: string;
   oneTime: string;
   monthlyLabel: string;
+  alreadyHavePremium: string;
   
   // Free account limitations
   freeAccountLimitation: string;

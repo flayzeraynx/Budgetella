@@ -20,6 +20,7 @@ export const premium: PremiumTranslations = {
   recommended: 'Önerilen',
   oneTime: 'tek seferlik',
   monthlyLabel: 'ay',
+  alreadyHavePremium: 'Zaten premium erişiminiz var! Tüm premium özelliklerin keyfini çıkarın.',
   
   // Free account limitations
   freeAccountLimitation: 'Ücretsiz Hesap Sınırlaması',

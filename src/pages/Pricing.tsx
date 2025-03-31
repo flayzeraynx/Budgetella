@@ -20,23 +20,23 @@ const Pricing: React.FC = () => {
 
   // Free features list
   const freeFeatures = [
-    'Basic expense tracking',
-    'Limited transaction history (3 months)',
-    'Basic reports and charts',
-    'Default categories',
-    'Single device usage'
+    t.premium.basicExpenseTracking,
+    t.premium.limitedTransactionHistory,
+    t.premium.basicReportsAndCharts,
+    t.premium.defaultCategories,
+    t.premium.singleDeviceUsage
   ];
 
   // Premium features list
   const premiumFeatures = [
-    'Unlimited transaction history',
-    'Advanced analytics and reporting',
-    'Custom categories creation',
-    'Export to multiple formats (CSV, PDF, Excel)',
-    'Multi-device sync',
-    'Recurring transaction automation',
-    'Budget planning tools',
-    'Priority support'
+    t.premium.unlimitedTransactionHistory,
+    t.premium.advancedAnalytics,
+    t.premium.customCategoriesCreation,
+    t.premium.exportToMultipleFormats,
+    t.premium.multiDeviceSync,
+    t.premium.recurringTransactionAutomation,
+    t.premium.budgetPlanningTools,
+    t.premium.prioritySupport
   ];
 
   // Handle one-time payment
@@ -89,7 +89,7 @@ const Pricing: React.FC = () => {
       {isPremium && (
         <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-4 mb-8 text-center">
           <p className="text-primary-700 dark:text-primary-300">
-            You already have premium access! Enjoy all the premium features.
+            {t.premium.alreadyHavePremium}
           </p>
         </div>
       )}
@@ -185,7 +185,7 @@ const Pricing: React.FC = () => {
 
       <div className="mt-12 text-center text-secondary-500 dark:text-secondary-400">
         <p>
-          Questions? Contact us at support@budgetella.com
+          {t.premium.contactSupport}
         </p>
       </div>
     </div>
