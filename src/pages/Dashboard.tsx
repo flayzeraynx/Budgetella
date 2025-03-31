@@ -130,7 +130,7 @@ const Dashboard: React.FC = () => {
     <div className="space-y-6">
       {renderAuthWarning()}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <h1 className="text-2xl font-bold">{t.common.dashboard}</h1>
         <div className="flex items-center space-x-4">
           <div className="relative">
             <select
@@ -151,7 +151,7 @@ const Dashboard: React.FC = () => {
             leftIcon={<Plus className="w-4 h-4" />}
             className="md:hidden" // Only visible on mobile
           >
-            Add
+            {t.transactions.add}
           </Button>
         </div>
       </div>
