@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { PlusCircle, Filter, Clock, Calendar } from 'lucide-react';
+import { PlusCircle, Filter, Clock, Calendar, Lock } from 'lucide-react';
 import { db, Transaction } from '../db';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
@@ -11,18 +11,41 @@ import { useTranslation } from '../context/TranslationContext';
 import { useToast } from '../context/ToastContext';
 import { useFirebase } from '../context/FirebaseContext';
 import { useAuth } from '../context/AuthContext';
+import { useSubscription } from '../context/SubscriptionContext';
+import PremiumFeatureGate from '../components/subscription/PremiumFeatureGate';
 
 const Transactions: React.FC = () => {
   const { t } = useTranslation();
   const { showToast } = useToast();
   const { currentUser } = useAuth();
+  const { checkIfPremium } = useSubscription();
   const { addTransaction, updateTransaction, deleteTransaction } = useFirebase();
   const [isAddingTransaction, setIsAddingTransaction] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState<number | string | null>(null);
 
-  const transactions = useLiveQuery(() => db.transactions.toArray()) || [];
+  // Check if user has premium access
+  const isPremium = checkIfPremium();
+
+  // Get all transactions
+  const allTransactions = useLiveQuery(() => db.transactions.toArray()) || [];
+  
+  // For free users, limit to last 3 months
+  const transactions = useMemo(() => {
+    if (isPremium) {
+      return allTransactions;
+    } else {
+      // Calculate date 3 months ago
+      const threeMonthsAgo = new Date();
+      threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+      
+      // Filter transactions to only show those from the last 3 months
+      return allTransactions.filter(transaction => 
+        new Date(transaction.date) >= threeMonthsAgo
+      );
+    }
+  }, [allTransactions, isPremium]);
   
   // Calculate totals excluding pending and planned transactions
   const completedTransactions = useMemo(() => 
@@ -109,14 +132,55 @@ const Transactions: React.FC = () => {
         </Button>
       </div>
 
+      {/* Premium notice for free users */}
+      {!isPremium && allTransactions.length > transactions.length && (
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
+          <div className="flex items-start">
+            <Lock className="w-5 h-5 text-yellow-500 dark:text-yellow-400 mr-3 mt-0.5" />
+            <div>
+              <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                Free Account Limitation
+              </h3>
+              <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-300">
+                Free accounts can view up to 3 months of transaction history. 
+                You have {allTransactions.length - transactions.length} older transactions that are not displayed.
+              </p>
+              <div className="mt-3">
+                <Button
+                  onClick={() => window.location.href = '/pricing'}
+                  size="sm"
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                >
+                  Upgrade to Premium
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Card>
         <div className="p-4">
+          {/* Show current transactions (limited to 3 months for free users) */}
           <TransactionList 
             transactions={transactions}
             onEdit={setEditingTransaction}
             onDelete={handleDeleteTransaction}
             onAdd={() => setIsAddingTransaction(true)}
           />
+          
+          {/* Show older transactions for premium users */}
+          {isPremium && allTransactions.length > 0 && (
+            <div className="mt-8 pt-6 border-t border-secondary-200 dark:border-secondary-700">
+              <h3 className="text-lg font-medium mb-4 flex items-center">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-300 mr-2">
+                  Premium
+                </span>
+                Full Transaction History
+              </h3>
+              {/* Additional premium features for transaction history could go here */}
+            </div>
+          )}
         </div>
       </Card>
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Download, Upload, FileSpreadsheet } from 'lucide-react';
+import { Plus, Edit2, Trash2, Download, Upload, FileSpreadsheet, Lock } from 'lucide-react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Select from '../ui/Select';
@@ -8,9 +8,12 @@ import { Category } from '../../db';
 import { useFirebase } from '../../context/FirebaseContext';
 import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from '../../context/TranslationContext';
+import { useSubscription } from '../../context/SubscriptionContext';
+import PremiumFeatureGate from '../subscription/PremiumFeatureGate';
 
 const CategoryManager: React.FC = () => {
   const { t } = useTranslation();
+  const { checkIfPremium } = useSubscription();
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [name, setName] = useState('');
@@ -26,22 +29,25 @@ const CategoryManager: React.FC = () => {
   const { categories, addCategory, updateCategory, deleteCategory } = useFirebase();
   const { currentUser } = useAuth();
   
+  // Check if user has premium access
+  const isPremium = checkIfPremium();
+  
   // Default categories when user is not logged in - using translations
   const defaultCategories: Category[] = [
     // Income categories
-    { id: 1, name: t.salary || 'Salary', type: 'income', color: '#4CAF50' },
-    { id: 2, name: t.freelance || 'Freelance', type: 'income', color: '#8BC34A' },
-    { id: 3, name: t.investments || 'Investments', type: 'income', color: '#009688' },
-    { id: 4, name: t.gifts || 'Gifts', type: 'income', color: '#00BCD4' },
+    { id: 1, name: t.categories.salary || 'Salary', type: 'income', color: '#4CAF50' },
+    { id: 2, name: t.categories.freelance || 'Freelance', type: 'income', color: '#8BC34A' },
+    { id: 3, name: t.categories.investments || 'Investments', type: 'income', color: '#009688' },
+    { id: 4, name: t.categories.gifts || 'Gifts', type: 'income', color: '#00BCD4' },
     
     // Expense categories
-    { id: 5, name: t.food || 'Food', type: 'expense', color: '#F44336' },
-    { id: 6, name: t.housing || 'Housing', type: 'expense', color: '#E91E63' },
-    { id: 7, name: t.transportation || 'Transportation', type: 'expense', color: '#9C27B0' },
-    { id: 8, name: t.entertainment || 'Entertainment', type: 'expense', color: '#673AB7' },
-    { id: 9, name: t.healthcare || 'Healthcare', type: 'expense', color: '#3F51B5' },
-    { id: 10, name: t.shopping || 'Shopping', type: 'expense', color: '#2196F3' },
-    { id: 11, name: t.utilities || 'Utilities', type: 'expense', color: '#FF9800' },
+    { id: 5, name: t.categories.food || 'Food', type: 'expense', color: '#F44336' },
+    { id: 6, name: t.categories.housing || 'Housing', type: 'expense', color: '#E91E63' },
+    { id: 7, name: t.categories.transportation || 'Transportation', type: 'expense', color: '#9C27B0' },
+    { id: 8, name: t.categories.entertainment || 'Entertainment', type: 'expense', color: '#673AB7' },
+    { id: 9, name: t.categories.healthcare || 'Healthcare', type: 'expense', color: '#3F51B5' },
+    { id: 10, name: t.categories.shopping || 'Shopping', type: 'expense', color: '#2196F3' },
+    { id: 11, name: t.categories.utilities || 'Utilities', type: 'expense', color: '#FF9800' },
     { id: 12, name: 'Other', type: 'expense', color: '#795548' }
   ];
   
@@ -61,6 +67,12 @@ const CategoryManager: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check if user has premium access
+    if (!isPremium) {
+      setError('Premium subscription required to add or edit categories');
+      return;
+    }
     
     if (!name.trim()) {
       setError('Category name is required');
@@ -93,6 +105,12 @@ const CategoryManager: React.FC = () => {
   };
 
   const handleEdit = (category: Category) => {
+    // Check if user has premium access
+    if (!isPremium) {
+      alert('Premium subscription required to edit categories');
+      return;
+    }
+    
     setName(category.name);
     setType(category.type);
     setColor(category.color);
@@ -101,6 +119,12 @@ const CategoryManager: React.FC = () => {
   };
 
   const handleDelete = async (id: number | string) => {
+    // Check if user has premium access
+    if (!isPremium) {
+      alert('Premium subscription required to delete categories');
+      return;
+    }
+    
     const numericId = typeof id === 'string' ? parseInt(id) : id;
     try {
       // Check if the category is used in transactions
@@ -444,7 +468,7 @@ const CategoryManager: React.FC = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t.categories}</CardTitle>
+        <CardTitle>{t.categories.categories}</CardTitle>
       </CardHeader>
       <CardContent>
         {renderImportOptionsDialog()}
@@ -461,12 +485,38 @@ const CategoryManager: React.FC = () => {
           </div>
         )}
         
+        {/* Premium notice for free users */}
+        {currentUser && !isPremium && (
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
+            <div className="flex items-start">
+              <Lock className="w-5 h-5 text-yellow-500 dark:text-yellow-400 mr-3 mt-0.5" />
+              <div>
+                <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                  Premium Feature
+                </h3>
+                <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-300">
+                  Custom categories are available for premium users only. Upgrade to create, edit, and manage your own categories.
+                </p>
+                <div className="mt-3">
+                  <Button
+                    onClick={() => window.location.href = '/pricing'}
+                    size="sm"
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                  >
+                    Upgrade to Premium
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {currentUser && (
           <>
             {isAdding ? (
               <form onSubmit={handleSubmit} className="space-y-4 mb-6">
                 <Input
-                  label={t.categoryName}
+                  label={t.categories.categoryName}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter category name"
@@ -477,7 +527,7 @@ const CategoryManager: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
-                      {t.type}
+                      {t.transactions.type}
                     </label>
                     <div className="relative">
                       <select
@@ -488,8 +538,8 @@ const CategoryManager: React.FC = () => {
                           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 
                           px-4 py-2 pr-10 text-sm"
                       >
-                        <option value="income">{t.incomeType}</option>
-                        <option value="expense">{t.expenseType}</option>
+                        <option value="income">{t.transactions.incomeType}</option>
+                        <option value="expense">{t.transactions.expenseType}</option>
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-secondary-500">
                         <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -501,7 +551,7 @@ const CategoryManager: React.FC = () => {
                   
                   <div>
                     <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
-                      {t.categoryColor}
+                      {t.categories.categoryColor}
                     </label>
                     <input
                       type="color"
@@ -514,21 +564,35 @@ const CategoryManager: React.FC = () => {
                 
                 <div className="flex justify-end space-x-3">
                   <Button type="button" variant="outline" onClick={resetForm}>
-                    {t.cancel}
+                    {t.transactions.cancel}
                   </Button>
                   <Button type="submit">
-                    {editingId ? t.update : t.add} {t.category}
+                    {editingId ? t.transactions.update : t.transactions.add} {t.categories.categories}
                   </Button>
                 </div>
               </form>
             ) : (
-              <Button 
-                onClick={() => setIsAdding(true)} 
-                className="mb-6"
-                leftIcon={<Plus className="w-4 h-4" />}
+              <PremiumFeatureGate
+                fallback={
+                  <div className="mb-6">
+                    <Button 
+                      onClick={() => window.location.href = '/pricing'}
+                      className="bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-800"
+                      leftIcon={<Lock className="w-4 h-4" />}
+                    >
+                      Unlock Custom Categories
+                    </Button>
+                  </div>
+                }
               >
-                {t.addCategory}
-              </Button>
+                <Button 
+                  onClick={() => setIsAdding(true)} 
+                  className="mb-6"
+                  leftIcon={<Plus className="w-4 h-4" />}
+                >
+                  {t.categories.addCategory}
+                </Button>
+              </PremiumFeatureGate>
             )}
           </>
         )}
@@ -536,16 +600,16 @@ const CategoryManager: React.FC = () => {
         {!currentUser && (
           <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md border border-blue-200 dark:border-blue-800 mb-6">
             <p className="text-sm text-blue-700 dark:text-blue-300">
-              {t.signInToAddCategories}
+              {t.auth.signInToAddCategories}
             </p>
           </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h3 className="text-lg font-medium mb-3 text-green-600 dark:text-green-400">{t.incomeType} {t.categories}</h3>
+            <h3 className="text-lg font-medium mb-3 text-green-600 dark:text-green-400">{t.transactions.incomeType} {t.categories.categories}</h3>
             {incomeCategories.length === 0 ? (
-              <p className="text-secondary-500 dark:text-secondary-400">{t.noIncomeCategories || 'No income categories yet.'}</p>
+              <p className="text-secondary-500 dark:text-secondary-400">{t.categories.noIncomeCategories || 'No income categories yet.'}</p>
             ) : (
               <div className="grid grid-cols-1 gap-3">
                 {incomeCategories.map((category) => (
@@ -561,24 +625,40 @@ const CategoryManager: React.FC = () => {
                       <span>{category.name}</span>
                     </div>
                     {currentUser && (
-                      <div className="flex space-x-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(category)}
-                          aria-label={`Edit ${category.name}`}
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => category.id && handleDelete(category.id)}
-                          aria-label={`Delete ${category.name}`}
-                        >
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                        </Button>
-                      </div>
+                      <PremiumFeatureGate
+                        fallback={
+                          <div className="flex space-x-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              disabled
+                              aria-label={`Premium feature`}
+                              title="Premium feature"
+                            >
+                              <Lock className="w-4 h-4 text-secondary-400" />
+                            </Button>
+                          </div>
+                        }
+                      >
+                        <div className="flex space-x-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(category)}
+                            aria-label={`Edit ${category.name}`}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => category.id && handleDelete(category.id)}
+                            aria-label={`Delete ${category.name}`}
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </PremiumFeatureGate>
                     )}
                   </div>
                 ))}
@@ -587,9 +667,9 @@ const CategoryManager: React.FC = () => {
           </div>
           
           <div>
-            <h3 className="text-lg font-medium mb-3 text-red-600 dark:text-red-400">{t.expenseType} {t.categories}</h3>
+            <h3 className="text-lg font-medium mb-3 text-red-600 dark:text-red-400">{t.transactions.expenseType} {t.categories.categories}</h3>
             {expenseCategories.length === 0 ? (
-              <p className="text-secondary-500 dark:text-secondary-400">{t.noExpenseCategories || 'No expense categories yet.'}</p>
+              <p className="text-secondary-500 dark:text-secondary-400">{t.categories.noExpenseCategories || 'No expense categories yet.'}</p>
             ) : (
               <div className="grid grid-cols-1 gap-3">
                 {expenseCategories.map((category) => (
@@ -605,24 +685,40 @@ const CategoryManager: React.FC = () => {
                       <span>{category.name}</span>
                     </div>
                     {currentUser && (
-                      <div className="flex space-x-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(category)}
-                          aria-label={`Edit ${category.name}`}
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => category.id && handleDelete(category.id)}
-                          aria-label={`Delete ${category.name}`}
-                        >
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                        </Button>
-                      </div>
+                      <PremiumFeatureGate
+                        fallback={
+                          <div className="flex space-x-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              disabled
+                              aria-label={`Premium feature`}
+                              title="Premium feature"
+                            >
+                              <Lock className="w-4 h-4 text-secondary-400" />
+                            </Button>
+                          </div>
+                        }
+                      >
+                        <div className="flex space-x-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(category)}
+                            aria-label={`Edit ${category.name}`}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => category.id && handleDelete(category.id)}
+                            aria-label={`Delete ${category.name}`}
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </PremiumFeatureGate>
                     )}
                   </div>
                 ))}

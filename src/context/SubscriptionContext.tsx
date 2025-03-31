@@ -48,16 +48,25 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     subscriptionType: 'none',
   });
 
-  // Fetch user subscription data from database
+  // Fetch user subscription data from database (read-only)
   const userData = useLiveQuery(
     async () => {
       if (!currentUser) return undefined;
+      return await db.users.get(currentUser.uid);
+    },
+    [currentUser]
+  );
+  
+  // Handle user creation separately from the liveQuery
+  useEffect(() => {
+    const createUserIfNeeded = async () => {
+      if (!currentUser) return;
       
       // Check if user exists in database
       const user = await db.users.get(currentUser.uid);
       
       // If user doesn't exist, create a new user record
-      if (!user && currentUser) {
+      if (!user) {
         const isAdmin = currentUser.email === 'flayzeraynx@gmail.com';
         const newUser: User = {
           uid: currentUser.uid,
@@ -65,14 +74,17 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
           subscriptionType: 'none',
           isAdmin
         };
-        await db.users.add(newUser);
-        return newUser;
+        try {
+          await db.users.add(newUser);
+          console.log('New user record created');
+        } catch (error) {
+          console.error('Error creating user record:', error);
+        }
       }
-      
-      return user;
-    },
-    [currentUser]
-  );
+    };
+    
+    createUserIfNeeded();
+  }, [currentUser]);
 
   // Update subscription status when user data changes
   useEffect(() => {

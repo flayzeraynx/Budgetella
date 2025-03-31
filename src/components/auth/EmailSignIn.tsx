@@ -39,17 +39,17 @@ const EmailSignIn: React.FC<EmailSignInProps> = ({
   
   const validateForm = () => {
     if (!email.trim()) {
-      setError(t.email + ' ' + t.required);
+      setError(t.feedback.email + ' ' + t.common.required);
       return false;
     }
     
     if (!/\S+@\S+\.\S+/.test(email)) {
-      setError(t.invalidEmail);
+      setError(t.auth.invalidEmail);
       return false;
     }
     
     if (!password) {
-      setError(t.password + ' ' + t.required);
+      setError(t.auth.password + ' ' + t.common.required);
       return false;
     }
     
@@ -88,7 +88,7 @@ const EmailSignIn: React.FC<EmailSignInProps> = ({
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
-          label={t.email}
+          label={t.feedback.email}
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -97,7 +97,7 @@ const EmailSignIn: React.FC<EmailSignInProps> = ({
         />
         
         <Input
-          label={t.password}
+          label={t.auth.password}
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -111,7 +111,7 @@ const EmailSignIn: React.FC<EmailSignInProps> = ({
             onClick={onForgotPasswordClick}
             className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
           >
-            {t.forgotPassword}?
+            {t.auth.forgotPassword}?
           </button>
         </div>
         
@@ -122,7 +122,7 @@ const EmailSignIn: React.FC<EmailSignInProps> = ({
             isLoading={isLoading}
             variant="primary"
           >
-            {t.signIn}
+            {t.auth.signIn}
           </Button>
         </div>
         
@@ -133,14 +133,14 @@ const EmailSignIn: React.FC<EmailSignInProps> = ({
               onClick={onMagicLinkClick}
               className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
             >
-              {t.signInWithMagicLink}
+              {t.auth.signInWithMagicLink}
             </button>
           </div>
         )}
         
         <div className="relative flex items-center py-2">
           <div className="flex-grow border-t border-secondary-300 dark:border-secondary-700"></div>
-          <span className="flex-shrink mx-3 text-secondary-500 dark:text-secondary-400 text-sm">{t.or}</span>
+          <span className="flex-shrink mx-3 text-secondary-500 dark:text-secondary-400 text-sm">{t.common.or}</span>
           <div className="flex-grow border-t border-secondary-300 dark:border-secondary-700"></div>
         </div>
         
@@ -150,18 +150,18 @@ const EmailSignIn: React.FC<EmailSignInProps> = ({
           variant="secondary"
           leftIcon={<LogIn className="w-4 h-4" />}
         >
-          {t.signInWithGoogle}
+          {t.auth.signInWithGoogle}
         </Button>
         
         <div className="text-center mt-4">
           <p className="text-sm text-secondary-600 dark:text-secondary-400">
-            {t.noAccount}{' '}
+            {t.auth.noAccount}{' '}
             <button
               type="button"
               onClick={onSignUpClick}
               className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
             >
-              {t.createOne}!
+              {t.auth.createOne}!
             </button>
           </p>
         </div>

@@ -4,6 +4,7 @@ import Button from '../ui/Button';
 import { useTranslation } from '../../context/TranslationContext';
 import { db, updateSettings } from '../../db';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { Language } from '../../i18n';
 
 interface LanguageDialogProps {
   isOpen: boolean;
@@ -11,19 +12,18 @@ interface LanguageDialogProps {
 }
 
 const LanguageDialog: React.FC<LanguageDialogProps> = ({ isOpen, onClose }) => {
-  const { t } = useTranslation();
-  const settings = useLiveQuery(() => db.settings.toArray()) || [{ currency: 'TRY' }];
-  const currentCurrency = settings[0]?.currency || 'TRY';
+  const { t, currentLanguage } = useTranslation();
+  const settings = useLiveQuery(() => db.settings.toArray()) || [{ currency: 'TRY', language: 'tr' }];
   
   const languages = [
-    { code: 'TR', name: 'Türkçe', currency: 'TRY', flag: '🇹🇷' },
-    { code: 'EN', name: 'English', currency: 'USD', flag: '🇺🇸' },
-    { code: 'DE', name: 'Deutsch', currency: 'EUR', flag: '🇩🇪' }
+    { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
+    { code: 'en', name: 'English', flag: '🇺🇸' },
+    { code: 'de', name: 'Deutsch', flag: '🇩🇪' }
   ];
 
-  const handleLanguageSelect = async (currency: string) => {
+  const handleLanguageSelect = async (language: Language) => {
     try {
-      await updateSettings({ currency });
+      await updateSettings({ language });
       onClose();
     } catch (error) {
       console.error('Error updating language:', error);
@@ -36,7 +36,7 @@ const LanguageDialog: React.FC<LanguageDialogProps> = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg max-w-md w-full">
         <div className="flex justify-between items-center p-4 border-b border-secondary-200 dark:border-secondary-700">
-          <h3 className="text-lg font-medium">{t.selectLanguage}</h3>
+          <h3 className="text-lg font-medium">{t.common.selectLanguage}</h3>
           <Button
             variant="ghost"
             size="sm"
@@ -49,21 +49,21 @@ const LanguageDialog: React.FC<LanguageDialogProps> = ({ isOpen, onClose }) => {
         
         <div className="p-4">
           <div className="space-y-2">
-            {languages.map((language) => (
+            {languages.map((lang) => (
               <button
-                key={language.code}
-                onClick={() => handleLanguageSelect(language.currency)}
+                key={lang.code}
+                onClick={() => handleLanguageSelect(lang.code as Language)}
                 className={`flex items-center w-full p-3 rounded-md transition-colors ${
-                  currentCurrency === language.currency
+                  currentLanguage === lang.code
                     ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
                     : 'hover:bg-secondary-100 dark:hover:bg-secondary-700'
                 }`}
               >
-                <span className="text-2xl mr-3">{language.flag}</span>
+                <span className="text-2xl mr-3">{lang.flag}</span>
                 <div className="flex flex-col items-start">
-                  <span className="font-medium">{language.name}</span>
+                  <span className="font-medium">{lang.name}</span>
                   <span className="text-xs text-secondary-500 dark:text-secondary-400">
-                    {language.code}
+                    {lang.code}
                   </span>
                 </div>
               </button>

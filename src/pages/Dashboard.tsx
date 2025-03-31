@@ -105,20 +105,20 @@ const Dashboard: React.FC = () => {
       return (
         <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-md border border-yellow-200 dark:border-yellow-800 mb-6">
           <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">
-            {t.notSignedIn}
+            {t.auth.notSignedIn}
           </h3>
           <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-3">
-            {t.localDataWarning}
+            {t.auth.localDataWarning}
           </p>
           <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-3">
-            {t.signInToSync}
+            {t.auth.signInToSync}
           </p>
           <Button
             onClick={() => setIsAuthDialogOpen(true)}
             size="sm"
             leftIcon={<LogIn className="w-4 h-4" />}
           >
-            {t.signInToBudgetella}
+            {t.auth.signInToBudgetella}
           </Button>
         </div>
       );
@@ -161,7 +161,7 @@ const Dashboard: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center text-green-600 dark:text-green-400">
               <ArrowUpRight className="w-5 h-5 mr-2" />
-              {t.income} ({selectedYear})
+              {t.dashboard.income} ({selectedYear})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -175,7 +175,7 @@ const Dashboard: React.FC = () => {
               )}
             </div>
             <p className="text-secondary-500 dark:text-secondary-400 mt-2">
-              {t.totalMoneyIn || 'Total money in'}
+              {t.dashboard.totalMoneyIn}
             </p>
           </CardContent>
         </Card>
@@ -184,7 +184,7 @@ const Dashboard: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center text-red-600 dark:text-red-400">
               <ArrowDownRight className="w-5 h-5 mr-2" />
-              {t.expense} ({selectedYear})
+              {t.dashboard.expense} ({selectedYear})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -198,7 +198,7 @@ const Dashboard: React.FC = () => {
               )}
             </div>
             <p className="text-secondary-500 dark:text-secondary-400 mt-2">
-              {t.totalMoneyOut || 'Total money out'}
+              {t.dashboard.totalMoneyOut || 'Total money out'}
             </p>
           </CardContent>
         </Card>
@@ -212,7 +212,7 @@ const Dashboard: React.FC = () => {
             onDelete={handleDeleteTransaction}
             onAdd={() => setIsAddingTransaction(true)}
             selectedYear={selectedYear}
-            onYearChange={setSelectedYear}
+            onYearChange={(year) => setSelectedYear(Number(year))}
           />
         </div>
       </Card>
@@ -238,7 +238,7 @@ const Dashboard: React.FC = () => {
           <Dialog.Panel className="mx-auto max-w-md w-full rounded-lg bg-white dark:bg-secondary-800 p-6 shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <Dialog.Title className="text-lg font-medium text-secondary-900 dark:text-white">
-                {editingTransaction ? t.editTransaction : t.addTransaction}
+                {editingTransaction ? t.transactions.editTransaction : t.transactions.addTransaction}
               </Dialog.Title>
               <button
                 onClick={() => {
@@ -278,12 +278,12 @@ const Dashboard: React.FC = () => {
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Dialog.Panel className="mx-auto max-w-sm rounded-lg bg-white dark:bg-secondary-800 p-6 shadow-xl">
             <Dialog.Title className="text-lg font-medium text-secondary-900 dark:text-white">
-              {t.confirmDeletion}
+              {t.transactions.confirmDeletion}
             </Dialog.Title>
             
             <div className="mt-2">
               <p className="text-secondary-600 dark:text-secondary-300">
-                {t.deleteConfirmMessage}
+                {t.transactions.deleteConfirmMessage}
               </p>
             </div>
             
@@ -292,13 +292,13 @@ const Dashboard: React.FC = () => {
                 variant="secondary" 
                 onClick={() => setIsDeleteDialogOpen(false)}
               >
-                {t.cancel}
+                {t.transactions.cancel}
               </Button>
               <Button 
                 variant="danger" 
                 onClick={confirmDelete}
               >
-                {t.delete}
+                {t.transactions.delete}
               </Button>
             </div>
           </Dialog.Panel>

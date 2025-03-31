@@ -35,6 +35,7 @@ export interface SavingsTip {
 export interface Settings {
   id?: number;
   currency: string;
+  language?: string;
 }
 
 export interface User {
@@ -174,25 +175,25 @@ export async function initializeDefaultCategories() {
   if (categoryCount === 0) {
     // Get current settings to determine language
     const settings = await db.settings.toArray();
-    const currency = settings.length > 0 ? settings[0].currency : 'TRY';
+    const language = settings.length > 0 ? (settings[0].language || 'tr') : 'tr';
     
-    // Get translations based on currency
-    const t = getTranslations(currency);
+    // Get translations based on language
+    const t = getTranslations(language);
     
     const defaultCategories: Omit<Category, 'id'>[] = [
-      { name: t.salary, type: 'income', color: '#10b981' },
-      { name: t.freelance, type: 'income', color: '#3b82f6' },
-      { name: t.investments, type: 'income', color: '#6366f1' },
-      { name: t.gifts, type: 'income', color: '#ec4899' },
+      { name: t.categories.salary, type: 'income', color: '#10b981' },
+      { name: t.categories.freelance, type: 'income', color: '#3b82f6' },
+      { name: t.categories.investments, type: 'income', color: '#6366f1' },
+      { name: t.categories.gifts, type: 'income', color: '#ec4899' },
       
-      { name: t.food, type: 'expense', color: '#f59e0b' },
-      { name: t.housing, type: 'expense', color: '#ef4444' },
-      { name: t.transportation, type: 'expense', color: '#8b5cf6' },
-      { name: t.entertainment, type: 'expense', color: '#06b6d4' },
-      { name: t.shopping, type: 'expense', color: '#f43f5e' },
-      { name: t.utilities, type: 'expense', color: '#84cc16' },
-      { name: t.healthcare, type: 'expense', color: '#14b8a6' },
-      { name: t.education, type: 'expense', color: '#6366f1' }
+      { name: t.categories.food, type: 'expense', color: '#f59e0b' },
+      { name: t.categories.housing, type: 'expense', color: '#ef4444' },
+      { name: t.categories.transportation, type: 'expense', color: '#8b5cf6' },
+      { name: t.categories.entertainment, type: 'expense', color: '#06b6d4' },
+      { name: t.categories.shopping, type: 'expense', color: '#f43f5e' },
+      { name: t.categories.utilities, type: 'expense', color: '#84cc16' },
+      { name: t.categories.healthcare, type: 'expense', color: '#14b8a6' },
+      { name: t.categories.education, type: 'expense', color: '#6366f1' }
     ];
     
     await db.categories.bulkAdd(defaultCategories);
@@ -203,54 +204,54 @@ export async function initializeDefaultCategories() {
 export async function updateDefaultCategoryNames() {
   // Get current settings to determine language
   const settings = await db.settings.toArray();
-  const currency = settings.length > 0 ? settings[0].currency : 'TRY';
+  const language = settings.length > 0 ? (settings[0].language || 'tr') : 'tr';
   
-  // Get translations based on currency
-  const t = getTranslations(currency);
+  // Get translations based on language
+  const t = getTranslations(language);
   
   // Define default category names mapping
   const defaultCategoryMap: Record<string, string> = {
     // Turkish default names (original)
-    'Maaş': t.salary,
-    'Serbest Çalışma': t.freelance,
-    'Yatırımlar': t.investments,
-    'Hediyeler': t.gifts,
-    'Yiyecek': t.food,
-    'Konut': t.housing,
-    'Ulaşım': t.transportation,
-    'Eğlence': t.entertainment,
-    'Alışveriş': t.shopping,
-    'Faturalar': t.utilities,
-    'Sağlık': t.healthcare,
-    'Eğitim': t.education,
+    'Maaş': t.categories.salary,
+    'Serbest Çalışma': t.categories.freelance,
+    'Yatırımlar': t.categories.investments,
+    'Hediyeler': t.categories.gifts,
+    'Yiyecek': t.categories.food,
+    'Konut': t.categories.housing,
+    'Ulaşım': t.categories.transportation,
+    'Eğlence': t.categories.entertainment,
+    'Alışveriş': t.categories.shopping,
+    'Faturalar': t.categories.utilities,
+    'Sağlık': t.categories.healthcare,
+    'Eğitim': t.categories.education,
     
     // English default names
-    'Salary': t.salary,
-    'Freelance': t.freelance,
-    'Investments': t.investments,
-    'Gifts': t.gifts,
-    'Food': t.food,
-    'Housing': t.housing,
-    'Transportation': t.transportation,
-    'Entertainment': t.entertainment,
-    'Shopping': t.shopping,
-    'Utilities': t.utilities,
-    'Healthcare': t.healthcare,
-    'Education': t.education,
+    'Salary': t.categories.salary,
+    'Freelance': t.categories.freelance,
+    'Investments': t.categories.investments,
+    'Gifts': t.categories.gifts,
+    'Food': t.categories.food,
+    'Housing': t.categories.housing,
+    'Transportation': t.categories.transportation,
+    'Entertainment': t.categories.entertainment,
+    'Shopping': t.categories.shopping,
+    'Utilities': t.categories.utilities,
+    'Healthcare': t.categories.healthcare,
+    'Education': t.categories.education,
     
     // German default names
-    'Gehalt': t.salary,
-    'Freiberuflich': t.freelance,
-    'Investitionen': t.investments,
-    'Geschenke': t.gifts,
-    'Lebensmittel': t.food,
-    'Wohnen': t.housing,
-    'Transport': t.transportation,
-    'Unterhaltung': t.entertainment,
-    'Einkaufen': t.shopping,
-    'Nebenkosten': t.utilities,
-    'Gesundheitswesen': t.healthcare,
-    'Bildung': t.education
+    'Gehalt': t.categories.salary,
+    'Freiberuflich': t.categories.freelance,
+    'Investitionen': t.categories.investments,
+    'Geschenke': t.categories.gifts,
+    'Lebensmittel': t.categories.food,
+    'Wohnen': t.categories.housing,
+    'Transport': t.categories.transportation,
+    'Unterhaltung': t.categories.entertainment,
+    'Einkaufen': t.categories.shopping,
+    'Nebenkosten': t.categories.utilities,
+    'Gesundheitswesen': t.categories.healthcare,
+    'Bildung': t.categories.education
   };
   
   // Get all categories
@@ -272,7 +273,8 @@ export async function initializeDefaultSettings() {
   
   if (settingsCount === 0) {
     await db.settings.add({
-      currency: 'TRY'
+      currency: 'TRY',
+      language: 'tr'
     });
   }
 }
@@ -280,7 +282,7 @@ export async function initializeDefaultSettings() {
 // Get current settings
 export async function getCurrentSettings(): Promise<Settings> {
   const settings = await db.settings.toArray();
-  return settings[0] || { currency: 'TRY' };
+  return settings[0] || { currency: 'TRY', language: 'tr' };
 }
 
 // Update settings
@@ -294,10 +296,12 @@ export async function updateSettings(settings: Partial<Settings>): Promise<void>
 }
 
 // Currency formatter
-export function formatCurrency(amount: number, currency: string = 'TRY', hideAmount: boolean = false): string {
+export function formatCurrency(amount: number | string, currency: string = 'TRY', hideAmount: boolean = false): string {
   if (hideAmount) {
     return '******';
   }
+  
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
   
   const currencyMap: Record<string, { locale: string, symbol: string }> = {
     'USD': { locale: 'en-US', symbol: '$' },
@@ -313,5 +317,5 @@ export function formatCurrency(amount: number, currency: string = 'TRY', hideAmo
     currency: currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
-  }).format(amount);
+  }).format(numAmount);
 }

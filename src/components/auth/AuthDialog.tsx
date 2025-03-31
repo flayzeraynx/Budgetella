@@ -94,11 +94,11 @@ const AuthDialog: React.FC<AuthDialogProps> = ({
       <div className="bg-white dark:bg-secondary-800 rounded-lg max-w-md w-full">
         <div className="flex justify-between items-center px-4 py-3 border-b border-secondary-200 dark:border-secondary-700">
           <h2 className="text-lg font-medium">
-            {currentUser ? t.userProfile : (
-              currentView === 'signin' ? t.signInToBudgetella :
-              currentView === 'signup' ? t.createAccount :
-              currentView === 'forgot-password' ? t.resetPassword :
-              currentView === 'magic-link' ? t.magicLinkSignIn : t.signInToBudgetella
+            {currentUser ? t.auth.userProfile : (
+              currentView === 'signin' ? t.auth.signInToBudgetella :
+              currentView === 'signup' ? t.auth.createAccount :
+              currentView === 'forgot-password' ? t.auth.resetPassword :
+              currentView === 'magic-link' ? t.auth.magicLinkSignIn : t.auth.signInToBudgetella
             )}
           </h2>
           <button

@@ -1,19 +1,15 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Edit2, Trash2, ChevronDown, ChevronUp, Plus, Search, Repeat, Clock, Calendar, Lock } from 'lucide-react';
+import { format, parse, startOfMonth, endOfMonth, getMonth, getYear, subMonths } from 'date-fns';
+import { Edit2, Trash2, ChevronDown, ChevronUp, Filter, Plus, Search, Repeat, Clock, Calendar, Lock } from 'lucide-react';
 import { Transaction, formatCurrency } from '../../db';
 import Button from '../ui/Button';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db';
+import Input from '../ui/Input';
 import { useTranslation } from '../../context/TranslationContext';
 import { useAmountVisibility } from '../../context/AmountVisibilityContext';
 import { useSubscription } from '../../context/SubscriptionContext';
-
-// Helper function to ensure we always pass a number to formatCurrency
-const safeFormatCurrency = (amount: string | number, currency: string, hideAmount: boolean = false): string => {
-  // formatCurrency already handles string or number types
-  return formatCurrency(amount, currency, hideAmount);
-};
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -86,21 +82,25 @@ const TransactionList: React.FC<TransactionListProps> = ({
     return Array.from({ length: 12 }, (_, i) => i);
   }, []);
 
-  // Helper function to convert string or number to number
-  const toNumber = (value: string | number): number => {
-    return typeof value === 'number' ? value : parseInt(String(value));
+  // Helper function to check if a transaction date matches the selected month and year
+  const matchesMonthAndYear = (transactionDate: Date, month: number, year: number | string): boolean => {
+    const transactionMonth = transactionDate.getMonth();
+    const transactionYear = transactionDate.getFullYear();
+    const numYear = typeof year === 'number' ? year : parseInt(year);
+    
+    return transactionMonth === month && transactionYear === numYear;
   };
 
   // Filter transactions based on search term, filter type, status, and selected month/year
   const filteredTransactions = useMemo(() => {
     return transactions.filter(transaction => {
       const transactionDate = new Date(transaction.date);
-      const numYear = toNumber(selectedYear);
+      const numYear = typeof selectedYear === 'number' ? selectedYear : parseInt(String(selectedYear));
       
       const matchesSearch = 
         transaction.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
         transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        safeFormatCurrency(transaction.amount, currency).includes(searchTerm);
+        formatCurrency(transaction.amount, currency).includes(searchTerm);
       
       const matchesType = 
         filterType === 'all' || 
@@ -145,13 +145,29 @@ const TransactionList: React.FC<TransactionListProps> = ({
   
   // Get month name from translations
   const getMonthName = (month: number) => {
-    // Use the month index to get the translated month name
-    const monthNames = [
-      t.months.jan, t.months.feb, t.months.mar, t.months.apr, t.months.may, t.months.jun, 
-      t.months.jul, t.months.aug, t.months.sep, t.months.oct, t.months.nov, t.months.dec
-    ];
+    // Create a date object for the first day of the month
+    const date = new Date();
+    date.setMonth(month);
+    date.setDate(1);
     
-    return monthNames[month];
+    // Get the month abbreviation
+    const monthKey = date.toLocaleDateString('en-US', { month: 'short' }).toLowerCase();
+    
+    switch (monthKey) {
+      case 'jan': return t.jan;
+      case 'feb': return t.feb;
+      case 'mar': return t.mar;
+      case 'apr': return t.apr;
+      case 'may': return t.may;
+      case 'jun': return t.jun;
+      case 'jul': return t.jul;
+      case 'aug': return t.aug;
+      case 'sep': return t.sep;
+      case 'oct': return t.oct;
+      case 'nov': return t.nov;
+      case 'dec': return t.dec;
+      default: return date.toLocaleDateString('en-US', { month: 'short' });
+    }
   };
   
   // For free users, limit transaction history to current month only
@@ -172,7 +188,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
     return transactions
       .filter(t => {
         const tDate = new Date(t.date);
-        const numYear = toNumber(selectedYear);
+        const numYear = typeof selectedYear === 'number' ? selectedYear : parseInt(String(selectedYear));
         return t.type === 'income' && 
           t.status === 'completed' && 
           tDate.getMonth() === selectedMonth && 
@@ -186,7 +202,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
     return transactions
       .filter(t => {
         const tDate = new Date(t.date);
-        const numYear = toNumber(selectedYear);
+        const numYear = typeof selectedYear === 'number' ? selectedYear : parseInt(String(selectedYear));
         return t.type === 'expense' && 
           t.status === 'completed' && 
           tDate.getMonth() === selectedMonth && 
@@ -199,26 +215,26 @@ const TransactionList: React.FC<TransactionListProps> = ({
     <div className="space-y-4">
       <div className="mb-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <h3 className="text-lg font-medium mb-2 sm:mb-0">{t.common.transactions}</h3>
+          <h3 className="text-lg font-medium mb-2 sm:mb-0">{t.transactions}</h3>
           
           <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:space-x-6 sm:items-center sm:justify-end">
             <div className="flex items-center justify-between sm:justify-start border-b pb-1 sm:border-0 sm:pb-0">
               <div className="flex items-center">
                 <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-                <span className="text-sm font-medium">{t.dashboard.income}</span>
+                <span className="text-sm font-medium">{t.income}</span>
               </div>
               <span className="text-sm ml-2 text-green-600 dark:text-green-400 font-semibold">
-                {safeFormatCurrency(calculateIncomeTotal(), currency, hideAmounts)}
+                {formatCurrency(calculateIncomeTotal(), currency, hideAmounts)}
               </span>
             </div>
             
             <div className="flex items-center justify-between sm:justify-start">
               <div className="flex items-center">
                 <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
-                <span className="text-sm font-medium">{t.dashboard.expense}</span>
+                <span className="text-sm font-medium">{t.expense}</span>
               </div>
               <span className="text-sm ml-2 text-red-600 dark:text-red-400 font-semibold">
-                {safeFormatCurrency(calculateExpenseTotal(), currency, hideAmounts)}
+                {formatCurrency(calculateExpenseTotal(), currency, hideAmounts)}
               </span>
             </div>
           </div>
@@ -231,12 +247,12 @@ const TransactionList: React.FC<TransactionListProps> = ({
           <div className="flex items-start">
             <Lock className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mr-3 mt-0.5" />
             <div>
-              <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-300">{t.premium.freeAccountLimitation}</h3>
+              <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-300">Free Account Limitation</h3>
               <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-200">
-                {t.premium.freeAccountLimitationMessage}
+                Free accounts can only view transactions from the current month. 
                 <Link to="/pricing" className="ml-1 font-medium underline">
-                  {t.premium.upgradeNow}
-                </Link>
+                  Upgrade to Premium
+                </Link> to access your complete transaction history.
               </p>
             </div>
           </div>
@@ -249,7 +265,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
           {months.map(month => {
             const currentMonth = new Date().getMonth();
             const currentYear = new Date().getFullYear();
-            const numSelectedYear = toNumber(selectedYear);
+            const numSelectedYear = typeof selectedYear === 'number' ? selectedYear : parseInt(String(selectedYear));
             const isCurrentMonth = month === currentMonth && numSelectedYear === currentYear;
             const isPastMonth = (numSelectedYear < currentYear) || (numSelectedYear === currentYear && month < currentMonth);
             const isFutureMonth = (numSelectedYear > currentYear) || (numSelectedYear === currentYear && month > currentMonth);
@@ -282,7 +298,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
           </div>
           <input
             type="text"
-            placeholder={`${t.transactions.search} ${t.common.transactions.toLowerCase()}...`}
+            placeholder={`${t.search} ${t.transactions.toLowerCase()}...`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="block w-full pl-10 pr-10 py-2 rounded-md border border-secondary-300 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-secondary-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
@@ -306,9 +322,9 @@ const TransactionList: React.FC<TransactionListProps> = ({
               onChange={(e) => setFilterType(e.target.value as 'all' | 'income' | 'expense')}
               className="appearance-none block w-full sm:w-auto rounded-md border border-secondary-300 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-secondary-900 dark:text-white focus:ring-primary-500 focus:border-primary-500 px-4 py-2 pr-10"
             >
-              <option value="all">{t.transactions.allTypes || 'All Types'}</option>
-              <option value="income">{t.transactions.incomeType}</option>
-              <option value="expense">{t.transactions.expenseType}</option>
+              <option value="all">{t.allTypes || 'All Types'}</option>
+              <option value="income">{t.incomeType}</option>
+              <option value="expense">{t.expenseType}</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-secondary-500">
               <ChevronDown className="h-4 w-4" />
@@ -321,10 +337,10 @@ const TransactionList: React.FC<TransactionListProps> = ({
               onChange={(e) => setFilterStatus(e.target.value as 'all' | 'completed' | 'pending' | 'planned')}
               className="appearance-none block w-full sm:w-auto rounded-md border border-secondary-300 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-secondary-900 dark:text-white focus:ring-primary-500 focus:border-primary-500 px-4 py-2 pr-10"
             >
-              <option value="all">{t.transactions.status}: {t.transactions.allTypes}</option>
-              <option value="completed">{t.transactions.completed}</option>
-              <option value="pending">{t.transactions.pending}</option>
-              <option value="planned">{t.transactions.planned}</option>
+              <option value="all">{t.status}: {t.allTypes}</option>
+              <option value="completed">{t.completed}</option>
+              <option value="pending">{t.pending}</option>
+              <option value="planned">{t.planned}</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-secondary-500">
               <ChevronDown className="h-4 w-4" />
@@ -336,7 +352,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
             leftIcon={<Plus className="w-4 h-4" />}
             className="hidden sm:flex"
           >
-            {t.transactions.add || 'Add'}
+            {t.add || 'Add'}
           </Button>
         </div>
       </div>
@@ -344,10 +360,10 @@ const TransactionList: React.FC<TransactionListProps> = ({
       {sortedTransactions.length === 0 ? (
         <div className="text-center py-8">
           <p className="text-secondary-500 dark:text-secondary-400 mb-4">
-            {searchTerm ? t.transactions.noSearchResults || 'No transactions match your search.' : t.dashboard.noTransactions}
+            {searchTerm ? t.noSearchResults || 'No transactions match your search.' : t.noTransactions}
           </p>
           <Button onClick={onAdd} leftIcon={<Plus className="w-4 h-4" />}>
-            {t.transactions.addFirstTransaction || 'Add Your First Transaction'}
+            {t.addFirstTransaction || 'Add Your First Transaction'}
           </Button>
         </div>
       ) : (
@@ -361,7 +377,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
                   onClick={() => handleSort('amount')}
                 >
                   <div className="flex items-center">
-                    {t.transactions.amount}
+                    {t.amount}
                     {sortField === 'amount' && (
                       sortDirection === 'asc' ? 
                         <ChevronUp className="w-4 h-4 ml-1" /> : 
@@ -375,7 +391,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
                   onClick={() => handleSort('description')}
                 >
                   <div className="flex items-center">
-                    {t.transactions.description}
+                    {t.description}
                     {sortField === 'description' && (
                       sortDirection === 'asc' ? 
                         <ChevronUp className="w-4 h-4 ml-1" /> : 
@@ -389,7 +405,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
                   onClick={() => handleSort('type')}
                 >
                   <div className="flex items-center justify-center">
-                    {t.transactions.type || 'Type'}
+                    {t.type || 'Type'}
                     {sortField === 'type' && (
                       sortDirection === 'asc' ? 
                         <ChevronUp className="w-4 h-4 ml-1" /> : 
@@ -403,7 +419,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
                   onClick={() => handleSort('category')}
                 >
                   <div className="flex items-center">
-                    {t.transactions.category}
+                    {t.category}
                     {sortField === 'category' && (
                       sortDirection === 'asc' ? 
                         <ChevronUp className="w-4 h-4 ml-1" /> : 
@@ -417,7 +433,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
                   onClick={() => handleSort('date')}
                 >
                   <div className="flex items-center">
-                    {t.transactions.date}
+                    {t.date}
                     {sortField === 'date' && (
                       sortDirection === 'asc' ? 
                         <ChevronUp className="w-4 h-4 ml-1" /> : 
@@ -444,10 +460,10 @@ const TransactionList: React.FC<TransactionListProps> = ({
                     } ${
                       transaction.status !== 'completed' ? 'opacity-60' : ''
                     }`}>
-                      {transaction.type === 'income' ? '+' : '-'}{safeFormatCurrency(transaction.amount, currency, hideAmounts)}
+                      {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount, currency, hideAmounts)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-900 dark:text-secondary-100">
-                      {transaction.description || t.transactions.noDescription || 'No description provided'}
+                      {transaction.description || t.noDescription || 'No description provided'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                       <div className="flex flex-col items-center space-y-1">
@@ -456,7 +472,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
                             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' 
                             : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
                         }`}>
-                          {transaction.type === 'income' ? t.transactions.incomeType : t.transactions.expenseType}
+                          {transaction.type === 'income' ? t.incomeType : t.expenseType}
                         </span>
                         
                         {transaction.status !== 'completed' && (
@@ -466,9 +482,9 @@ const TransactionList: React.FC<TransactionListProps> = ({
                               : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100'
                           }`}>
                             {transaction.status === 'pending' ? (
-                              <><Clock className="w-3 h-3 mr-1" /> {t.transactions.pending}</>
+                              <><Clock className="w-3 h-3 mr-1" /> {t.pending}</>
                             ) : (
-                              <><Calendar className="w-3 h-3 mr-1" /> {t.transactions.planned}</>
+                              <><Calendar className="w-3 h-3 mr-1" /> {t.planned}</>
                             )}
                           </span>
                         )}
@@ -506,9 +522,9 @@ const TransactionList: React.FC<TransactionListProps> = ({
                       <td colSpan={6} className="px-6 py-4">
                         <div className="text-sm space-y-2">
                           <div>
-                            <p className="font-medium text-secondary-900 dark:text-white mb-1">{t.transactions.description}:</p>
+                            <p className="font-medium text-secondary-900 dark:text-white mb-1">{t.description}:</p>
                             <p className="text-secondary-700 dark:text-secondary-300">
-                              {transaction.description || t.transactions.noDescription || 'No description provided'}
+                              {transaction.description || t.noDescription || 'No description provided'}
                             </p>
                           </div>
                           
@@ -517,19 +533,13 @@ const TransactionList: React.FC<TransactionListProps> = ({
                               <div className="flex items-center">
                                 <Repeat className="w-4 h-4 mr-1 text-primary-500" />
                                 <p className="font-medium text-secondary-900 dark:text-white">
-                                  {t.transactions.recurring}
+                                  {t.recurring}
                                 </p>
                               </div>
                               <p className="text-secondary-700 dark:text-secondary-300">
-                                {t.transactions.recurrenceInterval}: {transaction.recurrenceInterval && (
-                                  transaction.recurrenceInterval === 'daily' ? t.transactions.daily :
-                                  transaction.recurrenceInterval === 'weekly' ? t.transactions.weekly :
-                                  transaction.recurrenceInterval === 'monthly' ? t.transactions.monthly :
-                                  transaction.recurrenceInterval === 'yearly' ? t.transactions.yearly :
-                                  t.transactions.none
-                                )}
+                                {t.recurrenceInterval}: {transaction.recurrenceInterval && t[transaction.recurrenceInterval]}
                                 {transaction.recurrenceEndDate && (
-                                  <span> • {t.transactions.endDate}: {new Date(transaction.recurrenceEndDate).toLocaleDateString()}</span>
+                                  <span> • {t.endDate}: {new Date(transaction.recurrenceEndDate).toLocaleDateString()}</span>
                                 )}
                               </p>
                             </div>

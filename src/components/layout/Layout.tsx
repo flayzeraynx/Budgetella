@@ -21,9 +21,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {t.footerText}
           </p>
           <div className="flex justify-center space-x-4 text-xs text-primary-600 dark:text-primary-400">
-            <Link to="/terms" className="hover:underline">Terms and Conditions</Link>
+            <Link to="/pricing" className="hover:underline">{t.pricing}</Link>
             <span>•</span>
-            <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
+            <Link to="/terms" className="hover:underline">{t.termsAndConditions}</Link>
+            <span>•</span>
+            <Link to="/privacy" className="hover:underline">{t.privacyPolicy}</Link>
           </div>
         </div>
       </footer>

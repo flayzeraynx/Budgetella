@@ -243,7 +243,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       // Only show success toast for adding, not for updating
       // (Update success is handled in the parent component)
       if (!initialData) {
-        showToast('success', t.transactionAdded || 'Transaction added successfully');
+        showToast('success', t.transactions.transactionAdded || 'Transaction added successfully');
         
         // Reset form if not editing
         setAmount('');
@@ -252,7 +252,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       }
     } catch (error) {
       console.error('Error saving transaction:', error);
-      showToast('error', t.errorSavingTransaction || 'Error saving transaction');
+      showToast('error', t.transactions.errorSavingTransaction || 'Error saving transaction');
     } finally {
       setIsSubmitting(false);
     }
@@ -303,10 +303,10 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
             </div>
             <div className="ml-2 flex-1">
               <h3 className="text-xs font-medium text-yellow-800 dark:text-yellow-200">
-                {t.signInRequired}
+                {t.auth.signInRequired}
               </h3>
               <div className="mt-1 text-xs text-yellow-700 dark:text-yellow-300">
-                <p className="line-clamp-2">{t.signInRequiredMessage}</p>
+                <p className="line-clamp-2">{t.auth.signInRequiredMessage}</p>
               </div>
               <div className="mt-1">
                 <Button
@@ -315,7 +315,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                   onClick={signInWithGoogle}
                   className="py-0.5 px-2 text-xs"
                 >
-                  {t.signInWithGoogle || 'Sign in with Google'}
+                  {t.auth.signInWithGoogle || 'Sign in with Google'}
                 </Button>
               </div>
             </div>
@@ -326,7 +326,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       <div>
         <div className="mb-4">
           <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
-            {t.transactionType}
+            {t.transactions.transactionType}
           </label>
           <div className="flex space-x-4">
             <label className="inline-flex items-center">
@@ -336,7 +336,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                 checked={type === 'expense'}
                 onChange={() => setType('expense')}
               />
-              <span className="ml-2 text-secondary-700 dark:text-secondary-300">{t.expenseType}</span>
+              <span className="ml-2 text-secondary-700 dark:text-secondary-300">{t.transactions.expenseType}</span>
             </label>
             <label className="inline-flex items-center">
               <input
@@ -345,7 +345,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                 checked={type === 'income'}
                 onChange={() => setType('income')}
               />
-              <span className="ml-2 text-secondary-700 dark:text-secondary-300">{t.incomeType}</span>
+              <span className="ml-2 text-secondary-700 dark:text-secondary-300">{t.transactions.incomeType}</span>
             </label>
           </div>
         </div>
@@ -353,7 +353,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
-              {t.amount} ({currency})
+              {t.transactions.amount} ({currency})
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -388,7 +388,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
           {/* Category Selection */}
           <div>
             <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
-              {t.category}
+              {t.transactions.category}
             </label>
             <div className="relative">
               <select
@@ -414,7 +414,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
-            label={t.date}
+            label={t.transactions.date}
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
@@ -423,13 +423,13 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
           />
           
           <Select
-            label={t.status || "Status"}
+            label={t.transactions.status || "Status"}
             value={status}
             onChange={(e) => setStatus(e.target.value as 'completed' | 'pending' | 'planned')}
             options={[
-              { value: 'completed', label: t.completed || 'Completed' },
-              { value: 'pending', label: t.pending || 'Pending' },
-              { value: 'planned', label: t.planned || 'Planned' }
+              { value: 'completed', label: t.transactions.completed || 'Completed' },
+              { value: 'pending', label: t.transactions.pending || 'Pending' },
+              { value: 'planned', label: t.transactions.planned || 'Planned' }
             ]}
             fullWidth
           />
@@ -437,12 +437,12 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
         
         <div className="mt-4">
           <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
-            {t.description} ({t.optional})
+            {t.transactions.description} ({t.transactions.optional})
           </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder={t.enterDescription || "Enter description"}
+            placeholder={t.transactions.enterDescription || "Enter description"}
             rows={3}
             className="block w-full rounded-md border border-secondary-300 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-secondary-900 dark:text-white focus:ring-primary-500 focus:border-primary-500 px-4 py-2"
           />
@@ -459,21 +459,21 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
               className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300 dark:border-secondary-700 rounded"
             />
             <label htmlFor="isRecurring" className="ml-2 block text-sm font-medium text-secondary-700 dark:text-secondary-300">
-              {t.recurring}
+              {t.transactions.recurring}
             </label>
           </div>
           
           {isRecurring && (
             <div className="space-y-4 pl-6">
               <Select
-                label={t.recurrenceInterval}
+                label={t.transactions.recurrenceInterval}
                 value={recurrenceInterval}
                 onChange={(e) => setRecurrenceInterval(e.target.value as RecurrenceInterval)}
                 options={[
-                  { value: 'daily', label: t.daily },
-                  { value: 'weekly', label: t.weekly },
-                  { value: 'monthly', label: t.monthlyLabel },
-                  { value: 'yearly', label: t.yearly }
+                  { value: 'daily', label: t.transactions.daily },
+                  { value: 'weekly', label: t.transactions.weekly },
+                  { value: 'monthly', label: t.transactions.monthly },
+                  { value: 'yearly', label: t.transactions.yearly }
                 ]}
                 fullWidth
               />
@@ -487,7 +487,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                   className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300 dark:border-secondary-700 rounded"
                 />
                 <label htmlFor="hasEndDate" className="ml-2 block text-sm font-medium text-secondary-700 dark:text-secondary-300">
-                  {t.endDate}
+                  {t.transactions.endDate}
                 </label>
               </div>
               
@@ -513,7 +513,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                 variant="secondary" 
                 onClick={onCancel}
               >
-                {t.cancel}
+                {t.transactions.cancel}
               </Button>
             )}
             <Button 
@@ -521,7 +521,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
               isLoading={isSubmitting}
               leftIcon={isRecurring ? <Repeat className="w-4 h-4" /> : <PlusCircle className="w-4 h-4" />}
             >
-              {initialData ? t.update : t.save}
+              {initialData ? t.transactions.update : t.transactions.save}
             </Button>
           </div>
         </div>

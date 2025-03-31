@@ -295,6 +295,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       setError(null);
       await firebaseSignOut(auth);
+      // Navigate to dashboard after signing out
+      window.location.href = '/';
       // The page will be reloaded in the onAuthStateChanged listener
     } catch (error) {
       console.error('Error signing out:', error);

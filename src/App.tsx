@@ -6,10 +6,12 @@ import { AmountVisibilityProvider } from './context/AmountVisibilityContext';
 import { AuthProvider } from './context/AuthContext';
 import { FirebaseProvider } from './context/FirebaseContext';
 import { ToastProvider } from './context/ToastContext';
+import { SubscriptionProvider } from './context/SubscriptionContext';
 import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 import Pricing from './pages/Pricing';
+import Transactions from './pages/Transactions';
 import TermsAndConditions from './pages/TermsAndConditions';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import {
@@ -59,18 +61,21 @@ function App() {
             <ToastProvider>
               <AuthProvider>
                 <FirebaseProvider>
-                  <Router>
-                    <Layout>
-                      <Routes>
-                        <Route path="/" element={<Dashboard />} />
-                        <Route path="/settings" element={<Settings />} />
-                        <Route path="/pricing" element={<Pricing />} />
-                        <Route path="/terms" element={<TermsAndConditions />} />
-                        <Route path="/privacy" element={<PrivacyPolicy />} />
-                        <Route path="/login" element={<Navigate to="/" replace />} />
-                      </Routes>
-                    </Layout>
-                  </Router>
+                  <SubscriptionProvider>
+                    <Router>
+                      <Layout>
+                        <Routes>
+                          <Route path="/" element={<Dashboard />} />
+                          <Route path="/settings" element={<Settings />} />
+                          <Route path="/pricing" element={<Pricing />} />
+                          <Route path="/transactions" element={<Transactions />} />
+                          <Route path="/terms" element={<TermsAndConditions />} />
+                          <Route path="/privacy" element={<PrivacyPolicy />} />
+                          <Route path="/login" element={<Navigate to="/" replace />} />
+                        </Routes>
+                      </Layout>
+                    </Router>
+                  </SubscriptionProvider>
                 </FirebaseProvider>
               </AuthProvider>
             </ToastProvider>

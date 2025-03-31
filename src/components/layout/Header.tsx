@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Wallet, BarChart2, Settings, Menu, X, EyeOff, Eye, LogIn, LogOut, Globe, Home, User, ChevronDown } from 'lucide-react';
+import { Wallet, BarChart2, Settings, Menu, X, EyeOff, Eye, LogIn, LogOut, Globe, Home, User, ChevronDown, Crown } from 'lucide-react';
 import LoginDialog from '../auth/LoginDialog';
 import LanguageDialog from '../settings/LanguageDialog';
 import LogoutConfirmationDialog from '../auth/LogoutConfirmationDialog';
@@ -9,6 +9,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from '../../context/TranslationContext';
 import { useAmountVisibility } from '../../context/AmountVisibilityContext';
+import { useSubscription } from '../../context/SubscriptionContext';
 import Button from '../ui/Button';
 import Select from '../ui/Select';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -28,8 +29,12 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
   const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
   const [isLogoutConfirmationOpen, setIsLogoutConfirmationOpen] = useState(false);
   const { currentUser, signOut } = useAuth();
+  const { checkIfPremium } = useSubscription();
   const settings = useLiveQuery(() => db.settings.toArray()) || [{ currency: 'TRY' }];
   const currency = settings[0]?.currency || 'TRY';
+  
+  // Check if user has premium access
+  const isPremium = checkIfPremium();
   
   const userMenuRef = useRef<HTMLDivElement>(null);
   
@@ -47,19 +52,20 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
     };
   }, [userMenuRef]);
   
-  // Get language code based on currency
+  // Get language code based on current language
   const getLanguageCode = () => {
-    switch (currency) {
-      case 'USD': return 'EN';
-      case 'EUR': return 'DE';
-      case 'TRY': 
+    const { currentLanguage } = useTranslation();
+    switch (currentLanguage) {
+      case 'en': return 'EN';
+      case 'de': return 'DE';
+      case 'tr': 
       default: return 'TR';
     }
   };
 
   const navLinks = [
-    { path: '/', label: t.dashboard, icon: <BarChart2 className="w-5 h-5" /> },
-    { path: '/settings', label: t.settings, icon: <Settings className="w-5 h-5" /> },
+    { path: '/', label: t.common.dashboard, icon: <BarChart2 className="w-5 h-5" /> },
+    { path: '/settings', label: t.common.settings, icon: <Settings className="w-5 h-5" /> },
   ];
 
   const isActive = (path: string) => {
@@ -99,9 +105,23 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
                   : 'text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800'
               }`}
               aria-label="Home"
-              title={t.dashboard}
+              title={t.common.dashboard}
             >
               <Home className="w-5 h-5" />
+            </Link>
+            
+            {/* Pricing */}
+            <Link
+              to="/pricing"
+              className={`flex items-center px-2 py-2 rounded-md text-sm font-medium transition-colors ${
+                isActive('/pricing')
+                  ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
+                  : 'text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800'
+              }`}
+              aria-label="Pricing"
+              title="Pricing"
+            >
+              <Crown className="w-5 h-5" />
             </Link>
             
             {/* Settings */}
@@ -113,7 +133,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
                   : 'text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800'
               }`}
               aria-label="Settings"
-              title={t.settings}
+              title={t.common.settings}
             >
               <Settings className="w-5 h-5" />
             </Link>
@@ -137,11 +157,26 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
               onClick={() => setIsLanguageDialogOpen(true)}
               className="flex items-center px-2 py-2 rounded-md text-sm font-medium transition-colors text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800"
               aria-label="Language"
-              title={t.selectLanguage}
+              title={t.common.selectLanguage}
             >
               <Globe className="w-5 h-5" />
               <span className="ml-1 font-bold">{getLanguageCode()}</span>
             </Button>
+            
+            {/* Premium Button */}
+            {currentUser && !isPremium && (
+              <Link
+                to="/pricing"
+                className={`flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-800 transition-colors ${
+                  isActive('/pricing') ? 'ring-2 ring-yellow-500' : ''
+                }`}
+                aria-label="Upgrade to Premium"
+                title="Upgrade to Premium"
+              >
+                <Crown className="w-4 h-4 mr-1" />
+                <span>Premium</span>
+              </Link>
+            )}
             
             {/* User Avatar / Login */}
             {currentUser ? (
@@ -178,7 +213,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
                       className="w-full text-left px-4 py-2 text-sm text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-700 flex items-center"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
-                      {t.signOut}
+                      {t.auth.signOut}
                     </button>
                   </div>
                 )}
@@ -190,7 +225,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
                 onClick={onOpenLoginDialog}
                 className="px-2 py-2 rounded-md text-sm font-medium transition-colors text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800"
                 aria-label="Sign In"
-                title={t.signInToBudgetella}
+                title={t.auth.signInToBudgetella}
               >
                 <LogIn className="w-5 h-5" />
               </Button>
@@ -239,7 +274,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
               onClick={() => setIsMenuOpen(false)}
             >
               <Home className="w-5 h-5 mr-3" />
-              {t.dashboard}
+              {t.common.dashboard}
             </Link>
             
             {/* Settings */}
@@ -253,7 +288,21 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
               onClick={() => setIsMenuOpen(false)}
             >
               <Settings className="w-5 h-5 mr-3" />
-              {t.settings}
+              {t.common.settings}
+            </Link>
+            
+            {/* Pricing (Mobile) */}
+            <Link
+              to="/pricing"
+              className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${
+                isActive('/pricing')
+                  ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
+                  : 'text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800'
+              }`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Crown className="w-5 h-5 mr-3" />
+              Pricing
             </Link>
             
             {/* Language */}
@@ -263,11 +312,23 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
                 setIsMenuOpen(false);
               }}
               className="flex w-full items-center px-3 py-2 rounded-md text-base font-medium text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800"
-              title={t.selectLanguage}
+              title={t.common.selectLanguage}
             >
               <Globe className="w-5 h-5 mr-3" />
               <span className="font-bold">{getLanguageCode()}</span>
             </button>
+            
+            {/* Premium Button (Mobile) */}
+            {currentUser && !isPremium && (
+              <Link
+                to="/pricing"
+                className="flex items-center px-3 py-2 rounded-md text-base font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-800 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Crown className="w-5 h-5 mr-3" />
+                Upgrade to Premium
+              </Link>
+            )}
             
             {/* User Profile / Login */}
             {currentUser ? (
@@ -286,10 +347,10 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
                 <button
                   onClick={handleLogoutClick}
                   className="flex w-full items-center px-3 py-2 rounded-md text-base font-medium text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800"
-                  title={t.signedOutSuccessfully || 'Sign Out'}
+                  title={t.auth.signedOutSuccessfully || 'Sign Out'}
                 >
                   <LogOut className="w-5 h-5 mr-3" />
-                  {t.signedOutSuccessfully || 'Sign Out'}
+                  {t.auth.signedOutSuccessfully || 'Sign Out'}
                 </button>
               </>
             ) : (
@@ -301,10 +362,10 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
                   }
                 }}
                 className="flex w-full items-center px-3 py-2 rounded-md text-base font-medium text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800"
-                title={t.signInToBudgetella}
+                title={t.auth.signInToBudgetella}
               >
                 <LogIn className="w-5 h-5 mr-3" />
-                {t.signInToBudgetella}
+                  {t.auth.signInToBudgetella}
               </button>
             )}
           </div>
