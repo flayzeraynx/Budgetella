@@ -492,10 +492,10 @@ const CategoryManager: React.FC = () => {
               <Lock className="w-5 h-5 text-yellow-500 dark:text-yellow-400 mr-3 mt-0.5" />
               <div>
                 <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                  Premium Feature
+                  {t.premium.premiumFeature}
                 </h3>
                 <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-300">
-                  Custom categories are available for premium users only. Upgrade to create, edit, and manage your own categories.
+                  {t.premium.premiumFeatureDescription}
                 </p>
                 <div className="mt-3">
                   <Button
@@ -503,7 +503,7 @@ const CategoryManager: React.FC = () => {
                     size="sm"
                     className="bg-yellow-600 hover:bg-yellow-700 text-white"
                   >
-                    Upgrade to Premium
+                    {t.premium.upgradeNow}
                   </Button>
                 </div>
               </div>
@@ -580,7 +580,7 @@ const CategoryManager: React.FC = () => {
                       className="bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-800"
                       leftIcon={<Lock className="w-4 h-4" />}
                     >
-                      Unlock Custom Categories
+                      {t.premium.unlockCustomCategories}
                     </Button>
                   </div>
                 }

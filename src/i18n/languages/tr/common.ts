@@ -12,4 +12,8 @@ export const common: CommonTranslations = {
   required: 'gereklidir',
   selectLanguage: 'Dil Seçin',
   footerText: 'Budgetella - Gizlilik Öncelikli Finans Takipçisi. Tüm veriler cihazınızda yerel olarak saklanır.',
+  cancel: 'İptal',
+  delete: 'Sil',
+  add: 'Ekle',
+  edit: 'Düzenle',
 };

@@ -17,16 +17,16 @@ const PasswordRequirements: React.FC<PasswordRequirementsProps> = ({ password })
   const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
   
   const requirements = [
-    { label: t.passwordMinLength, valid: hasMinLength },
-    { label: t.passwordUppercase, valid: hasUppercase },
-    { label: t.passwordLowercase, valid: hasLowercase },
-    { label: t.passwordNumber, valid: hasNumber },
-    { label: t.passwordSpecial, valid: hasSpecial }
+    { label: t.auth.passwordMinLength, valid: hasMinLength },
+    { label: t.auth.passwordUppercase, valid: hasUppercase },
+    { label: t.auth.passwordLowercase, valid: hasLowercase },
+    { label: t.auth.passwordNumber, valid: hasNumber },
+    { label: t.auth.passwordSpecial, valid: hasSpecial }
   ];
   
   return (
     <div className="mt-2 text-sm text-secondary-600 dark:text-secondary-400">
-      <p className="font-medium mb-1">{t.passwordRequirements}</p>
+      <p className="font-medium mb-1">{t.auth.passwordRequirements}</p>
       <ul className="space-y-1">
         {requirements.map((req, index) => (
           <li key={index} className="flex items-center">

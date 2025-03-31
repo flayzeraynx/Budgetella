@@ -57,7 +57,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
             }`}
             onClick={() => handleTabChange('profile')}
           >
-            {t.userProfile}
+            {t.auth.profileInformation}
           </button>
           
           <button
@@ -68,7 +68,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
             }`}
             onClick={() => handleTabChange('password')}
           >
-            {t.changePassword}
+            {t.auth.changePassword}
           </button>
         </div>
       )}

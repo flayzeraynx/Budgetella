@@ -28,11 +28,11 @@ const LogoutConfirmationDialog: React.FC<LogoutConfirmationDialogProps> = ({
             <div className="bg-red-100 dark:bg-red-900/30 p-2 rounded-full mr-4">
               <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
             </div>
-            <h3 className="text-xl font-bold">{t.logoutConfirmation}</h3>
+            <h3 className="text-xl font-bold">{t.auth.logoutConfirmation}</h3>
           </div>
           
           <p className="text-secondary-600 dark:text-secondary-400 mb-6">
-            {t.logoutConfirmationMessage}
+            {t.auth.logoutConfirmationMessage}
           </p>
           
           <div className="flex gap-3">
@@ -41,7 +41,7 @@ const LogoutConfirmationDialog: React.FC<LogoutConfirmationDialogProps> = ({
               onClick={onCancel}
               className="flex-1"
             >
-              {t.cancel}
+              {t.common.cancel}
             </Button>
             
             <Button
@@ -49,7 +49,7 @@ const LogoutConfirmationDialog: React.FC<LogoutConfirmationDialogProps> = ({
               onClick={onConfirm}
               className="flex-1"
             >
-              {t.confirmLogout}
+              {t.auth.confirmLogout}
             </Button>
           </div>
         </div>

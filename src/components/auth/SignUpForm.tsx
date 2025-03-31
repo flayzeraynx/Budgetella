@@ -46,27 +46,27 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
     const newErrors: typeof errors = {};
     
     if (!firstName.trim()) {
-      newErrors.firstName = t.firstName + ' ' + t.required;
+      newErrors.firstName = t.auth.firstName + ' ' + t.common.required;
     }
     
     if (!lastName.trim()) {
-      newErrors.lastName = t.lastName + ' ' + t.required;
+      newErrors.lastName = t.auth.lastName + ' ' + t.common.required;
     }
     
     if (!email.trim()) {
-      newErrors.email = t.email + ' ' + t.required;
+      newErrors.email = t.email + ' ' + t.common.required;
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = t.invalidEmail;
+      newErrors.email = t.auth.invalidEmail;
     }
     
     if (!password) {
-      newErrors.password = t.password + ' ' + t.required;
+      newErrors.password = t.auth.password + ' ' + t.common.required;
     } else if (!isPasswordValid) {
-      newErrors.password = t.invalidPassword;
+      newErrors.password = t.auth.invalidPassword;
     }
     
     if (password !== confirmPassword) {
-      newErrors.confirmPassword = t.passwordsDontMatch;
+      newErrors.confirmPassword = t.auth.passwordsDontMatch;
     }
     
     setErrors(newErrors);
@@ -107,7 +107,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
-            label={t.firstName}
+            label={t.auth.firstName}
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             leftIcon={<User className="w-4 h-4 text-secondary-500" />}
@@ -116,7 +116,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
           />
           
           <Input
-            label={t.lastName}
+            label={t.auth.lastName}
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             leftIcon={<User className="w-4 h-4 text-secondary-500" />}
@@ -126,7 +126,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
         </div>
         
         <Input
-          label={t.email}
+          label={t.auth.emailAccount}
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -136,7 +136,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
         />
         
         <Input
-          label={t.password}
+          label={t.auth.password}
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -146,7 +146,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
         />
         
         <Input
-          label={t.confirmPassword}
+          label={t.auth.confirmPassword}
           type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
@@ -163,19 +163,19 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
             fullWidth
             isLoading={isLoading}
           >
-            {t.createAccount}
+            {t.auth.createAccount}
           </Button>
         </div>
         
         <div className="text-center mt-4">
           <p className="text-sm text-secondary-600 dark:text-secondary-400">
-            {t.alreadyHaveAccount}{' '}
+            {t.auth.alreadyHaveAccount}{' '}
             <button
               type="button"
               onClick={onSignInClick}
               className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
             >
-              {t.signInToBudgetella}
+              {t.auth.signInToBudgetella}
             </button>
           </p>
         </div>

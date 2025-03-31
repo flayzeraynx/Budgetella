@@ -37,12 +37,12 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   
   const validateForm = () => {
     if (!firstName.trim()) {
-      setError(t.firstName + ' ' + t.required);
+      setError(t.auth.firstName + ' ' + t.common.required);
       return false;
     }
     
     if (!lastName.trim()) {
-      setError(t.lastName + ' ' + t.required);
+      setError(t.auth.lastName + ' ' + t.common.required);
       return false;
     }
     
@@ -83,14 +83,14 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
       {success && (
         <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md flex items-start">
           <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-green-600 dark:text-green-400">{t.profileUpdated}</p>
+          <p className="text-sm text-green-600 dark:text-green-400">{t.auth.profileUpdated}</p>
         </div>
       )}
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
-            label={t.firstName}
+            label={t.auth.firstName}
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             leftIcon={<User className="w-4 h-4 text-secondary-500" />}
@@ -98,7 +98,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
           />
           
           <Input
-            label={t.lastName}
+            label={t.auth.lastName}
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             leftIcon={<User className="w-4 h-4 text-secondary-500" />}
@@ -108,7 +108,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
         
         <div className="relative">
           <Input
-            label={t.email}
+            label={t.auth.emailAccount}
             type="email"
             value={email}
             onChange={() => {}} // Email cannot be changed
@@ -116,7 +116,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             disabled
           />
           <div className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
-            {t.emailCannotBeChanged}
+            {t.auth.emailCannotBeChanged}
           </div>
         </div>
         
@@ -128,7 +128,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               onClick={onCancel}
               className="flex-1"
             >
-              {t.cancel}
+              {t.common.cancel}
             </Button>
           )}
           
@@ -137,7 +137,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             className="flex-1"
             isLoading={isLoading}
           >
-            {t.update}
+            {t.transactions.update}
           </Button>
         </div>
       </form>

@@ -34,22 +34,22 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({
   
   const validateForm = () => {
     if (!currentPassword) {
-      setError(t.currentPassword + ' ' + t.required);
+      setError(t.auth.currentPassword + ' ' + t.common.required);
       return false;
     }
     
     if (!newPassword) {
-      setError(t.newPassword + ' ' + t.required);
+      setError(t.auth.newPassword + ' ' + t.common.required);
       return false;
     }
     
     if (!isPasswordValid) {
-      setError(t.invalidPassword);
+      setError(t.auth.invalidPassword);
       return false;
     }
     
     if (newPassword !== confirmPassword) {
-      setError(t.passwordsDontMatch);
+      setError(t.auth.passwordsDontMatch);
       return false;
     }
     
@@ -95,13 +95,13 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({
       {success && (
         <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md flex items-start">
           <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-green-600 dark:text-green-400">{t.passwordUpdated}</p>
+          <p className="text-sm text-green-600 dark:text-green-400">{t.auth.passwordUpdated}</p>
         </div>
       )}
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
-          label={t.currentPassword}
+          label={t.auth.currentPassword}
           type="password"
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
@@ -110,7 +110,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({
         />
         
         <Input
-          label={t.newPassword}
+          label={t.auth.newPassword}
           type="password"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
@@ -119,7 +119,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({
         />
         
         <Input
-          label={t.confirmPassword}
+          label={t.auth.confirmPassword}
           type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
@@ -137,7 +137,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({
               onClick={onCancel}
               className="flex-1"
             >
-              {t.cancel}
+              {t.common.cancel}
             </Button>
           )}
           
@@ -146,7 +146,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({
             className="flex-1"
             isLoading={isLoading}
           >
-            {t.update}
+            {t.transactions.update}
           </Button>
         </div>
       </form>

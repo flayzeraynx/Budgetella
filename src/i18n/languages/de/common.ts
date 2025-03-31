@@ -12,4 +12,9 @@ export const common: CommonTranslations = {
   required: 'ist erforderlich',
   selectLanguage: 'Sprache auswählen',
   footerText: 'Budgetella - Datenschutzorientierter Finanztracker. Alle Daten werden lokal auf Ihrem Gerät gespeichert.',
+  cancel: 'Abbrechen',
+  delete: 'Löschen',
+  add: 'Hinzufügen',
+  edit: 'Bearbeiten',
+  save: 'Speichern',
 };

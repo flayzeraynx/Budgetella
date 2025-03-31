@@ -43,8 +43,8 @@ export const settings: SettingsTranslations = {
   settingsSaved: 'Ayarlar başarıyla kaydedildi',
   
   // CSV Export/Import
-  exportAsJSON: 'JSON Olarak Dışa Aktar',
-  exportAsCSV: 'CSV Olarak Dışa Aktar',
-  importJSON: 'JSON İçe Aktar',
-  importCSV: 'CSV İçe Aktar'
+  exportAsJSON: 'JSON',
+  exportAsCSV: 'CSV',
+  importJSON: 'JSON',
+  importCSV: 'CSV'
 };
