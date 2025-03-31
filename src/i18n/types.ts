@@ -12,6 +12,8 @@ export interface CommonTranslations {
   required: string;
   selectLanguage: string;
   footerText: string;
+  cancel: string;
+  delete: string;
 }
 
 // Authentication related translations

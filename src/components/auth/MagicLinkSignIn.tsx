@@ -45,12 +45,12 @@ const MagicLinkSignIn: React.FC<MagicLinkSignInProps> = ({
     e.preventDefault();
     
     if (!email.trim()) {
-      setError(t.email + ' ' + t.required);
+      setError(t.feedback.email + ' ' + t.common.required);
       return;
     }
     
     if (!validateEmail(email)) {
-      setError(t.invalidEmail);
+      setError(t.auth.invalidEmail);
       return;
     }
     
@@ -99,9 +99,9 @@ const MagicLinkSignIn: React.FC<MagicLinkSignInProps> = ({
         <div className="text-center">
           <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
             <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400 mx-auto mb-2" />
-            <h3 className="font-medium text-green-700 dark:text-green-400 mb-1">{t.checkYourEmail}</h3>
+            <h3 className="font-medium text-green-700 dark:text-green-400 mb-1">{t.auth.checkYourEmail}</h3>
             <p className="text-sm text-green-600 dark:text-green-500">
-              We've sent a magic link to <strong>{email}</strong>. Click the link in the email to sign in.
+              {t.auth.passwordResetSent}
             </p>
           </div>
           
@@ -113,17 +113,17 @@ const MagicLinkSignIn: React.FC<MagicLinkSignInProps> = ({
             className="mt-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            {t.backToSignIn}
+            {t.auth.backToSignIn}
           </Button>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           <p className="text-sm text-secondary-600 dark:text-secondary-400 mb-4">
-            {t.signInWithMagicLinkDescription}
+            {t.auth.signInWithMagicLinkDescription}
           </p>
           
           <Input
-            label={t.email}
+            label={t.feedback.email}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -138,19 +138,19 @@ const MagicLinkSignIn: React.FC<MagicLinkSignInProps> = ({
               fullWidth
               isLoading={isLoading}
             >
-              {t.sendResetLink}
+              {t.auth.sendResetLink}
             </Button>
           </div>
           
           <div className="text-center mt-4">
             <p className="text-sm text-secondary-600 dark:text-secondary-400">
-              {t.rememberPassword}{' '}
+              {t.auth.rememberPassword}{' '}
               <button
                 type="button"
                 onClick={onBackToSignIn}
                 className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
               >
-                {t.backToSignIn}
+                {t.auth.backToSignIn}
               </button>
             </p>
           </div>

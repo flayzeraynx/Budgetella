@@ -360,7 +360,7 @@ const DataManagement: React.FC = () => {
       setImportProgress(100);
       
       // Show success message
-      showToast('success', t.importSuccess || 'Data imported successfully');
+      showToast('success', t.settings.importSuccess || 'Data imported successfully');
       
       // Clean up
       setImportSuccess(true);
@@ -675,7 +675,7 @@ const DataManagement: React.FC = () => {
               variant="secondary"
               leftIcon={<X className="w-4 h-4" />}
             >
-              {t.cancel}
+              {t.common.cancel}
             </Button>
             <Button
               onClick={confirmImport}
@@ -697,9 +697,9 @@ const DataManagement: React.FC = () => {
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg max-w-md w-full">
           <div className="p-4 border-b border-secondary-200 dark:border-secondary-700">
-            <h3 className="text-lg font-medium">{t.exportOptions}</h3>
+            <h3 className="text-lg font-medium">{t.settings.exportOptions}</h3>
             <p className="text-sm text-secondary-500 dark:text-secondary-400">
-              {t.selectExportData}
+              {t.settings.selectExportData}
             </p>
           </div>
           
@@ -716,7 +716,7 @@ const DataManagement: React.FC = () => {
                 className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300 rounded"
               />
               <label htmlFor="export-transactions" className="ml-2 block text-sm text-secondary-900 dark:text-secondary-100">
-              {t.transactions}
+              {t.common.transactions}
               </label>
             </div>
             
@@ -732,7 +732,7 @@ const DataManagement: React.FC = () => {
                 className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300 rounded"
               />
               <label htmlFor="export-settings" className="ml-2 block text-sm text-secondary-900 dark:text-secondary-100">
-                {t.settings}
+                {t.common.settings}
               </label>
             </div>
           </div>
@@ -742,14 +742,14 @@ const DataManagement: React.FC = () => {
               onClick={() => setShowExportOptions(false)}
               variant="secondary"
             >
-              {t.cancel}
+              {t.common.cancel}
             </Button>
             <Button
               onClick={handleExport}
               leftIcon={<Download className="w-4 h-4" />}
               isLoading={isExporting}
             >
-              {t.exportAsJSON}
+              {t.settings.exportAsJSON}
             </Button>
             <Button
               onClick={handleExportCSV}
@@ -757,7 +757,7 @@ const DataManagement: React.FC = () => {
               leftIcon={<FileSpreadsheet className="w-4 h-4" />}
               isLoading={isExporting}
             >
-              {t.exportAsCSV}
+              {t.settings.exportAsCSV}
             </Button>
           </div>
         </div>
@@ -773,9 +773,9 @@ const DataManagement: React.FC = () => {
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg max-w-md w-full">
           <div className="p-4 border-b border-secondary-200 dark:border-secondary-700">
-            <h3 className="text-lg font-medium">{t.importOptions}</h3>
+            <h3 className="text-lg font-medium">{t.settings.importOptions}</h3>
             <p className="text-sm text-secondary-500 dark:text-secondary-400">
-              {t.selectImportFormat}
+              {t.settings.selectImportFormat}
             </p>
           </div>
           
@@ -788,7 +788,7 @@ const DataManagement: React.FC = () => {
                     leftIcon={<Upload className="w-4 h-4" />}
                     fullWidth
                   >
-                    {t.importJSON || 'Import JSON'}
+                    {t.settings.importJSON || 'Import JSON'}
                   </Button>
                   <input
                     type="file"
@@ -810,7 +810,7 @@ const DataManagement: React.FC = () => {
                     leftIcon={<FileSpreadsheet className="w-4 h-4" />}
                     fullWidth
                   >
-                    {t.importCSV || 'Import CSV'}
+                    {t.settings.importCSV || 'Import CSV'}
                   </Button>
                   <input
                     type="file"
@@ -831,7 +831,7 @@ const DataManagement: React.FC = () => {
               onClick={() => setShowImportOptions(false)}
               variant="secondary"
             >
-              {t.cancel}
+              {t.common.cancel}
             </Button>
           </div>
         </div>
@@ -847,14 +847,14 @@ const DataManagement: React.FC = () => {
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-lg max-w-md w-full">
           <div className="p-4 border-b border-secondary-200 dark:border-secondary-700">
-            <h3 className="text-lg font-medium">{t.clearAllTransactions}</h3>
+            <h3 className="text-lg font-medium">{t.settings.clearAllTransactions}</h3>
           </div>
           
           <div className="p-4">
             <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-md border border-red-200 dark:border-red-800 flex items-start space-x-2">
               <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-red-700 dark:text-red-300">
-                {t.deleteConfirmMessage}
+                {t.transactions.deleteConfirmMessage}
               </div>
             </div>
           </div>
@@ -864,7 +864,7 @@ const DataManagement: React.FC = () => {
               onClick={() => setShowClearConfirmation(false)}
               variant="secondary"
             >
-              {t.cancel}
+              {t.common.cancel}
             </Button>
               <Button
                 onClick={handleClearTransactions}
@@ -872,7 +872,7 @@ const DataManagement: React.FC = () => {
                 leftIcon={<Trash2 className="w-4 h-4" />}
                 isLoading={isClearing}
               >
-                {t.clearAllTransactions}
+                {t.settings.clearAllTransactions}
               </Button>
           </div>
         </div>
@@ -884,7 +884,7 @@ const DataManagement: React.FC = () => {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium text-secondary-900 dark:text-white mb-2">
-          {t.dataManagement}
+          {t.settings.dataManagement}
         </h3>
       </div>
       
@@ -902,38 +902,38 @@ const DataManagement: React.FC = () => {
       
       {importSuccess && (
         <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-md border border-green-200 dark:border-green-800">
-          <p className="text-sm text-green-700 dark:text-green-300">{t.importSuccess}</p>
+          <p className="text-sm text-green-700 dark:text-green-300">{t.settings.importSuccess}</p>
         </div>
       )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="p-4 border border-secondary-200 dark:border-secondary-700 rounded-lg">
-          <h4 className="font-medium mb-2">{t.exportData}</h4>
+          <h4 className="font-medium mb-2">{t.settings.exportData}</h4>
           <p className="text-sm text-secondary-500 dark:text-secondary-400 mb-4">
-            {t.exportDescription || 'Download your data as a JSON or CSV file'}
+            {t.settings.exportDescription || 'Download your data as a JSON or CSV file'}
           </p>
           <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
             <Button
               onClick={() => setShowExportOptions(true)}
               leftIcon={<Download className="w-4 h-4" />}
             >
-              {t.exportOptions}
+              {t.settings.exportOptions}
             </Button>
             
           </div>
         </div>
         
         <div className="p-4 border border-secondary-200 dark:border-secondary-700 rounded-lg">
-          <h4 className="font-medium mb-2">{t.importData}</h4>
+          <h4 className="font-medium mb-2">{t.settings.importData}</h4>
           <p className="text-sm text-secondary-500 dark:text-secondary-400 mb-4">
-            {t.importDescription || 'Restore your data from a backup file'}
+            {t.settings.importDescription || 'Restore your data from a backup file'}
           </p>
           <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
             <Button
               onClick={() => setShowImportOptions(true)}
               leftIcon={<Upload className="w-4 h-4" />}
             >
-              {t.importOptions}
+              {t.settings.importOptions}
             </Button>
             
           </div>
@@ -941,16 +941,16 @@ const DataManagement: React.FC = () => {
       </div>
       
       <div className="p-4 border border-secondary-200 dark:border-secondary-700 rounded-lg">
-        <h4 className="font-medium mb-2 text-red-600 dark:text-red-400">{t.clearData}</h4>
+        <h4 className="font-medium mb-2 text-red-600 dark:text-red-400">{t.settings.clearData}</h4>
         <p className="text-sm text-secondary-500 dark:text-secondary-400 mb-4">
-          {t.permanentlyDelete}
+          {t.settings.permanentlyDelete}
         </p>
         <Button
           onClick={() => setShowClearConfirmation(true)}
           variant="danger"
           leftIcon={<Trash2 className="w-4 h-4" />}
         >
-              {t.clearAllTransactions}
+              {t.settings.clearAllTransactions}
         </Button>
       </div>
     </div>
