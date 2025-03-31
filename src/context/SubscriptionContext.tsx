@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { db, User } from '../db';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { useToast } from './ToastContext';
 
 // Define subscription status interface
 export interface SubscriptionStatus {
@@ -43,6 +44,7 @@ export const useSubscription = () => useContext(SubscriptionContext);
 // Provider component
 export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentUser } = useAuth();
+  const { showToast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>({
     isPremium: false,
@@ -87,6 +89,66 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     createUserIfNeeded();
   }, [currentUser]);
 
+  // Sync subscription data from Firestore when component mounts or user changes
+  useEffect(() => {
+    const syncSubscriptionData = async () => {
+      if (!currentUser) return;
+
+      try {
+        // Fetch subscription data from the server
+        const functionsUrl = import.meta.env.VITE_FIREBASE_FUNCTIONS_URL || 'https://us-central1-budgetella-d1d41.cloudfunctions.net';
+        const response = await fetch(`${functionsUrl}/getSubscriptionStatus?userId=${currentUser.uid}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch subscription status');
+        }
+        
+        const data = await response.json();
+        
+        console.log('Subscription data from server:', data);
+        
+        if (data.success && data.subscription) {
+          // Update the local database with the subscription data from Firestore
+          const userRecord = await db.users.get(currentUser.uid);
+          
+          if (userRecord) {
+            // Determine subscription type based on subscription ID format
+            let subscriptionType = data.subscription.type || 'none';
+            
+            // If we have a subscription ID that starts with 'sub_', it's a monthly subscription
+            if (data.subscription.id && data.subscription.id.startsWith('sub_')) {
+              subscriptionType = 'monthly';
+            }
+            
+            // Make sure we're setting isPremium correctly
+            const isPremium = data.subscription.isPremium === true ||
+                             subscriptionType === 'one-time' ||
+                             subscriptionType === 'monthly' ||
+                             (data.subscription.status === 'active' && data.subscription.id);
+            
+            const updateData = {
+              isPremium: isPremium,
+              subscriptionType: subscriptionType,
+              subscriptionId: data.subscription.id,
+              subscriptionStatus: data.subscription.status,
+              subscriptionEndDate: data.subscription.endDate ? new Date(data.subscription.endDate) : null
+            };
+            
+            console.log('Updating local database with subscription data:', updateData);
+            
+            await db.users.update(currentUser.uid, updateData);
+            
+            console.log('Subscription data synced from Firestore');
+          }
+        }
+      } catch (error) {
+        console.error('Error syncing subscription data:', error);
+      }
+    };
+    
+    syncSubscriptionData();
+  }, [currentUser]);
+
   // Update subscription status when user data changes
   useEffect(() => {
     if (!currentUser) {
@@ -102,18 +164,24 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       // Check if user is admin (always has premium access)
       const isAdmin = currentUser.email === 'flayzeraynx@gmail.com';
       
+      console.log('User data from database:', userData);
+      
       // Check subscription status
-      const isPremium = isAdmin || 
-        !!userData.isPremium || 
+      const isPremium = isAdmin ||
+        !!userData.isPremium ||
         !!(userData.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date());
       
-      setSubscriptionStatus({
+      const subscriptionData = {
         isPremium,
         subscriptionType: userData.subscriptionType || 'none',
         subscriptionId: userData.subscriptionId,
         subscriptionEndDate: userData.subscriptionEndDate,
         subscriptionStatus: userData.subscriptionStatus,
-      });
+      };
+      
+      console.log('Setting subscription status:', subscriptionData);
+      
+      setSubscriptionStatus(subscriptionData);
       setIsLoading(false);
     }
   }, [currentUser, userData]);
@@ -124,6 +192,8 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     
     // Admin always has premium access
     if (currentUser.email === 'flayzeraynx@gmail.com') return true;
+    
+    console.log('Checking if premium:', subscriptionStatus);
     
     return subscriptionStatus.isPremium;
   };
