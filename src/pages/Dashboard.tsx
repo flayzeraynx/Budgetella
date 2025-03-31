@@ -197,9 +197,9 @@ const Dashboard: React.FC = () => {
                 hideAmounts
               )}
             </div>
-            <p className="text-secondary-500 dark:text-secondary-400 mt-2">
-              {t.dashboard.totalMoneyOut || 'Total money out'}
-            </p>
+              <p className="text-secondary-500 dark:text-secondary-400 mt-2">
+                {t.dashboard.totalMoneyOut}
+              </p>
           </CardContent>
         </Card>
       </div>

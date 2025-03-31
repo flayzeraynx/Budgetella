@@ -36,20 +36,20 @@ const PremiumFeatureGate: React.FC<PremiumFeatureGateProps> = ({
     <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-md p-4 text-center">
       <div className="mb-4">
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-300">
-          {t.premium || 'Premium'}
+          {t.premium.premium}
         </span>
       </div>
       <h3 className="text-lg font-medium text-secondary-900 dark:text-white mb-2">
-        {t.premiumFeature || 'Premium Feature'}
+        {t.premium.premiumFeature}
       </h3>
       <p className="text-secondary-500 dark:text-secondary-400 mb-4">
-        {t.premiumFeatureDescription || 'This feature is available to premium users only.'}
+        {t.premium.premiumFeatureDescription}
       </p>
       <Button
         onClick={() => navigate('/pricing')}
         className="w-full"
       >
-        {t.upgradeNow || 'Upgrade Now'}
+        {t.premium.upgradeNow}
       </Button>
     </div>
   );

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, getCurrentSettings, updateDefaultCategoryNames } from '../db';
-import { getTranslations, Translations, Language } from '../i18n';
+import { Translations, Language } from '../i18n';
 import { translations } from '../i18n';
 
 interface TranslationContextType {
@@ -19,11 +19,25 @@ const TranslationContext = createContext<TranslationContextType>({
 export const useTranslation = () => useContext(TranslationContext);
 
 export const TranslationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [translations, setTranslations] = useState<Translations>(getTranslations('en'));
+  const [translationData, setTranslationData] = useState<Translations>(translations.en);
   const [currentCurrency, setCurrentCurrency] = useState<string>('USD');
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   
   const settings = useLiveQuery(() => db.settings.toArray());
+  
+  // Function to directly get translations without fallback
+  const getDirectTranslations = (language: Language): Translations => {
+    switch (language) {
+      case 'en':
+        return translations.en;
+      case 'tr':
+        return translations.tr;
+      case 'de':
+        return translations.de;
+      default:
+        return translations.en;
+    }
+  };
   
   useEffect(() => {
     const loadSettings = async () => {
@@ -34,7 +48,7 @@ export const TranslationProvider: React.FC<{ children: React.ReactNode }> = ({ c
         
         setCurrentCurrency(currency);
         setCurrentLanguage(language);
-        setTranslations(getTranslations(language));
+        setTranslationData(getDirectTranslations(language));
         
         // Update default category names on initial load
         await updateDefaultCategoryNames();
@@ -54,7 +68,7 @@ export const TranslationProvider: React.FC<{ children: React.ReactNode }> = ({ c
       // Update currency, language and translations
       setCurrentCurrency(currency);
       setCurrentLanguage(language);
-      setTranslations(getTranslations(language));
+      setTranslationData(getDirectTranslations(language));
       
       // Update default category names when language changes
       updateDefaultCategoryNames().catch(error => {
@@ -64,7 +78,7 @@ export const TranslationProvider: React.FC<{ children: React.ReactNode }> = ({ c
   }, [settings]);
   
   return (
-    <TranslationContext.Provider value={{ t: translations, currentCurrency, currentLanguage }}>
+    <TranslationContext.Provider value={{ t: translationData, currentCurrency, currentLanguage }}>
       {children}
     </TranslationContext.Provider>
   );

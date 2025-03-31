@@ -83,7 +83,7 @@ const Pricing: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold text-center mb-8 text-secondary-900 dark:text-white">
-        {t.pricing}
+        {t.premium.pricing}
       </h1>
 
       {isPremium && (
@@ -99,10 +99,10 @@ const Pricing: React.FC = () => {
         <Card className="relative overflow-hidden">
           <div className="p-6">
             <h2 className="text-xl font-semibold mb-2 text-secondary-900 dark:text-white">
-              {t.freeFeatures}
+              {t.premium.freeFeatures}
             </h2>
             <p className="text-3xl font-bold mb-6 text-secondary-900 dark:text-white">
-              $0 <span className="text-sm font-normal text-secondary-500 dark:text-secondary-400">/ {t.forever || 'forever'}</span>
+              $0 <span className="text-sm font-normal text-secondary-500 dark:text-secondary-400">/ {t.premium.forever}</span>
             </p>
             <div className="space-y-3 mb-6">
               {freeFeatures.map((feature, index) => (
@@ -117,7 +117,7 @@ const Pricing: React.FC = () => {
               className="w-full"
               disabled={true}
             >
-              {t.currentPlan}
+              {t.premium.currentPlan}
             </Button>
           </div>
         </Card>
@@ -125,11 +125,11 @@ const Pricing: React.FC = () => {
         {/* Premium Plan */}
         <Card className="relative overflow-hidden border-primary-500 dark:border-primary-400">
           <div className="absolute top-0 right-0 bg-primary-500 text-white px-3 py-1 text-sm font-medium">
-            {t.recommended || 'Recommended'}
+            {t.premium.recommended}
           </div>
           <div className="p-6">
             <h2 className="text-xl font-semibold mb-2 text-secondary-900 dark:text-white">
-              {t.premiumFeatures}
+              {t.premium.premiumFeatures}
             </h2>
             
             <div className="flex flex-col space-y-4 mb-6">
@@ -137,17 +137,17 @@ const Pricing: React.FC = () => {
               <div className="border border-secondary-200 dark:border-secondary-700 rounded-lg p-4">
                 <div className="flex items-center mb-2">
                   <CreditCard className="h-5 w-5 text-primary-500 mr-2" />
-                  <h3 className="font-medium text-secondary-900 dark:text-white">{t.oneTimePayment}</h3>
+                  <h3 className="font-medium text-secondary-900 dark:text-white">{t.premium.oneTimePayment}</h3>
                 </div>
                 <p className="text-2xl font-bold mb-2 text-secondary-900 dark:text-white">
-                  $10 <span className="text-sm font-normal text-secondary-500 dark:text-secondary-400">/ {t.oneTime || 'one-time'}</span>
+                  $10 <span className="text-sm font-normal text-secondary-500 dark:text-secondary-400">/ {t.premium.oneTime}</span>
                 </p>
                 <Button
                   className="w-full"
                   onClick={handleOneTimePayment}
                   disabled={isPremium || isProcessing}
                 >
-                  {isPremium ? t.currentPlan : t.upgradeNow}
+                  {isPremium ? t.premium.currentPlan : t.premium.upgradeNow}
                 </Button>
               </div>
               
@@ -155,10 +155,10 @@ const Pricing: React.FC = () => {
               <div className="border border-secondary-200 dark:border-secondary-700 rounded-lg p-4">
                 <div className="flex items-center mb-2">
                   <Calendar className="h-5 w-5 text-primary-500 mr-2" />
-                  <h3 className="font-medium text-secondary-900 dark:text-white">{t.monthlySubscription}</h3>
+                  <h3 className="font-medium text-secondary-900 dark:text-white">{t.premium.monthlySubscription}</h3>
                 </div>
                 <p className="text-2xl font-bold mb-2 text-secondary-900 dark:text-white">
-                  $1 <span className="text-sm font-normal text-secondary-500 dark:text-secondary-400">/ {t.monthlyLabel || 'month'}</span>
+                  $1 <span className="text-sm font-normal text-secondary-500 dark:text-secondary-400">/ {t.premium.monthlyLabel}</span>
                 </p>
                 <Button
                   className="w-full"
@@ -166,7 +166,7 @@ const Pricing: React.FC = () => {
                   onClick={handleMonthlySubscription}
                   disabled={isPremium || isProcessing}
                 >
-                  {isPremium ? t.currentPlan : t.upgradeNow}
+                  {isPremium ? t.premium.currentPlan : t.premium.upgradeNow}
                 </Button>
               </div>
             </div>

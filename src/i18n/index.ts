@@ -15,12 +15,12 @@ export const translations = {
 // Function to get translations based on language
 export function getTranslations(language: string): Translations {
   switch (language) {
-    case 'en':
-      return translations.en;
+    case 'tr':
+      return translations.tr;
     case 'de':
       return translations.de;
-    case 'tr':
+    case 'en':
     default:
-      return translations.tr;
+      return translations.en;
   }
 }

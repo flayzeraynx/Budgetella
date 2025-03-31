@@ -302,15 +302,15 @@ const CombinedFinancialChart: React.FC<CombinedFinancialChartProps> = ({
   return (
     <Card>
       <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-        <CardTitle>{t.balanceSummary || 'Financial Charts'}</CardTitle>
+        <CardTitle>{t.dashboard.balanceSummary}</CardTitle>
         <div className="mt-2 sm:mt-0">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList>
               <TabsTrigger value="income-expense">
-                {t.income} vs {t.expense}
+                {t.dashboard.income} vs {t.dashboard.expense}
               </TabsTrigger>
               <TabsTrigger value="expense-breakdown">
-                {t.expense} {t.category}
+                {t.dashboard.expense} {t.transactions.category}
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -329,8 +329,8 @@ const CombinedFinancialChart: React.FC<CombinedFinancialChartProps> = ({
                 onChange={(e) => setShowOnlyCompleted(e.target.value === 'completed')}
                 className="text-xs rounded-md border border-secondary-300 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-secondary-900 dark:text-white focus:ring-primary-500 focus:border-primary-500 px-2 py-1"
               >
-                <option value="completed">{t.completed || 'Completed'} {t.expense}</option>
-                <option value="all">{t.allTypes || 'All'} {t.expense}</option>
+                <option value="completed">{t.transactions.completed} {t.dashboard.expense}</option>
+                <option value="all">{t.transactions.allTypes} {t.dashboard.expense}</option>
               </select>
             </div>
             
@@ -340,7 +340,7 @@ const CombinedFinancialChart: React.FC<CombinedFinancialChartProps> = ({
               ) : (
                 <div className="h-full flex items-center justify-center">
                   <p className="text-secondary-500 dark:text-secondary-400">
-                  {t.noExpenseData}
+                  {t.dashboard.noExpenseData}
                   </p>
                 </div>
               )}
