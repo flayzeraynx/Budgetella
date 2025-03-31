@@ -62,9 +62,10 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setIsLoading(true);
       setError(null);
       
-      // Get current settings from local database to preserve language preference
+      // Get current settings from local database to preserve language preference and currency
       const currentSettings = await db.settings.toArray();
       const currentCurrency = currentSettings.length > 0 ? currentSettings[0].currency : 'USD';
+      const currentLanguage = currentSettings.length > 0 ? currentSettings[0].language : 'tr';
       
       // Get data from Firebase
       const [userTransactions, userCategories, userSettings] = await Promise.all([
@@ -89,14 +90,21 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         await db.categories.bulkAdd(userCategories);
       }
       
-      // Add settings, preserving the current currency if it exists
+      // Add settings, preserving the current currency and language if they exist
       if (Object.keys(userSettings).length > 0) {
-        // Preserve the current currency setting
-        const mergedSettings = { ...userSettings, currency: currentCurrency };
+        // Preserve the current currency and language settings
+        const mergedSettings = {
+          ...userSettings,
+          currency: currentCurrency,
+          language: currentLanguage
+        };
         await db.settings.add(mergedSettings);
         setSettings(mergedSettings);
       } else {
-        const defaultSettings = { currency: currentCurrency };
+        const defaultSettings = {
+          currency: currentCurrency,
+          language: currentLanguage
+        };
         await db.settings.add(defaultSettings);
         setSettings(defaultSettings);
       }
@@ -167,15 +175,20 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           }
         );
 
-        // Get current settings to preserve currency
+        // Get current settings to preserve currency and language
         const currentSettings = await db.settings.toArray();
         const currentCurrency = currentSettings.length > 0 ? currentSettings[0].currency : 'USD';
+        const currentLanguage = currentSettings.length > 0 ? currentSettings[0].language : 'tr';
         
         unsubscribeSettings = firebaseDB.onSettingsChange(
           currentUser.uid,
           async (updatedSettings) => {
-            // Preserve the current currency setting
-            const mergedSettings = { ...updatedSettings, currency: currentCurrency };
+            // Preserve the current currency and language settings
+            const mergedSettings = {
+              ...updatedSettings,
+              currency: currentCurrency,
+              language: currentLanguage
+            };
             setSettings(mergedSettings);
             
             // Update local database
