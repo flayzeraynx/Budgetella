@@ -29,7 +29,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
   const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
   const [isLogoutConfirmationOpen, setIsLogoutConfirmationOpen] = useState(false);
   const { currentUser, signOut } = useAuth();
-  const { checkIfPremium } = useSubscription();
+  const { subscriptionStatus, checkIfPremium } = useSubscription(); // Get full status
   const settings = useLiveQuery(() => db.settings.toArray()) || [{ currency: 'TRY' }];
   const currency = settings[0]?.currency || 'TRY';
   
@@ -110,19 +110,21 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
               <Home className="w-5 h-5" />
             </Link>
             
-            {/* Pricing */}
-            <Link
-              to="/pricing"
-              className={`flex items-center px-2 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive('/pricing')
-                  ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
-                  : 'text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800'
-              }`}
-              aria-label="Pricing"
-              title={t.premium.pricing}
-            >
-              <Crown className="w-5 h-5" />
-            </Link>
+            {/* Pricing - Hide if user has one-time payment */}
+            {subscriptionStatus.subscriptionType !== 'one-time' && (
+              <Link
+                to="/pricing"
+                className={`flex items-center px-2 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive('/pricing')
+                    ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
+                    : 'text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800'
+                }`}
+                aria-label="Pricing"
+                title={t.premium.pricing}
+              >
+                <Crown className="w-5 h-5" />
+              </Link>
+            )}
             
             {/* Settings */}
             <Link
@@ -291,19 +293,21 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
               {t.common.settings}
             </Link>
             
-            {/* Pricing (Mobile) */}
-            <Link
-              to="/pricing"
-              className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${
-                isActive('/pricing')
-                  ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
-                  : 'text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800'
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <Crown className="w-5 h-5 mr-3" />
-              {t.premium.pricing}
-            </Link>
+            {/* Pricing (Mobile) - Hide if user has one-time payment */}
+            {subscriptionStatus.subscriptionType !== 'one-time' && (
+              <Link
+                to="/pricing"
+                className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${
+                  isActive('/pricing')
+                    ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
+                    : 'text-secondary-600 hover:bg-secondary-100 dark:text-secondary-300 dark:hover:bg-secondary-800'
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Crown className="w-5 h-5 mr-3" />
+                {t.premium.pricing}
+              </Link>
+            )}
             
             {/* Language */}
             <button
