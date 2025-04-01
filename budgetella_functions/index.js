@@ -398,17 +398,36 @@ exports.handleStripeWebhook = functions.https.onRequest(async (req, res) => {
         const subscriptionType = session.metadata.subscriptionType;
         
         if (subscriptionType === 'one-time') {
-          // Handle one-time payment
-          await admin.firestore().collection('users').doc(userId).set({
+          // Handle one-time payment - potentially upgrading from monthly
+          logger.info(`Processing one-time payment for user ${userId}`);
+          
+          // 1. Get current user data to check for existing monthly subscription
+          const userDocRef = admin.firestore().collection('users').doc(userId);
+          const userDoc = await userDocRef.get();
+          const userData = userDoc.data();
+
+          // 2. If user exists and has a monthly subscription ID, cancel it
+          if (userData && userData.subscriptionType === 'monthly' && userData.subscriptionId) {
+            try {
+              logger.info(`User ${userId} upgrading from monthly (${userData.subscriptionId}) to one-time. Cancelling monthly subscription.`);
+              await stripe.subscriptions.cancel(userData.subscriptionId);
+              logger.info(`Successfully cancelled monthly subscription ${userData.subscriptionId} for user ${userId}`);
+            } catch (cancelError) {
+              logger.error(`Failed to cancel existing monthly subscription ${userData.subscriptionId} for user ${userId} during one-time upgrade:`, cancelError);
+              // Continue with the upgrade even if cancellation fails, but log the error.
+            }
+          }
+
+          // 3. Update Firestore for one-time purchase (lifetime access)
+          await userDocRef.set({
             isPremium: true,
             subscriptionType: 'one-time',
-            subscriptionStatus: 'active',
-            subscriptionEndDate: admin.firestore.Timestamp.fromDate(
-              new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year from now
-            )
+            subscriptionStatus: 'active', // One-time is always active
+            subscriptionId: null, // Clear any previous monthly ID
+            subscriptionEndDate: null // One-time has no end date
           }, { merge: true });
           
-          logger.info(`One-time payment completed for user ${userId}`);
+          logger.info(`Firestore updated for one-time payment completion for user ${userId}`);
         }
         
         break;

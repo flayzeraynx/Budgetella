@@ -122,17 +122,19 @@ const SubscriptionManagement: React.FC = () => {
           </div>
           <div className="border-t border-secondary-200 dark:border-secondary-700 my-2"></div>
 
-          {subscriptionStatus.subscriptionEndDate && (
-            <div className="flex justify-between items-center">
-              <span className="text-secondary-700 dark:text-secondary-300">{t.premium.expirationDate}</span>
-              <span className="font-medium text-secondary-900 dark:text-white">
-                {formatDate(subscriptionStatus.subscriptionEndDate)}
-              </span>
-            </div>
-          )}
-          
-          {subscriptionStatus.subscriptionEndDate && (
-            <div className="border-t border-secondary-200 dark:border-secondary-700 my-2"></div>
+          {/* Only show expiration date for non-active monthly subscriptions (e.g., cancelled grace period) */}
+          {subscriptionStatus.subscriptionType === 'monthly' &&
+           subscriptionStatus.subscriptionStatus !== 'active' &&
+           subscriptionStatus.subscriptionEndDate && (
+            <>
+              <div className="flex justify-between items-center">
+                <span className="text-secondary-700 dark:text-secondary-300">{t.premium.expirationDate}</span>
+                <span className="font-medium text-secondary-900 dark:text-white">
+                  {formatDate(subscriptionStatus.subscriptionEndDate)}
+                </span>
+              </div>
+              <div className="border-t border-secondary-200 dark:border-secondary-700 my-2"></div>
+            </>
           )}
       
           <div className="pt-3 space-y-3">
