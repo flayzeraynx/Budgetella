@@ -70,4 +70,5 @@ export const premium: PremiumTranslations = {
   // Premium marketing messages
   premiumValueProposition: 'Schalten Sie Premium-Funktionen frei und halten Sie Ihre Finanzdaten sicher und von jedem Gerät aus zugänglich.',
   signInToSaveData: 'Melden Sie sich an, um Ihre Daten in der Cloud zu speichern und auf erweiterte Funktionen wie benutzerdefinierte Kategorien und unbegrenzten Transaktionsverlauf zuzugreifen.',
+  upgradeToPremiumUnlock: 'Steigen Sie auf Premium um, um alle Funktionen freizuschalten und unbegrenzten Zugriff auf Ihre Finanzdaten zu erhalten.',
 };

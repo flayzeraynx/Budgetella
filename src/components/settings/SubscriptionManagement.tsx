@@ -206,7 +206,7 @@ const SubscriptionManagement: React.FC = () => {
                   {t.premium.active}
                 </span>
               ) : (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-400 dark:text-gray-800">
                   {t.premium.inactive}
                 </span>
               )}
@@ -225,16 +225,6 @@ const SubscriptionManagement: React.FC = () => {
                   ? `$1 / ${t.premium.monthlySubscription}`
                   : t.premium.none}
               </span>
-              
-              {subscriptionStatus.subscriptionType === 'monthly' && (
-                <a
-                  href={window.location.origin + '/pricing'}
-                  className="mt-2 flex items-center text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
-                >
-                  <ArrowUpCircle className="w-4 h-4 mr-1" />
-                  {t.premium.upgradeToPremium}
-                </a>
-              )}
             </div>
           </div>
           <div className="border-t border-secondary-200 dark:border-secondary-700 my-2"></div>
@@ -251,85 +241,17 @@ const SubscriptionManagement: React.FC = () => {
           {subscriptionStatus.subscriptionEndDate && (
             <div className="border-t border-secondary-200 dark:border-secondary-700 my-2"></div>
           )}
-          
-          {/* Force update button for active subscription */}
-          {subscriptionStatus.subscriptionId && subscriptionStatus.subscriptionStatus === 'active' && !subscriptionStatus.isPremium && (
-            <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-              <p className="text-yellow-700 dark:text-yellow-300 mb-2">
-                Your subscription appears to be active but your premium status is not updated. Click the button below to fix this issue.
-              </p>
-              <Button
-                onClick={async () => {
-                  try {
-                    if (!currentUser) {
-                      showToast('error', 'You must be logged in to update your premium status');
-                      return;
-                    }
-                    
-                    const db = (await import('../../db')).db;
-                    await db.users.update(currentUser.uid, {
-                      isPremium: true,
-                      subscriptionType: 'monthly',
-                      subscriptionEndDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
-                    });
-                    
-                    showToast('success', 'Premium status updated successfully');
-                    
-                    // Force a page reload to update the UI
-                    window.location.reload();
-                  } catch (error: any) {
-                    setError(error.message || 'Failed to update premium status');
-                    showToast('error', 'Failed to update premium status');
-                  }
-                }}
-                className="w-full mt-2"
-              >
-                Fix Premium Status
-              </Button>
-            </div>
-          )}
-          
-          {/* Force update button for one-time payment */}
-          <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <p className="text-blue-700 dark:text-blue-300 mb-2">
-              If you've made a one-time payment but your subscription status hasn't updated, click the button below to manually update your status.
-            </p>
-            <Button
-              onClick={async () => {
-                try {
-                  if (!currentUser) {
-                    showToast('error', 'You must be logged in to update your premium status');
-                    return;
-                  }
-                  
-                  const db = (await import('../../db')).db;
-                  await db.users.update(currentUser.uid, {
-                    isPremium: true,
-                    subscriptionType: 'one-time',
-                    subscriptionStatus: 'active',
-                    subscriptionEndDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year from now
-                  });
-                  
-                  showToast('success', 'Premium status updated successfully');
-                  
-                  // Force a page reload to update the UI
-                  window.location.reload();
-                } catch (error: any) {
-                  setError(error.message || 'Failed to update premium status');
-                  showToast('error', 'Failed to update premium status');
-                }
-              }}
-              className="w-full mt-2"
-            >
-              Update to One-Time Premium
-            </Button>
-          </div>
-          
-
+      
           <div className="pt-3 space-y-3">
-            <p className="text-secondary-700 dark:text-secondary-300 mb-2">
-              {getStatusText()}
-            </p>
+            {subscriptionStatus.subscriptionType === 'none' && 'monthly' && (
+                <a
+                  href={window.location.origin + '/pricing'}
+                  className="mt-2 flex items-center text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
+                >
+                  <ArrowUpCircle className="w-4 h-4 mr-1" />
+                  {getStatusText()} {t.premium.upgradeToPremium}
+                </a>
+              )}
 
             {subscriptionStatus.isPremium && subscriptionStatus.subscriptionType === 'monthly' && (
               <div className="space-y-4">

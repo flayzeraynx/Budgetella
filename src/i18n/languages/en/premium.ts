@@ -69,4 +69,5 @@ export const premium: PremiumTranslations = {
   // Premium marketing messages
   premiumValueProposition: 'Unlock premium features and keep your financial data secure and accessible from any device.',
   signInToSaveData: 'Sign in to save your data to the cloud and access advanced features like custom categories and unlimited transaction history.',
+  upgradeToPremiumUnlock: 'Upgrade to premium to unlock all features and get unlimited access to your financial data.',
 };

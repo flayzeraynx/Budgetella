@@ -29,7 +29,7 @@ export const premium: PremiumTranslations = {
   subscriptionType: 'Abonelik Türü',
   none: 'Yok',
   expirationDate: 'Bitiş Tarihi',
-  noActiveSubscription: 'Aktif bir aboneliğiniz yok. Tüm özelliklere erişmek için premium\'a yükseltin.',
+  noActiveSubscription: 'Aktif bir aboneliğiniz yok. Tüm özelliklere erişmek için',
   oneTimeSubscriptionActive: 'Tek seferlik ödeme aboneliğiniz aktif. Premium özelliklere ömür boyu erişiminiz var.',
   monthlySubscriptionActive: 'Aylık aboneliğiniz aktif. Premium erişim için aylık olarak ücretlendirileceksiniz.',
   subscriptionActive: 'Aboneliğiniz aktif. Tüm premium özelliklerin keyfini çıkarın!',
@@ -70,4 +70,5 @@ export const premium: PremiumTranslations = {
   // Premium marketing messages
   premiumValueProposition: 'Premium özellikleri açın ve finansal verilerinizi güvende tutun ve herhangi bir cihazdan erişilebilir hale getirin.',
   signInToSaveData: 'Verilerinizi buluta kaydetmek ve özel kategoriler ve sınırsız işlem geçmişi gibi gelişmiş özelliklere erişmek için giriş yapın.',
+  upgradeToPremiumUnlock: 'Tüm özelliklerin kilidini açmak ve finansal verilerinize sınırsız erişim elde etmek için premium\'a yükseltin.',
 };

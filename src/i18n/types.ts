@@ -312,6 +312,7 @@ export interface PremiumTranslations {
   // Premium marketing messages
   premiumValueProposition: string;
   signInToSaveData: string;
+  upgradeToPremiumUnlock: string;
 }
 
 // Feedback form translations
