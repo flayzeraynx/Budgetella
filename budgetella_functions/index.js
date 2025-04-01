@@ -477,15 +477,25 @@ exports.handleStripeWebhook = functions.https.onRequest(async (req, res) => {
         const userId = await getUserIdFromCustomerId(subscription.customer);
         
         if (userId) {
-          await admin.firestore().collection('users').doc(userId).set({
-            isPremium: false,
-            subscriptionType: 'none',
-            subscriptionId: null,
-            subscriptionStatus: 'canceled',
-            subscriptionEndDate: null
-          }, { merge: true });
-          
-          logger.info(`Subscription canceled for user ${userId}`);
+          // Check if the user already has a one-time subscription.
+          // If so, this cancellation is likely part of an upgrade, so don't revert their status.
+          const userDocRef = admin.firestore().collection('users').doc(userId);
+          const userDoc = await userDocRef.get();
+          const userData = userDoc.data();
+
+          if (userData && userData.subscriptionType === 'one-time') {
+            logger.info(`Subscription ${subscription.id} deleted for user ${userId}, but user already has one-time status. No Firestore update needed.`);
+          } else {
+            // User does not have one-time status, so proceed with setting non-premium.
+            logger.info(`Subscription ${subscription.id} deleted for user ${userId}. Setting Firestore status to non-premium.`);
+            await userDocRef.set({
+              isPremium: false,
+              subscriptionType: 'none',
+              subscriptionId: null, // Ensure ID is cleared
+              subscriptionStatus: 'canceled',
+              subscriptionEndDate: null // Ensure end date is cleared
+            }, { merge: true });
+          }
         }
         
         break;
