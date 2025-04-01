@@ -89,68 +89,68 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     createUserIfNeeded();
   }, [currentUser]);
 
+  // Define sync function using useCallback
+  const syncSubscriptionData = React.useCallback(async () => {
+    if (!currentUser) return;
+
+    try {
+      // Fetch subscription data from the server
+      const functionsUrl = import.meta.env.VITE_FIREBASE_FUNCTIONS_URL || 'https://us-central1-budgetella-d1d41.cloudfunctions.net';
+      const response = await fetch(`${functionsUrl}/getSubscriptionStatus?userId=${currentUser.uid}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch subscription status');
+      }
+      
+      const data = await response.json();
+      
+      console.log('Subscription data from server:', data);
+      
+      if (data.success && data.subscription) {
+        // Update the local database with the subscription data from Firestore
+        const userRecord = await db.users.get(currentUser.uid);
+        
+        if (userRecord) {
+          // Determine subscription type and status directly from server data if available
+          const subscriptionType = data.subscription.type ||
+                                   (data.subscription.id && data.subscription.id.startsWith('sub_') ? 'monthly' : 'none');
+          const subscriptionStatusFromServer = data.subscription.status; // e.g., 'active', 'canceled'
+          const subscriptionEndDate = data.subscription.endDate ? new Date(data.subscription.endDate) : null;
+
+          // Determine premium status based on server data
+          const isPremiumValue = data.subscription.isPremium === true ||
+                                 subscriptionType === 'one-time' ||
+                                 (subscriptionType === 'monthly' && subscriptionStatusFromServer === 'active') ||
+                                 (subscriptionEndDate && subscriptionEndDate > new Date());
+
+          // Explicitly type updateData and ensure isPremium is boolean
+          const updateData: Partial<User> = {
+            isPremium: !!isPremiumValue, // Ensure boolean type
+            subscriptionType: subscriptionType,
+            subscriptionId: data.subscription.id,
+            subscriptionStatus: subscriptionStatusFromServer,
+            subscriptionEndDate: subscriptionEndDate
+          };
+          
+          console.log('Updating local database with subscription data:', updateData);
+          
+          await db.users.update(currentUser.uid, updateData);
+          
+          console.log('Subscription data synced from Firestore');
+        }
+      }
+    } catch (error) {
+      console.error('Error syncing subscription data:', error);
+    }
+  }, [currentUser]); // Add dependencies for useCallback
+
   // Sync subscription data from Firestore when component mounts or user changes
   useEffect(() => {
-    const syncSubscriptionData = async () => {
-      if (!currentUser) return;
-
-      try {
-        // Fetch subscription data from the server
-        const functionsUrl = import.meta.env.VITE_FIREBASE_FUNCTIONS_URL || 'https://us-central1-budgetella-d1d41.cloudfunctions.net';
-        const response = await fetch(`${functionsUrl}/getSubscriptionStatus?userId=${currentUser.uid}`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch subscription status');
-        }
-        
-        const data = await response.json();
-        
-        console.log('Subscription data from server:', data);
-        
-        if (data.success && data.subscription) {
-          // Update the local database with the subscription data from Firestore
-          const userRecord = await db.users.get(currentUser.uid);
-          
-          if (userRecord) {
-            // Determine subscription type based on subscription ID format or the type from server
-            let subscriptionType = data.subscription.type || 'none';
-            
-            // If we have a subscription ID that starts with 'sub_', it's a monthly subscription
-            if (data.subscription.id && data.subscription.id.startsWith('sub_')) {
-              subscriptionType = 'monthly';
-            } else if (data.subscription.type === 'one-time') {
-              subscriptionType = 'one-time';
-            }
-            
-            // Make sure we're setting isPremium correctly
-            const isPremium = data.subscription.isPremium === true ||
-                             subscriptionType === 'one-time' ||
-                             subscriptionType === 'monthly' ||
-                             (data.subscription.status === 'active' && data.subscription.id) ||
-                             (data.subscription.type === 'one-time');
-            
-            const updateData = {
-              isPremium: isPremium,
-              subscriptionType: subscriptionType,
-              subscriptionId: data.subscription.id,
-              subscriptionStatus: data.subscription.status,
-              subscriptionEndDate: data.subscription.endDate ? new Date(data.subscription.endDate) : null
-            };
-            
-            console.log('Updating local database with subscription data:', updateData);
-            
-            await db.users.update(currentUser.uid, updateData);
-            
-            console.log('Subscription data synced from Firestore');
-          }
-        }
-      } catch (error) {
-        console.error('Error syncing subscription data:', error);
-      }
-    };
+    // Call the memoized sync function
+    // Call the memoized sync function defined above
     
     syncSubscriptionData();
-  }, [currentUser]);
+  }, [currentUser, syncSubscriptionData]); // Add syncSubscriptionData as dependency
 
   // Update subscription status when user data changes
   useEffect(() => {
@@ -169,13 +169,9 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       
       console.log('User data from database:', userData);
       
-      // Check subscription status
-      const isPremium = isAdmin ||
-        !!userData.isPremium ||
-        !!(userData.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date());
-      
-      const subscriptionData = {
-        isPremium,
+      // Directly use the data fetched and stored in Dexie by the sync function
+      const subscriptionData: SubscriptionStatus = {
+        isPremium: isAdmin || !!userData.isPremium, // Admin override + Dexie value
         subscriptionType: userData.subscriptionType || 'none',
         subscriptionId: userData.subscriptionId,
         subscriptionEndDate: userData.subscriptionEndDate,
@@ -188,6 +184,26 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setIsLoading(false);
     }
   }, [currentUser, userData]);
+
+  // Handle payment success redirects
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+    // const paymentType = urlParams.get('type'); // Type might not be needed if sync handles it
+
+    if (paymentStatus === 'success' && currentUser) {
+      console.log('Payment success detected, triggering sync...');
+      // Payment was successful, trigger sync with the server
+      syncSubscriptionData(); // Call the existing sync function
+
+      // Remove the query parameter from the URL without reloading
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+      
+      // Optionally show a toast message
+      showToast('success', 'Subscription status updated successfully!');
+    }
+  }, [currentUser, showToast, syncSubscriptionData]); // Add syncSubscriptionData as dependency
 
   // Check if user has premium access
   const checkIfPremium = (): boolean => {

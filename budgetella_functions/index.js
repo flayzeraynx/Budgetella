@@ -12,7 +12,7 @@ const nodemailer = require("nodemailer");
 require('dotenv').config();
 
 // Initialize Stripe with API key
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const stripe = require("stripe")(functions.config().stripe.secret_key);
 
 // Configure CORS to allow requests from your Firebase hosting domain
 const cors = require("cors")({
