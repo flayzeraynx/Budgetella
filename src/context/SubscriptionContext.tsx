@@ -3,6 +3,7 @@ import { useAuth } from './AuthContext';
 import { db, User } from '../db';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useToast } from './ToastContext';
+import { useTranslation } from './TranslationContext'; // Import useTranslation
 
 // Define subscription status interface
 export interface SubscriptionStatus {
@@ -45,6 +46,7 @@ export const useSubscription = () => useContext(SubscriptionContext);
 export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentUser } = useAuth();
   const { showToast } = useToast();
+  const { t } = useTranslation(); // Get the t function
   const [isLoading, setIsLoading] = useState(true);
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>({
     isPremium: false,
@@ -201,7 +203,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       window.history.replaceState({}, document.title, newUrl);
       
       // Optionally show a toast message
-      showToast('success', 'Subscription status updated successfully!');
+      showToast('success', t.premium.subscriptionStatusUpdated); // Use translation key
     }
   }, [currentUser, showToast, syncSubscriptionData]); // Add syncSubscriptionData as dependency
 

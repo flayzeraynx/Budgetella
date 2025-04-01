@@ -313,6 +313,8 @@ export interface PremiumTranslations {
   premiumValueProposition: string;
   signInToSaveData: string;
   upgradeToPremiumUnlock: string;
+  subscriptionStatusUpdated: string; // Added for toast message
+  accessEndsOn: string; // Added for cancelled monthly end date display
 }
 
 // Feedback form translations

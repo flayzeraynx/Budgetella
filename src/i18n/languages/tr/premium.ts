@@ -71,4 +71,6 @@ export const premium: PremiumTranslations = {
   premiumValueProposition: 'Premium özellikleri açın ve finansal verilerinizi güvende tutun ve herhangi bir cihazdan erişilebilir hale getirin.',
   signInToSaveData: 'Verilerinizi buluta kaydetmek ve özel kategoriler ve sınırsız işlem geçmişi gibi gelişmiş özelliklere erişmek için giriş yapın.',
   upgradeToPremiumUnlock: 'Tüm özelliklerin kilidini açmak ve finansal verilerinize sınırsız erişim elde etmek için premium\'a yükseltin.',
+  subscriptionStatusUpdated: 'Abonelik durumu başarıyla güncellendi!',
+  accessEndsOn: 'Erişim bitiş tarihi: {date}',
 };

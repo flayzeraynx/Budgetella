@@ -118,6 +118,14 @@ const SubscriptionManagement: React.FC = () => {
                   ? `$1 / ${t.premium.monthlySubscription}`
                   : t.premium.none}
               </span>
+              {/* Show end date info for cancelled monthly subscriptions */}
+              {subscriptionStatus.subscriptionType === 'monthly' &&
+               subscriptionStatus.subscriptionStatus !== 'active' &&
+               subscriptionStatus.subscriptionEndDate && (
+                <p className="text-xs text-secondary-500 dark:text-secondary-400 mt-1">
+                  {t.premium.accessEndsOn.replace('{date}', formatDate(subscriptionStatus.subscriptionEndDate))}
+                </p>
+              )}
             </div>
           </div>
           <div className="border-t border-secondary-200 dark:border-secondary-700 my-2"></div>
