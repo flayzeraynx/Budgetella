@@ -242,7 +242,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
       
       {/* Month Tabs */}
       <div className="mb-6">
-        <div className="flex items-center justify-center w-full bg-secondary-100 dark:bg-secondary-800 p-2 rounded-md shadow-sm border-b-2 border-secondary-200 dark:border-secondary-700 overflow-x-auto">
+        <div className="flex items-center w-full bg-secondary-100 dark:bg-secondary-800 p-2 rounded-md shadow-sm border-b-2 border-secondary-200 dark:border-secondary-700 overflow-x-auto scrollbar-hide"> {/* Removed justify-center, added scrollbar-hide (ensure this utility class exists or is added to Tailwind config if needed) */}
           {months.map(month => {
             const currentMonth = new Date().getMonth();
             const currentYear = new Date().getFullYear();
@@ -296,12 +296,12 @@ const TransactionList: React.FC<TransactionListProps> = ({
           )}
         </div>
         
-        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 space-y-2 sm:space-y-0">
+        <div className="flex flex-row flex-wrap items-center gap-2"> {/* Changed to row, wrap, and gap for better mobile layout */}
           <div className="relative w-full sm:w-auto">
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as 'all' | 'income' | 'expense')}
-              className="appearance-none block w-full sm:w-auto rounded-md border border-secondary-300 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-secondary-900 dark:text-white focus:ring-primary-500 focus:border-primary-500 px-4 py-2 pr-10"
+              className="appearance-none block w-auto rounded-md border border-secondary-300 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-secondary-900 dark:text-white focus:ring-primary-500 focus:border-primary-500 px-4 py-2 pr-10"
             >
               <option value="all">{t.transactions.allTypes || 'All Types'}</option>
               <option value="income">{t.transactions.incomeType}</option>
@@ -316,7 +316,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value as 'all' | 'completed' | 'pending' | 'planned')}
-              className="appearance-none block w-full sm:w-auto rounded-md border border-secondary-300 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-secondary-900 dark:text-white focus:ring-primary-500 focus:border-primary-500 px-4 py-2 pr-10"
+              className="appearance-none block w-auto rounded-md border border-secondary-300 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-secondary-900 dark:text-white focus:ring-primary-500 focus:border-primary-500 px-4 py-2 pr-10"
             >
               <option value="all">{t.transactions.status}: {t.transactions.allTypes}</option>
               <option value="completed">{t.transactions.completed}</option>
@@ -331,7 +331,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
           <Button 
             onClick={onAdd}
             leftIcon={<Plus className="w-4 h-4" />}
-            className="hidden sm:flex"
+            className="flex flex-shrink-0" /* Made button visible on mobile, added flex-shrink-0 */
           >
             {t.transactions.add || 'Add'}
           </Button>
