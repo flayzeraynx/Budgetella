@@ -17,4 +17,5 @@ export const common: CommonTranslations = {
   add: 'Add',
   edit: 'Edit',
   save: 'Save',
+  // Deletion related keys are defined in transactions.ts
 };

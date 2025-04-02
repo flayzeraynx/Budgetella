@@ -17,17 +17,17 @@ const safeFormatCurrency = (amount: string | number, currency: string, hideAmoun
 
 interface TransactionListProps {
   transactions: Transaction[];
-  onEdit: (transaction: Transaction) => void;
-  onDelete: (id: number) => Promise<void>;
+  onEdit: (transaction: Transaction) => void; // Restored onEdit prop
+  // onDelete prop removed
   onAdd: () => void;
   selectedYear?: number | string;
   onYearChange?: (year: number | string) => void;
 }
 
 const TransactionList: React.FC<TransactionListProps> = ({ 
-  transactions, 
-  onEdit, 
-  onDelete,
+  transactions,
+  onEdit, // Restored onEdit prop destructuring
+  // onDelete prop removed from destructuring
   onAdd,
   selectedYear: propSelectedYear,
   onYearChange
@@ -432,23 +432,32 @@ const TransactionList: React.FC<TransactionListProps> = ({
               <tbody className="bg-white dark:bg-secondary-900 divide-y divide-secondary-200 dark:divide-secondary-800">
                 {sortedTransactions.slice(0, visibleCount).map((transaction) => (
                   <React.Fragment key={transaction.id}>
-                    <tr 
-                      className="hover:bg-secondary-50 dark:hover:bg-secondary-800 cursor-pointer"
-                      onClick={() => onEdit(transaction)}
+                    <tr
+                      className="hover:bg-secondary-50 dark:hover:bg-secondary-800 cursor-pointer" /* Restored cursor-pointer */
+                      onClick={() => onEdit(transaction)} // Restored onClick
                     >
-                      <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
-                        transaction.type === 'income' 
-                          ? 'text-green-600 dark:text-green-400' 
-                          : 'text-red-600 dark:text-red-400'
-                      } ${
-                        transaction.status !== 'completed' ? 'opacity-60' : ''
-                      }`}>
+                      <td
+                        className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${ /* Removed cursor-pointer */
+                          transaction.type === 'income'
+                            ? 'text-green-600 dark:text-green-400'
+                            : 'text-red-600 dark:text-red-400'
+                        } ${
+                          transaction.status !== 'completed' ? 'opacity-60' : ''
+                        }`}
+                        /* Removed onClick */
+                      >
                         {transaction.type === 'income' ? '+' : '-'}{safeFormatCurrency(transaction.amount, currency, hideAmounts)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-900 dark:text-secondary-100">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap text-sm text-secondary-900 dark:text-secondary-100" /* Removed cursor-pointer */
+                        /* Removed onClick */
+                      >
                         {transaction.description || t.transactions.noDescription || 'No description provided'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap text-sm text-center" /* Removed cursor-pointer */
+                        /* Removed onClick */
+                      >
                         <div className="flex flex-col items-center space-y-1">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             transaction.type === 'income' 
@@ -473,35 +482,22 @@ const TransactionList: React.FC<TransactionListProps> = ({
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-900 dark:text-secondary-100">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap text-sm text-secondary-900 dark:text-secondary-100" /* Removed cursor-pointer */
+                        /* Removed onClick */
+                      >
                         {transaction.category}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-900 dark:text-secondary-100">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap text-sm text-secondary-900 dark:text-secondary-100" /* Removed cursor-pointer */
+                        /* Removed onClick */
+                      >
                         {new Date(transaction.date).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onEdit(transaction)}
-                            aria-label="Edit transaction"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              // Ensure ID is a number before calling onDelete
-                              if (typeof transaction.id === 'number') {
-                                onDelete(transaction.id);
-                              }
-                            }}
-                            aria-label="Delete transaction"
-                          >
-                            <Trash2 className="w-4 h-4 text-red-500" />
-                          </Button>
+                        <div className="flex justify-end space-x-2">
+                          {/* Edit button removed */}
+                          {/* Delete button removed */}
                         </div>
                       </td>
                     </tr>
@@ -516,8 +512,8 @@ const TransactionList: React.FC<TransactionListProps> = ({
             {sortedTransactions.slice(0, visibleCount).map((transaction) => (
               <div
                 key={transaction.id}
-                className="flex justify-between items-center py-3 cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary-800" // Removed px-4
-                onClick={() => onEdit(transaction)}
+                className="flex justify-between items-center py-3 cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary-800" // Restored cursor-pointer
+                onClick={() => onEdit(transaction)} // Restored onClick
               >
                 <div className="flex-1 mr-4 overflow-hidden"> {/* Added overflow-hidden */}
                   <p className="text-sm text-secondary-900 dark:text-secondary-100 truncate">

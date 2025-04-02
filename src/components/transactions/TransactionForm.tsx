@@ -1,30 +1,34 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { PlusCircle, Repeat, AlertTriangle } from 'lucide-react';
+import { Trash2, PlusCircle, Repeat, AlertTriangle } from 'lucide-react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import GoogleIcon from '../icons/GoogleIcon';
 import Select from '../ui/Select';
+import { Dialog } from '@headlessui/react';
 import { db, Category, Transaction, formatCurrency, RecurrenceInterval } from '../../db';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useTranslation } from '../../context/TranslationContext';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
+import { deleteTransaction } from '../../firebase/db'; // Corrected import name
 
 interface TransactionFormProps {
   onSubmit: (transaction: Omit<Transaction, 'id'>) => Promise<void>;
   initialData?: Transaction;
   onCancel?: () => void;
+  // Removed onDeleteRequest prop
 }
 
-const TransactionForm: React.FC<TransactionFormProps> = ({ 
-  onSubmit, 
-  initialData, 
-  onCancel 
+const TransactionForm: React.FC<TransactionFormProps> = ({
+  onSubmit,
+  initialData,
+  onCancel
+  // Removed onDeleteRequest from destructuring
 }) => {
   const { t } = useTranslation();
   const { showToast } = useToast();
   const { currentUser, signInWithGoogle } = useAuth();
-  
+  // Removed internal delete dialog state
   const [type, setType] = useState<'income' | 'expense'>(initialData?.type || 'expense');
   const [amount, setAmount] = useState(initialData?.amount?.toString() || '');
   const [description, setDescription] = useState(initialData?.description || '');
@@ -294,6 +298,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     c.id.toString() === selectedCategory.id.toString()
   );
 
+  // Removed internal confirmDelete and related functions
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto">
       {!currentUser && (
@@ -529,8 +534,10 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
           </div>
         </div>
       </div>
+      {/* Removed internal Delete Confirmation Dialog */}
+
     </form>
   );
 };
 
-export default TransactionForm;
+export default TransactionForm; // Ensure export default is present

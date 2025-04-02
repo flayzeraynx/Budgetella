@@ -22,9 +22,7 @@ const Transactions: React.FC = () => {
   const { addTransaction, updateTransaction, deleteTransaction } = useFirebase();
   const [isAddingTransaction, setIsAddingTransaction] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [transactionToDelete, setTransactionToDelete] = useState<number | string | null>(null);
-
+  // Removed delete-related state
   // Check if user has premium access
   const isPremium = checkIfPremium();
 
@@ -70,7 +68,7 @@ const Transactions: React.FC = () => {
       setIsAddingTransaction(false);
     } catch (error) {
       console.error('Error adding transaction:', error);
-      showToast('error', t.errorSavingTransaction || 'Error saving transaction');
+      showToast('error', t.transactions.errorSavingTransaction || 'Error saving transaction'); // Correct path
     }
   };
 
@@ -87,48 +85,24 @@ const Transactions: React.FC = () => {
         // Only close the dialog if the update was successful
         setEditingTransaction(null);
         // Only show success toast here, not in the TransactionForm
-        showToast('success', t.transactionUpdated || 'Transaction updated successfully');
+        showToast('success', t.transactions.transactionUpdated || 'Transaction updated successfully'); // Correct path
       } catch (error) {
         console.error('Error updating transaction:', error);
-        showToast('error', t.errorSavingTransaction || 'Error updating transaction');
+        showToast('error', t.transactions.errorSavingTransaction || 'Error updating transaction'); // Correct path
       }
     }
   };
 
-  const handleDeleteTransaction = async (id: number | string) => {
-    setTransactionToDelete(id);
-    setIsDeleteDialogOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    if (transactionToDelete) {
-      try {
-        if (currentUser) {
-          // Delete from Firebase if user is logged in
-          await deleteTransaction(transactionToDelete);
-        } else {
-          // Delete only locally if user is not logged in
-          await db.transactions.delete(transactionToDelete as number);
-        }
-        showToast('success', t.transactionDeleted);
-        setIsDeleteDialogOpen(false);
-        setTransactionToDelete(null);
-      } catch (error) {
-        console.error('Error deleting transaction:', error);
-        showToast('error', t.errorSavingTransaction || 'Error deleting transaction');
-      }
-    }
-  };
-
+  // Removed handleDeleteTransaction and confirmDelete functions
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">{t.transactions}</h1>
+        <h1 className="text-2xl font-bold">{t.common.transactions}</h1> {/* Correct path */}
         <Button 
           onClick={() => setIsAddingTransaction(true)}
           leftIcon={<PlusCircle className="w-4 h-4" />}
         >
-          {t.addTransaction}
+          {t.transactions.addTransaction} {/* Correct path */}
         </Button>
       </div>
 
@@ -164,8 +138,8 @@ const Transactions: React.FC = () => {
           {/* Show current transactions (limited to 3 months for free users) */}
           <TransactionList 
             transactions={transactions}
-            onEdit={setEditingTransaction}
-            onDelete={handleDeleteTransaction}
+            onEdit={setEditingTransaction} // Restored onEdit prop
+            // Removed onDelete prop
             onAdd={() => setIsAddingTransaction(true)}
           />
           
@@ -198,7 +172,7 @@ const Transactions: React.FC = () => {
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Dialog.Panel className="mx-auto max-w-md w-full rounded-lg bg-white dark:bg-secondary-800 p-6 shadow-xl">
             <Dialog.Title className="text-lg font-medium text-secondary-900 dark:text-white mb-4">
-              {editingTransaction ? t.editTransaction : t.addTransaction}
+              {editingTransaction ? t.transactions.editTransaction : t.transactions.addTransaction} {/* Correct paths */}
             </Dialog.Title>
             
             <TransactionForm 
@@ -209,48 +183,13 @@ const Transactions: React.FC = () => {
                 setIsAddingTransaction(false);
                 setEditingTransaction(null);
               }}
+              // Removed onDeleteRequest prop
             />
           </Dialog.Panel>
         </div>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog 
-        open={isDeleteDialogOpen} 
-        onClose={() => setIsDeleteDialogOpen(false)}
-        className="relative z-50"
-      >
-        <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
-        
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="mx-auto max-w-sm rounded-lg bg-white dark:bg-secondary-800 p-6 shadow-xl">
-            <Dialog.Title className="text-lg font-medium text-secondary-900 dark:text-white">
-              {t.confirmDeletion}
-            </Dialog.Title>
-            
-            <div className="mt-2">
-              <p className="text-secondary-600 dark:text-secondary-300">
-                {t.deleteConfirmMessage}
-              </p>
-            </div>
-            
-            <div className="mt-6 flex justify-end space-x-3">
-              <Button 
-                variant="secondary" 
-                onClick={() => setIsDeleteDialogOpen(false)}
-              >
-                {t.cancel}
-              </Button>
-              <Button 
-                variant="danger" 
-                onClick={confirmDelete}
-              >
-                {t.delete}
-              </Button>
-            </div>
-          </Dialog.Panel>
-        </div>
-      </Dialog>
+      {/* Removed Delete Confirmation Dialog */}
     </div>
   );
 };
