@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 import { Link } from 'react-router-dom';
 import { Edit2, Trash2, ChevronDown, ChevronUp, Plus, Search, Repeat, Clock, Calendar, Lock } from 'lucide-react';
 import { Transaction, formatCurrency } from '../../db';
@@ -17,8 +18,8 @@ const safeFormatCurrency = (amount: string | number, currency: string, hideAmoun
 
 interface TransactionListProps {
   transactions: Transaction[];
-  onEdit: (transaction: Transaction) => void; // Restored onEdit prop
-  // onDelete prop removed
+  onEdit: (transaction: Transaction) => void;
+  onDelete: (id: number | string) => Promise<void>;
   onAdd: () => void;
   selectedYear?: number | string;
   onYearChange?: (year: number | string) => void;
@@ -26,8 +27,8 @@ interface TransactionListProps {
 
 const TransactionList: React.FC<TransactionListProps> = ({ 
   transactions,
-  onEdit, // Restored onEdit prop destructuring
-  // onDelete prop removed from destructuring
+  onEdit,
+  onDelete,
   onAdd,
   selectedYear: propSelectedYear,
   onYearChange
@@ -55,6 +56,8 @@ const TransactionList: React.FC<TransactionListProps> = ({
   const [filterStatus, setFilterStatus] = useState<'all' | 'completed' | 'pending' | 'planned'>('all');
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
   const [internalSelectedYear, setInternalSelectedYear] = useState<number | string>(new Date().getFullYear());
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
   
   // Use either the prop value or internal state
   const selectedYear = propSelectedYear !== undefined ? propSelectedYear : internalSelectedYear;
@@ -497,9 +500,18 @@ const TransactionList: React.FC<TransactionListProps> = ({
                         {new Date(transaction.date).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex justify-end space-x-2">
-                          {/* Edit button removed */}
-                          {/* Delete button removed */}
+                        <div className="flex justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setTransactionToDelete(transaction);
+                              setIsDeleteDialogOpen(true);
+                            }}
+                            aria-label="Delete transaction"
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -525,14 +537,31 @@ const TransactionList: React.FC<TransactionListProps> = ({
                     {transaction.category} • {new Date(transaction.date).toLocaleDateString()}
                   </p>
                 </div>
-                <div className={`text-sm font-medium whitespace-nowrap ${
-                  transaction.type === 'income' 
-                    ? 'text-green-600 dark:text-green-400' 
-                    : 'text-red-600 dark:text-red-400'
-                } ${
-                  transaction.status !== 'completed' ? 'opacity-60' : ''
-                }`}>
-                  {transaction.type === 'income' ? '+' : '-'}{safeFormatCurrency(transaction.amount, currency, hideAmounts)}
+                <div className="flex items-center">
+                  <div className={`text-sm font-medium whitespace-nowrap mr-3 ${
+                    transaction.type === 'income' 
+                      ? 'text-green-600 dark:text-green-400' 
+                      : 'text-red-600 dark:text-red-400'
+                  } ${
+                    transaction.status !== 'completed' ? 'opacity-60' : ''
+                  }`}>
+                    {transaction.type === 'income' ? '+' : '-'}{safeFormatCurrency(transaction.amount, currency, hideAmounts)}
+                  </div>
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setTransactionToDelete(transaction);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                      aria-label="Delete transaction"
+                      className="p-1"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-500" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -548,6 +577,34 @@ const TransactionList: React.FC<TransactionListProps> = ({
           )}
         </div>
       )}
+      
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        transaction={transactionToDelete}
+        onConfirm={async () => {
+          if (transactionToDelete?.id) {
+            try {
+              // Call the onDelete prop (which is handleDelete in Transactions.tsx) and wait
+              await onDelete(transactionToDelete.id);
+              // Only close the dialog after successful deletion attempt
+              setIsDeleteDialogOpen(false);
+              setTransactionToDelete(null);
+            } catch (error) {
+              // Error handling is now primarily in the handleDelete wrapper in Transactions.tsx
+              console.error('[TransactionList] Error calling onDelete prop:', error); // Keep basic error log
+              // Keep the dialog open if there's an error (optional, could also close here)
+            }
+          } else {
+            setIsDeleteDialogOpen(false);
+            setTransactionToDelete(null);
+          }
+        }}
+        onCancel={() => {
+          setIsDeleteDialogOpen(false);
+          setTransactionToDelete(null);
+        }}
+      />
     </div>
   );
 };

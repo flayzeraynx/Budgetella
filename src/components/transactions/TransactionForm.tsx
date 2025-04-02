@@ -10,7 +10,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useTranslation } from '../../context/TranslationContext';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
-import { deleteTransaction } from '../../firebase/db'; // Corrected import name
+// Removed import of deleteTransaction
 
 interface TransactionFormProps {
   onSubmit: (transaction: Omit<Transaction, 'id'>) => Promise<void>;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react'; // Import useCallback
 import AuthDialog from '../components/auth/AuthDialog';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, Transaction, formatCurrency } from '../db';
@@ -17,12 +17,14 @@ import Button from '../components/ui/Button';
 import { Plus, ArrowUpRight, ArrowDownRight, ChevronDown, LogIn } from 'lucide-react';
 import { useTranslation } from '../context/TranslationContext';
 import { useAmountVisibility } from '../context/AmountVisibilityContext';
+import { useToast } from '../context/ToastContext'; // Import useToast
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
   const { hideAmounts } = useAmountVisibility();
   const { currentUser } = useAuth();
-  const { addTransaction, updateTransaction, deleteTransaction } = useFirebase();
+  const { showToast } = useToast(); // Get showToast
+  const { addTransaction, updateTransaction, deleteTransactionFromFirebase } = useFirebase(); // Updated function name
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   
   // Always fetch data from local database, regardless of authentication status
@@ -81,23 +83,28 @@ const Dashboard: React.FC = () => {
     setIsDeleteDialogOpen(true);
   };
 
-  const confirmDelete = async () => {
-    if (transactionToDelete) {
+  const confirmDelete = useCallback(async () => {
+    if (transactionToDelete !== null) { // Check against null explicitly
       try {
         if (currentUser) {
-          // Delete from Firebase if user is logged in
-          await deleteTransaction(transactionToDelete);
-        } else {
-          // Delete only locally if user is not logged in
-          await db.transactions.delete(transactionToDelete);
+          // 1. Delete from Firebase
+          await deleteTransactionFromFirebase(transactionToDelete);
         }
+        // 2. Always delete from local Dexie
+        await db.transactions.delete(transactionToDelete);
+        
+        // 3. Show success toast
+        showToast('success', t.transactions.transactionDeleted || 'Transaction deleted successfully');
+        
         setIsDeleteDialogOpen(false);
         setTransactionToDelete(null);
       } catch (error) {
-        console.error('Error deleting transaction:', error);
+        console.error('Error deleting transaction from Dashboard:', error); // Updated log
+        showToast('error', t.transactions.errorSavingTransaction || 'Error deleting transaction'); // Use existing key
+        // Optionally keep dialog open on error
       }
     }
-  };
+  }, [transactionToDelete, currentUser, deleteTransactionFromFirebase, showToast, t]); // Add dependencies
 
   // Show warning banner if not signed in
   const renderAuthWarning = () => {
@@ -267,7 +274,7 @@ const Dashboard: React.FC = () => {
         </div>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Confirmation Dialog
       <Dialog 
         open={isDeleteDialogOpen} 
         onClose={() => setIsDeleteDialogOpen(false)}
@@ -303,7 +310,7 @@ const Dashboard: React.FC = () => {
             </div>
           </Dialog.Panel>
         </div>
-      </Dialog>
+      </Dialog> */}
       
       <AuthDialog
         initialView="signin"

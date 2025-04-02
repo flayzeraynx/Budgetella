@@ -91,6 +91,7 @@ export const updateTransaction = async (userId: string, transactionId: string, t
 
 export const deleteTransaction = async (userId: string, transactionId: string) => {
   const transactionRef = doc(db, `users/${userId}/transactions/${transactionId}`);
+  // No confirmation dialog here
   return deleteDoc(transactionRef);
 };
 

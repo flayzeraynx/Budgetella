@@ -12,7 +12,7 @@ interface FirebaseContextType {
   error: string | null;
   addTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<void>;
   updateTransaction: (id: number | string, transaction: Partial<Transaction>) => Promise<void>;
-  deleteTransaction: (id: number | string) => Promise<void>;
+  deleteTransactionFromFirebase: (id: number | string) => Promise<void>; // Renamed
   addCategory: (category: Omit<Category, 'id'>) => Promise<void>;
   updateCategory: (id: number | string, category: Partial<Category>) => Promise<void>;
   deleteCategory: (id: number | string) => Promise<void>;
@@ -31,7 +31,7 @@ const FirebaseContext = createContext<FirebaseContextType>({
   error: null,
   addTransaction: async () => {},
   updateTransaction: async () => {},
-  deleteTransaction: async () => {},
+  deleteTransactionFromFirebase: async () => {}, // Renamed
   addCategory: async () => {},
   updateCategory: async () => {},
   deleteCategory: async () => {},
@@ -274,7 +274,8 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  const deleteTransaction = async (id: number | string) => {
+  const deleteTransactionFromFirebase = async (id: number | string) => {
+    console.log(`[FirebaseContext] deleteTransaction called for ID: ${id}`); // Log 1: Function entry
     if (!currentUser) {
       showToast('error', 'You must be signed in to delete transactions');
       return;
@@ -294,16 +295,16 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         throw new Error('Transaction ID is undefined');
       }
       const firestoreId = transactionToDelete.id.toString();
-      
+      // Delete from Firestore
       await firebaseDB.deleteTransaction(currentUser.uid, firestoreId);
       
-      // No need to update local state - real-time listener will update automatically
-      
-      showToast('success', 'Transaction deleted successfully');
+      // Local deletion and toast messages are handled by the calling component
+      // showToast('success', t.transactions.transactionDeleted || 'Transaction deleted successfully');
     } catch (error) {
-      console.error('Error deleting transaction:', error);
-      setError('Failed to delete transaction');
-      showToast('error', 'Failed to delete transaction');
+      console.error('Error deleting transaction from Firebase:', error); // Updated log
+      setError('Failed to delete transaction from Firebase'); // Updated error
+      // Let the calling component handle the error toast
+      // showToast('error', 'Failed to delete transaction');
       throw error;
     }
   };
@@ -462,7 +463,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         error,
         addTransaction,
         updateTransaction,
-        deleteTransaction,
+        deleteTransactionFromFirebase, // Renamed
         addCategory,
         updateCategory,
         deleteCategory,

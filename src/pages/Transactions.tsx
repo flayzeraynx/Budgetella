@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react'; // Import useCallback
 import { useLiveQuery } from 'dexie-react-hooks';
 import { PlusCircle, Filter, Clock, Calendar, Lock } from 'lucide-react';
 import { db, Transaction } from '../db';
@@ -19,7 +19,7 @@ const Transactions: React.FC = () => {
   const { showToast } = useToast();
   const { currentUser } = useAuth();
   const { checkIfPremium } = useSubscription();
-  const { addTransaction, updateTransaction, deleteTransaction } = useFirebase();
+  const { addTransaction, updateTransaction, deleteTransactionFromFirebase } = useFirebase(); // Updated function name
   const [isAddingTransaction, setIsAddingTransaction] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   // Removed delete-related state
@@ -95,7 +95,23 @@ const Transactions: React.FC = () => {
     }
   };
 
-  // Removed handleDeleteTransaction and confirmDelete functions
+  const handleDelete = useCallback(async (id: number | string) => {
+    console.log(`[Transactions.tsx] handleDelete called with ID: ${id}`);
+    try {
+      // 1. Delete from Firebase (using the renamed context function)
+      await deleteTransactionFromFirebase(id);
+      
+      // 2. Delete from local Dexie database
+      await db.transactions.delete(id);
+      
+      // 3. Show success toast
+      showToast('success', t.transactions.transactionDeleted || 'Transaction deleted successfully');
+      
+    } catch (error) {
+      console.error('[Transactions.tsx] Error during transaction deletion:', error); // Updated log
+      showToast('error', t.transactions.errorSavingTransaction || 'Error deleting transaction'); // Use existing key
+    }
+  }, [deleteTransactionFromFirebase, showToast, t]); // Updated dependencies
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -138,10 +154,11 @@ const Transactions: React.FC = () => {
       <Card>
         <div className="p-4">
           {/* Show current transactions (limited to 3 months for free users) */}
-          <TransactionList 
+          {/* Show current transactions (limited to 3 months for free users) */}
+          <TransactionList
             transactions={transactions}
-            onEdit={setEditingTransaction} // Restored onEdit prop
-            // Removed onDelete prop
+            onEdit={setEditingTransaction}
+            onDelete={handleDelete} // Pass the new handler
             onAdd={() => setIsAddingTransaction(true)}
           />
           
