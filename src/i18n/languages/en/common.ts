@@ -13,4 +13,8 @@ export const common: CommonTranslations = {
   footerText: 'Budgetella - Privacy-First Finance Tracker. All data is stored locally on your device.',
   cancel: 'Cancel',
   delete: 'Delete',
+  showMore: 'Show More',
+  add: 'Add',
+  edit: 'Edit',
+  save: 'Save',
 };

@@ -17,4 +17,5 @@ export const common: CommonTranslations = {
   add: 'Hinzufügen',
   edit: 'Bearbeiten',
   save: 'Speichern',
+  showMore: 'Mehr anzeigen',
 };

@@ -48,7 +48,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
   
   const [sortField, setSortField] = useState<keyof Transaction>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [visibleCount, setVisibleCount] = useState(20); // State for pagination
   const [searchTerm, setSearchTerm] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
@@ -134,9 +134,6 @@ const TransactionList: React.FC<TransactionListProps> = ({
     }
   });
 
-  const toggleExpand = (id: number) => {
-    setExpandedId(expandedId === id ? null : id);
-  };
 
   // Helper function to safely format dates
   const formatDate = (date: string | Date) => {
@@ -351,197 +348,206 @@ const TransactionList: React.FC<TransactionListProps> = ({
           </Button>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-secondary-200 dark:divide-secondary-700">
-            <thead className="bg-secondary-50 dark:bg-secondary-800">
-              <tr>
-                <th 
-                  scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort('amount')}
-                >
-                  <div className="flex items-center">
-                    {t.transactions.amount}
-                    {sortField === 'amount' && (
-                      sortDirection === 'asc' ? 
-                        <ChevronUp className="w-4 h-4 ml-1" /> : 
-                        <ChevronDown className="w-4 h-4 ml-1" />
-                    )}
-                  </div>
-                </th>
-                <th 
-                  scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort('description')}
-                >
-                  <div className="flex items-center">
-                    {t.transactions.description}
-                    {sortField === 'description' && (
-                      sortDirection === 'asc' ? 
-                        <ChevronUp className="w-4 h-4 ml-1" /> : 
-                        <ChevronDown className="w-4 h-4 ml-1" />
-                    )}
-                  </div>
-                </th>
-                <th 
-                  scope="col" 
-                  className="px-6 py-3 text-center text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort('type')}
-                >
-                  <div className="flex items-center justify-center">
-                    {t.transactions.type || 'Type'}
-                    {sortField === 'type' && (
-                      sortDirection === 'asc' ? 
-                        <ChevronUp className="w-4 h-4 ml-1" /> : 
-                        <ChevronDown className="w-4 h-4 ml-1" />
-                    )}
-                  </div>
-                </th>
-                <th 
-                  scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort('category')}
-                >
-                  <div className="flex items-center">
-                    {t.transactions.category}
-                    {sortField === 'category' && (
-                      sortDirection === 'asc' ? 
-                        <ChevronUp className="w-4 h-4 ml-1" /> : 
-                        <ChevronDown className="w-4 h-4 ml-1" />
-                    )}
-                  </div>
-                </th>
-                <th 
-                  scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort('date')}
-                >
-                  <div className="flex items-center">
-                    {t.transactions.date}
-                    {sortField === 'date' && (
-                      sortDirection === 'asc' ? 
-                        <ChevronUp className="w-4 h-4 ml-1" /> : 
-                        <ChevronDown className="w-4 h-4 ml-1" />
-                    )}
-                  </div>
-                </th>
-                <th scope="col" className="relative px-6 py-3">
-                  <span className="sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-secondary-900 divide-y divide-secondary-200 dark:divide-secondary-800">
-              {sortedTransactions.map((transaction) => (
-                <React.Fragment key={transaction.id}>
-                  <tr 
-                    className="hover:bg-secondary-50 dark:hover:bg-secondary-800 cursor-pointer"
-                    onClick={() => toggleExpand(transaction.id!)}
+        <div> {/* Wrapper for both views + Show More button */}
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="min-w-full divide-y divide-secondary-200 dark:divide-secondary-700">
+              <thead className="bg-secondary-50 dark:bg-secondary-800">
+                <tr>
+                  <th 
+                    scope="col" 
+                    className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort('amount')}
                   >
-                    <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
-                      transaction.type === 'income' 
-                        ? 'text-green-600 dark:text-green-400' 
-                        : 'text-red-600 dark:text-red-400'
-                    } ${
-                      transaction.status !== 'completed' ? 'opacity-60' : ''
-                    }`}>
-                      {transaction.type === 'income' ? '+' : '-'}{safeFormatCurrency(transaction.amount, currency, hideAmounts)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-900 dark:text-secondary-100">
-                      {transaction.description || t.transactions.noDescription || 'No description provided'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
-                      <div className="flex flex-col items-center space-y-1">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          transaction.type === 'income' 
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' 
-                            : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
-                        }`}>
-                          {transaction.type === 'income' ? t.transactions.incomeType : t.transactions.expenseType}
-                        </span>
-                        
-                        {transaction.status !== 'completed' && (
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium flex items-center ${
-                            transaction.status === 'pending' 
-                              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100' 
-                              : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100'
+                    <div className="flex items-center">
+                      {t.transactions.amount}
+                      {sortField === 'amount' && (
+                        sortDirection === 'asc' ? 
+                          <ChevronUp className="w-4 h-4 ml-1" /> : 
+                          <ChevronDown className="w-4 h-4 ml-1" />
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    scope="col" 
+                    className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort('description')}
+                  >
+                    <div className="flex items-center">
+                      {t.transactions.description}
+                      {sortField === 'description' && (
+                        sortDirection === 'asc' ? 
+                          <ChevronUp className="w-4 h-4 ml-1" /> : 
+                          <ChevronDown className="w-4 h-4 ml-1" />
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    scope="col" 
+                    className="px-6 py-3 text-center text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort('type')}
+                  >
+                    <div className="flex items-center justify-center">
+                      {t.transactions.type || 'Type'}
+                      {sortField === 'type' && (
+                        sortDirection === 'asc' ? 
+                          <ChevronUp className="w-4 h-4 ml-1" /> : 
+                          <ChevronDown className="w-4 h-4 ml-1" />
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    scope="col" 
+                    className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort('category')}
+                  >
+                    <div className="flex items-center">
+                      {t.transactions.category}
+                      {sortField === 'category' && (
+                        sortDirection === 'asc' ? 
+                          <ChevronUp className="w-4 h-4 ml-1" /> : 
+                          <ChevronDown className="w-4 h-4 ml-1" />
+                      )}
+                    </div>
+                  </th>
+                  <th 
+                    scope="col" 
+                    className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort('date')}
+                  >
+                    <div className="flex items-center">
+                      {t.transactions.date}
+                      {sortField === 'date' && (
+                        sortDirection === 'asc' ? 
+                          <ChevronUp className="w-4 h-4 ml-1" /> : 
+                          <ChevronDown className="w-4 h-4 ml-1" />
+                      )}
+                    </div>
+                  </th>
+                  <th scope="col" className="relative px-6 py-3">
+                    <span className="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-secondary-900 divide-y divide-secondary-200 dark:divide-secondary-800">
+                {sortedTransactions.slice(0, visibleCount).map((transaction) => (
+                  <React.Fragment key={transaction.id}>
+                    <tr 
+                      className="hover:bg-secondary-50 dark:hover:bg-secondary-800 cursor-pointer"
+                      onClick={() => onEdit(transaction)}
+                    >
+                      <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
+                        transaction.type === 'income' 
+                          ? 'text-green-600 dark:text-green-400' 
+                          : 'text-red-600 dark:text-red-400'
+                      } ${
+                        transaction.status !== 'completed' ? 'opacity-60' : ''
+                      }`}>
+                        {transaction.type === 'income' ? '+' : '-'}{safeFormatCurrency(transaction.amount, currency, hideAmounts)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-900 dark:text-secondary-100">
+                        {transaction.description || t.transactions.noDescription || 'No description provided'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                        <div className="flex flex-col items-center space-y-1">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            transaction.type === 'income' 
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' 
+                              : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
                           }`}>
-                            {transaction.status === 'pending' ? (
-                              <><Clock className="w-3 h-3 mr-1" /> {t.transactions.pending}</>
-                            ) : (
-                              <><Calendar className="w-3 h-3 mr-1" /> {t.transactions.planned}</>
-                            )}
+                            {transaction.type === 'income' ? t.transactions.incomeType : t.transactions.expenseType}
                           </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-900 dark:text-secondary-100">
-                      {transaction.category}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-900 dark:text-secondary-100">
-                      {new Date(transaction.date).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onEdit(transaction)}
-                          aria-label="Edit transaction"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => transaction.id && onDelete(transaction.id)}
-                          aria-label="Delete transaction"
-                        >
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                  {expandedId === transaction.id && (
-                    <tr className="bg-secondary-50 dark:bg-secondary-800">
-                      <td colSpan={6} className="px-6 py-4">
-                        <div className="text-sm space-y-2">
-                          <div>
-                            <p className="font-medium text-secondary-900 dark:text-white mb-1">{t.transactions.description}:</p>
-                            <p className="text-secondary-700 dark:text-secondary-300">
-                              {transaction.description || t.transactions.noDescription || 'No description provided'}
-                            </p>
-                          </div>
                           
-                          {transaction.isRecurring && (
-                            <div className="mt-2">
-                              <div className="flex items-center">
-                                <Repeat className="w-4 h-4 mr-1 text-primary-500" />
-                                <p className="font-medium text-secondary-900 dark:text-white">
-                                  {t.transactions.recurring}
-                                </p>
-                              </div>
-                              <p className="text-secondary-700 dark:text-secondary-300">
-                                {t.transactions.recurrenceInterval}: {transaction.recurrenceInterval && (
-                                  transaction.recurrenceInterval === 'daily' ? t.transactions.daily :
-                                  transaction.recurrenceInterval === 'weekly' ? t.transactions.weekly :
-                                  transaction.recurrenceInterval === 'monthly' ? t.transactions.monthly :
-                                  transaction.recurrenceInterval === 'yearly' ? t.transactions.yearly :
-                                  t.transactions.none
-                                )}
-                                {transaction.recurrenceEndDate && (
-                                  <span> • {t.transactions.endDate}: {new Date(transaction.recurrenceEndDate).toLocaleDateString()}</span>
-                                )}
-                              </p>
-                            </div>
+                          {transaction.status !== 'completed' && (
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium flex items-center ${
+                              transaction.status === 'pending' 
+                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100' 
+                                : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100'
+                            }`}>
+                              {transaction.status === 'pending' ? (
+                                <><Clock className="w-3 h-3 mr-1" /> {t.transactions.pending}</>
+                              ) : (
+                                <><Calendar className="w-3 h-3 mr-1" /> {t.transactions.planned}</>
+                              )}
+                            </span>
                           )}
                         </div>
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-900 dark:text-secondary-100">
+                        {transaction.category}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-900 dark:text-secondary-100">
+                        {new Date(transaction.date).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onEdit(transaction)}
+                            aria-label="Edit transaction"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              // Ensure ID is a number before calling onDelete
+                              if (typeof transaction.id === 'number') {
+                                onDelete(transaction.id);
+                              }
+                            }}
+                            aria-label="Delete transaction"
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </td>
                     </tr>
-                  )}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile List View */}
+          <div className="block md:hidden divide-y divide-secondary-200 dark:divide-secondary-700">
+            {sortedTransactions.slice(0, visibleCount).map((transaction) => (
+              <div 
+                key={transaction.id} 
+                className="flex justify-between items-center py-3 px-4 cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary-800"
+                onClick={() => onEdit(transaction)}
+              >
+                <div className="flex-1 mr-4 overflow-hidden"> {/* Added overflow-hidden */}
+                  <p className="text-sm text-secondary-900 dark:text-secondary-100 truncate">
+                    {transaction.description || t.transactions.noDescription || 'No description'}
+                  </p>
+                  <p className="text-xs text-secondary-500 dark:text-secondary-400">
+                    {transaction.category} • {new Date(transaction.date).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className={`text-sm font-medium whitespace-nowrap ${
+                  transaction.type === 'income' 
+                    ? 'text-green-600 dark:text-green-400' 
+                    : 'text-red-600 dark:text-red-400'
+                } ${
+                  transaction.status !== 'completed' ? 'opacity-60' : ''
+                }`}>
+                  {transaction.type === 'income' ? '+' : '-'}{safeFormatCurrency(transaction.amount, currency, hideAmounts)}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Show More Button */}
+          {sortedTransactions.length > visibleCount && (
+            <div className="text-center mt-4">
+              <Button onClick={() => setVisibleCount(sortedTransactions.length)}>
+                {t.common.showMore || 'Show More'}
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>

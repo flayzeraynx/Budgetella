@@ -16,4 +16,6 @@ export const common: CommonTranslations = {
   delete: 'Sil',
   add: 'Ekle',
   edit: 'Düzenle',
+  save: 'Kaydet',
+  showMore: 'Daha Fazla Göster',
 };

@@ -14,6 +14,10 @@ export interface CommonTranslations {
   footerText: string;
   cancel: string;
   delete: string;
+  showMore: string;
+  add: string;
+  edit: string;
+  save: string;
 }
 
 // Authentication related translations
