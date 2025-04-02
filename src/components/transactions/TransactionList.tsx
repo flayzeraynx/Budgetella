@@ -514,9 +514,9 @@ const TransactionList: React.FC<TransactionListProps> = ({
           {/* Mobile List View */}
           <div className="block md:hidden divide-y divide-secondary-200 dark:divide-secondary-700">
             {sortedTransactions.slice(0, visibleCount).map((transaction) => (
-              <div 
-                key={transaction.id} 
-                className="flex justify-between items-center py-3 px-4 cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary-800"
+              <div
+                key={transaction.id}
+                className="flex justify-between items-center py-3 cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary-800" // Removed px-4
                 onClick={() => onEdit(transaction)}
               >
                 <div className="flex-1 mr-4 overflow-hidden"> {/* Added overflow-hidden */}
