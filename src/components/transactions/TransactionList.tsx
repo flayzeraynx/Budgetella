@@ -297,7 +297,8 @@ const TransactionList: React.FC<TransactionListProps> = ({
         </div>
         
         <div className="flex flex-row flex-wrap items-center gap-2"> {/* Changed to row, wrap, and gap for better mobile layout */}
-          <div className="relative w-full sm:w-auto">
+          {/* Hide Type filter on mobile */}
+          <div className="relative w-full sm:w-auto hidden sm:block">
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as 'all' | 'income' | 'expense')}
@@ -312,7 +313,8 @@ const TransactionList: React.FC<TransactionListProps> = ({
             </div>
           </div>
           
-          <div className="relative w-full sm:w-auto">
+          {/* Hide Status filter on mobile */}
+          <div className="relative w-full sm:w-auto hidden sm:block">
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value as 'all' | 'completed' | 'pending' | 'planned')}
@@ -331,7 +333,7 @@ const TransactionList: React.FC<TransactionListProps> = ({
           <Button 
             onClick={onAdd}
             leftIcon={<Plus className="w-4 h-4" />}
-            className="flex flex-shrink-0" /* Made button visible on mobile, added flex-shrink-0 */
+            className="hidden sm:flex flex-shrink-0" /* Hide on mobile, show as flex on sm+ */
           >
             {t.transactions.add || 'Add'}
           </Button>

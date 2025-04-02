@@ -27,7 +27,9 @@ const Transactions: React.FC = () => {
   const isPremium = checkIfPremium();
 
   // Get all transactions
-  const allTransactions = useLiveQuery(() => db.transactions.toArray()) || [];
+  const allTransactions = useLiveQuery(
+    () => db.transactions.orderBy('date').reverse().toArray() // Fetch sorted by date descending
+  ) || [];
   
   // For free users, limit to last 3 months
   const transactions = useMemo(() => {
