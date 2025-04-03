@@ -95,6 +95,14 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   
   const settings = useLiveQuery(() => db.settings.toArray()) || [{ currency: 'USD' }];
   const currency = settings[0]?.currency || 'USD';
+  
+  // Map currency codes to symbols for display
+  const currencyMap: Record<string, { symbol: string }> = {
+    'USD': { symbol: '$' },
+    'EUR': { symbol: '€' },
+    'GBP': { symbol: '£' },
+    'TRY': { symbol: '₺' }
+  };
 
   // Track when selectedCategory changes
   useEffect(() => {
@@ -365,7 +373,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span className="text-secondary-500">{currency === 'USD' ? '$' : currency}</span>
+                <span className="text-secondary-500">{currencyMap[currency]?.symbol || currency}</span>
               </div>
               <input
                 type="text"
@@ -387,7 +395,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                 }}
                 placeholder="0.00"
                 required
-                className="block w-full pl-10 pr-4 py-2 rounded-md border border-secondary-400 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-secondary-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
+                className="block w-full pl-10 pr-4 py-2 rounded-md border border-secondary-400 dark:border-secondary-700 bg-white dark:bg-secondary-900 text-secondary-900 dark:text-white focus:ring-primary-500 focus:border-primary-500 text-right"
               />
             </div>
             {errors.amount && <p className="mt-1 text-sm text-red-600">{errors.amount}</p>}
