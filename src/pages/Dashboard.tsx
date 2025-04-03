@@ -24,7 +24,7 @@ const Dashboard: React.FC = () => {
   const { hideAmounts } = useAmountVisibility();
   const { currentUser } = useAuth();
   const { showToast } = useToast(); // Get showToast
-  const { addTransaction, updateTransaction, deleteTransactionFromFirebase } = useFirebase(); // Updated function name
+  const { addTransaction, updateTransaction /*, deleteTransactionFromFirebase */ } = useFirebase(); // Commented out delete
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   
   // Always fetch data from local database, regardless of authentication status
@@ -37,8 +37,8 @@ const Dashboard: React.FC = () => {
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [isAddingTransaction, setIsAddingTransaction] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [transactionToDelete, setTransactionToDelete] = useState<number | null>(null);
+  // const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // Commented out
+  // const [transactionToDelete, setTransactionToDelete] = useState<number | null>(null); // Commented out
 
   const handleAddTransaction = async (transaction: Omit<Transaction, 'id'>) => {
     try {
@@ -78,33 +78,33 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleDeleteTransaction = async (id: number | string) => {
-    setTransactionToDelete(typeof id === 'string' ? null : id);
-    setIsDeleteDialogOpen(true);
-  };
+  // const handleDeleteTransaction = async (id: number | string) => { // Commented out
+  //   // setTransactionToDelete(typeof id === 'string' ? null : id);
+  //   // setIsDeleteDialogOpen(true);
+  // };
 
-  const confirmDelete = useCallback(async () => {
-    if (transactionToDelete !== null) { // Check against null explicitly
-      try {
-        if (currentUser) {
-          // 1. Delete from Firebase
-          await deleteTransactionFromFirebase(transactionToDelete);
-        }
-        // 2. Always delete from local Dexie
-        await db.transactions.delete(transactionToDelete);
+  // const confirmDelete = useCallback(async () => { // Commented out
+  //   // if (transactionToDelete !== null) { // Check against null explicitly
+  //   //   try {
+  //   //     if (currentUser) {
+  //   //       // 1. Delete from Firebase
+  //   //       await deleteTransactionFromFirebase(transactionToDelete);
+  //   //     }
+  //   //     // 2. Always delete from local Dexie
+  //   //     await db.transactions.delete(transactionToDelete);
         
-        // 3. Show success toast
-        showToast('success', t.transactions.transactionDeleted || 'Transaction deleted successfully');
+  //   //     // 3. Show success toast
+  //   //     showToast('success', t.transactions.transactionDeleted || 'Transaction deleted successfully');
         
-        setIsDeleteDialogOpen(false);
-        setTransactionToDelete(null);
-      } catch (error) {
-        console.error('Error deleting transaction from Dashboard:', error); // Updated log
-        showToast('error', t.transactions.errorSavingTransaction || 'Error deleting transaction'); // Use existing key
-        // Optionally keep dialog open on error
-      }
-    }
-  }, [transactionToDelete, currentUser, deleteTransactionFromFirebase, showToast, t]); // Add dependencies
+  //   //     setIsDeleteDialogOpen(false);
+  //   //     setTransactionToDelete(null);
+  //   //   } catch (error) {
+  //   //     console.error('Error deleting transaction from Dashboard:', error); // Updated log
+  //   //     showToast('error', t.transactions.errorSavingTransaction || 'Error deleting transaction'); // Use existing key
+  //   //     // Optionally keep dialog open on error
+  //   //   }
+  //   // }
+  // }, [/* transactionToDelete, currentUser, deleteTransactionFromFirebase, showToast, t */]); // Add dependencies
 
   // Show warning banner if not signed in
   const renderAuthWarning = () => {
@@ -216,7 +216,7 @@ const Dashboard: React.FC = () => {
           <TransactionList 
             transactions={transactions}
             onEdit={setEditingTransaction}
-            onDelete={handleDeleteTransaction}
+            // onDelete={handleDeleteTransaction} // Commented out delete prop
             onAdd={() => setIsAddingTransaction(true)}
             selectedYear={selectedYear}
             onYearChange={(year) => setSelectedYear(Number(year))}
@@ -274,43 +274,7 @@ const Dashboard: React.FC = () => {
         </div>
       </Dialog>
 
-      {/* Delete Confirmation Dialog
-      <Dialog 
-        open={isDeleteDialogOpen} 
-        onClose={() => setIsDeleteDialogOpen(false)}
-        className="relative z-50"
-      >
-        <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
-        
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="mx-auto max-w-sm rounded-lg bg-white dark:bg-secondary-800 p-6 shadow-xl">
-            <Dialog.Title className="text-lg font-medium text-secondary-900 dark:text-white">
-              {t.transactions.confirmDeletion}
-            </Dialog.Title>
-            
-            <div className="mt-2">
-              <p className="text-secondary-600 dark:text-secondary-300">
-                {t.transactions.deleteConfirmMessage}
-              </p>
-            </div>
-            
-            <div className="mt-6 flex justify-end space-x-3">
-              <Button 
-                variant="secondary" 
-                onClick={() => setIsDeleteDialogOpen(false)}
-              >
-                {t.transactions.cancel}
-              </Button>
-              <Button 
-                variant="danger" 
-                onClick={confirmDelete}
-              >
-                {t.transactions.delete}
-              </Button>
-            </div>
-          </Dialog.Panel>
-        </div>
-      </Dialog> */}
+      {/* Delete Confirmation Dialog commented out */}
       
       <AuthDialog
         initialView="signin"

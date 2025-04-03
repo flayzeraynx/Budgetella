@@ -19,7 +19,7 @@ const Transactions: React.FC = () => {
   const { showToast } = useToast();
   const { currentUser } = useAuth();
   const { checkIfPremium } = useSubscription();
-  const { addTransaction, updateTransaction, deleteTransactionFromFirebase } = useFirebase(); // Updated function name
+  const { addTransaction, updateTransaction /*, deleteTransactionFromFirebase */ } = useFirebase(); // Commented out delete
   const [isAddingTransaction, setIsAddingTransaction] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   // Removed delete-related state
@@ -95,23 +95,23 @@ const Transactions: React.FC = () => {
     }
   };
 
-  const handleDelete = useCallback(async (id: number | string) => {
-    console.log(`[Transactions.tsx] handleDelete called with ID: ${id}`);
-    try {
-      // 1. Delete from Firebase (using the renamed context function)
-      await deleteTransactionFromFirebase(id);
+  // const handleDelete = useCallback(async (id: number | string) => {
+  //   console.log(`[Transactions.tsx] handleDelete called with ID: ${id}`);
+  //   try {
+  //     // 1. Delete from Firebase (using the renamed context function)
+  //     // await deleteTransactionFromFirebase(id);
       
-      // 2. Delete from local Dexie database
-      await db.transactions.delete(id);
+  //     // 2. Delete from local Dexie database
+  //     // await db.transactions.delete(id);
       
-      // 3. Show success toast
-      showToast('success', t.transactions.transactionDeleted || 'Transaction deleted successfully');
+  //     // 3. Show success toast
+  //     // showToast('success', t.transactions.transactionDeleted || 'Transaction deleted successfully');
       
-    } catch (error) {
-      console.error('[Transactions.tsx] Error during transaction deletion:', error); // Updated log
-      showToast('error', t.transactions.errorSavingTransaction || 'Error deleting transaction'); // Use existing key
-    }
-  }, [deleteTransactionFromFirebase, showToast, t]); // Updated dependencies
+  //   } catch (error) {
+  //     console.error('[Transactions.tsx] Error during transaction deletion:', error); // Updated log
+  //     // showToast('error', t.transactions.errorSavingTransaction || 'Error deleting transaction'); // Use existing key
+  //   }
+  // }, [/* deleteTransactionFromFirebase, */ showToast, t]); // Updated dependencies
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -158,7 +158,7 @@ const Transactions: React.FC = () => {
           <TransactionList
             transactions={transactions}
             onEdit={setEditingTransaction}
-            onDelete={handleDelete} // Pass the new handler
+            // onDelete={handleDelete} // Commented out delete prop
             onAdd={() => setIsAddingTransaction(true)}
           />
           

@@ -9,7 +9,9 @@ import { db } from '../../db';
 import { useTranslation } from '../../context/TranslationContext';
 import { useAmountVisibility } from '../../context/AmountVisibilityContext';
 import { useSubscription } from '../../context/SubscriptionContext';
-
+import { useFirebase } from '../../context/FirebaseContext'; // Added
+import { useAuth } from '../../context/AuthContext'; // Added
+import { useToast } from '../../context/ToastContext'; // Added
 // Helper function to ensure we always pass a number to formatCurrency
 const safeFormatCurrency = (amount: string | number, currency: string, hideAmount: boolean = false): string => {
   // formatCurrency already handles string or number types
@@ -19,7 +21,7 @@ const safeFormatCurrency = (amount: string | number, currency: string, hideAmoun
 interface TransactionListProps {
   transactions: Transaction[];
   onEdit: (transaction: Transaction) => void;
-  onDelete: (id: number | string) => Promise<void>;
+  onDelete?: (id: number | string) => Promise<void>; // Made optional
   onAdd: () => void;
   selectedYear?: number | string;
   onYearChange?: (year: number | string) => void;
@@ -36,6 +38,9 @@ const TransactionList: React.FC<TransactionListProps> = ({
   const { t } = useTranslation();
   const { hideAmounts } = useAmountVisibility();
   const { checkIfPremium } = useSubscription();
+  const { deleteTransactionFromFirebase } = useFirebase(); // Get Firebase delete function
+  const { currentUser } = useAuth(); // Get current user
+  const { showToast } = useToast(); // Get toast function
   const settings = useLiveQuery(() => db.settings.toArray()) || [{ currency: 'USD' }];
   const currency = settings[0]?.currency || 'USD';
   
@@ -584,18 +589,32 @@ const TransactionList: React.FC<TransactionListProps> = ({
         transaction={transactionToDelete}
         onConfirm={async () => {
           if (transactionToDelete?.id) {
+            const idToDelete = transactionToDelete.id; // Store ID before resetting state
             try {
-              // Call the onDelete prop (which is handleDelete in Transactions.tsx) and wait
-              await onDelete(transactionToDelete.id);
-              // Only close the dialog after successful deletion attempt
+              console.log(`[TransactionList] Deleting transaction ID: ${idToDelete}`);
+              
+              // 1. Delete from Firebase (if logged in)
+              if (currentUser) {
+                await deleteTransactionFromFirebase(idToDelete);
+              }
+              
+              // 2. Delete from local Dexie database
+              await db.transactions.delete(idToDelete);
+              
+              // 3. Show success toast
+              showToast('success', t.transactions.transactionDeleted || 'Transaction deleted successfully');
+              
+              // 4. Close dialog and reset state on success
               setIsDeleteDialogOpen(false);
               setTransactionToDelete(null);
+              
             } catch (error) {
-              // Error handling is now primarily in the handleDelete wrapper in Transactions.tsx
-              console.error('[TransactionList] Error calling onDelete prop:', error); // Keep basic error log
-              // Keep the dialog open if there's an error (optional, could also close here)
+              console.error('[TransactionList] Error during direct deletion:', error);
+              showToast('error', t.transactions.errorSavingTransaction || 'Error deleting transaction');
+              // Keep the dialog open on error
             }
           } else {
+            // Should not happen if button is clicked, but handle defensively
             setIsDeleteDialogOpen(false);
             setTransactionToDelete(null);
           }
