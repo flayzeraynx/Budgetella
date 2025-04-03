@@ -7,7 +7,7 @@ import { getStorage } from 'firebase/storage';
 // Replace these values with your actual Firebase project configuration
 const firebaseConfig = {
     apiKey: "AIzaSyARjmNVwHJxEmiZT7e15ft6aeRsRTZaLVk",
-    authDomain: "budgetella-d1d41.firebaseapp.com",
+    authDomain: "budgetella.app",
     projectId: "budgetella-d1d41",
     storageBucket: "budgetella-d1d41.firebasestorage.app",
     messagingSenderId: "523687846942",
