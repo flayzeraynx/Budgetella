@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 import { useTranslation } from '../../context/TranslationContext';
 import { useAuth } from '../../context/AuthContext';
-import { User, Mail, LogIn, Shield } from 'lucide-react';
+import { LogIn, Shield } from 'lucide-react'; // Removed User, Mail
 import Button from '../ui/Button';
-import Card, { CardHeader, CardTitle, CardContent } from '../ui/Card';
-import UserAvatar from '../auth/UserAvatar';
+import Card, { CardContent } from '../ui/Card'; // Removed CardHeader, CardTitle
+// Removed UserAvatar import as it's now handled by UserProfile
 import AuthDialog from '../auth/AuthDialog';
+import UserProfile from '../auth/UserProfile'; // Import UserProfile
 
-const UserManagement: React.FC = () => {
+interface UserManagementProps {
+  onClose?: () => void; // Add optional onClose prop
+}
+
+const UserManagement: React.FC<UserManagementProps> = ({ onClose }) => {
   const { t } = useTranslation();
   const { currentUser } = useAuth();
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
@@ -56,51 +61,8 @@ const UserManagement: React.FC = () => {
     );
   }
   
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t.auth.userProfile}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="flex items-center space-x-4">
-            <UserAvatar size="lg" />
-            <div>
-              <h3 className="text-lg font-medium text-secondary-900 dark:text-white">
-                {currentUser.displayName || 'User'}
-              </h3>
-              <p className="text-sm text-secondary-500 dark:text-secondary-400">
-                {currentUser.email}
-              </p>
-              <div className="flex items-center mt-2 text-xs text-secondary-500 dark:text-secondary-400">
-                <Mail className="w-3 h-3 mr-1" />
-                {currentUser.providerData?.[0]?.providerId === 'password' 
-                  ? t.auth.emailAccount 
-                  : t.auth.googleAccount}
-              </div>
-            </div>
-          </div>
-        <div>
-          <Button
-            onClick={handleOpenAuthDialog}
-            fullWidth
-            variant="outline"
-            leftIcon={<User className="w-4 h-4" />}
-          >
-            {t.auth.userProfile}
-          </Button>
-        </div>
-        </div>
-      </CardContent>
-      
-      <AuthDialog
-        initialView="profile"
-        isOpen={isAuthDialogOpen}
-        onClose={() => setIsAuthDialogOpen(false)}
-      />
-    </Card>
-  );
+  // Directly render UserProfile if logged in
+  return <UserProfile onClose={onClose} />;
 };
 
 export default UserManagement;

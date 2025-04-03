@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import CategoryManager from '../components/settings/CategoryManager';
 import DataManagement from '../components/settings/DataManagement';
 import CurrencySelector from '../components/settings/CurrencySelector';
-import UserManagement from '../components/settings/UserManagement';
 import SubscriptionManagement from '../components/settings/SubscriptionManagement';
 import FeedbackDialog from '../components/settings/FeedbackDialog';
 import LanguageDialog from '../components/settings/LanguageDialog';
@@ -24,7 +23,6 @@ const Settings: React.FC = () => {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">{t.common.settings}</h1>
       
-      <UserManagement />
       
       {/* Only show subscription management for signed-in users */}
       {currentUser && <SubscriptionManagement />}

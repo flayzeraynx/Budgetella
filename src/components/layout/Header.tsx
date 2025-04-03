@@ -4,6 +4,7 @@ import { Wallet, BarChart2, Settings, Menu, X, EyeOff, Eye, LogIn, LogOut, Globe
 import LoginDialog from '../auth/LoginDialog';
 import LanguageDialog from '../settings/LanguageDialog';
 import LogoutConfirmationDialog from '../auth/LogoutConfirmationDialog';
+import UserManagement from '../settings/UserManagement'; // Correctly import UserManagement
 import UserAvatar from '../auth/UserAvatar';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -27,6 +28,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLanguageDialogOpen, setIsLanguageDialogOpen] = useState(false);
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false); // State for profile dialog
   const [isLogoutConfirmationOpen, setIsLogoutConfirmationOpen] = useState(false);
   const { currentUser, signOut } = useAuth();
   const { subscriptionStatus, checkIfPremium } = useSubscription(); // Get full status
@@ -210,9 +212,21 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
                         {currentUser.email}
                       </p>
                     </div>
+                    {/* Profile Button */}
+                    <button
+                      onClick={() => {
+                        setIsProfileDialogOpen(true);
+                        setIsUserMenuOpen(false); // Close dropdown when opening dialog
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-700 flex items-center"
+                    >
+                      <User className="w-4 h-4 mr-2" />
+                      {t.auth.userProfile} {/* Use correct translation key */}
+                    </button>
+                    {/* Logout Button */}
                     <button
                       onClick={handleLogoutClick}
-                      className="w-full text-left px-4 py-2 text-sm text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-700 flex items-center"
+                      className="w-full text-left px-4 py-2 text-sm text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-700 flex items-center border-t border-secondary-200 dark:border-secondary-700 mt-1 pt-1"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
                       {t.auth.signOut}
@@ -389,6 +403,27 @@ const Header: React.FC<HeaderProps> = ({ onOpenLoginDialog }) => {
         onCancel={() => setIsLogoutConfirmationOpen(false)}
         onConfirm={handleConfirmLogout}
       />
+
+      {/* Profile Dialog/Modal */}
+      {isProfileDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-xl p-6 w-full max-w-xl relative max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4 border-b pb-2 dark:border-secondary-700">
+              <h2 className="text-lg font-semibold text-secondary-900 dark:text-white">
+                {t.auth.userProfile}
+              </h2>
+              <button
+                onClick={() => setIsProfileDialogOpen(false)}
+                className="text-secondary-500 hover:text-secondary-700 dark:text-secondary-400 dark:hover:text-white"
+                aria-label="Close profile dialog"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <UserManagement onClose={() => setIsProfileDialogOpen(false)} />
+          </div>
+        </div>
+      )}
     </header>
   );
 };
