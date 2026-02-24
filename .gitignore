@@ -10,3 +10,8 @@ serviceAccountKey.json
 *credentials*.json
 *.pem
 *.key
+
+# Build artifacts
+dist/
+build/
+.firebase/
