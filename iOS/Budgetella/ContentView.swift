@@ -2,45 +2,70 @@
 //  ContentView.swift
 //  Budgetella
 //
-//  Geçici placeholder. Tasarım onayından sonra burası MainTabView ile değiştirilecek
-//  (Onboarding gating + Auth gating + TabView ile Dashboard/Transactions/Insights/Settings).
+//  App router — onboarding → auth → main tab sequence.
+//  Her aşama tamamlandıkça AppState ilerler.
 //
 
 import SwiftUI
 
+enum AppState {
+    case onboarding
+    case auth         // #5 — Auth flow (gelecek)
+    case main         // #6+ — Dashboard + tabs (gelecek)
+}
+
 struct ContentView: View {
+
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @State private var appState: AppState = .onboarding
+
     var body: some View {
-        VStack(spacing: 24) {
-            Image(systemName: "wallet.pass.fill")
-                .font(.system(size: 72, weight: .light))
-                .foregroundStyle(.tint)
-                .symbolRenderingMode(.hierarchical)
+        Group {
+            switch appState {
+            case .onboarding:
+                OnboardingView {
+                    withAnimation(.easeInOut(duration: 0.4)) {
+                        appState = .auth
+                    }
+                }
 
-            VStack(spacing: 8) {
-                Text("Budgetella")
-                    .font(.largeTitle.bold())
+            case .auth:
+                // Auth flow (Build Sequence #5 — yakında)
+                placeholderScreen(title: "Giriş Yap", subtitle: "Auth flow geliştirme aşamasında")
 
-                Text("iOS native — geliştirme aşamasında")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+            case .main:
+                // Main tab (Build Sequence #6 — yakında)
+                placeholderScreen(title: "Dashboard", subtitle: "Ana ekran geliştirme aşamasında")
             }
-
-            Text("v1.0 yapım aşamasında")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
-                .padding(.top, 16)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemBackground))
+        .onAppear {
+            if hasCompletedOnboarding {
+                appState = .auth
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func placeholderScreen(title: String, subtitle: String) -> some View {
+        ZStack {
+            BrandColor.background.ignoresSafeArea()
+            VStack(spacing: 16) {
+                Image(systemName: "wallet.pass.fill")
+                    .font(.system(size: 56, weight: .light))
+                    .foregroundStyle(BrandColor.primary)
+                    .symbolRenderingMode(.hierarchical)
+                Text(title)
+                    .font(.brand(.title))
+                    .foregroundStyle(BrandColor.textPrimary)
+                Text(subtitle)
+                    .font(.brand(.footnote))
+                    .foregroundStyle(BrandColor.textTertiary)
+            }
+        }
+        .preferredColorScheme(.dark)
     }
 }
 
-#Preview("Light") {
+#Preview {
     ContentView()
-        .preferredColorScheme(.light)
-}
-
-#Preview("Dark") {
-    ContentView()
-        .preferredColorScheme(.dark)
 }
