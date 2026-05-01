@@ -1,0 +1,49 @@
+# Xcode generated project (XcodeGen ile yeniden oluşturulur)
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+
+# Build artifacts
+build/
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+Packages/
+Package.resolved
+.swiftpm/
+
+# CocoaPods
+Pods/
+
+# Carthage
+Carthage/Build/
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output/
+
+# Firebase (asla commitleme)
+GoogleService-Info.plist
+
+# Secrets
+.env
+.env.local
+*.xcconfig.local
+Secrets.swift
+Secrets.xcconfig
+**/Configuration/Secrets.xcconfig
+
+# macOS
+.DS_Store
+
+# Local archives
+*.xcarchive
