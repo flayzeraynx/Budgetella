@@ -40,9 +40,9 @@ struct MainTabView: View {
         }
         .ignoresSafeArea(.keyboard)
         .sheet(isPresented: $showQuickEntry) {
-            // Placeholder — Build Sequence #7
-            tabPlaceholder(icon: "plus.circle.fill", title: "Hızlı Giriş")
+            QuickEntryView()
                 .presentationDetents([.large])
+                .presentationDragIndicator(.hidden)
         }
         .preferredColorScheme(.dark)
     }
