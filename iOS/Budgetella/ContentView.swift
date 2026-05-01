@@ -30,8 +30,11 @@ struct ContentView: View {
                 }
 
             case .auth:
-                // Auth flow (Build Sequence #5 — yakında)
-                placeholderScreen(title: "Giriş Yap", subtitle: "Auth flow geliştirme aşamasında")
+                AuthView {
+                    withAnimation(.easeInOut(duration: 0.4)) {
+                        appState = .main
+                    }
+                }
 
             case .main:
                 // Main tab (Build Sequence #6 — yakında)
