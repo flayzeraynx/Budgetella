@@ -2,14 +2,14 @@
 //  BudgetellaApp.swift
 //  Budgetella
 //
-//  App entry point — SwiftData ModelContainer, Firebase ve RevenueCat init.
+//  App entry point — SwiftData ModelContainer + Firebase init.
+//  IAP: native StoreKit 2 (Transaction.currentEntitlements).
 //  Auth gating, onboarding ve feature routing ContentView downstream'de.
 //
 
 import SwiftUI
 import SwiftData
 @preconcurrency import FirebaseCore
-import RevenueCat
 
 @main
 struct BudgetellaApp: App {
@@ -19,13 +19,6 @@ struct BudgetellaApp: App {
     init() {
         // Firebase — GoogleService-Info.plist'ten otomatik konfigürasyon
         FirebaseApp.configure()
-
-        // RevenueCat — Secrets.xcconfig → Info.plist üzerinden key
-        let rcKey = Bundle.main.object(forInfoDictionaryKey: "REVENUECAT_API_KEY") as? String ?? ""
-        Purchases.configure(withAPIKey: rcKey)
-        #if DEBUG
-        Purchases.logLevel = .debug
-        #endif
 
         // SwiftData ModelContainer
         do {

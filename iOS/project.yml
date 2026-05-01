@@ -7,9 +7,6 @@ packages:
   GoogleSignIn:
     url: https://github.com/google/GoogleSignIn-iOS
     from: "8.0.0"
-  RevenueCat:
-    url: https://github.com/RevenueCat/purchases-ios
-    from: "5.0.0"
 
 options:
   bundleIdPrefix: com.toprakkilic
@@ -34,7 +31,6 @@ settings:
     INFOPLIST_KEY_UIRequiresFullScreen: YES
     # Secrets.xcconfig'ten gelen key'ler Info.plist'e aktarılır
     # (xcconfig dosyası gitignore'da; Ozzy lokalde dolduracak)
-    REVENUECAT_API_KEY: $(REVENUECAT_API_KEY)
     GEMINI_API_KEY: $(GEMINI_API_KEY)
     INFOPLIST_KEY_NSCameraUsageDescription: "Fişlerinizi kameranızla tarayıp otomatik olarak işlem oluşturmamız için kamera erişimine ihtiyacımız var."
     INFOPLIST_KEY_NSFaceIDUsageDescription: "Hesabınızı Face ID ile koruyup hızlı ve güvenli giriş sağlamak için."
@@ -67,8 +63,6 @@ targets:
         product: FirebaseMessaging
       - package: GoogleSignIn
         product: GoogleSignIn
-      - package: RevenueCat
-        product: RevenueCat
 
   BudgetellaTests:
     type: bundle.unit-test

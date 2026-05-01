@@ -2,9 +2,9 @@
 //  SubscriptionRecord.swift
 //  Budgetella
 //
-//  RevenueCat'ten sync'lenen abonelik durumunun lokal SwiftData mirror'ı.
+//  StoreKit 2 Transaction.currentEntitlements'tan sync'lenen lokal mirror.
 //  userId unique olduğu için per-user tek kayıt.
-//  Kaynak-of-truth: RevenueCat CustomerInfo. Bu kayıt offline read içindir.
+//  Kaynak-of-truth: Apple App Store (StoreKit 2 verified transactions).
 //
 
 import Foundation
@@ -30,7 +30,7 @@ public final class SubscriptionRecord {
     public var productId: String?
     public var expiresAt: Date?
     public var statusRaw: String
-    /// RevenueCat customer ID ($RCAnonymousID veya Firebase UID).
+    /// App Store original transaction ID veya nil.
     public var customerId: String?
     public var lastSyncedAt: Date
 
