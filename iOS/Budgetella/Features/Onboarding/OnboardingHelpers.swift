@@ -20,7 +20,7 @@ func stepHeader(current: Int, total: Int, onSkip: @escaping () -> Void) -> some 
 
         Spacer()
 
-        Button("Skip", action: onSkip)
+        Button("Geç", action: onSkip)
             .font(.brand(.footnote))
             .foregroundStyle(BrandColor.textSecondary)
     }

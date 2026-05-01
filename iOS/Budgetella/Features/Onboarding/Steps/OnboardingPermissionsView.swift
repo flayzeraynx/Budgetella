@@ -3,8 +3,6 @@
 //  Budgetella
 //
 //  Adım 04 · İzinler
-//  Mikrofon + Kamera + Bildirimler — iOS native permission dialog tetikler.
-//  "Everything stays on-device. Always."
 //
 
 import SwiftUI
@@ -25,10 +23,10 @@ struct OnboardingPermissionsView: View {
             Spacer()
 
             VStack(alignment: .leading, spacing: Spacing.xs) {
-                Text("Allow a few things?")
+                Text("Birkaç izin verir misin?")
                     .font(.brand(.largeTitle))
                     .foregroundStyle(BrandColor.textPrimary)
-                Text("Everything stays on-device. Always.")
+                Text("Her şey cihazında kalır. Her zaman.")
                     .font(.brand(.body))
                     .foregroundStyle(BrandColor.textTertiary)
             }
@@ -39,12 +37,11 @@ struct OnboardingPermissionsView: View {
             .offset(y: appeared ? 0 : 16)
             .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.1), value: appeared)
 
-            // ── Permission rows
             VStack(spacing: Spacing.sm) {
                 permissionRow(
                     icon: "mic.fill",
-                    title: "Microphone",
-                    description: "For voice entry: \"100 lira gas\".",
+                    title: "Mikrofon",
+                    description: "Sesli işlem girişi için: \"100 lira benzin\".",
                     isEnabled: vm.microphoneEnabled,
                     delay: 0.18
                 ) {
@@ -53,8 +50,8 @@ struct OnboardingPermissionsView: View {
 
                 permissionRow(
                     icon: "camera.fill",
-                    title: "Camera",
-                    description: "Snap receipts to log instantly.",
+                    title: "Kamera",
+                    description: "Fiş fotoğrafı çekip anında işlem oluştur.",
                     isEnabled: vm.cameraEnabled,
                     delay: 0.25
                 ) {
@@ -63,8 +60,8 @@ struct OnboardingPermissionsView: View {
 
                 permissionRow(
                     icon: "bell.fill",
-                    title: "Notifications",
-                    description: "Bill reminders & saving nudges.",
+                    title: "Bildirimler",
+                    description: "Fatura hatırlatmaları ve tasarruf önerileri.",
                     isEnabled: vm.notificationsEnabled,
                     delay: 0.32
                 ) {
@@ -76,7 +73,7 @@ struct OnboardingPermissionsView: View {
             Spacer()
 
             Button(action: onComplete) {
-                primaryButtonLabel("Start tracking")
+                primaryButtonLabel("Takibe Başla")
             }
             .padding(.horizontal, 28)
             .padding(.bottom, 48)
@@ -129,12 +126,4 @@ struct OnboardingPermissionsView: View {
         .offset(y: appeared ? 0 : 16)
         .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(delay), value: appeared)
     }
-}
-
-#Preview {
-    ZStack {
-        BrandColor.background.ignoresSafeArea()
-        OnboardingPermissionsView(vm: OnboardingViewModel(), onComplete: {})
-    }
-    .preferredColorScheme(.dark)
 }

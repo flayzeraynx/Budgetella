@@ -3,7 +3,6 @@
 //  Budgetella
 //
 //  Adım 02 · Özellikler
-//  "Built for speed. Loved by your wallet." — 4 feature item.
 //
 
 import SwiftUI
@@ -15,34 +14,32 @@ struct OnboardingFeaturesView: View {
 
     private let features: [(icon: String, title: String, description: String)] = [
         ("mic.fill",
-         "Talk it in",
-         "\"100 lira gas\" — done. Voice → entry, instantly."),
+         "Sesle gir",
+         "\"100 lira benzin\" — tamam. Sesini söyle, işlem anında kaydolsun."),
         ("camera.fill",
-         "Snap a receipt",
-         "Camera reads the total, vendor, and category for you."),
+         "Fiş tara",
+         "Kamera tutarı, marketi ve kategoriyi senin için okur."),
         ("sparkles",
-         "AI categorizer",
-         "Every entry lands in the right bucket — no taps needed."),
+         "AI kategorileme",
+         "Her işlem doğru kategoriye düşer — tek dokunuş gerekmez."),
         ("chart.bar.fill",
-         "Real insights",
-         "Trends, forecasts, and gentle nudges toward saving more."),
+         "Gerçek içgörüler",
+         "Trendler, tahminler ve tasarruf için nazik hatırlatmalar."),
     ]
 
     var body: some View {
         VStack(spacing: 0) {
-            // ── Üst bar
             stepHeader(current: 2, total: 4, onSkip: vm.skip)
                 .padding(.horizontal, 28)
                 .padding(.top, 16)
 
             Spacer()
 
-            // ── Hero başlık
             VStack(alignment: .leading, spacing: Spacing.xs) {
-                Text("Built for speed.")
+                Text("Hız için yapıldı.")
                     .font(.brand(.largeTitle))
                     .foregroundStyle(BrandColor.textPrimary)
-                Text("Loved by your wallet.")
+                Text("Cüzdanınız tarafından sevildi.")
                     .font(.brand(.largeTitle))
                     .foregroundStyle(BrandColor.textTertiary)
             }
@@ -53,7 +50,6 @@ struct OnboardingFeaturesView: View {
             .offset(y: appeared ? 0 : 16)
             .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.1), value: appeared)
 
-            // ── Feature listesi
             VStack(spacing: Spacing.md) {
                 ForEach(Array(features.enumerated()), id: \.offset) { index, feature in
                     featureRow(icon: feature.icon, title: feature.title, description: feature.description)
@@ -70,8 +66,7 @@ struct OnboardingFeaturesView: View {
 
             Spacer()
 
-            // ── CTA
-            Button { vm.advance() } label: { primaryButtonLabel("Continue") }
+            Button { vm.advance() } label: { primaryButtonLabel("Devam") }
                 .padding(.horizontal, 28)
                 .padding(.bottom, 48)
                 .opacity(appeared ? 1 : 0)
@@ -104,12 +99,4 @@ struct OnboardingFeaturesView: View {
             Spacer()
         }
     }
-}
-
-#Preview {
-    ZStack {
-        BrandColor.background.ignoresSafeArea()
-        OnboardingFeaturesView(vm: OnboardingViewModel())
-    }
-    .preferredColorScheme(.dark)
 }

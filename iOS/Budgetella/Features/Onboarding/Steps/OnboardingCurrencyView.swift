@@ -3,7 +3,6 @@
 //  Budgetella
 //
 //  Adım 03 · Para birimi
-//  Flag + radio listesi. TRY varsayılan seçili.
 //
 
 import SwiftUI
@@ -14,10 +13,10 @@ struct OnboardingCurrencyView: View {
     @State private var appeared = false
 
     private let currencies: [(currency: AppCurrency, flag: String, name: String)] = [
-        (.tryLira, "🇹🇷", "Turkish Lira"),
-        (.usd,     "🇺🇸", "US Dollar"),
+        (.tryLira, "🇹🇷", "Türk Lirası"),
+        (.usd,     "🇺🇸", "ABD Doları"),
         (.eur,     "🇪🇺", "Euro"),
-        (.gbp,     "🇬🇧", "British Pound"),
+        (.gbp,     "🇬🇧", "İngiliz Sterlini"),
     ]
 
     var body: some View {
@@ -29,10 +28,10 @@ struct OnboardingCurrencyView: View {
             Spacer()
 
             VStack(alignment: .leading, spacing: Spacing.xs) {
-                Text("Pick your currency")
+                Text("Para birimini seç")
                     .font(.brand(.largeTitle))
                     .foregroundStyle(BrandColor.textPrimary)
-                Text("You can change this later in Settings.")
+                Text("Ayarlardan istediğin zaman değiştirebilirsin.")
                     .font(.brand(.body))
                     .foregroundStyle(BrandColor.textTertiary)
             }
@@ -43,7 +42,6 @@ struct OnboardingCurrencyView: View {
             .offset(y: appeared ? 0 : 16)
             .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.1), value: appeared)
 
-            // ── Currency listesi
             VStack(spacing: Spacing.sm) {
                 ForEach(Array(currencies.enumerated()), id: \.element.currency.rawValue) { index, item in
                     currencyRow(item: item)
@@ -60,7 +58,7 @@ struct OnboardingCurrencyView: View {
 
             Spacer()
 
-            Button { vm.advance() } label: { primaryButtonLabel("Continue") }
+            Button { vm.advance() } label: { primaryButtonLabel("Devam") }
                 .padding(.horizontal, 28)
                 .padding(.bottom, 48)
                 .opacity(appeared ? 1 : 0)
@@ -118,12 +116,4 @@ struct OnboardingCurrencyView: View {
         }
         .buttonStyle(.plain)
     }
-}
-
-#Preview {
-    ZStack {
-        BrandColor.background.ignoresSafeArea()
-        OnboardingCurrencyView(vm: OnboardingViewModel())
-    }
-    .preferredColorScheme(.dark)
 }

@@ -1,10 +1,16 @@
 {
   "sourceLanguage" : "tr",
   "strings" : {
+    "·" : {
+
+    },
     "**%@** adresine sıfırlama bağlantısı gönderdik. Gelen kutunu kontrol et." : {
 
     },
     "**Kullanım şartları** ve **gizlilik politikası**'nı okudum, kabul ediyorum." : {
+
+    },
+    "/%@" : {
 
     },
     "%@" : {
@@ -55,6 +61,12 @@
     "6 haneli kodu **%@**'ye gönderdik. Birazdan gelir." : {
 
     },
+    "7 gün ücretsiz dene" : {
+
+    },
+    "7 Gün Ücretsiz Dene" : {
+
+    },
     "30 saniyede başla. Verilerin sadece sende — Apple/Google ile devam et veya e-posta gir." : {
 
     },
@@ -64,10 +76,19 @@
     "AI ÖNERDİ" : {
 
     },
+    "Aktif" : {
+
+    },
+    "Aktif abonelik" : {
+
+    },
     "AKTİF AY" : {
 
     },
     "Allow a few things?" : {
+
+    },
+    "ANOMALİ" : {
 
     },
     "app.name" : {
@@ -213,10 +234,16 @@
         }
       }
     },
+    "Aylık otomatik işlem" : {
+
+    },
     "Bağlantı gönderildi!" : {
 
     },
     "Başlayalım" : {
+
+    },
+    "bekliyor" : {
 
     },
     "Bir kere bak, içeri gir." : {
@@ -225,13 +252,31 @@
     "Bir kez bak, bütçeni aç. Şifre yazma dönemi bitti." : {
 
     },
+    "Birkaç işlem ekledikten sonra Budgi senin için trend, tahmin ve insight kartları üretmeye başlar." : {
+
+    },
     "Bu ay harcamalarınız geçen aya göre %23 artış gösterdi. Alışveriş ve yemek kategorilerini gözden geçirmenizi öneririm." : {
+
+    },
+    "Bu işlem kalıcı olarak silinecek." : {
 
     },
     "Budgetella" : {
 
     },
+    "Budgetella Premium" : {
+
+    },
+    "Budgi" : {
+
+    },
     "BUDGİ · AI" : {
+
+    },
+    "Budgi ile sohbet Premium özelliği" : {
+
+    },
+    "Budgi'ye soru sor..." : {
 
     },
     "Built for speed." : {
@@ -536,6 +581,9 @@
         }
       }
     },
+    "Çıkış Yap" : {
+
+    },
     "common.cancel" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -651,6 +699,9 @@
         }
       }
     },
+    "Deneme süresi bittikten sonra seçtiğin plan fiyatından otomatik yenilenir." : {
+
+    },
     "Devam ederek **Şartlar** ve **Gizlilik**'i kabul edersin." : {
 
     },
@@ -669,7 +720,13 @@
     "E-postanı doğrula" : {
 
     },
+    "En az 5 işlem ile haftalık özet aktifleşir" : {
+
+    },
     "Everything stays on-device. Always." : {
+
+    },
+    "Face ID / Touch ID" : {
 
     },
     "Face ID ile gir" : {
@@ -678,13 +735,16 @@
     "Face ID ile hızlı giriş" : {
 
     },
+    "Finansal kontrol, her zaman" : {
+
+    },
+    "Finansal özgürlüğüne giden yolda\ntam kontrol" : {
+
+    },
     "G" : {
 
     },
     "Geçen aya göre ₺3.400\ntasarruf ettin. Aynen devam 🔥" : {
-
-    },
-    "Geliştirme aşamasında" : {
 
     },
     "Geri" : {
@@ -699,7 +759,19 @@
     "GÜNLÜK AKIŞ · %@" : {
 
     },
+    "Haftada 2 yemeği evde yapsan ay sonuna ~₺680 artar." : {
+
+    },
+    "Harcamalarını analiz et, sorular sor, finansal hedeflerine ulaş." : {
+
+    },
+    "Henüz analiz edecek bir şey yok" : {
+
+    },
     "Her gelir-gideri saniyeler içinde gir.\nGerisini AI hallediyor." : {
+
+    },
+    "Hesabı Sil" : {
 
     },
     "Hesabın var mı? " : {
@@ -712,6 +784,15 @@
 
     },
     "Hesaptan çık" : {
+
+    },
+    "İPUCU" : {
+
+    },
+    "Kategori dağılımı" : {
+
+    },
+    "Kategori yok" : {
 
     },
     "KATEGORİLER" : {
@@ -735,6 +816,9 @@
     "Loved by your wallet." : {
 
     },
+    "Merhaba Ozzy 👋 Bu hafta şunları fark ettim:" : {
+
+    },
     "Net %@%@ (%@)" : {
       "localizations" : {
         "tr" : {
@@ -745,6 +829,9 @@
         }
       }
     },
+    "ÖNERİ" : {
+
+    },
     "Para,\nnihayet net." : {
 
     },
@@ -752,6 +839,12 @@
 
     },
     "Pick your currency" : {
+
+    },
+    "PREMIUM" : {
+
+    },
+    "Premium özellik" : {
 
     },
     "Premium özellik — V1.1'de geliyor" : {
@@ -802,6 +895,18 @@
           }
         }
       }
+    },
+    "Premium'a Geç" : {
+
+    },
+    "Satın Alımları Geri Yükle" : {
+
+    },
+    "Seç" : {
+
+    },
+    "Senin finans asistanın" : {
+
     },
     "settings.currency" : {
       "extractionState" : "stale",
@@ -942,13 +1047,28 @@
         }
       }
     },
+    "Şifre Değiştir" : {
+
+    },
     "Şifre gücü:" : {
+
+    },
+    "Şifre güncellendi" : {
+
+    },
+    "Şifreler eşleşmiyor" : {
 
     },
     "Şifreni mi unuttun?" : {
 
     },
     "Şifrenle gir veya Face ID kullan." : {
+
+    },
+    "Şifreyi Güncelle" : {
+
+    },
+    "Şimdi değil" : {
 
     },
     "Şimdilik geç" : {
@@ -1053,6 +1173,12 @@
 
     },
     "Tekrar hoş geldin" : {
+
+    },
+    "Tekrarlayan" : {
+
+    },
+    "TOPLAM GİDER" : {
 
     },
     "transaction.field.amount" : {
@@ -1193,16 +1319,31 @@
         }
       }
     },
+    "Tüm verileriniz kalıcı olarak silinecek. Bu işlem geri alınamaz." : {
+
+    },
+    "Tutar" : {
+
+    },
     "TUTAR" : {
 
     },
+    "Tutarları Gizle" : {
+
+    },
     "UYARI" : {
+
+    },
+    "v%@" : {
 
     },
     "Veri yok" : {
 
     },
     "YILLIK ÖZET" : {
+
+    },
+    "Yiyecek harcaman **%34 arttı** (₺4,280 → geçen hafta ₺3,180). Çoğu dışarıdan yemek." : {
 
     },
     "You can change this later in Settings." : {
