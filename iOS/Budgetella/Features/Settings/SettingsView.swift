@@ -216,7 +216,7 @@ struct SettingsView: View {
             }
             .confirmationDialog("Çıkış yap?", isPresented: $showSignOutConfirm, titleVisibility: .visible) {
                 Button("Çıkış Yap", role: .destructive) {
-                    Task { try? await authService.signOut(modelContext: modelContext) }
+                    try? authService.signOut(modelContext: modelContext)
                 }
                 Button("Vazgeç", role: .cancel) {}
             }

@@ -78,11 +78,10 @@ import Foundation
 
     private func inPreviousPeriod(_ tx: Transaction) -> Bool {
         let cal = Calendar.current
-        guard var comps = Optional(DateComponents(year: selectedYear, month: selectedMonth)),
-              let current = cal.date(from: comps),
+        let comps = DateComponents(year: selectedYear, month: selectedMonth)
+        guard let current = cal.date(from: comps),
               let prev    = cal.date(byAdding: .month, value: -1, to: current)
         else { return false }
-        _ = comps
         return cal.component(.year,  from: tx.date) == cal.component(.year,  from: prev) &&
                cal.component(.month, from: tx.date) == cal.component(.month, from: prev)
     }
