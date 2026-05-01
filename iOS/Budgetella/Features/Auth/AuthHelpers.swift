@@ -9,7 +9,7 @@ import SwiftUI
 
 // MARK: - Back Button
 
-@ViewBuilder
+@MainActor @ViewBuilder
 func backButton(action: @escaping () -> Void) -> some View {
     Button(action: action) {
         HStack(spacing: Spacing.xs) {

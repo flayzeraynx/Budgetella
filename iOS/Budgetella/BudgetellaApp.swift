@@ -52,5 +52,22 @@ struct BudgetellaApp: App {
             ContentView()
         }
         .modelContainer(modelContainer)
+        .backgroundTask(.appRefresh("seed")) { }
+    }
+}
+
+// MARK: - Category seed on first launch
+// Called from ContentView.onAppear via a SwiftData-aware context
+extension BudgetellaApp {
+    static func seedCategoriesIfNeeded(in context: ModelContext) {
+        guard !UserDefaults.standard.bool(forKey: "categoriesSeeded") else { return }
+        let count = (try? context.fetchCount(FetchDescriptor<Category>())) ?? 0
+        guard count == 0 else {
+            UserDefaults.standard.set(true, forKey: "categoriesSeeded")
+            return
+        }
+        Category.seedDefaults(for: "local").forEach { context.insert($0) }
+        try? context.save()
+        UserDefaults.standard.set(true, forKey: "categoriesSeeded")
     }
 }

@@ -8,6 +8,7 @@ import SwiftData
 
 struct TransactionsView: View {
 
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @Query(sort: \Category.sortOrder) private var categories: [Category]
     @State private var vm = TransactionsViewModel()
@@ -194,7 +195,7 @@ struct TransactionsView: View {
                     Section {
                         VStack(spacing: 0) {
                             ForEach(section.transactions) { tx in
-                                TransactionRow(transaction: tx)
+                                TransactionRow(transaction: tx, onDelete: { modelContext.delete(tx) })
                                     .onTapGesture { editingTransaction = tx }
 
                                 if tx.id != section.transactions.last?.id {

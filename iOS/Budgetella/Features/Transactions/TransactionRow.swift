@@ -8,13 +8,62 @@ import SwiftUI
 struct TransactionRow: View {
 
     let transaction: Transaction
+    var onDelete: (() -> Void)? = nil
+
+    @State private var swipeOffset: CGFloat = 0
+    private let deleteWidth: CGFloat = 76
 
     var body: some View {
+        ZStack(alignment: .trailing) {
+            // Delete button (behind row, revealed on swipe)
+            Button {
+                withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
+                    swipeOffset = 0
+                }
+                onDelete?()
+            } label: {
+                VStack(spacing: 4) {
+                    Image(systemName: "trash.fill")
+                        .font(.system(size: 17, weight: .semibold))
+                    Text("Sil")
+                        .font(.brand(.caption))
+                }
+                .foregroundStyle(.white)
+                .frame(width: deleteWidth)
+                .frame(maxHeight: .infinity)
+                .background(BrandColor.expense)
+            }
+            .opacity(swipeOffset < -8 ? 1 : 0)
+
+            // Main row content
+            rowContent
+                .offset(x: swipeOffset)
+                .background(BrandColor.surface.opacity(0.001)) // extends tap area
+                .gesture(
+                    DragGesture(minimumDistance: 12, coordinateSpace: .local)
+                        .onChanged { value in
+                            let isHorizontal = abs(value.translation.width) > abs(value.translation.height)
+                            guard isHorizontal else { return }
+                            if value.translation.width < 0 {
+                                swipeOffset = max(value.translation.width, -deleteWidth)
+                            } else if swipeOffset < 0 {
+                                swipeOffset = min(0, swipeOffset + value.translation.width)
+                            }
+                        }
+                        .onEnded { _ in
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                                swipeOffset = swipeOffset < -(deleteWidth * 0.5) ? -deleteWidth : 0
+                            }
+                        }
+                )
+        }
+        .clipped()
+    }
+
+    private var rowContent: some View {
         HStack(spacing: Spacing.md) {
-            // Category icon circle
             categoryIcon
 
-            // Note + meta
             VStack(alignment: .leading, spacing: 2) {
                 Text(transaction.note.isEmpty ? "İsimsiz" : transaction.note)
                     .font(.brand(.subheadline))
@@ -44,7 +93,6 @@ struct TransactionRow: View {
 
             Spacer()
 
-            // Amount
             VStack(alignment: .trailing, spacing: 2) {
                 Text((transaction.type == .income ? "+" : "-") + transaction.amount.fullTRY)
                     .font(.brand(.subheadline).monospacedDigit())

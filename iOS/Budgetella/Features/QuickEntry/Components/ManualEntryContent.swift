@@ -2,7 +2,7 @@
 //  ManualEntryContent.swift
 //  Budgetella
 //
-//  Manuel işlem girişi — tip toggle + tutar + açıklama + AI önerisi + numpad
+//  Manuel işlem girişi: tip toggle → tutar → mod seçici → açıklama → kategori → numpad
 //
 
 import SwiftUI
@@ -12,35 +12,48 @@ struct ManualEntryContent: View {
 
     @Bindable var vm: QuickEntryViewModel
     let categories: [Category]
+    @Binding var mode: EntryMode
+    @Binding var isTyping: Bool
+
+    @FocusState private var noteFieldFocused: Bool
 
     var body: some View {
         VStack(spacing: 0) {
 
             // ── Type toggle (Gider / Gelir)
             typeToggle
-                .padding(.horizontal, 28)
-                .padding(.top, Spacing.xl)
+                .padding(.horizontal, 20)
+                .padding(.top, Spacing.lg)
 
             Spacer(minLength: Spacing.xl)
 
             // ── Amount display
             amountDisplay
-                .padding(.horizontal, 28)
+                .padding(.horizontal, 20)
 
-            Spacer(minLength: Spacing.lg)
+            Spacer(minLength: Spacing.md)
+
+            // ── Mode selector (Manuel / Sesli / Kamera) — above description
+            modeSelectorPills
+                .padding(.horizontal, 20)
+                .padding(.bottom, Spacing.sm)
 
             // ── Description field
             descriptionField
-                .padding(.horizontal, 28)
+                .padding(.horizontal, 20)
+
+            // ── Category chips (inline horizontal scroll)
+            categoryChipsRow
+                .padding(.top, Spacing.xs)
 
             // ── AI suggestion chips
-            if !vm.aiSuggestions.isEmpty || vm.selectedCategoryId != nil {
+            if !vm.aiSuggestions.isEmpty {
                 aiSuggestionRow
-                    .padding(.horizontal, 28)
-                    .padding(.top, Spacing.md)
+                    .padding(.horizontal, 20)
+                    .padding(.top, Spacing.sm)
             }
 
-            Spacer(minLength: Spacing.xl)
+            Spacer(minLength: Spacing.lg)
 
             // ── Numpad
             NumpadGrid(
@@ -49,8 +62,41 @@ struct ManualEntryContent: View {
                 onDelete:  { vm.backspace() }
             )
             .padding(.horizontal, 12)
-            .padding(.bottom, 16)
+            .padding(.bottom, Spacing.xs)
         }
+    }
+
+    // MARK: - Mode selector pills
+
+    private var modeSelectorPills: some View {
+        HStack(spacing: Spacing.xs) {
+            modePill(.manual, icon: "keyboard",     label: "Manuel")
+            modePill(.voice,  icon: "mic.fill",     label: "Sesli")
+            modePill(.camera, icon: "camera.fill",  label: "Kamera")
+        }
+        .padding(3)
+        .background(BrandColor.surface.opacity(0.4))
+        .clipShape(Capsule())
+    }
+
+    private func modePill(_ m: EntryMode, icon: String, label: String) -> some View {
+        Button {
+            withAnimation(.spring(response: 0.3)) { mode = m }
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 11, weight: .semibold))
+                Text(label)
+                    .font(.brand(.caption))
+            }
+            .foregroundStyle(mode == m ? .white : BrandColor.textTertiary)
+            .padding(.horizontal, Spacing.sm)
+            .padding(.vertical, 6)
+            .background(mode == m ? BrandColor.primary : Color.clear)
+            .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Type toggle
@@ -77,7 +123,7 @@ struct ManualEntryContent: View {
             }
             .foregroundStyle(selected ? .white : BrandColor.textTertiary)
             .frame(maxWidth: .infinity)
-            .frame(height: 40)
+            .frame(height: 44)
             .background(selected ? color : BrandColor.surface.opacity(0.5))
             .clipShape(Capsule())
             .overlay(
@@ -131,16 +177,70 @@ struct ManualEntryContent: View {
                 .foregroundStyle(BrandColor.textPrimary)
                 .tint(BrandColor.primary)
                 .submitLabel(.done)
+                .focused($noteFieldFocused)
+                .onSubmit { noteFieldFocused = false }
         }
         .padding(.horizontal, Spacing.md)
-        .padding(.vertical, Spacing.sm)
+        .padding(.vertical, 16)
         .background(BrandColor.surface.opacity(0.4))
         .clipShape(RoundedRectangle(cornerRadius: Spacing.radiusSmall, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: Spacing.radiusSmall, style: .continuous)
-                .strokeBorder(BrandColor.borderSubtle, lineWidth: 1)
+                .strokeBorder(noteFieldFocused ? BrandColor.primary.opacity(0.5) : BrandColor.borderSubtle, lineWidth: 1)
         )
         .onChange(of: vm.note) { _, _ in vm.updateSuggestions() }
+        .onChange(of: noteFieldFocused) { _, v in isTyping = v }
+    }
+
+    // MARK: - Category chips (horizontal scroll)
+
+    private var categoryChipsRow: some View {
+        let filtered = categories.filter {
+            vm.transactionType == .expense ? $0.type == .expense : $0.type == .income
+        }
+
+        return ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: Spacing.sm) {
+                ForEach(filtered) { cat in
+                    categoryChip(cat)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 4)
+        }
+    }
+
+    private func categoryChip(_ cat: Category) -> some View {
+        let isSelected = cat.id == vm.selectedCategoryId
+        let color = Color(hex: cat.colorHex)
+
+        return Button {
+            withAnimation(.spring(response: 0.25)) {
+                vm.selectedCategoryId = isSelected ? nil : cat.id
+            }
+        } label: {
+            VStack(spacing: 5) {
+                ZStack {
+                    Circle()
+                        .fill(color.opacity(isSelected ? 0.22 : 0.1))
+                        .frame(width: 46, height: 46)
+                        .overlay(
+                            Circle()
+                                .stroke(isSelected ? color : Color.clear, lineWidth: 2)
+                        )
+                    Image(systemName: cat.iconName)
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundStyle(color)
+                }
+                Text(cat.name)
+                    .font(.brand(.caption))
+                    .foregroundStyle(isSelected ? BrandColor.textPrimary : BrandColor.textTertiary)
+                    .lineLimit(1)
+                    .frame(width: 56)
+            }
+            .frame(width: 56)
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - AI suggestion chips
@@ -183,24 +283,6 @@ struct ManualEntryContent: View {
                     }
                     .buttonStyle(.plain)
                 }
-
-                Button {
-                    vm.showCategoryPicker = true
-                } label: {
-                    HStack(spacing: 3) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 9, weight: .semibold))
-                        Text("Diğer")
-                            .font(.brand(.footnote))
-                    }
-                    .foregroundStyle(BrandColor.textSecondary)
-                    .padding(.horizontal, Spacing.sm)
-                    .padding(.vertical, 5)
-                    .background(BrandColor.surface.opacity(0.3))
-                    .clipShape(Capsule())
-                    .overlay(Capsule().strokeBorder(BrandColor.borderSubtle, lineWidth: 1))
-                }
-                .buttonStyle(.plain)
             }
         }
     }
@@ -222,9 +304,9 @@ struct NumpadGrid: View {
     ]
 
     var body: some View {
-        VStack(spacing: Spacing.sm) {
+        VStack(spacing: Spacing.xs) {
             ForEach(layout, id: \.self) { row in
-                HStack(spacing: Spacing.sm) {
+                HStack(spacing: Spacing.xs) {
                     ForEach(row, id: \.self) { key in
                         numpadKey(key)
                     }
@@ -260,7 +342,7 @@ struct NumpadGrid: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 60)
+            .frame(height: 64)
         }
         .buttonStyle(.plain)
     }

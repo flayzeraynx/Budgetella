@@ -13,6 +13,7 @@ struct ThemePickerSheet: View {
 
     var settings: AppSettings?
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("appTheme") private var appTheme = "system"
 
     var body: some View {
         NavigationStack {
@@ -20,6 +21,7 @@ struct ThemePickerSheet: View {
                 BrandColor.background.ignoresSafeArea()
                 List(AppTheme.allCases, id: \.self) { theme in
                     Button {
+                        appTheme = theme.rawValue
                         settings?.theme = theme
                         dismiss()
                     } label: {

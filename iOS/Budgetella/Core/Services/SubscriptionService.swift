@@ -34,7 +34,6 @@ public final class SubscriptionService {
     /// App Store abonelik yönetimi deep link (Apple 5.1.1(v) zorunlu).
     public let managementURL = URL(string: "itms-apps://apps.apple.com/account/subscriptions")!
 
-    // nonisolated(unsafe): deinit'te cancel çağrısı için
     nonisolated(unsafe) private var transactionListener: Task<Void, Never>?
 
     // MARK: - Product IDs

@@ -66,7 +66,7 @@ public extension Category {
         CategorySlug.allCases.enumerated().map { index, slug in
             Category(
                 userId: userId,
-                name: slug.rawValue,
+                name: slug.turkishName,
                 slug: slug.rawValue,
                 type: slug.type,
                 iconName: slug.defaultIcon,

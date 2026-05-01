@@ -32,66 +32,99 @@ struct EditTransactionSheet: View {
             ZStack {
                 BrandColor.background.ignoresSafeArea()
 
-                ScrollView {
-                    VStack(spacing: Spacing.lg) {
+                VStack(spacing: 0) {
+                    ScrollView {
+                        VStack(spacing: Spacing.lg) {
 
-                        // Type toggle
-                        typeToggle
-                            .padding(.top, Spacing.sm)
+                            // Type toggle
+                            typeToggle
+                                .padding(.top, Spacing.sm)
 
-                        // Amount field
-                        amountField
+                            // Amount field
+                            amountField
 
-                        // Fields
-                        VStack(spacing: Spacing.sm) {
-                            editField(label: "Not") {
-                                TextField("Açıklama", text: $note)
-                                    .font(.brand(.body))
-                                    .foregroundStyle(BrandColor.textPrimary)
-                                    .autocorrectionDisabled()
-                            }
+                            // Fields
+                            VStack(spacing: Spacing.sm) {
+                                editField(label: "Not") {
+                                    TextField("Açıklama", text: $note)
+                                        .font(.brand(.body))
+                                        .foregroundStyle(BrandColor.textPrimary)
+                                        .autocorrectionDisabled()
+                                }
 
-                            editField(label: "Kategori") {
-                                Button {
-                                    showCategoryPicker = true
-                                } label: {
-                                    HStack {
-                                        if let cat = selectedCategory {
-                                            Circle()
-                                                .fill(Color(hex: cat.colorHex))
-                                                .frame(width: 10, height: 10)
-                                            Text(cat.name)
-                                                .font(.brand(.body))
-                                                .foregroundStyle(BrandColor.textPrimary)
-                                        } else {
-                                            Text("Seç")
-                                                .font(.brand(.body))
+                                editField(label: "Kategori") {
+                                    Button {
+                                        showCategoryPicker = true
+                                    } label: {
+                                        HStack {
+                                            if let cat = selectedCategory {
+                                                Circle()
+                                                    .fill(Color(hex: cat.colorHex))
+                                                    .frame(width: 10, height: 10)
+                                                Text(cat.name)
+                                                    .font(.brand(.body))
+                                                    .foregroundStyle(BrandColor.textPrimary)
+                                            } else {
+                                                Text("Seç")
+                                                    .font(.brand(.body))
+                                                    .foregroundStyle(BrandColor.textTertiary)
+                                            }
+                                            Spacer()
+                                            Image(systemName: "chevron.right")
+                                                .font(.system(size: 12, weight: .semibold))
                                                 .foregroundStyle(BrandColor.textTertiary)
                                         }
-                                        Spacer()
-                                        Image(systemName: "chevron.right")
-                                            .font(.system(size: 12, weight: .semibold))
-                                            .foregroundStyle(BrandColor.textTertiary)
                                     }
+                                    .buttonStyle(.plain)
                                 }
-                                .buttonStyle(.plain)
+
+                                editField(label: "Tarih") {
+                                    DatePicker("", selection: $date, displayedComponents: [.date, .hourAndMinute])
+                                        .datePickerStyle(.compact)
+                                        .labelsHidden()
+                                        .colorScheme(.dark)
+                                        .tint(BrandColor.primary)
+                                }
                             }
 
-                            editField(label: "Tarih") {
-                                DatePicker("", selection: $date, displayedComponents: [.date, .hourAndMinute])
-                                    .datePickerStyle(.compact)
-                                    .labelsHidden()
-                                    .colorScheme(.dark)
-                                    .tint(BrandColor.primary)
-                            }
+                            // Recurring toggle
+                            recurringRow
+
+                            Spacer(minLength: 20)
                         }
-
-                        // Recurring toggle
-                        recurringRow
-
-                        Spacer(minLength: 40)
+                        .padding(.horizontal, 20)
                     }
+
+                    // Full-width save button
+                    Button {
+                        saveChanges()
+                    } label: {
+                        Text("Kaydet")
+                            .font(.brand(.headline))
+                            .foregroundStyle(isValid ? .white : BrandColor.textTertiary)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
+                            .background(
+                                isValid
+                                ? LinearGradient(
+                                    colors: [BrandColor.primary, BrandColor.primaryLight],
+                                    startPoint: .leading, endPoint: .trailing
+                                )
+                                : LinearGradient(
+                                    colors: [BrandColor.surface.opacity(0.5), BrandColor.surface.opacity(0.5)],
+                                    startPoint: .leading, endPoint: .trailing
+                                )
+                            )
+                            .clipShape(Capsule())
+                            .shadow(
+                                color: isValid ? BrandColor.primary.opacity(0.4) : .clear,
+                                radius: 12, y: 4
+                            )
+                    }
+                    .disabled(!isValid)
                     .padding(.horizontal, 20)
+                    .padding(.bottom, 36)
+                    .padding(.top, Spacing.sm)
                 }
             }
             .navigationTitle("İşlemi Düzenle")
@@ -102,21 +135,12 @@ struct EditTransactionSheet: View {
                         .foregroundStyle(BrandColor.textTertiary)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    HStack(spacing: Spacing.md) {
-                        Button(role: .destructive) {
-                            showDeleteConfirm = true
-                        } label: {
-                            Image(systemName: "trash")
-                                .font(.system(size: 16))
-                                .foregroundStyle(BrandColor.expense)
-                        }
-
-                        Button("Kaydet") {
-                            saveChanges()
-                        }
-                        .font(.brand(.subheadline).bold())
-                        .foregroundStyle(BrandColor.primary)
-                        .disabled(!isValid)
+                    Button {
+                        showDeleteConfirm = true
+                    } label: {
+                        Image(systemName: "trash")
+                            .font(.system(size: 16))
+                            .foregroundStyle(BrandColor.expense)
                     }
                 }
             }
@@ -125,15 +149,18 @@ struct EditTransactionSheet: View {
             .sheet(isPresented: $showCategoryPicker) {
                 editCategoryPicker
             }
-            .confirmationDialog("İşlemi sil?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
-                Button("Sil", role: .destructive) {
-                    modelContext.delete(transaction)
-                    dismiss()
-                }
-                Button("Vazgeç", role: .cancel) {}
-            } message: {
-                Text("Bu işlem kalıcı olarak silinecek.")
-            }
+            .brandAlert(
+                title: "İşlemi Sil",
+                message: "Bu işlem kalıcı olarak silinecek.",
+                isPresented: $showDeleteConfirm,
+                buttons: [
+                    .destructive("Sil") {
+                        modelContext.delete(transaction)
+                        dismiss()
+                    },
+                    .cancel()
+                ]
+            )
         }
         .onAppear { loadFromTransaction() }
     }

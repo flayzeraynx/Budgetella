@@ -2,11 +2,15 @@
 //  QuickEntryView.swift
 //  Budgetella
 //
-//  04 · Hızlı giriş — 3 mod: manuel (tam), sesli (premium V1.1), kamera (premium V1.1)
+//  Hızlı giriş — 3 mod: manuel, sesli (premium), kamera (premium)
 //
 
 import SwiftUI
 import SwiftData
+
+enum EntryMode: CaseIterable {
+    case manual, voice, camera
+}
 
 struct QuickEntryView: View {
 
@@ -18,47 +22,96 @@ struct QuickEntryView: View {
 
     @State private var vm = QuickEntryViewModel()
     @State private var mode: EntryMode = .manual
-
-    enum EntryMode: CaseIterable {
-        case manual, voice, camera
-    }
+    @State private var isTyping = false
 
     var body: some View {
         NavigationStack {
             ZStack {
                 BrandColor.background.ignoresSafeArea()
 
-                switch mode {
-                case .manual:
-                    ManualEntryContent(vm: vm, categories: categories)
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .trailing).combined(with: .opacity),
-                            removal: .opacity
-                        ))
+                VStack(spacing: 0) {
+                    switch mode {
+                    case .manual:
+                        ManualEntryContent(vm: vm, categories: categories, mode: $mode, isTyping: $isTyping)
+                            .transition(.asymmetric(
+                                insertion: .move(edge: .trailing).combined(with: .opacity),
+                                removal: .opacity
+                            ))
 
-                case .voice:
-                    premiumGate(icon: "mic.fill", title: "Sesli Giriş",
-                                subtitle: "Harcamanı sesli anlat, AI anlasın ve kaydetsin.")
+                    case .voice:
+                        premiumGate(
+                            icon: "mic.fill",
+                            title: "Sesli Giriş",
+                            subtitle: "Harcamanı sesli anlat, AI anlasın ve kaydetsin."
+                        )
                         .transition(.opacity)
 
-                case .camera:
-                    premiumGate(icon: "camera.fill", title: "Fiş Tarama",
-                                subtitle: "Kameranla fişi tara, AI tutarı ve mağazayı otomatik okusun.")
+                    case .camera:
+                        premiumGate(
+                            icon: "camera.fill",
+                            title: "Fiş Tarama",
+                            subtitle: "Kameranla fişi tara, AI tutarı ve mağazayı otomatik okusun."
+                        )
                         .transition(.opacity)
+                    }
+
+                    // Full-width save button — only for manual mode
+                    if mode == .manual {
+                        Button {
+                            vm.save(modelContext: modelContext, categories: categories, userId: userId)
+                            if vm.errorMessage == nil { dismiss() }
+                        } label: {
+                            Text("Kaydet")
+                                .font(.brand(.headline))
+                                .foregroundStyle(vm.canSave ? .white : BrandColor.textTertiary)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 56)
+                                .background(
+                                    vm.canSave
+                                    ? LinearGradient(
+                                        colors: [BrandColor.primary, BrandColor.primaryLight],
+                                        startPoint: .leading, endPoint: .trailing
+                                    )
+                                    : LinearGradient(
+                                        colors: [BrandColor.surface.opacity(0.5), BrandColor.surface.opacity(0.5)],
+                                        startPoint: .leading, endPoint: .trailing
+                                    )
+                                )
+                                .clipShape(Capsule())
+                                .shadow(
+                                    color: vm.canSave ? BrandColor.primary.opacity(0.4) : .clear,
+                                    radius: 12, y: 4
+                                )
+                        }
+                        .disabled(!vm.canSave)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 36)
+                        .padding(.top, Spacing.sm)
+                    }
                 }
             }
             .animation(.spring(response: 0.3), value: mode)
             .navigationBarTitleDisplayMode(.inline)
+            .interactiveDismissDisabled(isTyping)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("İptal") { dismiss() }
                         .foregroundStyle(BrandColor.textSecondary)
                 }
-                ToolbarItem(placement: .principal) {
-                    modeSelector
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    saveButton
+                ToolbarItemGroup(placement: .keyboard) {
+                    Button("Bitti") { isTyping = false }
+                        .foregroundStyle(BrandColor.textSecondary)
+                    Spacer()
+                    Button {
+                        isTyping = false
+                        vm.save(modelContext: modelContext, categories: categories, userId: userId)
+                        if vm.errorMessage == nil { dismiss() }
+                    } label: {
+                        Text("Kaydet")
+                            .font(.brand(.subheadline).bold())
+                            .foregroundStyle(vm.canSave ? BrandColor.primary : BrandColor.textTertiary)
+                    }
+                    .disabled(!vm.canSave)
                 }
             }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
@@ -71,53 +124,6 @@ struct QuickEntryView: View {
             }
         }
         .preferredColorScheme(.dark)
-    }
-
-    // MARK: - Mode selector
-
-    private var modeSelector: some View {
-        HStack(spacing: Spacing.xs) {
-            modePill(.manual, icon: "keyboard", label: "Manuel")
-            modePill(.voice,  icon: "mic.fill",    label: "Sesli")
-            modePill(.camera, icon: "camera.fill",  label: "Kamera")
-        }
-        .padding(3)
-        .background(BrandColor.surface.opacity(0.4))
-        .clipShape(Capsule())
-    }
-
-    private func modePill(_ m: EntryMode, icon: String, label: String) -> some View {
-        Button {
-            withAnimation(.spring(response: 0.3)) { mode = m }
-        } label: {
-            HStack(spacing: 3) {
-                Image(systemName: icon)
-                    .font(.system(size: 11, weight: .semibold))
-                Text(label)
-                    .font(.brand(.caption))
-            }
-            .foregroundStyle(mode == m ? .white : BrandColor.textTertiary)
-            .padding(.horizontal, Spacing.sm)
-            .padding(.vertical, 5)
-            .background(mode == m ? BrandColor.primary : Color.clear)
-            .clipShape(Capsule())
-        }
-        .buttonStyle(.plain)
-    }
-
-    // MARK: - Save button
-
-    private var saveButton: some View {
-        Button {
-            guard mode == .manual else { return }
-            vm.save(modelContext: modelContext, categories: categories, userId: userId)
-            if vm.errorMessage == nil { dismiss() }
-        } label: {
-            Text("Kaydet")
-                .font(.brand(.subheadline))
-                .foregroundStyle(vm.canSave && mode == .manual ? BrandColor.income : BrandColor.textTertiary)
-        }
-        .disabled(!vm.canSave || mode != .manual)
     }
 
     // MARK: - Premium gate

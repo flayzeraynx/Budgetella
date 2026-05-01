@@ -5,6 +5,7 @@
 
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
 
 struct SettingsView: View {
 
@@ -25,6 +26,10 @@ struct SettingsView: View {
     @State private var showCurrencyPicker = false
     @State private var showDeleteConfirm = false
     @State private var showSignOutConfirm = false
+    @State private var showImportPicker = false
+    @State private var showImportResult = false
+    @State private var importResultMessage = ""
+    @State private var isImporting = false
 
     private var settings: AppSettings? { settingsArr.first }
 
@@ -125,11 +130,14 @@ struct SettingsView: View {
                         ) { }
 
                         settingsRow(
-                            icon: "square.and.arrow.down",
+                            icon: isImporting ? "arrow.triangle.2.circlepath" : "square.and.arrow.down",
                             iconColor: BrandColor.primaryLight,
-                            title: "Yedeği İçe Aktar",
+                            title: isImporting ? "İçe aktarılıyor…" : "Yedeği İçe Aktar",
                             value: nil
-                        ) { }
+                        ) {
+                            guard !isImporting else { return }
+                            showImportPicker = true
+                        }
                     }
                     .listRowBackground(BrandColor.surface.opacity(0.4))
 
@@ -194,7 +202,6 @@ struct SettingsView: View {
             .navigationTitle("Ayarlar")
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(BrandColor.background, for: .navigationBar)
-            .preferredColorScheme(.dark)
             // Sheets
             .sheet(isPresented: $showProfile) {
                 ProfileView(authService: authService)
@@ -214,22 +221,65 @@ struct SettingsView: View {
             .sheet(isPresented: $showCurrencyPicker) {
                 CurrencyPickerSheet(settings: settings)
             }
-            .confirmationDialog("Çıkış yap?", isPresented: $showSignOutConfirm, titleVisibility: .visible) {
-                Button("Çıkış Yap", role: .destructive) {
-                    try? authService.signOut(modelContext: modelContext)
-                }
-                Button("Vazgeç", role: .cancel) {}
-            }
-            .confirmationDialog("Hesabı sil?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
-                Button("Hesabı Sil", role: .destructive) {
-                    Task { try? await authService.deleteAccount(modelContext: modelContext) }
-                }
-                Button("Vazgeç", role: .cancel) {}
-            } message: {
-                Text("Tüm verileriniz kalıcı olarak silinecek. Bu işlem geri alınamaz.")
-            }
+            .brandAlert(
+                title: "Çıkış yap?",
+                isPresented: $showSignOutConfirm,
+                buttons: [
+                    .destructive("Çıkış Yap") {
+                        try? authService.signOut(modelContext: modelContext)
+                    },
+                    .cancel()
+                ]
+            )
+            .brandAlert(
+                title: "Hesabı sil?",
+                message: "Tüm verileriniz kalıcı olarak silinecek. Bu işlem geri alınamaz.",
+                isPresented: $showDeleteConfirm,
+                buttons: [
+                    .destructive("Hesabı Sil") {
+                        Task { try? await authService.deleteAccount(modelContext: modelContext) }
+                    },
+                    .cancel()
+                ]
+            )
         }
         .task { await subscriptionService.setup() }
+        .fileImporter(
+            isPresented: $showImportPicker,
+            allowedContentTypes: [.json],
+            allowsMultipleSelection: false
+        ) { result in
+            guard case .success(let urls) = result, let url = urls.first else { return }
+            isImporting = true
+            let userId = currentUserId.isEmpty ? "local" : currentUserId
+            DispatchQueue.global(qos: .userInitiated).async {
+                let accessing = url.startAccessingSecurityScopedResource()
+                defer { if accessing { url.stopAccessingSecurityScopedResource() } }
+                do {
+                    let res = try BackupImportService.importFromURL(url, modelContext: modelContext, userId: userId)
+                    DispatchQueue.main.async {
+                        importResultMessage = "\(res.imported) işlem aktarıldı.\n\(res.skipped) tekrar atlandı."
+                        if res.categoriesCreated > 0 {
+                            importResultMessage += "\n\(res.categoriesCreated) yeni kategori oluşturuldu."
+                        }
+                        isImporting = false
+                        showImportResult = true
+                    }
+                } catch {
+                    DispatchQueue.main.async {
+                        importResultMessage = "Hata: \(error.localizedDescription)"
+                        isImporting = false
+                        showImportResult = true
+                    }
+                }
+            }
+        }
+        .brandAlert(
+            title: "İçe Aktarma Tamamlandı",
+            message: importResultMessage,
+            isPresented: $showImportResult,
+            buttons: [.cancel("Tamam")]
+        )
     }
 
     // MARK: - Profile card

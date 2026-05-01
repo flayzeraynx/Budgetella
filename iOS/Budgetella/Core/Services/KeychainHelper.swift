@@ -12,9 +12,9 @@ import Security
 public enum KeychainHelper {
 
     public enum Key: String {
-        case firebaseIdToken  = "com.toprakkilic.budgetella.firebase.idToken"
-        case firebaseUid      = "com.toprakkilic.budgetella.firebase.uid"
-        case biometricEnabled = "com.toprakkilic.budgetella.biometric.enabled"
+        case firebaseIdToken  = "com.ozankilic.budgetella.firebase.idToken"
+        case firebaseUid      = "com.ozankilic.budgetella.firebase.uid"
+        case biometricEnabled = "com.ozankilic.budgetella.biometric.enabled"
     }
 
     // MARK: - Write

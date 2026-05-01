@@ -34,8 +34,6 @@ public final class AuthService: NSObject {
     public var errorMessage: String?
 
     // MARK: - Private
-    // nonisolated(unsafe): deinit ve ASAuthorizationController callback'lerinde erişilir.
-    // Her iki alan da tek threaded sırayla yazılıp okunur — data race yok.
     nonisolated(unsafe) private var authStateListener: AuthStateDidChangeListenerHandle?
     nonisolated(unsafe) private var currentNonce: String?
 
@@ -48,8 +46,16 @@ public final class AuthService: NSObject {
                 self?.currentUser = user
                 if let user {
                     KeychainHelper.set(user.uid, for: .firebaseUid)
+                    UserDefaults.standard.set(user.displayName ?? "", forKey: "displayName")
+                    UserDefaults.standard.set(user.email ?? "", forKey: "userEmail")
+                    UserDefaults.standard.set(user.uid, forKey: "currentUserId")
+                    UserDefaults.standard.set(true, forKey: "isSignedIn")
                 } else {
                     KeychainHelper.delete(.firebaseUid)
+                    UserDefaults.standard.set("", forKey: "displayName")
+                    UserDefaults.standard.set("", forKey: "userEmail")
+                    UserDefaults.standard.set("", forKey: "currentUserId")
+                    UserDefaults.standard.set(false, forKey: "isSignedIn")
                 }
             }
         }
@@ -126,7 +132,7 @@ public final class AuthService: NSObject {
     // MARK: - Google Sign-In
 
     public func signInWithGoogle() async throws {
-        guard let rootVC = await rootViewController() else {
+        guard let rootVC = rootViewController() else {
             throw AuthError.noRootViewController
         }
         isLoading = true

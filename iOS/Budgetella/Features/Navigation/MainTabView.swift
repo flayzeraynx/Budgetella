@@ -32,6 +32,9 @@ struct MainTabView: View {
                     .tag(AppTab.ai)
                     .toolbar(.hidden, for: .tabBar)
             }
+            .safeAreaInset(edge: .bottom) {
+                Color.clear.frame(height: 72)
+            }
 
             CustomTabBar(selected: $selectedTab, onFABTap: { showQuickEntry = true })
         }
@@ -93,11 +96,12 @@ struct CustomTabBar: View {
         }
         .padding(.horizontal, Spacing.sm)
         .padding(.top, Spacing.sm)
-        .padding(.bottom, 28)
+        .safeAreaPadding(.bottom)
         .background(
             BrandColor.background2
                 .opacity(0.92)
                 .background(.ultraThinMaterial)
+                .ignoresSafeArea(edges: .bottom)
         )
     }
 

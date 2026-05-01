@@ -62,6 +62,25 @@ public enum CategorySlug: String, Codable, CaseIterable, Sendable {
         }
     }
 
+    /// Türkçe görünen ad — SwiftData seed ve import mapping için.
+    public var turkishName: String {
+        switch self {
+        case .salary:         return "Maaş"
+        case .freelance:      return "Freelance"
+        case .investments:    return "Yatırım"
+        case .gifts:          return "Hediyeler"
+        case .food:           return "Yiyecek"
+        case .transportation: return "Ulaşım"
+        case .housing:        return "Konut"
+        case .bills:          return "Faturalar"
+        case .healthcare:     return "Sağlık"
+        case .shopping:       return "Alışveriş"
+        case .entertainment:  return "Eğlence"
+        case .education:      return "Eğitim"
+        case .other:          return "Diğer"
+        }
+    }
+
     /// Hex renk kodu — DesignSystem rengiyle koordineli (Tailwind palette referansı).
     public var defaultColorHex: String {
         switch self {
