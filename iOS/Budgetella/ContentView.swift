@@ -37,8 +37,7 @@ struct ContentView: View {
                 }
 
             case .main:
-                // Main tab (Build Sequence #6 — yakında)
-                placeholderScreen(title: "Dashboard", subtitle: "Ana ekran geliştirme aşamasında")
+                MainTabView()
             }
         }
         .onAppear {
