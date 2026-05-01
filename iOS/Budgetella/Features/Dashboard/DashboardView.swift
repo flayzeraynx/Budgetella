@@ -18,6 +18,7 @@ struct DashboardView: View {
 
     @AppStorage("displayName") private var displayName = "Ozzy"
     @State private var vm = DashboardViewModel()
+    @State private var showSettings = false
 
     var body: some View {
         ScrollView {
@@ -66,6 +67,9 @@ struct DashboardView: View {
         }
         .background(BrandColor.background.ignoresSafeArea())
         .scrollIndicators(.hidden)
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
+        }
     }
 
     // MARK: - Header
@@ -90,14 +94,23 @@ struct DashboardView: View {
     }
 
     private var avatarBadge: some View {
-        ZStack {
-            Circle()
-                .fill(Color.orange)
-                .frame(width: 40, height: 40)
-            Text(String(displayName.prefix(1)).uppercased())
-                .font(.brand(.headline))
-                .foregroundStyle(.white)
+        Button { showSettings = true } label: {
+            ZStack {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [BrandColor.primary, BrandColor.primaryLight],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 40, height: 40)
+                Text(String(displayName.prefix(1)).uppercased())
+                    .font(.brand(.headline))
+                    .foregroundStyle(.white)
+            }
         }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Category section

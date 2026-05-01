@@ -22,7 +22,7 @@ import { useToast } from '../context/ToastContext'; // Import useToast
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
   const { hideAmounts } = useAmountVisibility();
-  const { currentUser } = useAuth();
+  const { currentUser, isHydrated } = useAuth();
   const { showToast } = useToast(); // Get showToast
   const { addTransaction, updateTransaction /*, deleteTransactionFromFirebase */ } = useFirebase(); // Commented out delete
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
@@ -107,7 +107,9 @@ const Dashboard: React.FC = () => {
   // }, [/* transactionToDelete, currentUser, deleteTransactionFromFirebase, showToast, t */]); // Add dependencies
 
   // Show warning banner if not signed in
+  // Firebase auth state async resolve eder; isHydrated false iken banner FLICKER yapmasın diye gate'liyoruz.
   const renderAuthWarning = () => {
+    if (!isHydrated) return null;
     if (!currentUser) {
       return (
         <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-md border border-yellow-200 dark:border-yellow-800 mb-6">

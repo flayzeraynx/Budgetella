@@ -25,6 +25,7 @@ import { db } from '../db';
 interface AuthContextType {
   currentUser: User | null;
   isLoading: boolean;
+  isHydrated: boolean;
   error: string | null;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
@@ -40,6 +41,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   currentUser: null,
   isLoading: true,
+  isHydrated: false,
   error: null,
   signInWithGoogle: async () => {},
   signInWithEmail: async () => {},
@@ -57,6 +59,7 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { showToast } = useToast();
   const { t } = useTranslation();
@@ -81,7 +84,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       setCurrentUser(user);
       setIsLoading(false);
-      
+      setIsHydrated(true);
+
       // Show toast message when sign-in state changes
       if (!wasSignedIn && isSignedIn) {
         // Don't reload the page on sign-in, let the FirebaseContext handle data syncing
@@ -312,6 +316,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       value={{
         currentUser,
         isLoading,
+        isHydrated,
         error,
         signInWithGoogle,
         signInWithEmail,

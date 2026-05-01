@@ -70,14 +70,15 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       // Check if user exists in database
       const user = await db.users.get(currentUser.uid);
       
-      // If user doesn't exist, create a new user record
+      // If user doesn't exist, create a new user record.
+      // Admin status artık Firestore `users/{uid}.isAdmin` üzerinden manuel set ediliyor;
+      // hardcoded email check kaldırıldı (security hardening, native'e geçişle uyumlu).
       if (!user) {
-        const isAdmin = currentUser.email === 'flayzeraynx@gmail.com';
         const newUser: User = {
           uid: currentUser.uid,
-          isPremium: isAdmin, // Admin is premium by default
+          isPremium: false,
           subscriptionType: 'none',
-          isAdmin
+          isAdmin: false
         };
         try {
           await db.users.add(newUser);
@@ -166,14 +167,12 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
 
     if (userData) {
-      // Check if user is admin (always has premium access)
-      const isAdmin = currentUser.email === 'flayzeraynx@gmail.com';
-      
       console.log('User data from database:', userData);
-      
-      // Directly use the data fetched and stored in Dexie by the sync function
+
+      // Directly use the data fetched and stored in Dexie by the sync function.
+      // Admin override (eski hardcoded email check) kaldırıldı; premium = userData.isPremium kesin.
       const subscriptionData: SubscriptionStatus = {
-        isPremium: isAdmin || !!userData.isPremium, // Admin override + Dexie value
+        isPremium: !!userData.isPremium,
         subscriptionType: userData.subscriptionType || 'none',
         subscriptionId: userData.subscriptionId,
         subscriptionEndDate: userData.subscriptionEndDate,
@@ -207,22 +206,20 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   }, [currentUser, showToast, syncSubscriptionData]); // Add syncSubscriptionData as dependency
 
-  // Check if user has premium access
+  // Check if user has premium access.
+  // Hardcoded admin email override kaldırıldı; tek source of truth subscriptionStatus.isPremium
+  // (Firestore'dan sync'lenir, RevenueCat webhook ile güncellenir).
   const checkIfPremium = (): boolean => {
     if (!currentUser) return false;
-    
-    // Admin always has premium access
-    if (currentUser.email === 'flayzeraynx@gmail.com') return true;
-    
     console.log('Checking if premium:', subscriptionStatus);
-    
     return subscriptionStatus.isPremium;
   };
 
-  // Check if user is admin
+  // Check if user is admin — Firestore `users/{uid}.isAdmin` field'ı (Dexie'ye sync edilir).
+  // Admin atamak için: Firestore Console'da kullanıcının dokümanında `isAdmin: true` set et.
   const checkIfAdmin = (): boolean => {
     if (!currentUser) return false;
-    return currentUser.email === 'flayzeraynx@gmail.com';
+    return !!userData?.isAdmin;
   };
 
   // Initiate one-time payment

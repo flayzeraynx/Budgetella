@@ -101,6 +101,13 @@ public final class AuthService: NSObject {
         try await user.updatePassword(to: new)
     }
 
+    public func updateDisplayName(_ name: String) async throws {
+        guard let user = currentUser else { throw AuthError.noUser }
+        let request = user.createProfileChangeRequest()
+        request.displayName = name
+        try await request.commitChanges()
+    }
+
     // MARK: - Sign in with Apple
 
     /// Apple login flow başlatır. ASAuthorizationController callback'i bu class'a gelir.

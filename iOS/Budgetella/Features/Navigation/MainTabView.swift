@@ -20,18 +20,15 @@ struct MainTabView: View {
                     .tag(AppTab.home)
                     .toolbar(.hidden, for: .tabBar)
 
-                // Placeholder — Build Sequence #9
-                tabPlaceholder(icon: "list.bullet", title: "İşlemler")
+                TransactionsView()
                     .tag(AppTab.list)
                     .toolbar(.hidden, for: .tabBar)
 
-                // Placeholder — Build Sequence #8
-                tabPlaceholder(icon: "chart.bar.fill", title: "İstatistikler")
+                StatsView()
                     .tag(AppTab.stats)
                     .toolbar(.hidden, for: .tabBar)
 
-                // Placeholder — Build Sequence #8
-                tabPlaceholder(icon: "sparkles", title: "AI")
+                BudgiView()
                     .tag(AppTab.ai)
                     .toolbar(.hidden, for: .tabBar)
             }
@@ -47,24 +44,6 @@ struct MainTabView: View {
         .preferredColorScheme(.dark)
     }
 
-    @ViewBuilder
-    private func tabPlaceholder(icon: String, title: String) -> some View {
-        ZStack {
-            BrandColor.background.ignoresSafeArea()
-            VStack(spacing: Spacing.md) {
-                Image(systemName: icon)
-                    .font(.system(size: 48, weight: .light))
-                    .foregroundStyle(BrandColor.primary)
-                    .symbolRenderingMode(.hierarchical)
-                Text(title)
-                    .font(.brand(.title))
-                    .foregroundStyle(BrandColor.textPrimary)
-                Text("Geliştirme aşamasında")
-                    .font(.brand(.footnote))
-                    .foregroundStyle(BrandColor.textTertiary)
-            }
-        }
-    }
 }
 
 // MARK: - App Tab enum

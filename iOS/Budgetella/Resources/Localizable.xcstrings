@@ -1,304 +1,1213 @@
 {
   "sourceLanguage" : "tr",
-  "version" : "1.0",
   "strings" : {
+    "**%@** adresine sıfırlama bağlantısı gönderdik. Gelen kutunu kontrol et." : {
+
+    },
+    "**Kullanım şartları** ve **gizlilik politikası**'nı okudum, kabul ediyorum." : {
+
+    },
+    "%@" : {
+
+    },
+    "%@ · %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "%@ / %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ / %2$@"
+          }
+        }
+      }
+    },
+    "%@ %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@"
+          }
+        }
+      }
+    },
+    "%@/4 kriter" : {
+
+    },
+    "%@%%" : {
+
+    },
+    "👋" : {
+
+    },
+    "₺" : {
+
+    },
+    "6 haneli kodu **%@**'ye gönderdik. Birazdan gelir." : {
+
+    },
+    "30 saniyede başla. Verilerin sadece sende — Apple/Google ile devam et veya e-posta gir." : {
+
+    },
+    "AI INSIGHT" : {
+
+    },
+    "AI ÖNERDİ" : {
+
+    },
+    "AKTİF AY" : {
+
+    },
+    "Allow a few things?" : {
+
+    },
     "app.name" : {
       "comment" : "App display name",
       "extractionState" : "manual",
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Budgetella" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Budgetella" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Budgetella" } }
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budgetella"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budgetella"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budgetella"
+          }
+        }
       }
     },
-    "common.cancel" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Abbrechen" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancel" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "İptal" } }
-      }
-    },
-    "common.save" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Speichern" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Save" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Kaydet" } }
-      }
-    },
-    "common.delete" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Löschen" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Delete" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Sil" } }
-      }
-    },
-    "common.edit" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Bearbeiten" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Edit" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Düzenle" } }
-      }
-    },
-    "common.continue" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Weiter" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Continue" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Devam Et" } }
-      }
-    },
-    "tab.dashboard" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Übersicht" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Dashboard" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Pano" } }
-      }
-    },
-    "tab.transactions" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Transaktionen" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Transactions" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "İşlemler" } }
-      }
-    },
-    "tab.insights" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Einblicke" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Insights" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Analiz" } }
-      }
-    },
-    "tab.settings" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Einstellungen" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Settings" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Ayarlar" } }
-      }
-    },
-    "transaction.type.income" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Einkommen" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Income" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Gelir" } }
-      }
-    },
-    "transaction.type.expense" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Ausgabe" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Expense" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Gider" } }
-      }
-    },
-    "transaction.field.amount" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Betrag" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Amount" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Tutar" } }
-      }
-    },
-    "transaction.field.note" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Beschreibung" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Description" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Açıklama" } }
-      }
-    },
-    "transaction.field.category" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Kategorie" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Category" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Kategori" } }
-      }
-    },
-    "transaction.field.date" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Datum" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Date" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Tarih" } }
-      }
-    },
-    "category.slug.salary" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Gehalt" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Salary" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Maaş" } }
-      }
-    },
-    "category.slug.freelance" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Freiberuflich" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Freelance" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Serbest Çalışma" } }
-      }
-    },
-    "category.slug.investments" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Investitionen" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Investments" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Yatırımlar" } }
-      }
-    },
-    "category.slug.gifts" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Geschenke" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Gifts" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Hediyeler" } }
-      }
-    },
-    "category.slug.food" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Lebensmittel" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Food" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Yiyecek" } }
-      }
-    },
-    "category.slug.transportation" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Transport" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Transportation" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Ulaşım" } }
-      }
-    },
-    "category.slug.housing" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Wohnen" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Housing" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Konaklama" } }
-      }
-    },
-    "category.slug.bills" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Rechnungen" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Bills" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Faturalar" } }
-      }
-    },
-    "category.slug.healthcare" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Gesundheit" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Healthcare" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Sağlık" } }
-      }
-    },
-    "category.slug.shopping" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Einkaufen" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Shopping" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Alışveriş" } }
-      }
-    },
-    "category.slug.entertainment" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Unterhaltung" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Entertainment" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Eğlence" } }
-      }
-    },
-    "category.slug.education" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Bildung" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Education" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Eğitim" } }
-      }
-    },
-    "category.slug.other" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Sonstiges" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Other" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Diğer" } }
-      }
-    },
-    "auth.signIn" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Anmelden" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sign In" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Giriş Yap" } }
-      }
-    },
-    "auth.signUp" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Registrieren" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sign Up" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Kayıt Ol" } }
-      }
-    },
-    "auth.continueWithApple" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Mit Apple anmelden" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Continue with Apple" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Apple ile Devam Et" } }
-      }
-    },
-    "auth.continueWithGoogle" : {
-      "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Mit Google anmelden" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Continue with Google" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Google ile Devam Et" } }
-      }
+    "Apple ile devam et" : {
+
     },
     "auth.biometric.prompt" : {
       "comment" : "Face ID/Touch ID kurulum prompt",
+      "extractionState" : "stale",
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Mit Face ID anmelden" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sign in with Face ID" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Face ID ile Giriş Yap" } }
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit Face ID anmelden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in with Face ID"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID ile Giriş Yap"
+          }
+        }
       }
     },
-    "settings.theme" : {
+    "auth.continueWithApple" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Erscheinungsbild" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Appearance" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Tema" } }
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit Apple anmelden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue with Apple"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple ile Devam Et"
+          }
+        }
       }
     },
-    "settings.language" : {
+    "auth.continueWithGoogle" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Sprache" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Language" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Dil" } }
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit Google anmelden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue with Google"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Google ile Devam Et"
+          }
+        }
+      }
+    },
+    "auth.signIn" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anmelden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign In"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Giriş Yap"
+          }
+        }
+      }
+    },
+    "auth.signUp" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrieren"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign Up"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıt Ol"
+          }
+        }
+      }
+    },
+    "Bağlantı gönderildi!" : {
+
+    },
+    "Başlayalım" : {
+
+    },
+    "Bir kere bak, içeri gir." : {
+
+    },
+    "Bir kez bak, bütçeni aç. Şifre yazma dönemi bitti." : {
+
+    },
+    "Bu ay harcamalarınız geçen aya göre %23 artış gösterdi. Alışveriş ve yemek kategorilerini gözden geçirmenizi öneririm." : {
+
+    },
+    "Budgetella" : {
+
+    },
+    "BUDGİ · AI" : {
+
+    },
+    "Built for speed." : {
+
+    },
+    "category.slug.bills" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechnungen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bills"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faturalar"
+          }
+        }
+      }
+    },
+    "category.slug.education" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bildung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Education"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eğitim"
+          }
+        }
+      }
+    },
+    "category.slug.entertainment" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unterhaltung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entertainment"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eğlence"
+          }
+        }
+      }
+    },
+    "category.slug.food" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lebensmittel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Food"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yiyecek"
+          }
+        }
+      }
+    },
+    "category.slug.freelance" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Freiberuflich"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Freelance"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serbest Çalışma"
+          }
+        }
+      }
+    },
+    "category.slug.gifts" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geschenke"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gifts"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hediyeler"
+          }
+        }
+      }
+    },
+    "category.slug.healthcare" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gesundheit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Healthcare"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağlık"
+          }
+        }
+      }
+    },
+    "category.slug.housing" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wohnen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Housing"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konaklama"
+          }
+        }
+      }
+    },
+    "category.slug.investments" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Investitionen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Investments"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yatırımlar"
+          }
+        }
+      }
+    },
+    "category.slug.other" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonstiges"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diğer"
+          }
+        }
+      }
+    },
+    "category.slug.salary" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gehalt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salary"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maaş"
+          }
+        }
+      }
+    },
+    "category.slug.shopping" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einkaufen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shopping"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alışveriş"
+          }
+        }
+      }
+    },
+    "category.slug.transportation" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transport"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transportation"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ulaşım"
+          }
+        }
+      }
+    },
+    "common.cancel" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abbrechen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İptal"
+          }
+        }
+      }
+    },
+    "common.continue" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weiter"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Devam Et"
+          }
+        }
+      }
+    },
+    "common.delete" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Löschen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sil"
+          }
+        }
+      }
+    },
+    "common.edit" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bearbeiten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Düzenle"
+          }
+        }
+      }
+    },
+    "common.save" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speichern"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaydet"
+          }
+        }
+      }
+    },
+    "Devam ederek **Şartlar** ve **Gizlilik**'i kabul edersin." : {
+
+    },
+    "Diğer" : {
+
+    },
+    "E-posta ile devam et" : {
+
+    },
+    "E-postan ve güçlü bir şifreyle başla. 30 saniye sürer." : {
+
+    },
+    "E-postana sıfırlama bağlantısı gönderelim." : {
+
+    },
+    "E-postanı doğrula" : {
+
+    },
+    "Everything stays on-device. Always." : {
+
+    },
+    "Face ID ile gir" : {
+
+    },
+    "Face ID ile hızlı giriş" : {
+
+    },
+    "G" : {
+
+    },
+    "Geçen aya göre ₺3.400\ntasarruf ettin. Aynen devam 🔥" : {
+
+    },
+    "Geliştirme aşamasında" : {
+
+    },
+    "Geri" : {
+
+    },
+    "Giriş yap" : {
+
+    },
+    "Google ile devam et" : {
+
+    },
+    "GÜNLÜK AKIŞ · %@" : {
+
+    },
+    "Her gelir-gideri saniyeler içinde gir.\nGerisini AI hallediyor." : {
+
+    },
+    "Hesabın var mı? " : {
+
+    },
+    "Hesabın yok mu? " : {
+
+    },
+    "Hesabını oluştur" : {
+
+    },
+    "Hesaptan çık" : {
+
+    },
+    "KATEGORİLER" : {
+
+    },
+    "Kaydet" : {
+
+    },
+    "Kaydol" : {
+
+    },
+    "Kimliğini doğrula" : {
+
+    },
+    "Klavyeden **\"%@\"**yi otomatik dolduralım" : {
+
+    },
+    "Kod gelmedi mi? " : {
+
+    },
+    "Loved by your wallet." : {
+
+    },
+    "Net %@%@ (%@)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Net %1$@%2$@ (%3$@)"
+          }
+        }
+      }
+    },
+    "Para,\nnihayet net." : {
+
+    },
+    "Paranı yönet,\nbiraz da eğlen." : {
+
+    },
+    "Pick your currency" : {
+
+    },
+    "Premium özellik — V1.1'de geliyor" : {
+
+    },
+    "premium.trial.cta" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 Tage kostenlos starten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start 7-day free trial"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 Gün Ücretsiz Dene"
+          }
+        }
+      }
+    },
+    "premium.upgrade" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf Premium upgraden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upgrade to Premium"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premium'a Yükselt"
+          }
+        }
       }
     },
     "settings.currency" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Währung" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Currency" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Para Birimi" } }
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Währung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Currency"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para Birimi"
+          }
+        }
+      }
+    },
+    "settings.language" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprache"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Language"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dil"
+          }
+        }
       }
     },
     "settings.subscription" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Abonnement" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Subscription" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Abonelik" } }
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abonnement"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subscription"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abonelik"
+          }
+        }
       }
     },
     "settings.subscription.manage" : {
       "comment" : "App Store deep link button",
+      "extractionState" : "stale",
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Abonnement verwalten" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Manage Subscription" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Aboneliği Yönet" } }
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abonnement verwalten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage Subscription"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aboneliği Yönet"
+          }
+        }
       }
     },
     "settings.subscription.restore" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Käufe wiederherstellen" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Restore Purchases" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Satın Alımları Geri Yükle" } }
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Käufe wiederherstellen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore Purchases"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Satın Alımları Geri Yükle"
+          }
+        }
       }
     },
-    "premium.upgrade" : {
+    "settings.theme" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "Auf Premium upgraden" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Upgrade to Premium" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "Premium'a Yükselt" } }
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erscheinungsbild"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appearance"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tema"
+          }
+        }
       }
     },
-    "premium.trial.cta" : {
+    "Şifre gücü:" : {
+
+    },
+    "Şifreni mi unuttun?" : {
+
+    },
+    "Şifrenle gir veya Face ID kullan." : {
+
+    },
+    "Şimdilik geç" : {
+
+    },
+    "tab.dashboard" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "de" : { "stringUnit" : { "state" : "translated", "value" : "7 Tage kostenlos starten" } },
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Start 7-day free trial" } },
-        "tr" : { "stringUnit" : { "state" : "translated", "value" : "7 Gün Ücretsiz Dene" } }
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Übersicht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dashboard"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pano"
+          }
+        }
       }
+    },
+    "tab.insights" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einblicke"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insights"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analiz"
+          }
+        }
+      }
+    },
+    "tab.settings" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarlar"
+          }
+        }
+      }
+    },
+    "tab.transactions" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transaktionen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transactions"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İşlemler"
+          }
+        }
+      }
+    },
+    "Tekrar gönder" : {
+
+    },
+    "Tekrar gönder (%@)" : {
+
+    },
+    "Tekrar hoş geldin" : {
+
+    },
+    "transaction.field.amount" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Betrag"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amount"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tutar"
+          }
+        }
+      }
+    },
+    "transaction.field.category" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kategorie"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Category"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kategori"
+          }
+        }
+      }
+    },
+    "transaction.field.date" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datum"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarih"
+          }
+        }
+      }
+    },
+    "transaction.field.note" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beschreibung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Description"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açıklama"
+          }
+        }
+      }
+    },
+    "transaction.type.expense" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausgabe"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expense"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gider"
+          }
+        }
+      }
+    },
+    "transaction.type.income" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einkommen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Income"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gelir"
+          }
+        }
+      }
+    },
+    "TUTAR" : {
+
+    },
+    "UYARI" : {
+
+    },
+    "Veri yok" : {
+
+    },
+    "YILLIK ÖZET" : {
+
+    },
+    "You can change this later in Settings." : {
+
     }
-  }
+  },
+  "version" : "1.0"
 }
