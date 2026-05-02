@@ -23,7 +23,10 @@ struct ThemePickerSheet: View {
                     VStack(spacing: 0) {
                         // Options
                         VStack(spacing: Spacing.xs) {
-                            themeRow(.dark, icon: "moon.fill", subtitle: "Şu an aktif")
+                            let active = settings?.theme ?? .dark
+                            themeRow(.dark,   icon: "moon.fill",             subtitle: active == .dark   ? "Şu an aktif" : "")
+                            themeRow(.light,  icon: "sun.max.fill",           subtitle: active == .light  ? "Şu an aktif" : "")
+                            themeRow(.system, icon: "circle.lefthalf.filled", subtitle: active == .system ? "Şu an aktif" : "")
                         }
                         .padding(.horizontal, 20)
 
@@ -71,9 +74,11 @@ struct ThemePickerSheet: View {
                     Text(themeLabel(theme))
                         .font(.brand(.body))
                         .foregroundStyle(BrandColor.textPrimary)
-                    Text(subtitle)
-                        .font(.brand(.caption))
-                        .foregroundStyle(isActive ? BrandColor.primary : BrandColor.textTertiary)
+                    if !subtitle.isEmpty {
+                        Text(subtitle)
+                            .font(.brand(.caption))
+                            .foregroundStyle(isActive ? BrandColor.primary : BrandColor.textTertiary)
+                    }
                 }
 
                 Spacer()

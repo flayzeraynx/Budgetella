@@ -109,7 +109,9 @@ struct SettingsView: View {
                                 .tint(BrandColor.primary)
                                 .labelsHidden()
                             }
+                            .padding(.horizontal, 16)
                             .frame(maxWidth: .infinity, minHeight: 44)
+                            .listRowInsets(EdgeInsets())
 
                             HStack {
                                 settingsIconBadge(icon: "eye.slash", color: BrandColor.warning)
@@ -127,7 +129,9 @@ struct SettingsView: View {
                                 .tint(BrandColor.primary)
                                 .labelsHidden()
                             }
+                            .padding(.horizontal, 16)
                             .frame(maxWidth: .infinity, minHeight: 44)
+                            .listRowInsets(EdgeInsets())
                         }
                     }
                     .listRowBackground(BrandColor.surface.opacity(0.4))
@@ -171,8 +175,10 @@ struct SettingsView: View {
                                     .font(.brand(.body))
                                     .foregroundStyle(BrandColor.textPrimary)
                             }
+                            .padding(.horizontal, 16)
                             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         }
+                        .listRowInsets(EdgeInsets())
                     }
                     .listRowBackground(BrandColor.surface.opacity(0.4))
 
@@ -187,8 +193,10 @@ struct SettingsView: View {
                                     .font(.brand(.body))
                                     .foregroundStyle(BrandColor.textPrimary)
                             }
+                            .padding(.horizontal, 16)
                             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         }
+                        .listRowInsets(EdgeInsets())
                     }
                     .listRowBackground(BrandColor.surface.opacity(0.4))
 
@@ -221,10 +229,12 @@ struct SettingsView: View {
                                     .foregroundStyle(BrandColor.warning)
                                 Spacer()
                             }
+                            .padding(.horizontal, 16)
                             .frame(maxWidth: .infinity, minHeight: 44)
                         }
                         .buttonStyle(.plain)
                         .highlightOnPress()
+                        .listRowInsets(EdgeInsets())
                         .listRowBackground(BrandColor.surface.opacity(0.4))
 
                         NavigationLink {
@@ -236,8 +246,10 @@ struct SettingsView: View {
                                     .font(.brand(.body))
                                     .foregroundStyle(BrandColor.expense)
                             }
+                            .padding(.horizontal, 16)
                             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         }
+                        .listRowInsets(EdgeInsets())
                         .listRowBackground(BrandColor.surface.opacity(0.4))
                     }
 
@@ -457,10 +469,12 @@ struct SettingsView: View {
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(BrandColor.textTertiary)
             }
+            .padding(.horizontal, 16)
             .frame(maxWidth: .infinity, minHeight: 44)
         }
         .buttonStyle(.plain)
         .highlightOnPress()
+        .listRowInsets(EdgeInsets())
     }
 
     // MARK: - Row helpers
@@ -488,10 +502,12 @@ struct SettingsView: View {
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(BrandColor.textTertiary.opacity(0.5))
             }
+            .padding(.horizontal, 16)
             .frame(maxWidth: .infinity, minHeight: 44)
         }
         .buttonStyle(.plain)
         .highlightOnPress()
+        .listRowInsets(EdgeInsets())
     }
 
     private func settingsIconBadge(icon: String, color: Color) -> some View {
