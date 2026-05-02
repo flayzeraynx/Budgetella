@@ -155,7 +155,12 @@ struct EditTransactionSheet: View {
                 isPresented: $showDeleteConfirm,
                 buttons: [
                     .destructive("Sil") {
+                        let txId = transaction.id
+                        let txUserId = transaction.userId
                         modelContext.delete(transaction)
+                        Task {
+                            try? await FirestoreService.shared.deleteTransaction(id: txId, userId: txUserId)
+                        }
                         dismiss()
                     },
                     .cancel()
@@ -344,6 +349,10 @@ struct EditTransactionSheet: View {
         transaction.date = date
         transaction.isRecurring = isRecurring
         transaction.updatedAt = .now
+        let tx = transaction
+        Task {
+            try? await FirestoreService.shared.uploadTransaction(tx)
+        }
         dismiss()
     }
 }

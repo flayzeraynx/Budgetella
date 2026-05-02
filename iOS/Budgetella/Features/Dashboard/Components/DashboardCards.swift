@@ -17,6 +17,8 @@ struct YearSummaryCard: View {
     let availableYears: [Int]
     let onYearChange: (Int) -> Void
 
+    @Environment(\.hideAmounts) private var hideAmounts
+
     var body: some View {
         VStack(spacing: Spacing.md) {
             HStack {
@@ -32,7 +34,7 @@ struct YearSummaryCard: View {
                 statColumn(
                     arrow: "arrow.up",
                     label: "GELİR (YIL)",
-                    amount: income.compactTRY,
+                    amount: hideAmounts ? "••••" : income.compactTRY,
                     color: BrandColor.income
                 )
                 Divider()
@@ -42,7 +44,7 @@ struct YearSummaryCard: View {
                 statColumn(
                     arrow: "arrow.down",
                     label: "GİDER (YIL)",
-                    amount: expense.compactTRY,
+                    amount: hideAmounts ? "••••" : expense.compactTRY,
                     color: BrandColor.expense
                 )
             }
@@ -103,8 +105,15 @@ struct MonthSummaryCard: View {
     let dailyData: [DailyFlowPoint]
     let onMonthChange: (Int) -> Void
 
+    @Environment(\.hideAmounts) private var hideAmounts
+
     private var net: Decimal { income - expense }
     private var isNegativeNet: Bool { net < 0 }
+
+    private var isCurrentPeriod: Bool {
+        let cal = Calendar.current
+        return year == cal.component(.year, from: .now) && month == cal.component(.month, from: .now)
+    }
 
     var body: some View {
         VStack(spacing: Spacing.md) {
@@ -115,6 +124,21 @@ struct MonthSummaryCard: View {
                     .foregroundStyle(BrandColor.textTertiary)
                     .tracking(1.2)
                 Spacer()
+                if !isCurrentPeriod {
+                    Button {
+                        let cal = Calendar.current
+                        onMonthChange(cal.component(.month, from: .now))
+                    } label: {
+                        Text("Bu Ay")
+                            .font(.brand(.caption))
+                            .foregroundStyle(BrandColor.primary)
+                            .padding(.horizontal, Spacing.sm)
+                            .padding(.vertical, 4)
+                            .background(BrandColor.primary.opacity(0.12))
+                            .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                }
                 monthPicker
             }
 
@@ -123,13 +147,13 @@ struct MonthSummaryCard: View {
                 amountColumn(
                     arrow: "arrow.up.right",
                     label: "Gelir",
-                    amount: income.fullTRY,
+                    amount: hideAmounts ? "••••" : income.fullTRY,
                     color: BrandColor.income
                 )
                 amountColumn(
                     arrow: "arrow.down.right",
                     label: "Gider",
-                    amount: expense.fullTRY,
+                    amount: hideAmounts ? "••••" : expense.fullTRY,
                     color: BrandColor.expense
                 )
             }
@@ -139,7 +163,7 @@ struct MonthSummaryCard: View {
                 Image(systemName: isNegativeNet ? "arrow.down" : "arrow.up")
                     .font(.system(size: 10, weight: .bold))
                     .foregroundStyle(isNegativeNet ? BrandColor.expense : BrandColor.income)
-                Text("Net \(isNegativeNet ? "−" : "+")\((abs(net)).fullTRY) (\(turkishMonthShort(month)))")
+                Text(hideAmounts ? "Net •••• (\(turkishMonthShort(month)))" : "Net \(isNegativeNet ? "−" : "+")\((abs(net)).fullTRY) (\(turkishMonthShort(month)))")
                     .font(.brand(.footnote))
                     .foregroundStyle(isNegativeNet ? BrandColor.expense : BrandColor.income)
                 Spacer()
@@ -165,14 +189,22 @@ struct MonthSummaryCard: View {
         .glassCard(cornerRadius: Spacing.radiusMedium)
     }
 
+    private var availableMonths: [Int] {
+        let cal = Calendar.current
+        let currentYear = cal.component(.year, from: .now)
+        let currentMonth = cal.component(.month, from: .now)
+        let maxMonth = year == currentYear ? currentMonth : 12
+        return Array(stride(from: maxMonth, through: 1, by: -1))
+    }
+
     private var monthPicker: some View {
         Menu {
-            ForEach(1...12, id: \.self) { m in
-                Button("\(turkishMonthShort(m)) \(year)") { onMonthChange(m) }
+            ForEach(availableMonths, id: \.self) { m in
+                Button(turkishMonthFull(m)) { onMonthChange(m) }
             }
         } label: {
             HStack(spacing: 4) {
-                Text("\(turkishMonthShort(month)) \(year)")
+                Text(turkishMonthShort(month))
                     .font(.brand(.caption))
                     .foregroundStyle(BrandColor.textPrimary)
                 Image(systemName: "chevron.down")

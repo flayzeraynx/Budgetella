@@ -126,10 +126,16 @@ extension Decimal {
     }
 }
 
-// MARK: - Month name helper
+// MARK: - Month name helpers
 
 func turkishMonthShort(_ month: Int) -> String {
     let names = ["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"]
+    guard (1...12).contains(month) else { return "" }
+    return names[month - 1]
+}
+
+func turkishMonthFull(_ month: Int) -> String {
+    let names = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"]
     guard (1...12).contains(month) else { return "" }
     return names[month - 1]
 }

@@ -68,6 +68,16 @@ import Foundation
         return Array(stride(from: y, through: y - 4, by: -1))
     }
 
+    func autoSelectPeriod(from txs: [Transaction]) {
+        guard !txs.isEmpty else { return }
+        guard !txs.contains(where: { inPeriod($0) }) else { return }
+        let cal = Calendar.current
+        if let latest = txs.max(by: { $0.date < $1.date }) {
+            selectedYear  = cal.component(.year,  from: latest.date)
+            selectedMonth = cal.component(.month, from: latest.date)
+        }
+    }
+
     // MARK: - Helpers
 
     private func inPeriod(_ tx: Transaction) -> Bool {

@@ -2,28 +2,31 @@
 //  FirestoreService.swift
 //  Budgetella
 //
-//  Firestore CRUD — lokal-first mimarinin cloud sync katmanı.
-//  Webapp firebase/db.ts → Swift port (sadece auth'lu kullanıcı için).
+//  Firestore CRUD — local-first mimarinin cloud sync katmanı.
 //
 //  Koleksiyon yapısı:
 //    users/{uid}/transactions/{id}
 //    users/{uid}/categories/{id}
-//    users/{uid}/settings/userSettings
 //
-//  Sign-in'de: Firestore → lokal SwiftData (overwrite)
-//  Sign-out'ta: lokal temizlik (AuthService.clearLocalData)
-//  Mutation'larda: önce lokal SwiftData, arka planda Firestore
+//  Sync stratejisi:
+//  - Mutation'da: SwiftData'ya yaz → arka planda Firestore'a push (fire & forget)
+//  - Login'de: fetchAndSync() → Firestore'dan indir → SwiftData'yı overwrite
+//  - Yeni kullanıcı: fetchAndSync() boş döner → lokal default kategorileri Firestore'a yükle
 //
 
 import Foundation
 import SwiftData
 @preconcurrency import FirebaseFirestore
 
-public actor FirestoreService {
+@MainActor
+public final class FirestoreService {
+
+    public static let shared = FirestoreService()
+    private init() {}
 
     private let db = Firestore.firestore()
 
-    // MARK: - Paths
+    // MARK: - Collection Paths
 
     private func userRef(_ uid: String) -> DocumentReference {
         db.collection("users").document(uid)
@@ -37,23 +40,23 @@ public actor FirestoreService {
         userRef(uid).collection("categories")
     }
 
-    // MARK: - Upload (lokal → Firestore)
+    // MARK: - Upload: Lokal → Firestore
 
     public func uploadTransaction(_ tx: Transaction) async throws {
         let data: [String: Any] = [
-            "id":               tx.id.uuidString,
-            "userId":           tx.userId,
-            "type":             tx.type.rawValue,
-            "amount":           NSDecimalNumber(decimal: tx.amount).doubleValue,
-            "currency":         tx.currency,
-            "note":             tx.note,
-            "categorySlug":     tx.category?.slug ?? "",
-            "date":             Timestamp(date: tx.date),
-            "status":           tx.status.rawValue,
-            "isRecurring":      tx.isRecurring,
+            "id":                tx.id.uuidString,
+            "userId":            tx.userId,
+            "type":              tx.type.rawValue,
+            "amount":            NSDecimalNumber(decimal: tx.amount).doubleValue,
+            "currency":          tx.currency,
+            "note":              tx.note,
+            "categorySlug":      tx.category?.slug ?? "",
+            "date":              Timestamp(date: tx.date),
+            "status":            tx.status.rawValue,
+            "isRecurring":       tx.isRecurring,
             "recurringInterval": tx.recurringInterval?.rawValue ?? "",
-            "createdAt":        Timestamp(date: tx.createdAt),
-            "updatedAt":        Timestamp(date: tx.updatedAt),
+            "createdAt":         Timestamp(date: tx.createdAt),
+            "updatedAt":         Timestamp(date: tx.updatedAt),
         ]
         try await transactionsRef(tx.userId)
             .document(tx.id.uuidString)
@@ -81,31 +84,78 @@ public actor FirestoreService {
             .setData(data, merge: true)
     }
 
-    // MARK: - Fetch (Firestore → lokal)
+    // MARK: - Batch Upload (import sonrası)
 
-    /// Sign-in sonrası kullanıcının Firestore verisini çekip SwiftData'ya yazar.
+    /// Fire-and-forget: tüm transaksiyonları paralel task'larla Firestore'a gönderir.
+    public func batchUploadTransactions(_ txs: [Transaction]) {
+        for tx in txs {
+            Task {
+                try? await self.uploadTransaction(tx)
+            }
+        }
+    }
+
+    // MARK: - Fetch & Sync: Firestore → SwiftData (login sonrası)
+
+    /// Login sonrası çağrılır. Firestore'dan indirir, SwiftData'yı günceller.
+    /// - Yeni kullanıcı (boş Firestore): lokal default kategorileri Firestore'a yükler.
+    /// - Mevcut kullanıcı: kategorileri + transaksiyonları indirir, kategori ilişkilerini kurar.
     public func fetchAndSync(userId: String, modelContext: ModelContext) async throws {
-        async let txSnapshot  = transactionsRef(userId).getDocuments()
-        async let catSnapshot = categoriesRef(userId).getDocuments()
+        async let txFetch  = transactionsRef(userId).getDocuments()
+        async let catFetch = categoriesRef(userId).getDocuments()
+        let (txDocs, catDocs) = try await (txFetch, catFetch)
 
-        let (txDocs, catDocs) = try await (txSnapshot, catSnapshot)
+        if catDocs.documents.isEmpty {
+            // Yeni / boş Firestore — lokal veriyi SİLME, koru
+            let localCats = (try? modelContext.fetch(FetchDescriptor<Category>())) ?? []
+            if localCats.isEmpty {
+                // Hiç kategori yok → default'ları seed et ve Firestore'a yükle
+                let cats = Category.seedDefaults(for: userId)
+                cats.forEach { modelContext.insert($0) }
+                try? modelContext.save()
+                Task { for cat in cats { try? await self.uploadCategory(cat) } }
+            } else {
+                // Lokal import verisi var → userId'yi gerçek UID'ye migrate et ve Firestore'a yükle
+                let localTxs = (try? modelContext.fetch(FetchDescriptor<Transaction>())) ?? []
+                for tx in localTxs where tx.userId != userId { tx.userId = userId }
+                for cat in localCats where cat.userId != userId { cat.userId = userId }
+                try? modelContext.save()
+                Task { for cat in localCats { try? await self.uploadCategory(cat) } }
+                batchUploadTransactions(localTxs)
+            }
+            UserDefaults.standard.set(true, forKey: "categoriesSeeded")
+            return
+        }
 
-        // Mevcut lokal transaction ve kategorileri temizle
-        try modelContext.delete(model: Transaction.self)
-        try modelContext.delete(model: Category.self)
+        // Firestore'da veri var → lokal veriyi temizle ve Firestore'dan indir
+        let localTxsToDelete = (try? modelContext.fetch(FetchDescriptor<Transaction>())) ?? []
+        localTxsToDelete.forEach { modelContext.delete($0) }
+        try? modelContext.save()
+        let localCatsToDelete = (try? modelContext.fetch(FetchDescriptor<Category>())) ?? []
+        localCatsToDelete.forEach { modelContext.delete($0) }
 
-        // Kategorileri önce ekle (transaction FK referansı için)
+        // Kategorileri ekle + slug → Category map oluştur
+        var categoryBySlug: [String: Category] = [:]
         for doc in catDocs.documents {
             if let cat = category(from: doc.data(), userId: userId) {
                 modelContext.insert(cat)
+                if let slug = cat.slug, !slug.isEmpty {
+                    categoryBySlug[slug] = cat
+                }
             }
         }
 
+        // Transaksiyonları ekle, kategori ilişkisini slug üzerinden kur
         for doc in txDocs.documents {
             if let tx = transaction(from: doc.data(), userId: userId) {
+                let catSlug = doc.data()["categorySlug"] as? String ?? ""
+                tx.category = categoryBySlug[catSlug]
                 modelContext.insert(tx)
             }
         }
+
+        try? modelContext.save()
+        UserDefaults.standard.set(true, forKey: "categoriesSeeded")
     }
 
     // MARK: - Delete User Data (hesap sil)
@@ -120,12 +170,12 @@ public actor FirestoreService {
         try await batch.commit()
     }
 
-    // MARK: - Mappers
+    // MARK: - Private Mappers
 
     private func transaction(from data: [String: Any], userId: String) -> Transaction? {
         guard
-            let idStr  = data["id"]     as? String, let id = UUID(uuidString: idStr),
-            let typeRaw = data["type"]  as? String, let type = TransactionType(rawValue: typeRaw),
+            let idStr   = data["id"]     as? String, let id = UUID(uuidString: idStr),
+            let typeRaw = data["type"]   as? String, let type = TransactionType(rawValue: typeRaw),
             let amount  = data["amount"] as? Double,
             let note    = data["note"]   as? String,
             let dateTS  = data["date"]   as? Timestamp

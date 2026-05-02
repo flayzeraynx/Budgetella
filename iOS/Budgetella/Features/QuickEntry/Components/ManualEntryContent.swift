@@ -25,45 +25,50 @@ struct ManualEntryContent: View {
                 .padding(.horizontal, 20)
                 .padding(.top, Spacing.lg)
 
-            Spacer(minLength: Spacing.xl)
+            Spacer(minLength: isTyping ? Spacing.md : Spacing.xl)
 
-            // ── Amount display
-            amountDisplay
-                .padding(.horizontal, 20)
+            // ── Amount display — hidden when typing to give more space
+            if !isTyping {
+                amountDisplay
+                    .padding(.horizontal, 20)
 
-            Spacer(minLength: Spacing.md)
+                Spacer(minLength: Spacing.md)
 
-            // ── Mode selector (Manuel / Sesli / Kamera) — above description
-            modeSelectorPills
-                .padding(.horizontal, 20)
-                .padding(.bottom, Spacing.sm)
+                // ── Mode selector
+                modeSelectorPills
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, Spacing.sm)
+            }
 
-            // ── Description field
+            // ── Description field — always visible
             descriptionField
                 .padding(.horizontal, 20)
 
-            // ── Category chips (inline horizontal scroll)
-            categoryChipsRow
-                .padding(.top, Spacing.xs)
+            if isTyping {
+                // Description expands to fill remaining space — no extra content needed
+            } else {
+                // Normal mode: categories, AI chips, numpad
+                categoryChipsRow
+                    .padding(.top, Spacing.xs)
 
-            // ── AI suggestion chips
-            if !vm.aiSuggestions.isEmpty {
-                aiSuggestionRow
-                    .padding(.horizontal, 20)
-                    .padding(.top, Spacing.sm)
+                if !vm.aiSuggestions.isEmpty {
+                    aiSuggestionRow
+                        .padding(.horizontal, 20)
+                        .padding(.top, Spacing.sm)
+                }
+
+                Spacer(minLength: Spacing.lg)
+
+                NumpadGrid(
+                    onDigit:   { vm.appendDigit($0) },
+                    onDecimal: { vm.appendDecimal() },
+                    onDelete:  { vm.backspace() }
+                )
+                .padding(.horizontal, 12)
+                .padding(.bottom, Spacing.xs)
             }
-
-            Spacer(minLength: Spacing.lg)
-
-            // ── Numpad
-            NumpadGrid(
-                onDigit:   { vm.appendDigit($0) },
-                onDecimal: { vm.appendDecimal() },
-                onDelete:  { vm.backspace() }
-            )
-            .padding(.horizontal, 12)
-            .padding(.bottom, Spacing.xs)
         }
+        .animation(.spring(response: 0.3), value: isTyping)
     }
 
     // MARK: - Mode selector pills
@@ -168,24 +173,30 @@ struct ManualEntryContent: View {
     // MARK: - Description field
 
     private var descriptionField: some View {
-        HStack(spacing: Spacing.sm) {
+        let radius: CGFloat = isTyping ? 20 : Spacing.radiusSmall
+        return HStack(alignment: isTyping ? .top : .center, spacing: Spacing.sm) {
             Image(systemName: "text.alignleft")
                 .font(.system(size: 14))
                 .foregroundStyle(BrandColor.textTertiary)
-            TextField("Açıklama ekle…", text: $vm.note)
-                .font(.brand(.body))
-                .foregroundStyle(BrandColor.textPrimary)
-                .tint(BrandColor.primary)
-                .submitLabel(.done)
-                .focused($noteFieldFocused)
-                .onSubmit { noteFieldFocused = false }
+                .padding(.top, isTyping ? 2 : 0)
+            VStack(alignment: .leading, spacing: 0) {
+                TextField("Açıklama ekle…", text: $vm.note)
+                    .font(.brand(.body))
+                    .foregroundStyle(BrandColor.textPrimary)
+                    .tint(BrandColor.primary)
+                    .submitLabel(.done)
+                    .focused($noteFieldFocused)
+                    .onSubmit { noteFieldFocused = false }
+                if isTyping { Spacer(minLength: 0) }
+            }
         }
         .padding(.horizontal, Spacing.md)
-        .padding(.vertical, 16)
+        .padding(.vertical, Spacing.md)
+        .frame(maxHeight: isTyping ? .infinity : nil)
         .background(BrandColor.surface.opacity(0.4))
-        .clipShape(RoundedRectangle(cornerRadius: Spacing.radiusSmall, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: Spacing.radiusSmall, style: .continuous)
+            RoundedRectangle(cornerRadius: radius, style: .continuous)
                 .strokeBorder(noteFieldFocused ? BrandColor.primary.opacity(0.5) : BrandColor.borderSubtle, lineWidth: 1)
         )
         .onChange(of: vm.note) { _, _ in vm.updateSuggestions() }

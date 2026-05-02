@@ -14,6 +14,7 @@ struct TransactionsView: View {
     @State private var vm = TransactionsViewModel()
     @State private var showFilter = false
     @State private var editingTransaction: Transaction?
+    @FocusState private var isSearchFocused: Bool
 
     var body: some View {
         NavigationStack {
@@ -88,18 +89,18 @@ struct TransactionsView: View {
                 .font(.brand(.body))
                 .foregroundStyle(BrandColor.textPrimary)
                 .autocorrectionDisabled()
-            if !vm.searchText.isEmpty {
+                .focused($isSearchFocused)
+                .submitLabel(.search)
+                .onSubmit { isSearchFocused = false }
+            if !vm.searchText.isEmpty || isSearchFocused {
                 Button {
                     vm.searchText = ""
+                    isSearchFocused = false
                 } label: {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 15))
                         .foregroundStyle(BrandColor.textTertiary)
                 }
-            } else {
-                Image(systemName: "mic")
-                    .font(.system(size: 15))
-                    .foregroundStyle(BrandColor.textTertiary)
             }
         }
         .padding(.horizontal, Spacing.md)
@@ -195,8 +196,15 @@ struct TransactionsView: View {
                     Section {
                         VStack(spacing: 0) {
                             ForEach(section.transactions) { tx in
-                                TransactionRow(transaction: tx, onDelete: { modelContext.delete(tx) })
-                                    .onTapGesture { editingTransaction = tx }
+                                TransactionRow(transaction: tx, onDelete: {
+                                    let txId = tx.id
+                                    let txUserId = tx.userId
+                                    modelContext.delete(tx)
+                                    Task {
+                                        try? await FirestoreService.shared.deleteTransaction(id: txId, userId: txUserId)
+                                    }
+                                })
+                                .onTapGesture { editingTransaction = tx }
 
                                 if tx.id != section.transactions.last?.id {
                                     Divider()
@@ -222,6 +230,7 @@ struct TransactionsView: View {
             }
             .padding(.top, Spacing.sm)
         }
+        .scrollDismissesKeyboard(.interactively)
     }
 
     private func sectionHeader(_ section: TransactionSection) -> some View {

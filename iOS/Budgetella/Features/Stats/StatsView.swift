@@ -14,6 +14,8 @@ struct StatsView: View {
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @Query(sort: \Category.sortOrder) private var categories: [Category]
     @State private var vm = StatsViewModel()
+    @State private var didAutoSelect = false
+    @Environment(\.hideAmounts) private var hideAmounts
 
     var body: some View {
         NavigationStack {
@@ -47,6 +49,11 @@ struct StatsView: View {
             }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
             .preferredColorScheme(.dark)
+            .onAppear {
+                guard !didAutoSelect else { return }
+                vm.autoSelectPeriod(from: transactions)
+                didAutoSelect = true
+            }
         }
     }
 
@@ -122,7 +129,7 @@ struct StatsView: View {
                         .font(.brand(.caption))
                         .foregroundStyle(BrandColor.textTertiary)
                         .tracking(0.8)
-                    Text(total.fullTRY)
+                    Text(hideAmounts ? "••••" : total.fullTRY)
                         .font(.brand(.title))
                         .foregroundStyle(BrandColor.textPrimary)
                         .minimumScaleFactor(0.6)
@@ -178,7 +185,7 @@ struct StatsView: View {
             }
             .frame(height: 4)
 
-            Text(stat.amount.fullTRY)
+            Text(hideAmounts ? "••••" : stat.amount.fullTRY)
                 .font(.brand(.footnote))
                 .foregroundStyle(BrandColor.textSecondary)
                 .frame(width: 70, alignment: .trailing)
@@ -250,11 +257,16 @@ struct StatsView: View {
     // MARK: - Month picker
 
     private var monthPicker: some View {
-        Menu {
+        let cal = Calendar.current
+        let currentYear = cal.component(.year, from: .now)
+        let currentMonth = cal.component(.month, from: .now)
+
+        return Menu {
             ForEach(vm.availableYears, id: \.self) { yr in
                 Section("\(yr)") {
-                    ForEach(1...12, id: \.self) { m in
-                        Button("\(turkishMonthShort(m)) \(yr)") {
+                    let maxMonth = yr == currentYear ? currentMonth : 12
+                    ForEach(Array(stride(from: maxMonth, through: 1, by: -1)), id: \.self) { m in
+                        Button(turkishMonthFull(m)) {
                             vm.selectedYear  = yr
                             vm.selectedMonth = m
                         }
@@ -263,7 +275,7 @@ struct StatsView: View {
             }
         } label: {
             HStack(spacing: 4) {
-                Text("\(turkishMonthShort(vm.selectedMonth)) \(vm.selectedYear)")
+                Text(turkishMonthShort(vm.selectedMonth))
                     .font(.brand(.subheadline))
                     .foregroundStyle(BrandColor.textPrimary)
                 Image(systemName: "chevron.down")

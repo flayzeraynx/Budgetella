@@ -9,6 +9,7 @@ import UniformTypeIdentifiers
 
 struct SettingsView: View {
 
+    @Environment(\.dismiss) private var dismiss
     @Query private var settingsArr: [AppSettings]
     @Environment(\.modelContext) private var modelContext
     @AppStorage("currentUserId") private var currentUserId = ""
@@ -138,6 +139,8 @@ struct SettingsView: View {
                             guard !isImporting else { return }
                             showImportPicker = true
                         }
+
+
                     }
                     .listRowBackground(BrandColor.surface.opacity(0.4))
 
@@ -202,6 +205,18 @@ struct SettingsView: View {
             .navigationTitle("Ayarlar")
             .navigationBarTitleDisplayMode(.large)
             .toolbarBackground(BrandColor.background, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(BrandColor.textSecondary)
+                            .frame(width: 30, height: 30)
+                            .background(BrandColor.surface.opacity(0.6))
+                            .clipShape(Circle())
+                    }
+                }
+            }
             // Sheets
             .sheet(isPresented: $showProfile) {
                 ProfileView(authService: authService)
@@ -222,21 +237,20 @@ struct SettingsView: View {
                 CurrencyPickerSheet(settings: settings)
             }
             .brandAlert(
-                title: "Çıkış yap?",
+                title: "Çıkış Yap",
+                message: "Hesabınızdan çıkış yapılacak.",
                 isPresented: $showSignOutConfirm,
                 buttons: [
-                    .destructive("Çıkış Yap") {
-                        try? authService.signOut(modelContext: modelContext)
-                    },
+                    .destructive("Çıkış Yap") { try? authService.signOut(modelContext: modelContext) },
                     .cancel()
                 ]
             )
             .brandAlert(
-                title: "Hesabı sil?",
+                title: "Hesabı Sil",
                 message: "Tüm verileriniz kalıcı olarak silinecek. Bu işlem geri alınamaz.",
                 isPresented: $showDeleteConfirm,
                 buttons: [
-                    .destructive("Hesabı Sil") {
+                    .destructive("Hesabı Kalıcı Olarak Sil") {
                         Task { try? await authService.deleteAccount(modelContext: modelContext) }
                     },
                     .cancel()
@@ -252,25 +266,25 @@ struct SettingsView: View {
             guard case .success(let urls) = result, let url = urls.first else { return }
             isImporting = true
             let userId = currentUserId.isEmpty ? "local" : currentUserId
-            DispatchQueue.global(qos: .userInitiated).async {
+            Task { @MainActor in
                 let accessing = url.startAccessingSecurityScopedResource()
                 defer { if accessing { url.stopAccessingSecurityScopedResource() } }
                 do {
                     let res = try BackupImportService.importFromURL(url, modelContext: modelContext, userId: userId)
-                    DispatchQueue.main.async {
-                        importResultMessage = "\(res.imported) işlem aktarıldı.\n\(res.skipped) tekrar atlandı."
-                        if res.categoriesCreated > 0 {
-                            importResultMessage += "\n\(res.categoriesCreated) yeni kategori oluşturuldu."
-                        }
-                        isImporting = false
-                        showImportResult = true
+                    importResultMessage = "\(res.imported) işlem aktarıldı.\n\(res.skipped) tekrar atlandı."
+                    if res.categoriesCreated > 0 {
+                        importResultMessage += "\n\(res.categoriesCreated) yeni kategori oluşturuldu."
+                    }
+                    isImporting = false
+                    showImportResult = true
+                    if !currentUserId.isEmpty {
+                        let allTxs = (try? modelContext.fetch(FetchDescriptor<Transaction>())) ?? []
+                        FirestoreService.shared.batchUploadTransactions(allTxs)
                     }
                 } catch {
-                    DispatchQueue.main.async {
-                        importResultMessage = "Hata: \(error.localizedDescription)"
-                        isImporting = false
-                        showImportResult = true
-                    }
+                    importResultMessage = "Hata: \(error.localizedDescription)"
+                    isImporting = false
+                    showImportResult = true
                 }
             }
         }

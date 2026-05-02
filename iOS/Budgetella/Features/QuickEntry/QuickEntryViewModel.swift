@@ -92,7 +92,12 @@ import SwiftData
             category: category
         )
         modelContext.insert(tx)
+        try? modelContext.save()
         reset()
+        // Firestore'a push (fire & forget)
+        Task {
+            try? await FirestoreService.shared.uploadTransaction(tx)
+        }
     }
 
     private func reset() {

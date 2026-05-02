@@ -21,6 +21,8 @@ public enum CategorySlug: String, Codable, CaseIterable, Sendable {
     case freelance
     case investments
     case gifts
+    case productSale
+    case loan
 
     // Expense
     case food
@@ -35,7 +37,7 @@ public enum CategorySlug: String, Codable, CaseIterable, Sendable {
 
     public var type: TransactionType {
         switch self {
-        case .salary, .freelance, .investments, .gifts:
+        case .salary, .freelance, .investments, .gifts, .productSale, .loan:
             return .income
         case .food, .transportation, .housing, .bills,
              .healthcare, .shopping, .entertainment, .education, .other:
@@ -50,6 +52,8 @@ public enum CategorySlug: String, Codable, CaseIterable, Sendable {
         case .freelance:      return "briefcase"
         case .investments:    return "chart.line.uptrend.xyaxis"
         case .gifts:          return "gift"
+        case .productSale:    return "shippingbox.fill"
+        case .loan:           return "arrow.left.arrow.right.circle.fill"
         case .food:           return "fork.knife"
         case .transportation: return "car.fill"
         case .housing:        return "house.fill"
@@ -69,6 +73,8 @@ public enum CategorySlug: String, Codable, CaseIterable, Sendable {
         case .freelance:      return "Freelance"
         case .investments:    return "Yatırım"
         case .gifts:          return "Hediyeler"
+        case .productSale:    return "Ürün Satışı"
+        case .loan:           return "Borç Para"
         case .food:           return "Yiyecek"
         case .transportation: return "Ulaşım"
         case .housing:        return "Konut"
@@ -88,6 +94,8 @@ public enum CategorySlug: String, Codable, CaseIterable, Sendable {
         case .freelance:      return "#10b981"
         case .investments:    return "#06b6d4"
         case .gifts:          return "#ec4899"
+        case .productSale:    return "#f59e0b"
+        case .loan:           return "#8b5cf6"
         case .food:           return "#f59e0b"
         case .transportation: return "#3b82f6"
         case .housing:        return "#8b5cf6"

@@ -89,8 +89,7 @@ struct AuthFaceIDLockView: View {
                 // Actions
                 VStack(spacing: Spacing.sm) {
                     Button {
-                        // Face ID'yi atla — şifre ile giriş için auth ekranına yönlendir
-                        onSignOut()   // auth'a gönder, SignIn ekranı açılacak
+                        triggerPasscode()
                     } label: {
                         primaryButtonLabel("Şifre kullan")
                     }
@@ -113,6 +112,25 @@ struct AuthFaceIDLockView: View {
         .opacity(appeared ? 1 : 0)
         .animation(.easeOut(duration: 0.3), value: appeared)
         .onAppear { appeared = true }
+    }
+
+    private func triggerPasscode() {
+        scanning = true
+        errorMessage = nil
+        Task {
+            do {
+                let ctx = LAContext()
+                let success = try await ctx.evaluatePolicy(
+                    .deviceOwnerAuthentication,
+                    localizedReason: "Budgetella'ya girmek için kimliğini doğrula"
+                )
+                scanning = false
+                if success { onUnlocked() }
+            } catch {
+                scanning = false
+                withAnimation { errorMessage = "Kimlik doğrulanamadı. Tekrar dene." }
+            }
+        }
     }
 
     private func triggerFaceID() {

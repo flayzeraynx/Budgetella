@@ -56,7 +56,7 @@ struct BudgetellaApp: App {
     }
 }
 
-// MARK: - Category seed on first launch
+// MARK: - Seed on first launch
 // Called from ContentView.onAppear via a SwiftData-aware context
 extension BudgetellaApp {
     static func seedCategoriesIfNeeded(in context: ModelContext) {
@@ -69,5 +69,12 @@ extension BudgetellaApp {
         Category.seedDefaults(for: "local").forEach { context.insert($0) }
         try? context.save()
         UserDefaults.standard.set(true, forKey: "categoriesSeeded")
+    }
+
+    static func seedSettingsIfNeeded(in context: ModelContext) {
+        let count = (try? context.fetchCount(FetchDescriptor<AppSettings>())) ?? 0
+        guard count == 0 else { return }
+        context.insert(AppSettings(userId: "local"))
+        try? context.save()
     }
 }

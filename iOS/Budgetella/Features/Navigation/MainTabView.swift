@@ -7,11 +7,15 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct MainTabView: View {
 
     @State private var selectedTab: AppTab = .home
     @State private var showQuickEntry = false
+    @Query private var settingsArr: [AppSettings]
+
+    private var hideAmounts: Bool { settingsArr.first?.hideAmounts ?? false }
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -38,6 +42,7 @@ struct MainTabView: View {
 
             CustomTabBar(selected: $selectedTab, onFABTap: { showQuickEntry = true })
         }
+        .environment(\.hideAmounts, hideAmounts)
         .ignoresSafeArea(.keyboard)
         .sheet(isPresented: $showQuickEntry) {
             QuickEntryView()

@@ -19,6 +19,7 @@ struct DashboardView: View {
     @AppStorage("displayName") private var displayName = "Ozzy"
     @State private var vm = DashboardViewModel()
     @State private var showSettings = false
+    @Environment(\.hideAmounts) private var hideAmounts
 
     var body: some View {
         ScrollView {
@@ -164,7 +165,7 @@ struct DashboardView: View {
                 .font(.brand(.subheadline))
                 .foregroundStyle(BrandColor.textPrimary)
             Spacer()
-            Text(amount.fullTRY)
+            Text(hideAmounts ? "••••" : amount.fullTRY)
                 .font(.brand(.subheadline))
                 .foregroundStyle(BrandColor.expense)
         }

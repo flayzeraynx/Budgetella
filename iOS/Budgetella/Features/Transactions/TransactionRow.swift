@@ -10,6 +10,7 @@ struct TransactionRow: View {
     let transaction: Transaction
     var onDelete: (() -> Void)? = nil
 
+    @Environment(\.hideAmounts) private var hideAmounts
     @State private var swipeOffset: CGFloat = 0
     private let deleteWidth: CGFloat = 76
 
@@ -94,7 +95,7 @@ struct TransactionRow: View {
             Spacer()
 
             VStack(alignment: .trailing, spacing: 2) {
-                Text((transaction.type == .income ? "+" : "-") + transaction.amount.fullTRY)
+                Text(hideAmounts ? "••••" : (transaction.type == .income ? "+" : "-") + transaction.amount.fullTRY)
                     .font(.brand(.subheadline).monospacedDigit())
                     .foregroundStyle(transaction.type == .income ? BrandColor.income : BrandColor.expense)
                     .lineLimit(1)

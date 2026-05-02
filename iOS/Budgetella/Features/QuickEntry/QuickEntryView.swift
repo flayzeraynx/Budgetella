@@ -23,6 +23,11 @@ struct QuickEntryView: View {
     @State private var vm = QuickEntryViewModel()
     @State private var mode: EntryMode = .manual
     @State private var isTyping = false
+    @State private var showDiscardAlert = false
+
+    private var hasContent: Bool {
+        vm.amountDecimal > 0 || !vm.note.isEmpty || vm.selectedCategoryId != nil
+    }
 
     var body: some View {
         NavigationStack {
@@ -55,8 +60,8 @@ struct QuickEntryView: View {
                         .transition(.opacity)
                     }
 
-                    // Full-width save button — only for manual mode
-                    if mode == .manual {
+                    // Full-width save button — only for manual mode, hidden while keyboard is up
+                    if mode == .manual && !isTyping {
                         Button {
                             vm.save(modelContext: modelContext, categories: categories, userId: userId)
                             if vm.errorMessage == nil { dismiss() }
@@ -92,30 +97,30 @@ struct QuickEntryView: View {
             }
             .animation(.spring(response: 0.3), value: mode)
             .navigationBarTitleDisplayMode(.inline)
-            .interactiveDismissDisabled(isTyping)
+            .interactiveDismissDisabled(hasContent)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("İptal") { dismiss() }
-                        .foregroundStyle(BrandColor.textSecondary)
-                }
-                ToolbarItemGroup(placement: .keyboard) {
-                    Button("Bitti") { isTyping = false }
-                        .foregroundStyle(BrandColor.textSecondary)
-                    Spacer()
-                    Button {
-                        isTyping = false
-                        vm.save(modelContext: modelContext, categories: categories, userId: userId)
-                        if vm.errorMessage == nil { dismiss() }
-                    } label: {
-                        Text("Kaydet")
-                            .font(.brand(.subheadline).bold())
-                            .foregroundStyle(vm.canSave ? BrandColor.primary : BrandColor.textTertiary)
+                    Button("İptal") {
+                        if hasContent {
+                            showDiscardAlert = true
+                        } else {
+                            dismiss()
+                        }
                     }
-                    .disabled(!vm.canSave)
+                    .foregroundStyle(BrandColor.textSecondary)
                 }
             }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
+            .brandAlert(
+                title: "Değişiklikleri At",
+                message: "Girilen bilgiler silinecek.",
+                isPresented: $showDiscardAlert,
+                buttons: [
+                    .destructive("Vazgeç ve Kapat") { dismiss() },
+                    .cancel("Devam Et")
+                ]
+            )
             .sheet(isPresented: $vm.showCategoryPicker) {
                 CategoryPickerView(
                     categories: categories,
