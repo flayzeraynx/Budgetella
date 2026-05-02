@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İletişim — Budgetella</title>
+<meta name="description" content="Budgetella ile iletişime geç — destek, basın, iş ortaklığı.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 80px;
+  margin: 64px 0 100px;
+}
+@media (max-width: 900px) { .contact-grid { grid-template-columns: 1fr; gap: 48px; } }
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.info-block {
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+.info-block .label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.info-block .v {
+  font-size: 17px;
+  color: var(--ink);
+  font-weight: 500;
+}
+.info-block .v a { color: var(--accent); }
+.info-block .desc {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.form {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 36px;
+}
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+.form-row label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.form-row input,
+.form-row textarea,
+.form-row select {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+}
+.form-row input:focus,
+.form-row textarea:focus,
+.form-row select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(110,91,255,0.1);
+}
+.form-row textarea { resize: vertical; min-height: 120px; font-family: inherit; }
+.form-row.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-row.cols > div { display: flex; flex-direction: column; gap: 8px; }
+
+.form-disclaimer {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 12px;
+  font-family: var(--font-mono);
+}
+
+.address-block {
+  margin: 60px 0 100px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  padding: 40px;
+  background: var(--bg-deep);
+  border-radius: 20px;
+}
+@media (max-width: 800px) { .address-block { grid-template-columns: 1fr; padding: 28px; } }
+.address-block h3 {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin-bottom: 12px;
+}
+.address-block p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+.address-block .meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--muted);
+}
+.address-block .meta strong { color: var(--ink); font-weight: 500; }
+</style>
+</head>
+<body>
+<div id="mount-nav"></div>
+
+<header class="page-head">
+  <div class="container">
+    <div class="eyebrow">İletişim</div>
+    <h1>Konuşalım.</h1>
+    <p class="lead">Soru, geri bildirim, basın talebi ya da iş ortaklığı — yazmak istediğin ne varsa kapımız açık.</p>
+  </div>
+</header>
+
+<div class="container">
+  <div class="contact-grid">
+    <aside class="contact-info">
+      <div class="info-block">
+        <div class="label">Genel destek</div>
+        <div class="v"><a href="mailto:destek@budgetella.com">destek@budgetella.com</a></div>
+        <div class="desc">Hesap ve uygulama soruları için. Hafta içi 09:00–18:00 arası ortalama 4 saat içinde yanıt.</div>
+      </div>
+      <div class="info-block">
+        <div class="label">KVKK &amp; Gizlilik</div>
+        <div class="v"><a href="mailto:kvkk@budgetella.com">kvkk@budgetella.com</a></div>
+        <div class="desc">Veri talepleri, KVKK kapsamındaki haklar, silme istekleri.</div>
+      </div>
+      <div class="info-block">
+        <div class="label">Basın</div>
+        <div class="v"><a href="mailto:basin@budgetella.com">basin@budgetella.com</a></div>
+        <div class="desc">Röportaj, alıntı, basın kiti talepleri.</div>
+      </div>
+      <div class="info-block">
+        <div class="label">İş ortaklığı</div>
+        <div class="v"><a href="mailto:ortaklik@budgetella.com">ortaklik@budgetella.com</a></div>
+        <div class="desc">Entegrasyon, dağıtım, kurumsal teklifler.</div>
+      </div>
+      <div class="info-block">
+        <div class="label">Güvenlik</div>
+        <div class="v"><a href="mailto:guvenlik@budgetella.com">guvenlik@budgetella.com</a></div>
+        <div class="desc">Açık tespit ettiysen, sorumlu açıklama programımız var.</div>
+      </div>
+    </aside>
+
+    <form class="form" onsubmit="event.preventDefault(); this.querySelector('button').textContent='✓ Gönderildi'; this.querySelector('button').disabled=true;">
+      <h3 style="font-size: 22px; font-weight: 500; letter-spacing: -0.018em; margin-bottom: 6px;">Bize yaz</h3>
+      <p style="font-size: 14px; color: var(--muted); margin-bottom: 28px;">Doğru kişiye ulaşman için, lütfen konu seç.</p>
+
+      <div class="form-row cols">
+        <div>
+          <label for="name">İsim</label>
+          <input id="name" type="text" placeholder="Adın soyadın" required>
+        </div>
+        <div>
+          <label for="email">E-posta</label>
+          <input id="email" type="email" placeholder="ornek@mail.com" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label for="topic">Konu</label>
+        <select id="topic" required>
+          <option value="">Bir konu seç…</option>
+          <option>Genel destek</option>
+          <option>Hesap &amp; abonelik</option>
+          <option>Hata bildirimi</option>
+          <option>Özellik önerisi</option>
+          <option>KVKK / veri talebi</option>
+          <option>Basın</option>
+          <option>İş ortaklığı</option>
+          <option>Güvenlik</option>
+          <option>Diğer</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label for="msg">Mesaj</label>
+        <textarea id="msg" placeholder="Sana nasıl yardım edebiliriz?" required></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Gönder</button>
+
+      <p class="form-disclaimer">Bu formu göndererek <a href="privacy.html" style="color: var(--accent);">Gizlilik Politikası</a>'nı kabul etmiş olursun.</p>
+    </form>
+  </div>
+
+  <div class="address-block">
+    <div>
+      <h3>Adres</h3>
+      <p>Budgetella Yazılım A.Ş.<br>Maslak Mah. Bilim Sok. No:5<br>Sarıyer / İstanbul</p>
+    </div>
+    <div>
+      <h3>Künye</h3>
+      <div class="meta">
+        <span><strong>Mersis</strong> 0123-4567-8901-2345</span>
+        <span><strong>Vergi No</strong> 1234567890</span>
+        <span><strong>Vergi Dairesi</strong> Maslak</span>
+        <span><strong>Tel</strong> +90 (212) 555 12 34</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="mount-footer"></div>
+<script src="site.js"></script>
+</body>
+</html>

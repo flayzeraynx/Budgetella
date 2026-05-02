@@ -33,7 +33,6 @@ struct SettingsView: View {
     @State private var isImporting = false
     @State private var exportURL: URL?
     @State private var showExportSheet = false
-    @State private var supportURL: URL?
 
     private var settings: AppSettings? { settingsArr.first }
 
@@ -204,15 +203,21 @@ struct SettingsView: View {
                     Section("Destek") {
                         settingsRow(icon: "questionmark.circle", iconColor: BrandColor.info,
                                     title: "Yardım & Destek", value: nil) {
-                            supportURL = URL(string: "https://budgetella.app/support")
+                            if let url = URL(string: "mailto:info@budgetella.app") {
+                                UIApplication.shared.open(url)
+                            }
                         }
                         settingsRow(icon: "lock.shield", iconColor: BrandColor.textTertiary,
                                     title: "Gizlilik Politikası", value: nil) {
-                            supportURL = URL(string: "https://budgetella.app/privacy")
+                            if let url = URL(string: "https://budgetella.app/privacy") {
+                                UIApplication.shared.open(url)
+                            }
                         }
                         settingsRow(icon: "doc.text", iconColor: BrandColor.textTertiary,
                                     title: "Kullanım Koşulları", value: nil) {
-                            supportURL = URL(string: "https://budgetella.app/terms")
+                            if let url = URL(string: "https://budgetella.app/terms") {
+                                UIApplication.shared.open(url)
+                            }
                         }
                     }
                     .listRowBackground(BrandColor.surface.opacity(0.4))
@@ -311,14 +316,6 @@ struct SettingsView: View {
                 if let url = exportURL {
                     ShareSheet(items: [url])
                         .ignoresSafeArea()
-                }
-            }
-            .sheet(isPresented: Binding(
-                get: { supportURL != nil },
-                set: { if !$0 { supportURL = nil } }
-            )) {
-                if let url = supportURL {
-                    SafariSheet(url: url).ignoresSafeArea()
                 }
             }
         }

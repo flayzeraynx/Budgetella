@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hakkımızda — Budgetella</title>
+<meta name="description" content="Budgetella'nın hikayesi, misyonu ve takımı.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.about-hero {
+  padding: 80px 0 40px;
+}
+.about-hero h1 .accent {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent);
+}
+.manifesto {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: start;
+  margin: 80px 0;
+}
+@media (max-width: 800px) { .manifesto { grid-template-columns: 1fr; gap: 40px; } }
+.manifesto p {
+  font-size: clamp(18px, 1.8vw, 22px);
+  line-height: 1.55;
+  color: var(--ink);
+  font-weight: 400;
+  text-wrap: pretty;
+}
+.manifesto .lede {
+  font-size: 14px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin: 80px 0;
+}
+@media (max-width: 800px) { .values-grid { grid-template-columns: 1fr; } }
+.value {
+  padding: 32px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+.value-num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.value h3 {
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.018em;
+  margin-bottom: 10px;
+}
+.value p {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.numbers {
+  background: var(--ink);
+  color: #fff;
+  border-radius: 24px;
+  padding: 64px 48px;
+  margin: 80px 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+}
+@media (max-width: 800px) { .numbers { grid-template-columns: 1fr 1fr; padding: 40px 28px; gap: 32px; } }
+.number-stat .v {
+  font-size: clamp(34px, 4vw, 52px);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  display: block;
+  margin-bottom: 6px;
+  font-feature-settings: 'tnum';
+}
+.number-stat .v .ac { color: var(--accent-hi); }
+.number-stat .l {
+  font-size: 13px;
+  color: rgba(255,255,255,0.55);
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin: 60px 0 80px;
+}
+@media (max-width: 800px) { .team-grid { grid-template-columns: 1fr 1fr; gap: 18px; } }
+.team-card {
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  text-align: left;
+}
+.team-avatar {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hi));
+  display: grid; place-items: center;
+  color: #fff;
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: -0.04em;
+  margin-bottom: 16px;
+}
+.team-card h4 { font-size: 17px; font-weight: 500; letter-spacing: -0.01em; margin-bottom: 4px; }
+.team-card .role { font-size: 13px; color: var(--muted); font-family: var(--font-mono); }
+
+.story {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 60px;
+  margin: 80px 0;
+  align-items: start;
+}
+@media (max-width: 800px) { .story { grid-template-columns: 1fr; gap: 24px; } }
+.story-time {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.story-body p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  margin: 0 0 18px;
+}
+.story-body p:last-child { margin-bottom: 0; }
+.story-body .quote {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 28px;
+  line-height: 1.3;
+  color: var(--ink);
+  margin: 32px 0;
+  padding-left: 22px;
+  border-left: 3px solid var(--accent);
+}
+</style>
+</head>
+<body>
+<div id="mount-nav"></div>
+
+<header class="page-head">
+  <div class="container">
+    <div class="eyebrow">Hakkımızda</div>
+    <h1>Finansla aramız <span class="accent" style="font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: var(--accent);">karışık</span><br>olmak zorunda değil.</h1>
+    <p class="lead" style="max-width: 580px;">Türkiye'de milyonlarca insan hâlâ "ay sonu nereye gitti bu para?" sorusuna cevap arıyor. Biz, bu soruyu Türkçe ve sade bir dille yanıtlayan bir uygulama yapıyoruz.</p>
+  </div>
+</header>
+
+<section class="container">
+  <div class="manifesto">
+    <div>
+      <div class="lede">Manifesto</div>
+      <p>Finans, sayılarla değil <em>kararlarla</em> ilgili. Doğru karar için doğru bilgiye, doğru zamanda ihtiyacın var. Budgetella, paranı bir tablo olarak değil; sana özel bir hikaye olarak sunmak için var.</p>
+    </div>
+    <div>
+      <div class="lede">Yaklaşım</div>
+      <p>Bankalarla rekabet etmiyoruz, onların yapmadığı şeyi yapıyoruz: <strong>anlamlandırma.</strong> Bağlantı zorunlu değil. Veri Türkiye'de. Konuşma dili Türkçe. Sadelik bizim için bir özellik değil, kural.</p>
+    </div>
+  </div>
+</section>
+
+<section class="container">
+  <div class="numbers reveal">
+    <div class="number-stat">
+      <span class="v">42<span class="ac">K</span></span>
+      <span class="l">Aktif kullanıcı</span>
+    </div>
+    <div class="number-stat">
+      <span class="v">2.8<span class="ac">M</span></span>
+      <span class="l">İşlem kaydedildi</span>
+    </div>
+    <div class="number-stat">
+      <span class="v">4.8<span class="ac">★</span></span>
+      <span class="l">App Store puanı</span>
+    </div>
+    <div class="number-stat">
+      <span class="v">100<span class="ac">%</span></span>
+      <span class="l">Banka bağımsız</span>
+    </div>
+  </div>
+</section>
+
+<section class="container">
+  <div class="section-head reveal" style="grid-template-columns: 1fr;">
+    <div>
+      <div class="eyebrow">Değerlerimiz</div>
+      <h2 style="margin-top: 18px;">Üç ilkeye sıkı<br>sıkıya bağlıyız.</h2>
+    </div>
+  </div>
+  <div class="values-grid reveal">
+    <div class="value">
+      <div class="value-num">01 / SADELİK</div>
+      <h3>Az şey, doğru şey</h3>
+      <p>Her ekran bir şeyi anlatmak için var. Gereksiz hiçbir feature, hiçbir sayı, hiçbir grafik yok. Karmaşıklık konfor değil, gürültü.</p>
+    </div>
+    <div class="value">
+      <div class="value-num">02 / GİZLİLİK</div>
+      <h3>Senin verin, senin işi</h3>
+      <p>Veri satmıyoruz, paylaşmıyoruz, eğitime sokmuyoruz. Banka bağlantısı yok. KVKK uyumlu, uçtan uca şifreli.</p>
+    </div>
+    <div class="value">
+      <div class="value-num">03 / YEREL DEĞER</div>
+      <h3>Türkçe düşünür, Türkçe konuşur</h3>
+      <p>Bir İngiliz uygulamasının çevirisi değil. Türkçe alışkanlıklar, Türkçe semboller, Türk Lirası — kökten Türkiye için tasarlandı.</p>
+    </div>
+  </div>
+</section>
+
+<section class="container">
+  <div class="section-head reveal" style="grid-template-columns: 1fr; margin-top: 100px;">
+    <div>
+      <div class="eyebrow">Hikaye</div>
+      <h2 style="margin-top: 18px;">Nasıl başladı.</h2>
+    </div>
+  </div>
+
+  <div class="story reveal">
+    <div class="story-time">2024 — Fikir</div>
+    <div class="story-body">
+      <p>Mert, üç farklı bütçe uygulaması denedi. Hiçbiri Türkçe konuşmuyordu. Hiçbiri "kahveye ne harcadın?" diye Türkçe soruyu anlamıyordu. Hepsi banka bağlantısı istiyordu.</p>
+      <div class="quote">"Türkçe düşünen birinin Türkçe konuşan bir finans asistanı olmamasının makul bir açıklaması yoktu."</div>
+      <p>Bir hafta sonu içinde ilk prototip yazıldı. Sonra Selen ekibe katıldı. Sonra Eren. Bir yıl içinde dört kişilik bir takım, Türkiye'nin en sevilen finans asistanını yapmaya soyundu.</p>
+    </div>
+  </div>
+
+  <div class="story reveal">
+    <div class="story-time">2025 — Beta</div>
+    <div class="story-body">
+      <p>500 kişilik kapalı beta. Üniversite öğrencileri, ev hanımları, freelancer'lar, kurumsal çalışanlar. Hepsinin tek ortak şeyi: "para nereye gidiyor anlamak istiyorum, ama bankama dokunulmasın."</p>
+      <p>Beta sonunda 9.2 ortalama memnuniyet skoru. Budgi'nin ilk hâli sadece 7 fonksiyon biliyordu — bugün 80'den fazla.</p>
+    </div>
+  </div>
+
+  <div class="story reveal">
+    <div class="story-time">2026 — Bugün</div>
+    <div class="story-body">
+      <p>App Store ve Google Play'de yayında. 42.000+ aktif kullanıcı. KVKK uyumlu altyapı. Ve hâlâ aynı niyet: "para konusunda kafan rahat olsun."</p>
+    </div>
+  </div>
+</section>
+
+<section class="container" style="padding-bottom: 80px;">
+  <div class="section-head reveal" style="grid-template-columns: 1fr;">
+    <div>
+      <div class="eyebrow">Takım</div>
+      <h2 style="margin-top: 18px;">Bunu yapan<br>küçük ama kararlı ekip.</h2>
+    </div>
+  </div>
+  <div class="team-grid reveal">
+    <div class="team-card">
+      <div class="team-avatar">MA</div>
+      <h4>Mert Aksoy</h4>
+      <div class="role">Kurucu &amp; CEO</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background: linear-gradient(135deg, #FFB547, #FF8A47);">SY</div>
+      <h4>Selen Yıldız</h4>
+      <div class="role">Tasarım &amp; Ürün</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background: linear-gradient(135deg, #10F2A5, #06B585);">EÖ</div>
+      <h4>Eren Özdemir</h4>
+      <div class="role">Mobil Mühendislik</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background: linear-gradient(135deg, #E03060, #B8244A);">DK</div>
+      <h4>Defne Kara</h4>
+      <div class="role">AI &amp; Backend</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background: linear-gradient(135deg, #6E5BFF, #8B6FFF);">B</div>
+      <h4>Budgi</h4>
+      <div class="role">AI Asistan · 7/24</div>
+    </div>
+    <div class="team-card" style="border-style: dashed; display: grid; place-items: center;">
+      <div style="text-align: center;">
+        <div style="font-size: 14px; color: var(--muted); margin-bottom: 8px;">Sıra sende olabilir.</div>
+        <a href="contact.html" style="color: var(--accent); font-size: 14px; font-weight: 500;">İş ilanları →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="mount-footer"></div>
+<script src="site.js"></script>
+</body>
+</html>

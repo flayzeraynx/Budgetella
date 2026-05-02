@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Destek — Budgetella</title>
+<meta name="description" content="Budgetella için yardım merkezi, sıkça sorulan sorular ve destek iletişim formu.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.search-wrap {
+  max-width: 580px;
+  margin: 32px auto 0;
+  position: relative;
+}
+.search-wrap input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 22px 16px 50px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+}
+.search-wrap input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(110,91,255,0.12);
+}
+.search-wrap svg {
+  position: absolute;
+  left: 18px; top: 50%;
+  transform: translateY(-50%);
+  width: 18px; height: 18px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.help-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+  margin-top: 60px;
+}
+@media (max-width: 800px) { .help-grid { grid-template-columns: 1fr; } }
+.help-card {
+  background: var(--surface);
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 200ms var(--ease-out);
+  cursor: pointer;
+}
+.help-card:hover { background: var(--surface-hi); }
+.help-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(110,91,255,0.12), rgba(110,91,255,0.04));
+  border: 1px solid rgba(110,91,255,0.18);
+  display: grid; place-items: center;
+  color: var(--accent);
+}
+.help-icon svg { width: 18px; height: 18px; }
+.help-card h3 { font-size: 18px; font-weight: 500; letter-spacing: -0.01em; }
+.help-card p { font-size: 14px; line-height: 1.5; color: var(--muted); }
+.help-card .arr {
+  margin-top: auto;
+  font-size: 13px;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+
+.support-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  margin-top: 80px;
+}
+@media (max-width: 800px) { .support-cols { grid-template-columns: 1fr; gap: 40px; } }
+
+.help-section h3 {
+  font-size: 13px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+.help-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.help-list li a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 15px;
+  color: var(--ink);
+  transition: color 200ms var(--ease-out);
+}
+.help-list li a:hover { color: var(--accent); }
+.help-list li a::after {
+  content: '→';
+  color: var(--muted);
+  font-family: var(--font-mono);
+  transition: transform 200ms var(--ease-out);
+}
+.help-list li a:hover::after { transform: translateX(3px); color: var(--accent); }
+
+.contact-card {
+  background: var(--ink);
+  color: #fff;
+  border-radius: 20px;
+  padding: 32px;
+  margin-top: 60px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 32px;
+}
+.contact-card h3 { color: #fff; font-size: 22px; font-weight: 500; letter-spacing: -0.01em; margin-bottom: 6px; }
+.contact-card p { color: rgba(255,255,255,0.65); font-size: 14px; }
+@media (max-width: 700px) {
+  .contact-card { grid-template-columns: 1fr; gap: 20px; }
+}
+</style>
+</head>
+<body>
+<div id="mount-nav"></div>
+
+<header class="page-head">
+  <div class="container">
+    <div class="eyebrow">Destek</div>
+    <h1>Sana nasıl<br>yardım edebiliriz?</h1>
+    <p class="lead">Sıkça sorulanlar, kullanım kılavuzları ve takıldığında ulaşabileceğin destek ekibi.</p>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="search" placeholder="Bir konu ara — örn. 'şifremi unuttum', 'fiş tarama'…">
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="help-grid">
+      <a class="help-card" href="#getting-started">
+        <div class="help-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        </div>
+        <h3>İlk adımlar</h3>
+        <p>Hesap oluşturma, ilk işlemini ekleme, bütçe kurma — sıfırdan başla.</p>
+        <span class="arr">5 makale →</span>
+      </a>
+      <a class="help-card" href="#features">
+        <div class="help-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <h3>Özellikler</h3>
+        <p>Budgi, fiş tarama, sesli giriş, hedef takibi nasıl çalışır?</p>
+        <span class="arr">12 makale →</span>
+      </a>
+      <a class="help-card" href="#account">
+        <div class="help-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a7 7 0 0114 0v1"/></svg>
+        </div>
+        <h3>Hesap &amp; Abonelik</h3>
+        <p>Şifre, ödeme, plan değişikliği, hesap silme.</p>
+        <span class="arr">8 makale →</span>
+      </a>
+      <a class="help-card" href="#privacy">
+        <div class="help-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 9.5-8 10-4.5-.5-8-5-8-10V6l8-4z"/></svg>
+        </div>
+        <h3>Gizlilik &amp; Güvenlik</h3>
+        <p>Verilerin nerede tutulur, nasıl korunur, KVKK hakların.</p>
+        <span class="arr">6 makale →</span>
+      </a>
+      <a class="help-card" href="#troubleshoot">
+        <div class="help-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 015.7 5.7l-9 9-5.7 1.4 1.4-5.7 9-9z"/></svg>
+        </div>
+        <h3>Sorun giderme</h3>
+        <p>Senkronizasyon, OCR yanlış okuma, uygulama açılmıyor.</p>
+        <span class="arr">9 makale →</span>
+      </a>
+      <a class="help-card" href="#data">
+        <div class="help-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        </div>
+        <h3>Veri &amp; Yedekleme</h3>
+        <p>İmport, export, yedekleme, başka uygulamadan geçiş.</p>
+        <span class="arr">5 makale →</span>
+      </a>
+    </div>
+
+    <div class="support-cols">
+      <div class="help-section" id="getting-started">
+        <h3>İlk adımlar</h3>
+        <ul class="help-list">
+          <li><a href="#">Budgetella'ya nasıl başlarım?</a></li>
+          <li><a href="#">İlk işlemimi nasıl eklerim?</a></li>
+          <li><a href="#">İlk bütçemi nasıl kurarım?</a></li>
+          <li><a href="#">Kategorileri nasıl özelleştiririm?</a></li>
+          <li><a href="#">Hedef nasıl belirlerim?</a></li>
+        </ul>
+      </div>
+      <div class="help-section" id="features">
+        <h3>Özellikler</h3>
+        <ul class="help-list">
+          <li><a href="#">Budgi'ye nasıl soru sorarım?</a></li>
+          <li><a href="#">Fiş taramada hangi formatlar destekleniyor?</a></li>
+          <li><a href="#">Sesli giriş hangi dillerde çalışıyor?</a></li>
+          <li><a href="#">"Yatırsaydın" senaryosu nasıl hesaplanıyor?</a></li>
+          <li><a href="#">Tahminler ne kadar doğru?</a></li>
+          <li><a href="#">Bütçe limit aşımında ne olur?</a></li>
+        </ul>
+      </div>
+      <div class="help-section" id="account">
+        <h3>Hesap &amp; Abonelik</h3>
+        <ul class="help-list">
+          <li><a href="#">Şifremi unuttum, ne yapayım?</a></li>
+          <li><a href="#">Premium'a nasıl geçerim?</a></li>
+          <li><a href="#">Aboneliğimi nasıl iptal ederim?</a></li>
+          <li><a href="#">Faturamı nereden alabilirim?</a></li>
+          <li><a href="#">Hesabımı nasıl silerim?</a></li>
+          <li><a href="#">E-posta adresimi nasıl değiştiririm?</a></li>
+        </ul>
+      </div>
+      <div class="help-section" id="privacy">
+        <h3>Gizlilik &amp; Güvenlik</h3>
+        <ul class="help-list">
+          <li><a href="privacy.html">Verilerim nerede tutuluyor?</a></li>
+          <li><a href="privacy.html#kvkk">KVKK haklarımı nasıl kullanırım?</a></li>
+          <li><a href="#">İki faktörlü doğrulama nasıl açılır?</a></li>
+          <li><a href="#">Budgi'yi tamamen kapatabilir miyim?</a></li>
+          <li><a href="#">Verilerimi indirebilir miyim?</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="contact-card">
+      <div>
+        <h3>Hâlâ takıldın mı?</h3>
+        <p>Destek ekibimiz hafta içi 09:00–18:00 arası ortalama 4 saat içinde yanıt veriyor. Premium kullanıcılar öncelikli kuyrukta.</p>
+      </div>
+      <a href="contact.html" class="btn btn-accent btn-lg">İletişime geç</a>
+    </div>
+  </div>
+</section>
+
+<div id="mount-footer"></div>
+<script src="site.js"></script>
+</body>
+</html>

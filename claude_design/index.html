@@ -1,0 +1,1654 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Budgetella — Paran nereye gidiyor, sonunda anlaşılır.</title>
+<meta name="description" content="Türkçe konuşan AI asistanın ile harcamalarını anla, bütçeni planla, finansını kontrol altına al. Banka bağlantısı yok, KVKK uyumlu, gizliliğe saygılı.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+/* ─── Hero ─── */
+.hero {
+  position: relative;
+  padding: clamp(60px, 8vw, 100px) 0 clamp(60px, 8vw, 100px);
+  overflow: hidden;
+}
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+@media (max-width: 980px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 60px; }
+}
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  background: rgba(255,255,255,0.7);
+  border: 1px solid var(--line);
+  padding: 7px 14px;
+  border-radius: 100px;
+  margin-bottom: 32px;
+  backdrop-filter: blur(8px);
+}
+.hero-tag .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 0 4px rgba(6,181,133,0.18);
+}
+.hero h1 .accent {
+  font-style: italic;
+  font-weight: 400;
+  font-family: 'Instrument Serif', 'Georgia', serif;
+  letter-spacing: -0.02em;
+  color: var(--accent);
+}
+.hero-sub {
+  margin-top: 28px;
+  font-size: clamp(17px, 1.7vw, 21px);
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: 540px;
+  text-wrap: pretty;
+}
+.hero-cta {
+  margin-top: 40px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.hero-meta {
+  margin-top: 28px;
+  display: flex;
+  gap: 24px;
+  font-size: 13px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+}
+.hero-meta-item { display: inline-flex; align-items: center; gap: 6px; }
+.hero-meta-item svg { width: 14px; height: 14px; }
+
+/* ─── Hero phone visual ─── */
+.hero-visual {
+  position: relative;
+  height: 640px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.phone {
+  width: 320px;
+  height: 640px;
+  background: #0A0B14;
+  border-radius: 50px;
+  padding: 8px;
+  position: relative;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.4) inset,
+    0 50px 100px -30px rgba(10,11,20,0.5),
+    0 30px 60px -20px rgba(110,91,255,0.25);
+  z-index: 2;
+  transform: perspective(1200px) rotateY(-6deg) rotateX(2deg);
+  transform-style: preserve-3d;
+}
+.phone-screen {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #11121C 0%, #0A0B14 100%);
+  border-radius: 42px;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  font-size: 13px;
+}
+.phone-notch {
+  position: absolute;
+  top: 12px; left: 50%;
+  transform: translateX(-50%);
+  width: 110px; height: 28px;
+  background: #000;
+  border-radius: 14px;
+  z-index: 3;
+}
+.app {
+  padding: 56px 18px 18px;
+}
+.app-top {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 11px; color: rgba(255,255,255,0.5);
+  font-family: var(--font-mono);
+  margin-bottom: 22px;
+}
+.app-greeting { font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 4px; }
+.app-balance-label { color: rgba(255,255,255,0.5); font-size: 12px; margin-bottom: 6px; }
+.app-balance {
+  font-size: 38px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
+  font-feature-settings: 'tnum';
+}
+.app-balance .small { font-size: 18px; color: rgba(255,255,255,0.5); margin-left: 2px; }
+.app-balance-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--success);
+  font-family: var(--font-mono);
+}
+.app-chips {
+  display: flex; gap: 6px; margin: 18px 0 16px;
+  font-size: 10px;
+}
+.chip {
+  padding: 5px 9px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.7);
+  font-family: var(--font-mono);
+}
+.chip.on { background: var(--accent); color: #fff; border-color: transparent; }
+
+.tx-list { display: flex; flex-direction: column; gap: 10px; }
+.tx {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 10px;
+  padding: 9px 10px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 10px;
+  align-items: center;
+}
+.tx-icon {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: rgba(110,91,255,0.18);
+  display: grid; place-items: center;
+  font-size: 13px;
+}
+.tx-name { font-size: 12px; font-weight: 500; }
+.tx-time { font-size: 10px; color: rgba(255,255,255,0.4); font-family: var(--font-mono); }
+.tx-amt { font-size: 12px; font-weight: 500; font-feature-settings: 'tnum'; }
+.tx-amt.in { color: var(--success); }
+.tx-amt.out { color: rgba(255,255,255,0.85); }
+
+/* Floating cards */
+.float-card {
+  position: absolute;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 24px 50px -12px rgba(10,11,20,0.18), 0 8px 16px -8px rgba(10,11,20,0.08);
+  z-index: 3;
+  font-size: 13px;
+  backdrop-filter: blur(8px);
+}
+.float-card .fc-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.fc-budgi {
+  top: 60px;
+  left: -40px;
+  width: 230px;
+  border-radius: 18px;
+  padding: 14px 16px;
+}
+.fc-budgi-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 8px;
+}
+.fc-budgi-avatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8B6FFF, #6E5BFF);
+  display: grid; place-items: center;
+  color: #fff; font-size: 13px; font-weight: 700;
+  letter-spacing: -0.04em;
+}
+.fc-budgi-name { font-size: 12px; font-weight: 500; }
+.fc-budgi-msg { font-size: 13px; line-height: 1.45; color: var(--ink); }
+.fc-budgi-msg .hl { background: linear-gradient(180deg, transparent 60%, rgba(110,91,255,0.18) 60%); padding: 0 2px; }
+
+.fc-progress {
+  bottom: 90px;
+  right: -32px;
+  width: 220px;
+}
+.fc-progress-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 6px;
+}
+.fc-progress-amt { font-size: 17px; font-weight: 500; letter-spacing: -0.02em; font-feature-settings: 'tnum'; }
+.fc-progress-pct { font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
+.fc-progress-bar {
+  height: 5px;
+  background: var(--bg-deep);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+.fc-progress-fill {
+  position: absolute;
+  inset: 0;
+  width: 68%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-hi));
+  border-radius: 3px;
+}
+.fc-progress-cap { font-size: 11px; color: var(--muted); margin-top: 6px; font-family: var(--font-mono); }
+
+.fc-ocr {
+  top: 280px;
+  right: -50px;
+  width: 200px;
+}
+.fc-ocr-head {
+  display: flex; gap: 8px; align-items: center;
+  margin-bottom: 8px;
+}
+.fc-ocr-icon {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: rgba(6,181,133,0.12);
+  display: grid; place-items: center;
+}
+.fc-ocr-icon svg { width: 16px; height: 16px; color: var(--success); }
+.fc-ocr-title { font-size: 12px; font-weight: 500; }
+.fc-ocr-amt { font-size: 19px; font-weight: 500; letter-spacing: -0.02em; font-feature-settings: 'tnum'; }
+.fc-ocr-meta { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: var(--font-mono); }
+
+/* Glow orbs */
+.hero-glow-1 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(110,91,255,0.25), transparent 60%);
+  top: -100px; right: -100px;
+}
+.hero-glow-2 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(6,181,133,0.15), transparent 60%);
+  bottom: -100px; left: -100px;
+}
+
+/* ─── Trust bar ─── */
+.trust-bar {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 28px 0;
+  background: rgba(255,255,255,0.4);
+}
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  align-items: center;
+}
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+.trust-icon {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: rgba(110,91,255,0.1);
+  display: grid; place-items: center;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.trust-icon svg { width: 14px; height: 14px; }
+@media (max-width: 800px) {
+  .trust-grid { grid-template-columns: 1fr 1fr; gap: 18px; }
+}
+
+/* ─── Features grid ─── */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  overflow: hidden;
+}
+.feature {
+  background: var(--surface);
+  padding: 40px 32px;
+  position: relative;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: background 240ms var(--ease-out);
+}
+.feature:hover { background: var(--surface-hi); }
+.feature-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(110,91,255,0.12), rgba(110,91,255,0.04));
+  border: 1px solid rgba(110,91,255,0.18);
+  display: grid; place-items: center;
+  color: var(--accent);
+  margin-bottom: 24px;
+}
+.feature-icon svg { width: 22px; height: 22px; }
+.feature h3 {
+  font-size: 22px;
+  letter-spacing: -0.018em;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+.feature p {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.feature.large { grid-column: span 2; }
+@media (max-width: 900px) {
+  .features-grid { grid-template-columns: 1fr 1fr; }
+  .feature.large { grid-column: span 2; }
+}
+@media (max-width: 600px) {
+  .features-grid { grid-template-columns: 1fr; }
+  .feature.large { grid-column: span 1; }
+}
+
+/* ─── Why (comparison) ─── */
+.why {
+  background: var(--ink);
+  color: #fff;
+  border-radius: 28px;
+  padding: clamp(60px, 8vw, 100px) clamp(32px, 5vw, 64px);
+  margin: 80px 0;
+  position: relative;
+  overflow: hidden;
+}
+.why::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(110,91,255,0.25), transparent 60%);
+  pointer-events: none;
+}
+.why h2 { color: #fff; }
+.why .lede { color: rgba(255,255,255,0.6); }
+.why .eyebrow { color: var(--accent-hi); }
+.why .eyebrow::before { background: var(--accent-hi); }
+
+.compare {
+  display: grid;
+  grid-template-columns: 1.4fr repeat(3, 1fr);
+  gap: 0;
+  margin-top: 64px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 18px;
+  overflow: hidden;
+  position: relative;
+}
+.compare-row {
+  display: contents;
+}
+.compare-cell {
+  padding: 18px 22px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  font-size: 14px;
+  color: rgba(255,255,255,0.85);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.compare-row:last-child .compare-cell { border-bottom: none; }
+.compare-cell.head {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.03);
+  padding: 14px 22px;
+}
+.compare-cell.head.brand {
+  color: #fff;
+  background: rgba(110,91,255,0.18);
+}
+.compare-cell.feat { color: rgba(255,255,255,0.75); font-weight: 400; }
+.compare-cell.brand { background: rgba(110,91,255,0.05); color: #fff; }
+.tick {
+  display: inline-grid; place-items: center;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: rgba(6,181,133,0.18);
+  color: var(--success);
+}
+.tick.no { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.3); }
+.tick svg { width: 10px; height: 10px; }
+@media (max-width: 800px) {
+  .compare { font-size: 12px; }
+  .compare-cell { padding: 12px 14px; font-size: 12.5px; }
+}
+
+/* ─── How (3-step) ─── */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  position: relative;
+}
+.steps::before {
+  content: '';
+  position: absolute;
+  top: 28px; left: 8%; right: 8%;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, var(--line-2) 0, var(--line-2) 4px, transparent 4px, transparent 8px);
+  z-index: 0;
+}
+.step { position: relative; z-index: 1; }
+.step-num {
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  display: grid; place-items: center;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+  position: relative;
+}
+.step-num::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 16px;
+  border: 1px solid var(--accent);
+  opacity: 0;
+  transition: opacity 240ms var(--ease-out);
+}
+.step:hover .step-num::after { opacity: 1; }
+.step h3 {
+  font-size: 22px;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+.step p {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+@media (max-width: 800px) {
+  .steps { grid-template-columns: 1fr; gap: 40px; }
+  .steps::before { display: none; }
+}
+
+/* ─── Budgi showcase ─── */
+.budgi {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+  margin: 60px 0;
+}
+@media (max-width: 900px) { .budgi { grid-template-columns: 1fr; gap: 60px; } }
+.budgi-chat {
+  background: linear-gradient(180deg, #11121C 0%, #0A0B14 100%);
+  border-radius: 24px;
+  padding: 28px 24px;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 30px 80px -20px rgba(10,11,20,0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 480px;
+}
+.budgi-chat-head {
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 8px;
+}
+.budgi-avatar-lg {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8B6FFF, #6E5BFF);
+  display: grid; place-items: center;
+  color: #fff; font-weight: 700; font-size: 17px;
+  letter-spacing: -0.04em;
+}
+.budgi-name { font-size: 15px; font-weight: 500; }
+.budgi-status { font-size: 11px; color: rgba(255,255,255,0.5); font-family: var(--font-mono); }
+.budgi-status::before {
+  content: ''; display: inline-block;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--success);
+  margin-right: 6px; vertical-align: middle;
+}
+
+.bubble {
+  max-width: 88%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.bubble.user {
+  background: rgba(110,91,255,0.85);
+  color: #fff;
+  align-self: flex-end;
+  border-bottom-right-radius: 6px;
+}
+.bubble.bot {
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.95);
+  border: 1px solid rgba(255,255,255,0.08);
+  align-self: flex-start;
+  border-bottom-left-radius: 6px;
+}
+.bubble.bot .insight {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: rgba(110,91,255,0.12);
+  border: 1px solid rgba(110,91,255,0.25);
+  border-radius: 10px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.85);
+  display: flex; gap: 8px; align-items: center;
+}
+.bubble.bot .insight svg { color: var(--accent-hi); flex-shrink: 0; }
+
+/* ─── Screenshots ─── */
+.screens-rail {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  padding: 12px 4px 32px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-2) transparent;
+}
+.screens-rail::-webkit-scrollbar { height: 6px; }
+.screens-rail::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 3px; }
+.screen-card {
+  flex: 0 0 280px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.screen-frame {
+  width: 280px; height: 580px;
+  background: #0A0B14;
+  border-radius: 38px;
+  padding: 6px;
+  box-shadow: 0 30px 60px -20px rgba(10,11,20,0.25), 0 0 0 1px rgba(0,0,0,0.4) inset;
+  position: relative;
+}
+.screen-frame .notch-mini {
+  position: absolute; top: 14px; left: 50%;
+  transform: translateX(-50%);
+  width: 90px; height: 24px;
+  background: #000;
+  border-radius: 12px;
+  z-index: 2;
+}
+.screen-inner {
+  width: 100%; height: 100%;
+  border-radius: 32px;
+  background: linear-gradient(180deg, #11121C 0%, #0A0B14 100%);
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  font-size: 12px;
+  padding: 50px 16px 16px;
+}
+.screen-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.screen-title { font-size: 16px; font-weight: 500; letter-spacing: -0.01em; color: var(--ink); }
+
+/* ─── Pricing ─── */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  max-width: 920px;
+  margin: 0 auto;
+}
+@media (max-width: 800px) { .pricing-grid { grid-template-columns: 1fr; } }
+.price-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 36px 32px;
+  display: flex;
+  flex-direction: column;
+}
+.price-card.featured {
+  border-color: var(--ink);
+  position: relative;
+  background: var(--ink);
+  color: #fff;
+}
+.price-card.featured::before {
+  content: 'En popüler';
+  position: absolute;
+  top: -12px;
+  right: 24px;
+  background: var(--accent);
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.price-name {
+  font-size: 13px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.price-card.featured .price-name { color: rgba(255,255,255,0.6); }
+.price-amount {
+  display: flex; align-items: baseline; gap: 6px;
+  margin-bottom: 6px;
+}
+.price-num {
+  font-size: 56px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  font-feature-settings: 'tnum';
+}
+.price-cycle { font-size: 14px; color: var(--muted); }
+.price-card.featured .price-cycle { color: rgba(255,255,255,0.55); }
+.price-tag { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+.price-card.featured .price-tag { color: rgba(255,255,255,0.65); }
+.price-features {
+  list-style: none;
+  margin: 24px 0 32px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+.price-features li {
+  display: flex;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  align-items: flex-start;
+}
+.price-features li svg {
+  width: 16px; height: 16px;
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: var(--accent);
+}
+.price-card.featured .price-features li svg { color: var(--accent-hi); }
+
+/* ─── FAQ ─── */
+.faq {
+  max-width: 760px;
+  margin: 0 auto;
+}
+.faq-item {
+  border-bottom: 1px solid var(--line);
+  padding: 20px 0;
+}
+.faq-q {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  user-select: none;
+  list-style: none;
+}
+.faq-q::-webkit-details-marker { display: none; }
+.faq-q::after {
+  content: '+';
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 300;
+  color: var(--muted);
+  transition: transform 240ms var(--ease-out);
+  line-height: 1;
+}
+.faq-item[open] .faq-q::after { content: '−'; color: var(--accent); }
+.faq-a {
+  margin-top: 12px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 640px;
+  text-wrap: pretty;
+}
+
+/* ─── Download / CTA ─── */
+.cta-final {
+  background: var(--ink);
+  color: #fff;
+  border-radius: 28px;
+  padding: clamp(60px, 8vw, 100px) clamp(32px, 5vw, 64px);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cta-final::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 100%, rgba(110,91,255,0.3), transparent 60%);
+  pointer-events: none;
+}
+.cta-final h2 { color: #fff; max-width: 720px; margin: 0 auto 18px; position: relative; }
+.cta-final .lede { color: rgba(255,255,255,0.6); max-width: 540px; margin: 0 auto; position: relative; }
+.cta-badges {
+  margin-top: 40px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  position: relative;
+}
+.store-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px 10px 18px;
+  background: #fff;
+  color: var(--ink);
+  border-radius: 14px;
+  font-weight: 500;
+  transition: transform 200ms var(--ease-out);
+}
+.store-badge:hover { transform: translateY(-2px); }
+.store-badge svg { width: 24px; height: 24px; }
+.store-badge .small { font-size: 11px; color: var(--muted); display: block; line-height: 1.1; font-family: var(--font-mono); letter-spacing: 0.04em; }
+.store-badge .big { font-size: 16px; font-weight: 600; line-height: 1.1; letter-spacing: -0.01em; }
+
+/* Newsletter */
+.newsletter {
+  margin-top: 60px;
+  padding-top: 40px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+.newsletter h4 {
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.newsletter-form {
+  display: flex;
+  gap: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 100px;
+  padding: 5px 5px 5px 20px;
+  width: 100%;
+  max-width: 440px;
+}
+.newsletter-form input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  outline: none;
+}
+.newsletter-form input::placeholder { color: rgba(255,255,255,0.4); }
+.newsletter-form button {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 100px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 200ms var(--ease-out);
+}
+.newsletter-form button:hover { background: var(--accent-hi); }
+</style>
+</head>
+<body>
+
+<div id="mount-nav"></div>
+
+<!-- ═════════════════ HERO ═════════════════ -->
+<section class="hero">
+  <div class="glow-orb hero-glow-1"></div>
+  <div class="glow-orb hero-glow-2"></div>
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <div class="hero-tag">
+          <span class="dot"></span>
+          <span>Yeni · Türkçe konuşan AI asistan</span>
+        </div>
+        <h1>Paran nereye gidiyor, sonunda <span class="accent">anlaşılır</span>.</h1>
+        <p class="hero-sub">Budgetella; harcamalarını yorumlayan, bütçeni planlayan ve finansal kararlarını birlikte aldığın Türkçe AI asistanın. Banka bağlantısı yok, gizliliğine saygılı.</p>
+        <div class="hero-cta">
+          <a href="#download" class="btn btn-primary btn-lg">
+            <span>Ücretsiz indir</span>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a href="#how" class="btn btn-outline btn-lg">Nasıl çalışır?</a>
+        </div>
+        <div class="hero-meta">
+          <span class="hero-meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 9.5-8 10-4.5-.5-8-5-8-10V6l8-4z"/></svg>
+            KVKK uyumlu
+          </span>
+          <span class="hero-meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            Uçtan uca şifreleme
+          </span>
+          <span class="hero-meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>
+            Banka bağlantısı yok
+          </span>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <!-- Floating cards -->
+        <div class="float-card fc-budgi">
+          <div class="fc-budgi-head">
+            <div class="fc-budgi-avatar">B</div>
+            <div>
+              <div class="fc-budgi-name">Budgi</div>
+              <div class="fc-label" style="margin: 0;">Az önce</div>
+            </div>
+          </div>
+          <div class="fc-budgi-msg">Bu ay <span class="hl">kahveye 1.240 ₺</span> harcadın — geçen aydan %18 fazla. Otomatik bütçe önereyim mi?</div>
+        </div>
+
+        <div class="float-card fc-progress">
+          <div class="fc-label">Yeme · İçme bütçesi</div>
+          <div class="fc-progress-row">
+            <span class="fc-progress-amt">2.840 ₺</span>
+            <span class="fc-progress-pct">68%</span>
+          </div>
+          <div class="fc-progress-bar">
+            <div class="fc-progress-fill"></div>
+          </div>
+          <div class="fc-progress-cap">4.200 ₺ / ay limiti</div>
+        </div>
+
+        <div class="float-card fc-ocr">
+          <div class="fc-ocr-head">
+            <div class="fc-ocr-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            </div>
+            <div class="fc-ocr-title">Fiş tarandı</div>
+          </div>
+          <div class="fc-ocr-amt">187,50 ₺</div>
+          <div class="fc-ocr-meta">Migros · Market</div>
+        </div>
+
+        <!-- Phone -->
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="app">
+              <div class="app-top">
+                <span>9:41</span>
+                <span>◉ ◉ ◉</span>
+              </div>
+              <div class="app-greeting">İyi akşamlar, Mert</div>
+              <div class="app-balance-label">Bu ay net</div>
+              <div class="app-balance">12.847<span class="small">,30 ₺</span></div>
+              <div class="app-balance-delta">
+                <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17l5-5 4 4 5-5"/></svg>
+                +%8 geçen aya göre
+              </div>
+              <div class="app-chips">
+                <span class="chip on">Tümü</span>
+                <span class="chip">Bu hafta</span>
+                <span class="chip">Bu ay</span>
+                <span class="chip">2026</span>
+              </div>
+              <div class="tx-list">
+                <div class="tx">
+                  <div class="tx-icon">☕</div>
+                  <div>
+                    <div class="tx-name">Starbucks Bağdat</div>
+                    <div class="tx-time">Bugün · 08:24</div>
+                  </div>
+                  <div class="tx-amt out">−92 ₺</div>
+                </div>
+                <div class="tx">
+                  <div class="tx-icon" style="background: rgba(6,181,133,0.18);">↓</div>
+                  <div>
+                    <div class="tx-name">Maaş · Mayıs</div>
+                    <div class="tx-time">Dün · 16:00</div>
+                  </div>
+                  <div class="tx-amt in">+38.500 ₺</div>
+                </div>
+                <div class="tx">
+                  <div class="tx-icon">🛒</div>
+                  <div>
+                    <div class="tx-name">Migros</div>
+                    <div class="tx-time">Dün · 19:12</div>
+                  </div>
+                  <div class="tx-amt out">−187,50 ₺</div>
+                </div>
+                <div class="tx">
+                  <div class="tx-icon">🚖</div>
+                  <div>
+                    <div class="tx-name">BiTaksi</div>
+                    <div class="tx-time">2 gün · 22:48</div>
+                  </div>
+                  <div class="tx-amt out">−145 ₺</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════ TRUST BAR ═════════════════ -->
+<div class="trust-bar">
+  <div class="container">
+    <div class="trust-grid">
+      <div class="trust-item">
+        <div class="trust-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 9.5-8 10-4.5-.5-8-5-8-10V6l8-4z"/></svg></div>
+        <span>KVKK uyumlu — verilerin Türkiye'de</span>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+        <span>Uçtan uca şifreleme</span>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg></div>
+        <span>Türkçe konuşan AI</span>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg></div>
+        <span>Banka bağlantısı yok</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════ FEATURES ═════════════════ -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <div class="eyebrow">Özellikler</div>
+        <h2 style="margin-top: 18px;">Bir cüzdan değil,<br>finansal bir ortak.</h2>
+      </div>
+      <p class="lede">Budgetella; AI ile konuşan, fişleri okuyan, harcamalarını anlayan ve geleceğini tahmin eden bir asistan. Her şey cebinde.</p>
+    </div>
+
+    <div class="features-grid reveal">
+      <div class="feature large" style="background: linear-gradient(135deg, var(--surface), var(--surface-hi));">
+        <div>
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4v3a4 4 0 11-8 0V6a4 4 0 014-4z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v3"/></svg>
+          </div>
+          <h3>Türkçe konuşan AI asistan, "Budgi"</h3>
+          <p>"Bu ay kahveye ne harcadım?", "1.000 lirayı ay sonuna nasıl yetiştirebilirim?" — sor, anla, planla. Budgi seninle tıpkı bir muhasebeci dostun gibi konuşur.</p>
+        </div>
+      </div>
+
+      <div class="feature">
+        <div>
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          </div>
+          <h3>Tek dokunuşla fiş okuma</h3>
+          <p>Fişin fotoğrafını çek; tarih, tutar, kategori otomatik. KDV bile ayrıştırılır.</p>
+        </div>
+      </div>
+
+      <div class="feature">
+        <div>
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10v2a7 7 0 0014 0v-2M12 19v3M8 22h8"/></svg>
+          </div>
+          <h3>Sesli işlem girişi</h3>
+          <p>"35 lira simit" de, kategoriye yerleşsin. Mikrofona söyle, ellerin meşgulken bile.</p>
+        </div>
+      </div>
+
+      <div class="feature">
+        <div>
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12c2-3 5-5 9-5s7 2 9 5"/><path d="M3 18c2-3 5-5 9-5s7 2 9 5"/><circle cx="12" cy="3" r="1"/></svg>
+          </div>
+          <h3>Akıllı bütçeler</h3>
+          <p>Geçmiş harcamana bakıp gerçekçi limitler önerir. Limit aşılmadan uyarır.</p>
+        </div>
+      </div>
+
+      <div class="feature">
+        <div>
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
+          </div>
+          <h3>Tahminler & senaryolar</h3>
+          <p>"Eğer her gün taksiye binmeseydim ay sonu nereye varırdım?" Geleceği canlı simüle eder.</p>
+        </div>
+      </div>
+
+      <div class="feature">
+        <div>
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v8M5 9l7-7 7 7M5 14h14M5 18h14M5 22h14"/></svg>
+          </div>
+          <h3>Hedefler & alışkanlıklar</h3>
+          <p>"3 ayda 15.000 ₺ biriktir" de, Budgetella sana her hafta gidişatı raporlasın.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════ WHY ═════════════════ -->
+<section class="container" id="why">
+  <div class="why reveal">
+    <div class="section-head" style="margin-bottom: 0;">
+      <div>
+        <div class="eyebrow">Neden Budgetella</div>
+        <h2 style="margin-top: 18px;">Diğerleri rakam<br>gösterir. Biz konuşuruz.</h2>
+      </div>
+      <p class="lede">Geleneksel finans uygulamaları sana grafikler ve tablolar verir. Budgetella anlamlandırır, önerir, yön gösterir. Türkçe, gizli ve banka bağlantısı olmadan.</p>
+    </div>
+
+    <div class="compare reveal">
+      <div class="compare-row">
+        <div class="compare-cell head">Özellik</div>
+        <div class="compare-cell head brand">Budgetella</div>
+        <div class="compare-cell head">Klasik bütçe app'leri</div>
+        <div class="compare-cell head">Banka uygulamaları</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell feat">Türkçe konuşan AI asistan</div>
+        <div class="compare-cell brand"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span> Var</div>
+        <div class="compare-cell"><span class="tick no">×</span> Yok</div>
+        <div class="compare-cell"><span class="tick no">×</span> Yok</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell feat">Banka bağlantısı zorunlu mu?</div>
+        <div class="compare-cell brand"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span> Hayır</div>
+        <div class="compare-cell"><span class="tick no">×</span> Çoğu zorunlu</div>
+        <div class="compare-cell"><span class="tick no">×</span> Doğal olarak</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell feat">Fiş tarama (OCR)</div>
+        <div class="compare-cell brand"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span> Tek dokunuş</div>
+        <div class="compare-cell"><span class="tick no">×</span> Manuel</div>
+        <div class="compare-cell"><span class="tick no">×</span> Yok</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell feat">Sesli işlem girişi</div>
+        <div class="compare-cell brand"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span> Var</div>
+        <div class="compare-cell"><span class="tick no">×</span> Yok</div>
+        <div class="compare-cell"><span class="tick no">×</span> Yok</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell feat">Veri Türkiye'de tutuluyor</div>
+        <div class="compare-cell brand"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span> KVKK</div>
+        <div class="compare-cell"><span class="tick no">×</span> Genelde yok</div>
+        <div class="compare-cell"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span> Var</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell feat">"Yatırsaydın" senaryoları</div>
+        <div class="compare-cell brand"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span> Var</div>
+        <div class="compare-cell"><span class="tick no">×</span> Yok</div>
+        <div class="compare-cell"><span class="tick no">×</span> Yok</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════ HOW ═════════════════ -->
+<section class="section" id="how">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <div class="eyebrow">Nasıl çalışır</div>
+        <h2 style="margin-top: 18px;">Üç adımda<br>finansal netlik.</h2>
+      </div>
+      <p class="lede">İndir, harcamalarını paylaş, Budgi'yi tanı. Banka bağlantısı yok, kart bilgisi yok, sadece sen ve cebin.</p>
+    </div>
+
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>İndir & 30 saniyede başla</h3>
+        <p>App Store ya da Google Play'den indir. Hesap aç, dilini seç. Hemen ücretsiz dene.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>Harcamalarını gir</h3>
+        <p>Manuel, sesli, ya da fiş tarayarak. Budgetella otomatik kategorilendirir.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>Budgi ile konuş</h3>
+        <p>Sor, planla, hedef belirle. AI asistanın sana özel öneriler ve uyarılar sunsun.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════ BUDGI SHOWCASE ═════════════════ -->
+<section class="section" style="padding-top: 0;">
+  <div class="container">
+    <div class="budgi reveal">
+      <div>
+        <div class="eyebrow">Budgi · AI Asistan</div>
+        <h2 style="margin-top: 18px;">Soruyu sor.<br>Cevabı al.</h2>
+        <p class="lede" style="margin-top: 24px; max-width: 460px;">Budgi senin verilerine bakar, sorularını anlar, konuşma diliyle cevap verir. Tablo değil, diyalog.</p>
+        <ul style="list-style: none; padding: 0; margin: 32px 0 0; display: flex; flex-direction: column; gap: 14px;">
+          <li style="display: flex; gap: 12px; align-items: flex-start;">
+            <span style="color: var(--accent); font-family: var(--font-mono); font-size: 13px; margin-top: 2px;">→</span>
+            <span style="font-size: 15px; line-height: 1.5;"><strong style="color: var(--ink); font-weight: 500;">Doğal dil.</strong> "Geçen ay marketten ne kadar harcadım?"</span>
+          </li>
+          <li style="display: flex; gap: 12px; align-items: flex-start;">
+            <span style="color: var(--accent); font-family: var(--font-mono); font-size: 13px; margin-top: 2px;">→</span>
+            <span style="font-size: 15px; line-height: 1.5;"><strong style="color: var(--ink); font-weight: 500;">Proaktif.</strong> Sen sormadan önce uyarır, fırsatları gösterir.</span>
+          </li>
+          <li style="display: flex; gap: 12px; align-items: flex-start;">
+            <span style="color: var(--accent); font-family: var(--font-mono); font-size: 13px; margin-top: 2px;">→</span>
+            <span style="font-size: 15px; line-height: 1.5;"><strong style="color: var(--ink); font-weight: 500;">Eyleme dönüşür.</strong> Önerilerini tek dokunuşla bütçeye dönüştür.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="budgi-chat">
+        <div class="budgi-chat-head">
+          <div class="budgi-avatar-lg">B</div>
+          <div>
+            <div class="budgi-name">Budgi</div>
+            <div class="budgi-status">Aktif</div>
+          </div>
+        </div>
+        <div class="bubble user">Bu ay neye en çok harcadım?</div>
+        <div class="bubble bot">
+          Mayıs'ta en çok <strong>yeme &amp; içme</strong> kategorisindesin: <strong>4.180 ₺</strong>. Bunun <strong>%32'si</strong> kahveye gitti — geçen aydan %18 fazla.
+          <div class="insight">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+            <span>Önerim: Kahveye 1.500 ₺ aylık limit koyalım mı?</span>
+          </div>
+        </div>
+        <div class="bubble user">İyi fikir, koy.</div>
+        <div class="bubble bot">Hazır. Limit %75'e geldiğinde haber vereceğim. 🎯</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════ SCREENSHOTS ═════════════════ -->
+<section class="section" style="padding-top: 0;" id="screens">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <div class="eyebrow">Yakından bak</div>
+        <h2 style="margin-top: 18px;">Her ekran bir şey<br>anlatmak için var.</h2>
+      </div>
+      <p class="lede">Dashboard'dan hedef takibine, AI sohbetinden bütçe planına — Budgetella'nın temel ekranları.</p>
+    </div>
+  </div>
+
+  <div style="overflow: hidden;">
+    <div class="container">
+      <div class="screens-rail reveal">
+        <!-- Screenshot placeholders, styled to look like real app screens -->
+        <!-- 1: Dashboard -->
+        <div class="screen-card">
+          <div class="screen-frame">
+            <div class="notch-mini"></div>
+            <div class="screen-inner" style="padding: 50px 18px 18px;">
+              <div style="font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 4px;">Mayıs · Bu ay</div>
+              <div style="font-size: 11px; color: rgba(255,255,255,0.5);">Net bakiye</div>
+              <div style="font-size: 32px; font-weight: 500; letter-spacing: -0.03em; margin: 4px 0 14px;">12.847,30 ₺</div>
+              <div style="height: 80px; background: linear-gradient(180deg, rgba(110,91,255,0.25), transparent); border-radius: 12px; position: relative; margin-bottom: 14px;">
+                <svg viewBox="0 0 240 80" width="100%" height="100%" preserveAspectRatio="none"><path d="M 0 60 Q 30 40 60 50 T 120 30 T 180 25 T 240 15" stroke="#8B6FFF" stroke-width="2" fill="none"/></svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(255,255,255,0.04); border-radius: 10px;">
+                  <span style="font-size: 11px;">☕ Starbucks</span>
+                  <span style="font-size: 11px; color: rgba(255,255,255,0.85);">−92 ₺</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(255,255,255,0.04); border-radius: 10px;">
+                  <span style="font-size: 11px;">🛒 Migros</span>
+                  <span style="font-size: 11px;">−187 ₺</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(255,255,255,0.04); border-radius: 10px;">
+                  <span style="font-size: 11px;">↓ Maaş</span>
+                  <span style="font-size: 11px; color: var(--success);">+38.500 ₺</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="screen-label">01</div>
+            <div class="screen-title">Dashboard</div>
+          </div>
+        </div>
+
+        <!-- 2: AI Chat -->
+        <div class="screen-card">
+          <div class="screen-frame">
+            <div class="notch-mini"></div>
+            <div class="screen-inner" style="padding: 50px 16px 16px;">
+              <div style="display: flex; align-items: center; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 14px;">
+                <div style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #8B6FFF, #6E5BFF); display: grid; place-items: center; font-weight: 700; font-size: 14px;">B</div>
+                <div style="font-size: 13px; font-weight: 500;">Budgi</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="background: rgba(110,91,255,0.85); padding: 10px 12px; border-radius: 14px; border-bottom-right-radius: 4px; align-self: flex-end; font-size: 12px; max-width: 80%;">Bu ay ne kadar harcadım?</div>
+                <div style="background: rgba(255,255,255,0.06); padding: 10px 12px; border-radius: 14px; border-bottom-left-radius: 4px; align-self: flex-start; font-size: 12px; max-width: 88%;">Mayıs'ta toplam <strong>14.230 ₺</strong> harcadın. En büyük kategori: yeme &amp; içme.</div>
+                <div style="background: rgba(110,91,255,0.85); padding: 10px 12px; border-radius: 14px; border-bottom-right-radius: 4px; align-self: flex-end; font-size: 12px; max-width: 80%;">Limit önerir misin?</div>
+                <div style="background: rgba(255,255,255,0.06); padding: 10px 12px; border-radius: 14px; border-bottom-left-radius: 4px; align-self: flex-start; font-size: 12px; max-width: 88%;">Haftalık 1.000 ₺ limit makul. Onaylıyor musun?</div>
+              </div>
+              <div style="position: absolute; bottom: 16px; left: 16px; right: 16px; background: rgba(255,255,255,0.08); border-radius: 100px; padding: 8px 14px; font-size: 11px; color: rgba(255,255,255,0.5);">Bir şey sor…</div>
+            </div>
+          </div>
+          <div>
+            <div class="screen-label">02</div>
+            <div class="screen-title">Budgi sohbet</div>
+          </div>
+        </div>
+
+        <!-- 3: Budget -->
+        <div class="screen-card">
+          <div class="screen-frame">
+            <div class="notch-mini"></div>
+            <div class="screen-inner" style="padding: 50px 18px 18px;">
+              <div style="font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 4px;">Mayıs bütçesi</div>
+              <div style="font-size: 28px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 14px;">8.420 / 12.000 ₺</div>
+              <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 18px;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px;"><span>Yeme · İçme</span><span style="color: rgba(255,255,255,0.6);">2.840 / 4.200 ₺</span></div>
+                  <div style="height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden;"><div style="height: 100%; width: 68%; background: var(--accent);"></div></div>
+                </div>
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px;"><span>Ulaşım</span><span style="color: rgba(255,255,255,0.6);">1.200 / 1.500 ₺</span></div>
+                  <div style="height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden;"><div style="height: 100%; width: 80%; background: #FFB547;"></div></div>
+                </div>
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px;"><span>Eğlence</span><span style="color: rgba(255,255,255,0.6);">1.480 / 2.000 ₺</span></div>
+                  <div style="height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden;"><div style="height: 100%; width: 74%; background: var(--accent);"></div></div>
+                </div>
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px;"><span>Market</span><span style="color: rgba(255,255,255,0.6);">2.900 / 3.500 ₺</span></div>
+                  <div style="height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden;"><div style="height: 100%; width: 83%; background: var(--accent);"></div></div>
+                </div>
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px;"><span>Sağlık</span><span style="color: rgba(255,255,255,0.6);">0 / 800 ₺</span></div>
+                  <div style="height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden;"><div style="height: 100%; width: 0%; background: var(--accent);"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="screen-label">03</div>
+            <div class="screen-title">Bütçe takibi</div>
+          </div>
+        </div>
+
+        <!-- 4: Goals -->
+        <div class="screen-card">
+          <div class="screen-frame">
+            <div class="notch-mini"></div>
+            <div class="screen-inner" style="padding: 50px 18px 18px;">
+              <div style="font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 4px;">Hedeflerin</div>
+              <div style="font-size: 24px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 18px;">3 aktif hedef</div>
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="padding: 14px; background: rgba(255,255,255,0.04); border-radius: 14px;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                    <div>
+                      <div style="font-size: 13px; font-weight: 500;">🌴 Tatil fonu</div>
+                      <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 2px;">Ağustos 2026</div>
+                    </div>
+                    <div style="font-size: 11px; color: var(--success); font-family: var(--font-mono);">68%</div>
+                  </div>
+                  <div style="height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden;"><div style="height: 100%; width: 68%; background: linear-gradient(90deg, var(--accent), #8B6FFF);"></div></div>
+                  <div style="font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 8px; font-family: var(--font-mono);">10.200 / 15.000 ₺</div>
+                </div>
+                <div style="padding: 14px; background: rgba(255,255,255,0.04); border-radius: 14px;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                    <div>
+                      <div style="font-size: 13px; font-weight: 500;">💻 Yeni laptop</div>
+                      <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 2px;">Aralık 2026</div>
+                    </div>
+                    <div style="font-size: 11px; color: rgba(255,255,255,0.7); font-family: var(--font-mono);">23%</div>
+                  </div>
+                  <div style="height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden;"><div style="height: 100%; width: 23%; background: var(--accent);"></div></div>
+                  <div style="font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 8px; font-family: var(--font-mono);">9.200 / 40.000 ₺</div>
+                </div>
+                <div style="padding: 14px; background: rgba(255,255,255,0.04); border-radius: 14px;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                    <div>
+                      <div style="font-size: 13px; font-weight: 500;">🏠 Ev fonu</div>
+                      <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 2px;">2 yıl</div>
+                    </div>
+                    <div style="font-size: 11px; color: rgba(255,255,255,0.7); font-family: var(--font-mono);">12%</div>
+                  </div>
+                  <div style="height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden;"><div style="height: 100%; width: 12%; background: var(--accent);"></div></div>
+                  <div style="font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 8px; font-family: var(--font-mono);">36.000 / 300.000 ₺</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="screen-label">04</div>
+            <div class="screen-title">Hedefler</div>
+          </div>
+        </div>
+
+        <!-- 5: Insights -->
+        <div class="screen-card">
+          <div class="screen-frame">
+            <div class="notch-mini"></div>
+            <div class="screen-inner" style="padding: 50px 18px 18px;">
+              <div style="font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 4px;">İstatistik</div>
+              <div style="font-size: 24px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 18px;">Bu hafta</div>
+              <!-- Donut placeholder -->
+              <div style="display: flex; justify-content: center; margin: 16px 0 24px;">
+                <svg viewBox="0 0 120 120" width="140" height="140">
+                  <circle cx="60" cy="60" r="48" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="14"/>
+                  <circle cx="60" cy="60" r="48" fill="none" stroke="#6E5BFF" stroke-width="14" stroke-dasharray="120 301" transform="rotate(-90 60 60)" stroke-linecap="round"/>
+                  <circle cx="60" cy="60" r="48" fill="none" stroke="#10F2A5" stroke-width="14" stroke-dasharray="60 301" stroke-dashoffset="-122" transform="rotate(-90 60 60)" stroke-linecap="round"/>
+                  <circle cx="60" cy="60" r="48" fill="none" stroke="#FFB547" stroke-width="14" stroke-dasharray="40 301" stroke-dashoffset="-184" transform="rotate(-90 60 60)" stroke-linecap="round"/>
+                  <text x="60" y="55" text-anchor="middle" fill="#fff" font-size="9" font-family="Geist Mono" opacity="0.6">Toplam</text>
+                  <text x="60" y="70" text-anchor="middle" fill="#fff" font-size="13" font-weight="500">3.840 ₺</text>
+                </svg>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;"><span style="display: inline-flex; gap: 6px; align-items: center;"><span style="width: 8px; height: 8px; background: #6E5BFF; border-radius: 2px;"></span>Yeme · İçme</span><span>1.520 ₺</span></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;"><span style="display: inline-flex; gap: 6px; align-items: center;"><span style="width: 8px; height: 8px; background: #10F2A5; border-radius: 2px;"></span>Ulaşım</span><span>760 ₺</span></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;"><span style="display: inline-flex; gap: 6px; align-items: center;"><span style="width: 8px; height: 8px; background: #FFB547; border-radius: 2px;"></span>Eğlence</span><span>510 ₺</span></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;"><span style="display: inline-flex; gap: 6px; align-items: center;"><span style="width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 2px;"></span>Diğer</span><span>1.050 ₺</span></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="screen-label">05</div>
+            <div class="screen-title">İstatistikler</div>
+          </div>
+        </div>
+
+        <!-- 6: OCR -->
+        <div class="screen-card">
+          <div class="screen-frame">
+            <div class="notch-mini"></div>
+            <div class="screen-inner" style="padding: 50px 18px 18px; background: linear-gradient(180deg, #1A1820, #0A0B14);">
+              <div style="font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 14px;">Fiş tarandı ✓</div>
+              <div style="background: rgba(255,255,255,0.04); border: 1px dashed rgba(255,255,255,0.15); border-radius: 14px; padding: 18px; margin-bottom: 16px;">
+                <div style="font-family: 'Geist Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.85); line-height: 1.7;">
+                  <div style="text-align: center; margin-bottom: 10px; color: rgba(255,255,255,0.5);">─ MİGROS ─</div>
+                  <div>Süt 1lt &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;28,00</div>
+                  <div>Ekmek &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;15,00</div>
+                  <div>Yumurta 30 &nbsp;&nbsp;&nbsp;&nbsp;72,00</div>
+                  <div>Domates &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;42,50</div>
+                  <div>Peynir &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30,00</div>
+                  <div style="border-top: 1px dashed rgba(255,255,255,0.2); margin-top: 8px; padding-top: 8px; display: flex; justify-content: space-between;"><span>Toplam</span><span style="color: var(--success);">187,50 ₺</span></div>
+                </div>
+              </div>
+              <div style="background: rgba(110,91,255,0.12); border: 1px solid rgba(110,91,255,0.3); border-radius: 12px; padding: 12px;">
+                <div style="font-size: 10px; font-family: var(--font-mono); color: rgba(255,255,255,0.6); letter-spacing: 0.08em; margin-bottom: 6px;">KATEGORİ</div>
+                <div style="font-size: 13px; font-weight: 500;">🛒 Market</div>
+              </div>
+              <button style="margin-top: 14px; width: 100%; background: var(--accent); color: #fff; border: none; padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 500; font-family: 'Geist', sans-serif;">Kaydet</button>
+            </div>
+          </div>
+          <div>
+            <div class="screen-label">06</div>
+            <div class="screen-title">Fiş tarama</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════ PRICING ═════════════════ -->
+<section class="section" id="pricing">
+  <div class="container">
+    <div class="section-head reveal" style="grid-template-columns: 1fr; text-align: center; margin-bottom: 64px;">
+      <div style="margin: 0 auto;">
+        <div class="eyebrow" style="justify-content: center;">Fiyatlandırma</div>
+        <h2 style="margin-top: 18px; max-width: 720px;">Önce dene, sonra düşün.<br>Geleceğine yatırım yapmak hep ucuz.</h2>
+      </div>
+    </div>
+
+    <div class="pricing-grid reveal">
+      <div class="price-card">
+        <div class="price-name">Free</div>
+        <div class="price-amount">
+          <span class="price-num">0 ₺</span>
+          <span class="price-cycle">/ ay</span>
+        </div>
+        <div class="price-tag">Başlangıç için ideal</div>
+        <ul class="price-features">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg><span>Sınırsız manuel işlem girişi</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg><span>Temel kategoriler &amp; özet</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg><span>Ayda 1 bütçe limiti</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg><span>Budgi ile günde 5 soru</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg><span>iPhone &amp; Android</span></li>
+        </ul>
+        <a href="#download" class="btn btn-outline btn-lg" style="width: 100%;">Ücretsiz başla</a>
+      </div>
+
+      <div class="price-card featured">
+        <div class="price-name">Premium</div>
+        <div class="price-amount">
+          <span class="price-num">79 ₺</span>
+          <span class="price-cycle">/ ay</span>
+        </div>
+        <div class="price-tag">Yıllık 790 ₺ — 2 ay hediye</div>
+        <ul class="price-features">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg><span><strong>Sınırsız Budgi sohbet</strong> &amp; proaktif öneriler</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg><span>Sınırsız fiş tarama (OCR) &amp; sesli giriş</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg><span>Sınırsız bütçe &amp; hedef</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg><span>"Yatırsaydın" senaryoları &amp; tahminler</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg><span>Şifreli yedekleme &amp; export (CSV / PDF)</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg><span>Öncelikli destek</span></li>
+        </ul>
+        <a href="#download" class="btn btn-accent btn-lg" style="width: 100%;">Premium başlat</a>
+      </div>
+    </div>
+
+    <p style="text-align: center; margin-top: 32px; font-size: 13px; color: var(--muted); font-family: var(--font-mono);">7 gün ücretsiz deneme · İstediğinde iptal</p>
+  </div>
+</section>
+
+<!-- ═════════════════ FAQ ═════════════════ -->
+<section class="section" id="faq" style="padding-top: 0;">
+  <div class="container">
+    <div class="section-head reveal" style="grid-template-columns: 1fr; text-align: center; margin-bottom: 56px;">
+      <div style="margin: 0 auto;">
+        <div class="eyebrow" style="justify-content: center;">Sıkça sorulanlar</div>
+        <h2 style="margin-top: 18px;">Aklını kemiren sorular.</h2>
+      </div>
+    </div>
+
+    <div class="faq reveal">
+      <details class="faq-item">
+        <summary class="faq-q">Verilerim güvende mi? Banka bilgisi vermem gerekiyor mu?</summary>
+        <div class="faq-a">Hayır, hiçbir banka hesabına ya da kart bilgisine ihtiyacımız yok. Tüm verilerin uçtan uca şifrelenir, KVKK uyumlu olarak Türkiye sınırları içinde tutulur. Sadece sen erişebilirsin.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Budgetella nasıl çalışıyor — banka bağlantısı yoksa nereden harcamamı biliyor?</summary>
+        <div class="faq-a">Harcamalarını manuel ekleyebilir, sesli söyleyebilir ya da fişi tarayabilirsin. Bu, "ne harcadığımı görmek istiyorum, ama bankama dokunulmasın" diyenler için bilinçli bir tasarım tercihi. Tam kontrol sende.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">"Budgi" gerçek bir AI mi, yoksa hazır cevaplar mı veriyor?</summary>
+        <div class="faq-a">Budgi, senin verilerine bakarak gerçek zamanlı çıkarım yapan bir AI asistandır. Sorduğun soruları anlar, hesaplar yapar, kişisel öneriler sunar. Hazır cevaplar değil, sana özel.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Premium'a geçince ne değişiyor?</summary>
+        <div class="faq-a">Sınırsız Budgi sohbet, sınırsız fiş tarama &amp; sesli giriş, sınırsız bütçe ve hedef, "Yatırsaydın" senaryoları, gelir tahminleri, şifreli yedekleme ve export. 7 gün ücretsiz dene, beğenmezsen iptal et.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Aboneliği istediğim zaman iptal edebilir miyim?</summary>
+        <div class="faq-a">Evet. App Store ya da Google Play üzerinden tek dokunuşla iptal edebilirsin. İptal sonrası mevcut dönemin sonuna kadar Premium kalırsın, sonra otomatik olarak Free'ye düşersin. Verilerin silinmez.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Verimi başka uygulamadan aktarabilir miyim?</summary>
+        <div class="faq-a">Evet. CSV import desteği var; çoğu finans uygulamasından aldığın export'u doğrudan yükleyebilirsin. Yükledikten sonra Budgetella otomatik kategorilendirir.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Çoklu cihaz / aile kullanımı var mı?</summary>
+        <div class="faq-a">Aynı hesapla iPhone &amp; Android arasında senkron olarak çalışır. Aile / paylaşımlı bütçe yakında geliyor — bültene kayıt olursan ilk sen duyarsın.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════ CTA + DOWNLOAD + NEWSLETTER ═════════════════ -->
+<section class="section" id="download">
+  <div class="container">
+    <div class="cta-final reveal">
+      <div class="eyebrow" style="color: var(--accent-hi); justify-content: center;">İndir</div>
+      <h2 style="margin-top: 18px;">Cebindeki en sakin<br>finans danışmanı.</h2>
+      <p class="lede">7 gün ücretsiz Premium dene. Kart bilgisi yok, otomatik yenileme yok.</p>
+
+      <div class="cta-badges">
+        <a href="#" class="store-badge" aria-label="App Store'dan indir">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+          <span>
+            <span class="small">İndir</span>
+            <span class="big">App Store</span>
+          </span>
+        </a>
+        <a href="#" class="store-badge" aria-label="Google Play'den indir">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3.5 2.4l10 10-10 10c-.3-.2-.5-.6-.5-1V3.4c0-.4.2-.8.5-1z" fill="#6E5BFF"/><path d="M13.5 12.4l3-3 4.4 2.5c.7.4.7 1.4 0 1.8l-4.4 2.5-3-3z" fill="#FFB547"/><path d="M3.5 2.4c.3-.3.7-.4 1.1-.2l11.9 6.7-3 3-10-9.5z" fill="#10F2A5"/><path d="M3.5 22.4l10-10 3 3-11.9 6.7c-.4.2-.8.1-1.1-.2z" fill="#E03060"/></svg>
+          <span>
+            <span class="small">İndir</span>
+            <span class="big">Google Play</span>
+          </span>
+        </a>
+      </div>
+
+      <div class="newsletter">
+        <h4>Bültene kayıt ol — yeni özelliklerden ilk sen haberdar ol</h4>
+        <form class="newsletter-form" onsubmit="event.preventDefault(); this.querySelector('button').textContent='✓ Eklendin';">
+          <input type="email" placeholder="ornek@mail.com" required>
+          <button type="submit">Kayıt ol</button>
+        </form>
+        <p style="font-size: 12px; color: rgba(255,255,255,0.4); margin: 0;">Spam yok. İstediğin zaman çık.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="mount-footer"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="site.js"></script>
+<script>
+// Hero choreography + scroll parallax for floating cards
+(function () {
+  if (typeof gsap === 'undefined') return;
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Hero entrance — staggered
+  const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+  heroTl
+    .from('.hero-tag', { y: 14, opacity: 0, duration: 0.6 })
+    .from('.hero h1', { y: 30, opacity: 0, duration: 0.9 }, '-=0.3')
+    .from('.hero-sub', { y: 20, opacity: 0, duration: 0.7 }, '-=0.5')
+    .from('.hero-cta > *', { y: 16, opacity: 0, duration: 0.5, stagger: 0.08 }, '-=0.4')
+    .from('.hero-meta-item', { y: 10, opacity: 0, duration: 0.4, stagger: 0.07 }, '-=0.3')
+    .from('.phone', { y: 60, opacity: 0, scale: 0.96, duration: 1.0, ease: 'expo.out' }, '-=1.0')
+    .from('.fc-budgi', { y: -20, x: -20, opacity: 0, scale: 0.92, duration: 0.7 }, '-=0.5')
+    .from('.fc-progress', { y: 20, x: 20, opacity: 0, scale: 0.92, duration: 0.7 }, '-=0.55')
+    .from('.fc-ocr', { x: 20, opacity: 0, scale: 0.92, duration: 0.7 }, '-=0.6');
+
+  // Gentle floating loop on cards
+  gsap.to('.fc-budgi', { y: '+=10', duration: 3.2, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+  gsap.to('.fc-progress', { y: '+=12', duration: 3.6, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 0.4 });
+  gsap.to('.fc-ocr', { y: '+=8', duration: 3.0, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 0.8 });
+
+  // Parallax phone tilt on mouse move
+  const visual = document.querySelector('.hero-visual');
+  const phone = document.querySelector('.phone');
+  if (visual && phone) {
+    visual.addEventListener('mousemove', (e) => {
+      const r = visual.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      gsap.to(phone, { rotateY: -6 + x * 8, rotateX: 2 - y * 6, duration: 0.6, ease: 'power2.out' });
+    });
+    visual.addEventListener('mouseleave', () => {
+      gsap.to(phone, { rotateY: -6, rotateX: 2, duration: 0.8, ease: 'power3.out' });
+    });
+  }
+
+  // Scroll parallax on glow orbs
+  gsap.to('.hero-glow-1', { y: 200, scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
+  gsap.to('.hero-glow-2', { y: -150, scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
+
+  // Counter on number stats (about page numbers don't exist here — safe noop)
+  // Magnetic hover on primary CTAs
+  document.querySelectorAll('.btn-primary, .btn-accent').forEach(btn => {
+    btn.addEventListener('mousemove', (e) => {
+      const r = btn.getBoundingClientRect();
+      const mx = e.clientX - r.left - r.width / 2;
+      const my = e.clientY - r.top - r.height / 2;
+      gsap.to(btn, { x: mx * 0.15, y: my * 0.25, duration: 0.4, ease: 'power2.out' });
+    });
+    btn.addEventListener('mouseleave', () => {
+      gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.5)' });
+    });
+  });
+})();
+</script>
+</body>
+</html>

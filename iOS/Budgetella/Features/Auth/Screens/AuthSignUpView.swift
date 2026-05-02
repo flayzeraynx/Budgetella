@@ -83,12 +83,12 @@ struct AuthSignUpView: View {
                     }
 
                     // ToS checkbox
-                    Button {
-                        withAnimation(.spring(response: 0.2)) {
-                            vm.termsAccepted.toggle()
-                        }
-                    } label: {
-                        HStack(alignment: .top, spacing: Spacing.sm) {
+                    HStack(alignment: .top, spacing: Spacing.sm) {
+                        Button {
+                            withAnimation(.spring(response: 0.2)) {
+                                vm.termsAccepted.toggle()
+                            }
+                        } label: {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 5, style: .continuous)
                                     .fill(vm.termsAccepted ? BrandColor.primary : .clear)
@@ -106,15 +106,21 @@ struct AuthSignUpView: View {
                                         .foregroundStyle(.white)
                                 }
                             }
-
-                            Text("**Kullanım şartları** ve **gizlilik politikası**'nı okudum, kabul ediyorum.")
-                                .font(.brand(.footnote))
-                                .foregroundStyle(BrandColor.textSecondary)
-                                .multilineTextAlignment(.leading)
-                                .frame(maxWidth: .infinity, alignment: .leading)
                         }
+                        .buttonStyle(.plain)
+
+                        Text(tosAttributedString)
+                            .font(.brand(.footnote))
+                            .foregroundStyle(BrandColor.textSecondary)
+                            .tint(BrandColor.primary)
+                            .multilineTextAlignment(.leading)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .onTapGesture {
+                                withAnimation(.spring(response: 0.2)) {
+                                    vm.termsAccepted.toggle()
+                                }
+                            }
                     }
-                    .buttonStyle(.plain)
                     .padding(.top, Spacing.xs)
                 }
                 .padding(.horizontal, 28)
@@ -154,5 +160,21 @@ struct AuthSignUpView: View {
         .offset(y: appeared ? 0 : 20)
         .animation(.spring(response: 0.4, dampingFraction: 0.85), value: appeared)
         .onAppear { appeared = true }
+    }
+
+    private var tosAttributedString: AttributedString {
+        var terms = AttributedString("Kullanım şartları")
+        terms.link = URL(string: "https://budgetella.app/terms")
+        terms.inlinePresentationIntent = .stronglyEmphasized
+
+        var mid = AttributedString(" ve ")
+
+        var privacy = AttributedString("gizlilik politikası")
+        privacy.link = URL(string: "https://budgetella.app/privacy")
+        privacy.inlinePresentationIntent = .stronglyEmphasized
+
+        let suffix = AttributedString("'nı okudum, kabul ediyorum.")
+
+        return terms + mid + privacy + suffix
     }
 }

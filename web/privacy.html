@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gizlilik Politikası — Budgetella</title>
+<meta name="description" content="Budgetella gizlilik politikası ve KVKK aydınlatma metni.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<style>
+.legal-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 80px;
+  max-width: 1080px;
+  margin: 64px auto;
+  padding: 0 var(--gutter);
+}
+@media (max-width: 900px) {
+  .legal-grid { grid-template-columns: 1fr; gap: 40px; }
+  .toc { position: static; }
+}
+.legal-content { font-size: 16px; line-height: 1.7; color: var(--ink-soft); }
+.legal-content h2 { font-size: 26px; margin: 56px 0 14px; letter-spacing: -0.02em; font-weight: 500; }
+.legal-content h2:first-child { margin-top: 0; }
+.legal-content h3 { font-size: 17px; margin: 28px 0 8px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); }
+.legal-content p { margin: 12px 0; }
+.legal-content ul, .legal-content ol { padding-left: 22px; margin: 12px 0; }
+.legal-content li { margin: 6px 0; }
+.legal-content strong { color: var(--ink); font-weight: 600; }
+.legal-content a { color: var(--accent); }
+.legal-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+</style>
+</head>
+<body>
+<div id="mount-nav"></div>
+
+<header class="page-head">
+  <div class="container">
+    <div class="eyebrow">Yasal</div>
+    <h1>Gizlilik Politikası</h1>
+    <p class="lead">Verin, senin. Budgetella senin verilerini nasıl topluyor, kullanıyor ve koruyor — açık ve sade dille.</p>
+    <p style="margin-top: 18px; font-family: var(--font-mono); font-size: 13px; color: var(--muted);">Son güncelleme: 2 Mayıs 2026 · Yürürlük: 1 Mayıs 2026</p>
+  </div>
+</header>
+
+<div class="legal-grid">
+  <aside class="toc">
+    <h4>İçindekiler</h4>
+    <ul>
+      <li><a href="#intro">1 · Genel</a></li>
+      <li><a href="#data">2 · Topladığımız veriler</a></li>
+      <li><a href="#use">3 · Verileri nasıl kullanıyoruz</a></li>
+      <li><a href="#share">4 · Paylaşım</a></li>
+      <li><a href="#storage">5 · Depolama &amp; güvenlik</a></li>
+      <li><a href="#kvkk">6 · KVKK hakların</a></li>
+      <li><a href="#ai">7 · AI &amp; Budgi</a></li>
+      <li><a href="#cookies">8 · Çerezler</a></li>
+      <li><a href="#changes">9 · Değişiklikler</a></li>
+      <li><a href="#contact">10 · İletişim</a></li>
+    </ul>
+  </aside>
+
+  <main class="legal-content">
+    <h2 id="intro">1. Genel</h2>
+    <p>Bu Gizlilik Politikası; Budgetella mobil uygulaması ("<strong>Uygulama</strong>") ve <strong>budgetella.app</strong> sitesi aracılığıyla işlenen kişisel verilere ilişkin uygulanan ilkeleri açıklar. 6698 sayılı Kişisel Verilerin Korunması Kanunu ("<strong>KVKK</strong>") çerçevesinde "veri sorumlusu" sıfatıyla hareket ediyoruz.</p>
+    <p><strong>Tek cümle ile:</strong> Bankana dokunmuyoruz, verilerini satmıyoruz, üçüncü tarafa pazarlama amaçlı paylaşmıyoruz.</p>
+
+    <h2 id="data">2. Topladığımız veriler</h2>
+    <h3>2.1 Hesap bilgileri</h3>
+    <ul>
+      <li>E-posta adresi (zorunlu)</li>
+      <li>Ad / takma ad (opsiyonel)</li>
+      <li>Şifre — bcrypt ile <strong>tek yönlü</strong> şifrelenmiş olarak saklanır</li>
+    </ul>
+
+    <h3>2.2 Finansal veri (sen girdiğin sürece)</h3>
+    <ul>
+      <li>Manuel eklediğin işlemler: tutar, kategori, tarih, açıklama</li>
+      <li>Fiş tarama ile çıkarılan veri (OCR sonucu)</li>
+      <li>Sesli giriş ile söylediğin işlem metni</li>
+      <li>Bütçe ve hedef tanımların</li>
+    </ul>
+    <p><strong>Hiçbir banka hesabı, kredi kartı bilgisi ya da BDDK kapsamındaki açık bankacılık verisi toplanmaz.</strong></p>
+
+    <h3>2.3 Cihaz &amp; kullanım</h3>
+    <ul>
+      <li>Cihaz modeli, işletim sistemi sürümü, uygulama sürümü</li>
+      <li>Anonim oturum süresi, hata kayıtları (crash logs)</li>
+      <li>IP adresi (sadece güvenlik amacıyla, 30 gün sonra anonimleştirilir)</li>
+    </ul>
+
+    <h2 id="use">3. Verileri nasıl kullanıyoruz</h2>
+    <p>Topladığımız veriyi yalnızca aşağıdaki amaçlarla işliyoruz:</p>
+    <ul>
+      <li><strong>Hizmet sunumu:</strong> Hesabını yönetmek, işlemlerini saklamak, bütçelerini hesaplamak.</li>
+      <li><strong>Kişisel öneri (Budgi):</strong> AI asistanın senin verine bakarak yorumlar, öneriler üretsin.</li>
+      <li><strong>Güvenlik:</strong> Yetkisiz erişim girişimlerini tespit etmek.</li>
+      <li><strong>İletişim:</strong> Hesabınla ilgili önemli güncellemeler (bunlardan vazgeçemezsin), opsiyonel ürün haberleri (bültene kayıtlıysan).</li>
+      <li><strong>Yasal yükümlülük:</strong> Mahkeme, savcılık veya KVKK Kurumu'nun resmi talepleri.</li>
+    </ul>
+    <p><strong>Verini hiçbir zaman:</strong> Reklam ağlarına satmıyoruz, üçüncü taraf pazarlamacılara devretmiyoruz, segment / hedefleme şirketleriyle paylaşmıyoruz.</p>
+
+    <h2 id="share">4. Paylaşım</h2>
+    <p>Verini sınırlı durumlarda <strong>veri işleyen</strong> sıfatıyla aşağıdaki hizmet sağlayıcılarla paylaşıyoruz:</p>
+    <ul>
+      <li><strong>Hosting &amp; altyapı:</strong> Firebase (Google Cloud) — şifrelenmiş veri depolama ve kimlik doğrulama.</li>
+      <li><strong>AI sağlayıcı:</strong> Budgi'ye soru sorduğunda, soru ve ilgili (anonimleştirilmiş) finansal bağlam AI sağlayıcımıza şifreli kanal üzerinden iletilir. <strong>Modelin eğitiminde kullanılmaz.</strong> 30 günden fazla saklanmaz.</li>
+      <li><strong>Hata izleme:</strong> Kişisel veri filtrelenmiş hata logları.</li>
+    </ul>
+    <p>Tüm sağlayıcılar KVKK uyumlu veri işleme sözleşmesi (DPA) ile bağlıdır.</p>
+
+    <h2 id="storage">5. Depolama &amp; güvenlik</h2>
+    <ul>
+      <li><strong>Konum:</strong> Veriler Firebase altyapısında tutulur.</li>
+      <li><strong>Şifreleme:</strong> Veri AES-256 ile dinlenmede, TLS 1.3 ile aktarımda şifrelenir.</li>
+      <li><strong>Saklama süresi:</strong> Hesabını silersen tüm verin 30 gün içinde kalıcı olarak silinir.</li>
+    </ul>
+
+    <h2 id="kvkk">6. KVKK kapsamındaki hakların</h2>
+    <p>Kanun'un 11. maddesi uyarınca aşağıdaki haklara sahipsin. Bu hakları kullanmak için <a href="mailto:info@budgetella.app">info@budgetella.app</a> adresine yazabilirsin.</p>
+    <ul>
+      <li>Kişisel verinin işlenip işlenmediğini öğrenme</li>
+      <li>İşlenen verilerin neler olduğunu öğrenme ve kopyasını isteme</li>
+      <li>Verinin amacına uygun kullanılıp kullanılmadığını öğrenme</li>
+      <li>Yurt içinde / yurt dışında aktarıldığı üçüncü tarafları bilme</li>
+      <li>Eksik / yanlış verinin düzeltilmesini isteme</li>
+      <li>Verinin silinmesini ya da yok edilmesini isteme</li>
+      <li>İşlemenin sınırlandırılmasını isteme</li>
+      <li>Otomatik sistemler aracılığıyla aleyhine bir sonuç çıkmasına itiraz etme</li>
+      <li>Hukuka aykırı işleme nedeniyle zararının giderilmesini talep etme</li>
+    </ul>
+    <p>Talebine en geç <strong>30 gün</strong> içinde yanıt veririz, ücret almayız.</p>
+
+    <h2 id="ai">7. AI &amp; Budgi hakkında özel bilgilendirme</h2>
+    <p>Budgi'ye soru sorduğunda iki şey gerçekleşir:</p>
+    <ol>
+      <li>Sorduğun soru ve <strong>sadece o soru için gereken</strong> finansal bağlam (ör. son 30 günlük yeme-içme toplamı) çıkarılır.</li>
+      <li>Bu paket, AI sağlayıcımıza şifreli kanal üzerinden gönderilir; cevap geri döner, ekrana basılır.</li>
+    </ol>
+    <p>Sağlayıcımızla yaptığımız sözleşme: <strong>(1)</strong> verin model eğitiminde kullanılamaz, <strong>(2)</strong> 30 günden fazla saklanamaz, <strong>(3)</strong> başka bir müşteriye gösterilemez.</p>
+    <p>İstersen Ayarlar &gt; Gizlilik &gt; <em>"Budgi'yi devre dışı bırak"</em> ile bu özelliği tamamen kapatabilirsin.</p>
+
+    <h2 id="cookies">8. Çerezler &amp; benzeri teknolojiler</h2>
+    <p>budgetella.app sitesi yalnızca <strong>zorunlu</strong> çerezleri kullanır (oturum, dil tercihi). Reklam ya da analitik çerez kullanmıyoruz. Mobil uygulama hiçbir reklam SDK'sı içermez.</p>
+
+    <h2 id="changes">9. Politikadaki değişiklikler</h2>
+    <p>Bu politikayı zaman zaman güncelleyebiliriz. Önemli bir değişiklik olduğunda hesap e-postanı kullanarak en az <strong>14 gün önceden</strong> haber veririz. Güncel sürüm her zaman bu sayfada yayınlanır.</p>
+
+    <h2 id="contact">10. İletişim</h2>
+    <p>Gizlilik ile ilgili her türlü soru ve talebini şu adrese iletebilirsin:<br>
+    <a href="mailto:info@budgetella.app">info@budgetella.app</a></p>
+
+    <div class="legal-meta">Bu metin yalnızca bilgilendirme amaçlıdır ve hukuki tavsiye yerine geçmez.</div>
+  </main>
+</div>
+
+<div id="mount-footer"></div>
+<script src="/assets/site.js"></script>
+</body>
+</html>

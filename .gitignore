@@ -15,3 +15,50 @@ serviceAccountKey.json
 dist/
 build/
 .firebase/
+
+# ─── macOS ────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Thumbs.db
+
+# ─── Xcode ────────────────────────────────────────────────────
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+
+# ─── iOS build output ─────────────────────────────────────────
+*.ipa
+*.dSYM
+*.dSYM.zip
+
+# ─── Swift Package Manager ────────────────────────────────────
+.build/
+.swiftpm/
+
+# ─── Node ─────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ─── Secrets / certs ──────────────────────────────────────────
+*.p8
+*.p12
+GoogleService-Info.plist
+
+# ─── Editor ───────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
