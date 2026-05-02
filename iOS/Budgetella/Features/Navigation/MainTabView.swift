@@ -45,9 +45,7 @@ struct MainTabView: View {
                     .tag(AppTab.ai)
                     .toolbar(.hidden, for: .tabBar)
             }
-            .safeAreaInset(edge: .bottom) {
-                Color.clear.frame(height: 72)
-            }
+            .padding(.bottom, 72)
 
             CustomTabBar(selected: $selectedTab, onModeSelect: { mode in
                 entryMode = mode

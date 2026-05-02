@@ -21,6 +21,7 @@ struct BudgiView: View {
     @State private var isSending         = false
     @State private var subscriptionService = SubscriptionService()
     @State private var scrollProxy:      ScrollViewProxy? = nil
+    @FocusState private var isInputFocused: Bool
 
     private var insights: [BudgiInsight] {
         BudgiInsightEngine.compute(transactions: transactions, categories: categories)
@@ -32,19 +33,15 @@ struct BudgiView: View {
                 BrandColor.background.ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    // ── Header
                     header
 
-                    // ── Chat feed
                     ScrollViewReader { proxy in
                         ScrollView(showsIndicators: false) {
                             LazyVStack(alignment: .leading, spacing: Spacing.md) {
-                                // Greeting + proactive insights
                                 ForEach(chatMessages) { msg in
                                     messageBubble(msg)
                                         .id(msg.id)
                                 }
-
                                 if isSending {
                                     typingIndicator
                                 }
@@ -53,19 +50,27 @@ struct BudgiView: View {
                             .padding(.top, Spacing.lg)
                             .padding(.bottom, 20)
                         }
+                        .scrollDismissesKeyboard(.interactively)
                         .onAppear {
                             scrollProxy = proxy
                             buildInitialMessages()
                         }
                     }
 
-                    // ── Input bar
                     chatInputBar
                 }
             }
-            .navigationBarHidden(true)
-            .task { await subscriptionService.setup(userId: currentUserId) }
+            .toolbar(.hidden, for: .navigationBar)
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Kapat") { isInputFocused = false }
+                        .font(.brand(.subheadline))
+                        .foregroundStyle(BrandColor.primary)
+                }
+            }
         }
+        .task { await subscriptionService.setup(userId: currentUserId) }
     }
 
     // MARK: - Build initial messages
@@ -103,21 +108,21 @@ struct BudgiView: View {
     private var header: some View {
         HStack(spacing: Spacing.sm) {
             ZStack {
-                Circle()
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(LinearGradient(
                         colors: [BrandColor.primary, BrandColor.primaryLight],
                         startPoint: .topLeading, endPoint: .bottomTrailing
                     ))
-                    .frame(width: 36, height: 36)
+                    .frame(width: 44, height: 44)
                 Image(systemName: "sparkles")
-                    .font(.system(size: 16, weight: .bold))
+                    .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(.white)
             }
-            VStack(alignment: .leading, spacing: 1) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text("Budgi")
                     .font(.brand(.headline))
                     .foregroundStyle(BrandColor.textPrimary)
-                HStack(spacing: 3) {
+                HStack(spacing: 4) {
                     Circle().fill(BrandColor.income).frame(width: 5, height: 5)
                     Text("Senin finans asistanın")
                         .font(.brand(.caption))
@@ -127,7 +132,7 @@ struct BudgiView: View {
             Spacer()
         }
         .padding(.horizontal, 20)
-        .padding(.vertical, Spacing.md)
+        .padding(.vertical, 12)
         .background(BrandColor.background)
         .overlay(alignment: .bottom) {
             Divider().background(BrandColor.borderSubtle)
@@ -151,25 +156,12 @@ struct BudgiView: View {
                     .frame(maxWidth: 280, alignment: .trailing)
             }
         } else {
-            HStack(alignment: .top, spacing: Spacing.sm) {
-                // Budgi avatar
-                ZStack {
-                    Circle()
-                        .fill(LinearGradient(colors: [BrandColor.primary, BrandColor.primaryLight],
-                                             startPoint: .topLeading, endPoint: .bottomTrailing))
-                        .frame(width: 28, height: 28)
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(.white)
-                }
-
-                // Card
+            HStack {
                 if let tag = msg.tag, !tag.isEmpty {
                     insightCard(msg: msg, tag: tag)
                 } else {
                     plainBubble(text: msg.text)
                 }
-
                 Spacer()
             }
         }
@@ -212,16 +204,7 @@ struct BudgiView: View {
     }
 
     private var typingIndicator: some View {
-        HStack(alignment: .top, spacing: Spacing.sm) {
-            ZStack {
-                Circle()
-                    .fill(LinearGradient(colors: [BrandColor.primary, BrandColor.primaryLight],
-                                         startPoint: .topLeading, endPoint: .bottomTrailing))
-                    .frame(width: 28, height: 28)
-                Image(systemName: "sparkles")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(.white)
-            }
+        HStack {
             HStack(spacing: 4) {
                 ForEach(0..<3, id: \.self) { i in
                     Circle()
@@ -249,6 +232,7 @@ struct BudgiView: View {
                     .tint(BrandColor.primary)
                     .lineLimit(4)
                     .submitLabel(.send)
+                    .focused($isInputFocused)
                     .onSubmit { Task { await sendMessage() } }
                 Spacer()
                 Image(systemName: "mic")
@@ -268,21 +252,22 @@ struct BudgiView: View {
                 Task { await sendMessage() }
             } label: {
                 ZStack {
-                    Circle()
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
                         .fill(chatInput.trimmingCharacters(in: .whitespaces).isEmpty ? BrandColor.surface : BrandColor.primary)
-                        .frame(width: 40, height: 40)
-                    Image(systemName: "arrow.up")
+                        .frame(width: 44, height: 44)
+                    Image(systemName: "paperplane.fill")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(chatInput.trimmingCharacters(in: .whitespaces).isEmpty ? BrandColor.textTertiary : .white)
+                        .offset(x: 1)
                 }
             }
             .disabled(chatInput.trimmingCharacters(in: .whitespaces).isEmpty || isSending)
             .buttonStyle(.plain)
         }
         .padding(.horizontal, 20)
-        .padding(.vertical, Spacing.sm)
-        .padding(.bottom, 20)
-        .background(BrandColor.background.opacity(0.95))
+        .padding(.top, Spacing.sm)
+        .padding(.bottom, Spacing.sm)
+        .background(BrandColor.background)
         .overlay(alignment: .top) {
             Divider().background(BrandColor.borderSubtle)
         }
