@@ -109,7 +109,7 @@ struct SettingsView: View {
                                 .tint(BrandColor.primary)
                                 .labelsHidden()
                             }
-                            .padding(.vertical, 2)
+                            .frame(maxWidth: .infinity, minHeight: 44)
 
                             HStack {
                                 settingsIconBadge(icon: "eye.slash", color: BrandColor.warning)
@@ -127,7 +127,7 @@ struct SettingsView: View {
                                 .tint(BrandColor.primary)
                                 .labelsHidden()
                             }
-                            .padding(.vertical, 2)
+                            .frame(maxWidth: .infinity, minHeight: 44)
                         }
                     }
                     .listRowBackground(BrandColor.surface.opacity(0.4))
@@ -171,7 +171,7 @@ struct SettingsView: View {
                                     .font(.brand(.body))
                                     .foregroundStyle(BrandColor.textPrimary)
                             }
-                            .padding(.vertical, 2)
+                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         }
                     }
                     .listRowBackground(BrandColor.surface.opacity(0.4))
@@ -187,7 +187,7 @@ struct SettingsView: View {
                                     .font(.brand(.body))
                                     .foregroundStyle(BrandColor.textPrimary)
                             }
-                            .padding(.vertical, 2)
+                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         }
                     }
                     .listRowBackground(BrandColor.surface.opacity(0.4))
@@ -219,8 +219,12 @@ struct SettingsView: View {
                                 Text("Çıkış Yap")
                                     .font(.brand(.body))
                                     .foregroundStyle(BrandColor.warning)
+                                Spacer()
                             }
+                            .frame(maxWidth: .infinity, minHeight: 44)
                         }
+                        .buttonStyle(.plain)
+                        .highlightOnPress()
                         .listRowBackground(BrandColor.surface.opacity(0.4))
 
                         NavigationLink {
@@ -232,6 +236,7 @@ struct SettingsView: View {
                                     .font(.brand(.body))
                                     .foregroundStyle(BrandColor.expense)
                             }
+                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         }
                         .listRowBackground(BrandColor.surface.opacity(0.4))
                     }
@@ -410,6 +415,7 @@ struct SettingsView: View {
             .glassCard(cornerRadius: Spacing.radiusMedium)
         }
         .buttonStyle(.plain)
+        .cardHighlightOnPress(cornerRadius: Spacing.radiusMedium)
     }
 
     // MARK: - Premium row
@@ -451,9 +457,10 @@ struct SettingsView: View {
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(BrandColor.textTertiary)
             }
-            .padding(.vertical, 4)
+            .frame(maxWidth: .infinity, minHeight: 44)
         }
         .buttonStyle(.plain)
+        .highlightOnPress()
     }
 
     // MARK: - Row helpers
@@ -481,9 +488,10 @@ struct SettingsView: View {
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(BrandColor.textTertiary.opacity(0.5))
             }
-            .padding(.vertical, 2)
+            .frame(maxWidth: .infinity, minHeight: 44)
         }
         .buttonStyle(.plain)
+        .highlightOnPress()
     }
 
     private func settingsIconBadge(icon: String, color: Color) -> some View {

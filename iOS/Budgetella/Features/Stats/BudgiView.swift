@@ -51,6 +51,7 @@ struct BudgiView: View {
                             .padding(.bottom, 20)
                         }
                         .scrollDismissesKeyboard(.interactively)
+                        .simultaneousGesture(TapGesture().onEnded { isInputFocused = false })
                         .onAppear {
                             scrollProxy = proxy
                             buildInitialMessages()
@@ -61,29 +62,30 @@ struct BudgiView: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Kapat") { isInputFocused = false }
-                        .font(.brand(.subheadline))
-                        .foregroundStyle(BrandColor.primary)
-                }
-            }
         }
         .task { await subscriptionService.setup(userId: currentUserId) }
     }
 
     // MARK: - Build initial messages
 
+    private let chatHistoryKey = "budgi_chat_v1"
+
     private func buildInitialMessages() {
         guard chatMessages.isEmpty else { return }
-        var msgs: [BudgiMessage] = []
 
-        // Greeting
+        // Restore persisted history if available
+        let saved = loadMessages()
+        if !saved.isEmpty {
+            chatMessages = saved
+            return
+        }
+
+        // Fresh start — greeting + proactive insights
+        var msgs: [BudgiMessage] = []
         let firstName = displayName.components(separatedBy: " ").first ?? displayName
         let name = firstName.isEmpty ? "Ozzy" : firstName
-        let greet: String
         let hour = Calendar.current.component(.hour, from: .now)
+        let greet: String
         switch hour {
         case 5..<12:  greet = "Günaydın \(name) ☀️"
         case 12..<18: greet = "İyi günler \(name) 👋"
@@ -93,14 +95,35 @@ struct BudgiView: View {
         let intro = insights.isEmpty
             ? "Henüz analiz edecek yeterli veri yok. Birkaç işlem ekledikten sonra kişisel öneriler burada belirmeye başlar."
             : "Bu hafta şunları fark ettim:"
-        msgs.append(BudgiMessage(role: .assistant, text: "\(greet) \(intro)", tag: nil, tagColor: .clear))
+        msgs.append(BudgiMessage(role: .assistant, text: "\(greet) \(intro)", tag: nil, accent: "clear"))
 
-        // Proactive insights
         for insight in insights {
-            msgs.append(BudgiMessage(role: .assistant, text: insight.text, tag: insight.tag, tagColor: insight.accentColor))
+            msgs.append(BudgiMessage(role: .assistant, text: insight.text, tag: insight.tag, accent: insight.accent))
         }
 
         withAnimation { chatMessages = msgs }
+    }
+
+    private func saveMessages() {
+        let toSave = Array(chatMessages.suffix(200)).map { msg in
+            PersistedMessage(id: msg.id,
+                             role: msg.role == .user ? "user" : "assistant",
+                             text: msg.text, tag: msg.tag, accent: msg.accent)
+        }
+        if let data = try? JSONEncoder().encode(toSave) {
+            UserDefaults.standard.set(data, forKey: chatHistoryKey)
+        }
+    }
+
+    private func loadMessages() -> [BudgiMessage] {
+        guard let data = UserDefaults.standard.data(forKey: chatHistoryKey),
+              let saved = try? JSONDecoder().decode([PersistedMessage].self, from: data)
+        else { return [] }
+        return saved.map { p in
+            BudgiMessage(id: p.id,
+                         role: p.role == "user" ? .user : .assistant,
+                         text: p.text, tag: p.tag, accent: p.accent)
+        }
     }
 
     // MARK: - Header
@@ -280,13 +303,14 @@ struct BudgiView: View {
         guard !text.isEmpty, !isSending else { return }
 
         chatInput = ""
-        chatMessages.append(BudgiMessage(role: .user, text: text, tag: nil, tagColor: .clear))
+        chatMessages.append(BudgiMessage(role: .user, text: text, tag: nil, accent: "clear"))
         isSending = true
 
         let context = buildContext()
         let reply = (try? await BudgiChatService.send(message: text, context: context)) ?? "Şu an cevap veremiyorum. Lütfen daha sonra tekrar dene."
-        chatMessages.append(BudgiMessage(role: .assistant, text: reply, tag: nil, tagColor: BrandColor.primary))
+        chatMessages.append(BudgiMessage(role: .assistant, text: reply, tag: nil, accent: "primary"))
         isSending = false
+        saveMessages()
 
         // Scroll to bottom
         if let last = chatMessages.last {
@@ -344,13 +368,38 @@ struct BudgiView: View {
 // MARK: - Chat message model
 
 struct BudgiMessage: Identifiable {
-    let id = UUID()
+    let id: UUID
     let role: Role
     let text: String
     let tag: String?
-    let tagColor: Color
+    let accent: String  // "primary" | "income" | "expense" | "warning" | "info" | "clear"
+
+    init(id: UUID = UUID(), role: Role, text: String, tag: String?, accent: String) {
+        self.id = id; self.role = role; self.text = text; self.tag = tag; self.accent = accent
+    }
+
+    var tagColor: Color {
+        switch accent {
+        case "income":  return BrandColor.income
+        case "expense": return BrandColor.expense
+        case "warning": return BrandColor.warning
+        case "info":    return BrandColor.info
+        case "clear":   return .clear
+        default:        return BrandColor.primary
+        }
+    }
 
     enum Role { case user, assistant }
+}
+
+// MARK: - Persisted message (Codable)
+
+private struct PersistedMessage: Codable {
+    let id: UUID
+    let role: String
+    let text: String
+    let tag: String?
+    let accent: String
 }
 
 // MARK: - Budgi Chat Service
@@ -406,9 +455,22 @@ struct BudgiInsight: Identifiable {
     let id = UUID()
     let tag: String
     let icon: String
+    let accent: String   // "primary" | "income" | "expense" | "warning" | "info"
     let accentColor: Color
     let text: String
     let redactedText: String
+
+    init(tag: String, icon: String, accent: String, text: String, redactedText: String) {
+        self.tag = tag; self.icon = icon; self.accent = accent; self.text = text
+        self.redactedText = redactedText
+        switch accent {
+        case "income":  accentColor = BrandColor.income
+        case "expense": accentColor = BrandColor.expense
+        case "warning": accentColor = BrandColor.warning
+        case "info":    accentColor = BrandColor.info
+        default:        accentColor = BrandColor.primary
+        }
+    }
 }
 
 enum BudgiInsightEngine {
@@ -444,7 +506,7 @@ enum BudgiInsightEngine {
         return BudgiInsight(
             tag: isPos ? "TASARRUF" : "AÇIK",
             icon: isPos ? "checkmark.seal.fill" : "exclamationmark.triangle.fill",
-            accentColor: isPos ? BrandColor.income : BrandColor.expense,
+            accent: isPos ? "income" : "expense",
             text: isPos
                 ? "Bu ay \(income.fullTRY) gelirinden \(savings.fullTRY) tasarruf ettin."
                 : "Bu ay giderlerin gelirini \((-savings).fullTRY) aştı. Dikkat et.",
@@ -462,7 +524,7 @@ enum BudgiInsightEngine {
         let amount = dict[topId]!
         let total  = expenses.reduce(Decimal(0)) { $0 + $1.amount }
         let pct    = total > 0 ? Int((Double(truncating: (amount / total) as NSDecimalNumber) * 100).rounded()) : 0
-        return BudgiInsight(tag: "EN YÜKSEK KATEGORİ", icon: "chart.pie.fill", accentColor: BrandColor.primary,
+        return BudgiInsight(tag: "EN YÜKSEK KATEGORİ", icon: "chart.pie.fill", accent: "primary",
                             text: "\(cat.name) bu ayın en büyük gider kalemi: \(amount.fullTRY) (toplam giderlerin %\(pct)'i).",
                             redactedText: "\(cat.name) bu ayın en büyük gider kalemi (%\(pct)).")
     }
@@ -475,14 +537,14 @@ enum BudgiInsightEngine {
         guard abs(pct) >= 5 else { return nil }
         let isUp = pct > 0
         return BudgiInsight(tag: isUp ? "ANOMALİ" : "AZALIŞ", icon: isUp ? "arrow.up.circle.fill" : "arrow.down.circle.fill",
-                            accentColor: isUp ? BrandColor.expense : BrandColor.income,
+                            accent: isUp ? "expense" : "income",
                             text: "\(cur.compactTRY) → geçen \(prv.compactTRY). Bu ay giderlerin %\(String(format: "%.0f", abs(pct))) \(isUp ? "arttı" : "azaldı").",
                             redactedText: "Bu ay giderlerin %\(String(format: "%.0f", abs(pct))) \(isUp ? "arttı" : "azaldı").")
     }
 
     private static func biggestExpenseInsight(current: [Transaction]) -> BudgiInsight? {
         guard let big = current.filter({ $0.type == .expense }).max(by: { $0.amount < $1.amount }) else { return nil }
-        return BudgiInsight(tag: "EN BÜYÜK İŞLEM", icon: "dollarsign.circle.fill", accentColor: BrandColor.warning,
+        return BudgiInsight(tag: "EN BÜYÜK İŞLEM", icon: "dollarsign.circle.fill", accent: "warning",
                             text: "Bu ayın en büyük gideri: \"\(big.note)\" — \(big.amount.fullTRY).",
                             redactedText: "Bu ayın en büyük gideri: \"\(big.note)\" — ••••.")
     }
@@ -495,7 +557,7 @@ enum BudgiInsightEngine {
         let daily = total / Decimal(days)
         let daysInMonth = Calendar.current.range(of: .day, in: .month, for: now)?.count ?? 30
         let projected = daily * Decimal(daysInMonth)
-        return BudgiInsight(tag: "ÖNERİ", icon: "lightbulb.fill", accentColor: BrandColor.info,
+        return BudgiInsight(tag: "ÖNERİ", icon: "lightbulb.fill", accent: "info",
                             text: "Günlük ortalama harcaman \(daily.fullTRY). Bu hızla ay sonu tahmini: \(projected.fullTRY).",
                             redactedText: "Günlük ortalama harcaman hesaplandı.")
     }

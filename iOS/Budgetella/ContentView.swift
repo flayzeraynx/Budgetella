@@ -112,7 +112,24 @@ struct ContentView: View {
                 }
             }
         }
+        // Pre-warm iOS keyboard so first TextField focus is instant
+        .background(KeyboardPrewarmView())
     }
+}
+
+// MARK: - Keyboard pre-warmer
+
+private struct KeyboardPrewarmView: UIViewRepresentable {
+    func makeUIView(context: Context) -> UITextField {
+        let field = UITextField(frame: .zero)
+        field.isHidden = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            field.becomeFirstResponder()
+            field.resignFirstResponder()
+        }
+        return field
+    }
+    func updateUIView(_ uiView: UITextField, context: Context) {}
 }
 
 #Preview {

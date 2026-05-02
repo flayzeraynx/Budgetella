@@ -75,11 +75,16 @@ struct CameraEntryContent: View {
             Task { await loadAndProcess(item: item) }
         }
         .sheet(isPresented: $showCamera) {
-            CameraPickerView { image in
-                selectedImage = image
-                showCamera = false
-                Task { await processImage(image) }
-            }
+            CameraPickerView(
+                onImage: { image in
+                    selectedImage = image
+                    showCamera = false
+                    Task { await processImage(image) }
+                },
+                onCancel: {
+                    showCamera = false
+                }
+            )
             .ignoresSafeArea()
         }
         .onAppear {
@@ -390,8 +395,9 @@ enum OCRError: LocalizedError {
 
 struct CameraPickerView: UIViewControllerRepresentable {
     let onImage: (UIImage) -> Void
+    let onCancel: () -> Void
 
-    func makeCoordinator() -> Coordinator { Coordinator(onImage: onImage) }
+    func makeCoordinator() -> Coordinator { Coordinator(onImage: onImage, onCancel: onCancel) }
 
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker = UIImagePickerController()
@@ -404,15 +410,20 @@ struct CameraPickerView: UIViewControllerRepresentable {
 
     final class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
         let onImage: (UIImage) -> Void
-        init(onImage: @escaping (UIImage) -> Void) { self.onImage = onImage }
+        let onCancel: () -> Void
+        init(onImage: @escaping (UIImage) -> Void, onCancel: @escaping () -> Void) {
+            self.onImage = onImage
+            self.onCancel = onCancel
+        }
 
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
             if let img = info[.originalImage] as? UIImage { onImage(img) }
-            picker.dismiss(animated: true)
+            // SwiftUI binding handles sheet dismissal — don't call picker.dismiss() here
+            // (picker.dismiss would propagate up and close the entire QuickEntry sheet)
         }
 
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            picker.dismiss(animated: true)
+            onCancel()
         }
     }
 }

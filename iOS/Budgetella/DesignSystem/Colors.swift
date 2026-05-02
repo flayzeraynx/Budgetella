@@ -161,3 +161,87 @@ public extension View {
         modifier(GlassCardModifier(cornerRadius: cornerRadius, elevated: elevated))
     }
 }
+
+// MARK: - Press highlight modifiers
+//
+// ButtonStyle.isPressed is unreliable inside SwiftUI List — the List's scroll
+// gesture recognizer steals the touch after ~300ms, snapping isPressed back to
+// false while the finger is still down. Using @GestureState + simultaneousGesture
+// with DragGesture(minimumDistance: 0) fires on finger-down, stays true for the
+// full press duration, and doesn't block the Button's action.
+
+/// List rows: instant brand-tinted highlight, fades out on release.
+public struct RowHighlightModifier: ViewModifier {
+    @GestureState private var isPressed = false
+    var color: Color
+
+    public func body(content: Content) -> some View {
+        content
+            .contentShape(Rectangle())
+            .background(isPressed ? color : .clear)
+            // Instant ON, smooth OFF
+            .animation(isPressed ? .none : .easeOut(duration: 0.22), value: isPressed)
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .updating($isPressed) { value, state, _ in
+                        // Cancel highlight if finger drifts (user is scrolling)
+                        let moved = abs(value.translation.width) > 10 || abs(value.translation.height) > 10
+                        state = !moved
+                    }
+            )
+    }
+}
+
+/// glassCard rows: white overlay + spring scale, same reliable gesture tracking.
+public struct CardHighlightModifier: ViewModifier {
+    @GestureState private var isPressed = false
+    var cornerRadius: CGFloat
+
+    public func body(content: Content) -> some View {
+        content
+            .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(Color.white.opacity(isPressed ? 0.18 : 0))
+            }
+            .scaleEffect(isPressed ? 0.955 : 1.0)
+            .animation(isPressed ? .none : .spring(response: 0.3, dampingFraction: 0.65), value: isPressed)
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .updating($isPressed) { value, state, _ in
+                        let moved = abs(value.translation.width) > 10 || abs(value.translation.height) > 10
+                        state = !moved
+                    }
+            )
+    }
+}
+
+public extension View {
+    func highlightOnPress(color: Color = BrandColor.primary.opacity(0.15)) -> some View {
+        modifier(RowHighlightModifier(color: color))
+    }
+
+    func cardHighlightOnPress(cornerRadius: CGFloat = 14) -> some View {
+        modifier(CardHighlightModifier(cornerRadius: cornerRadius))
+    }
+}
+
+// Keep ButtonStyle variants as no-ops so call sites that still reference them compile.
+public struct ListRowPressStyle: ButtonStyle {
+    public func makeBody(configuration: Configuration) -> some View {
+        configuration.label.contentShape(Rectangle())
+    }
+}
+public struct CardPressStyle: ButtonStyle {
+    public var cornerRadius: CGFloat = 14
+    public func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+    }
+}
+public extension ButtonStyle where Self == ListRowPressStyle {
+    static var listRow: ListRowPressStyle { ListRowPressStyle() }
+}
+public extension ButtonStyle where Self == CardPressStyle {
+    static func card(cornerRadius: CGFloat = 14) -> CardPressStyle { CardPressStyle(cornerRadius: cornerRadius) }
+}
