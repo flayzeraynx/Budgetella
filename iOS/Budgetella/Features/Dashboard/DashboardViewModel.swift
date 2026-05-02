@@ -75,6 +75,28 @@ import Foundation
         }
     }
 
+    // MARK: - Month-over-month change
+
+    func percentChange(from txs: [Transaction]) -> Double? {
+        let thisMonth = monthlyExpense(from: txs)
+        let prevMonth: Int
+        let prevYear: Int
+        if selectedMonth == 1 {
+            prevMonth = 12
+            prevYear = selectedYear - 1
+        } else {
+            prevMonth = selectedMonth - 1
+            prevYear = selectedYear
+        }
+        let prevExpense = txs
+            .filter { $0.type == .expense && calYear($0) == prevYear && calMonth($0) == prevMonth }
+            .reduce(Decimal(0)) { $0 + $1.amount }
+        guard prevExpense > 0 else { return nil }
+        let diff = (thisMonth - prevExpense) as NSDecimalNumber
+        let prev = prevExpense as NSDecimalNumber
+        return diff.doubleValue / prev.doubleValue * 100
+    }
+
     // MARK: - Available periods
 
     var availableYears: [Int] {
@@ -129,7 +151,7 @@ extension Decimal {
 // MARK: - Month name helpers
 
 func turkishMonthShort(_ month: Int) -> String {
-    let names = ["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"]
+    let names = ["Oca","Şub","Mar","Nis","Mayıs","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"]
     guard (1...12).contains(month) else { return "" }
     return names[month - 1]
 }

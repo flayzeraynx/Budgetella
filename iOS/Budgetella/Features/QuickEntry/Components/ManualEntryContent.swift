@@ -40,23 +40,25 @@ struct ManualEntryContent: View {
                 amountDisplay
                     .padding(.horizontal, 20)
                     .padding(.top, Spacing.md)
+
+                // Flexible space — expands the amount area and anchors description+numpad to bottom
+                Spacer(minLength: Spacing.lg)
             }
 
-            // 4 ── Description field (min 2 lines)
+            // 4 ── Description field
             descriptionField
                 .padding(.horizontal, 20)
                 .padding(.top, Spacing.sm)
 
             if !isTyping {
-                Spacer(minLength: Spacing.md)
-
-                // 5 ── Numpad pushed to bottom
+                // 5 ── Numpad — small gap above, pushed to bottom
                 NumpadGrid(
                     onDigit:   { vm.appendDigit($0) },
                     onDecimal: { vm.appendDecimal() },
                     onDelete:  { vm.backspace() }
                 )
                 .padding(.horizontal, 12)
+                .padding(.top, Spacing.sm)
                 .padding(.bottom, Spacing.xs)
             }
         }
@@ -194,7 +196,7 @@ struct ManualEntryContent: View {
         }
         .padding(.horizontal, Spacing.md)
         .padding(.vertical, Spacing.md)
-        .frame(minHeight: 64, maxHeight: isTyping ? .infinity : 64)
+        .frame(minHeight: 64, maxHeight: isTyping ? .infinity : 64, alignment: .topLeading)
         .background(BrandColor.surface.opacity(0.4))
         .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
         .overlay(

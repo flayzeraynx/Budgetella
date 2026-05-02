@@ -30,11 +30,11 @@ struct ContentView: View {
         settingsArr.first?.biometricLockEnabled ?? false
     }
 
-    // V1 dark-first: system defaults to dark until light mode design is complete
-    private var colorScheme: ColorScheme {
+    private var colorScheme: ColorScheme? {
         switch settingsArr.first?.theme ?? .system {
-        case .light: return .light
-        default:     return .dark
+        case .light:  return .light
+        case .dark:   return .dark
+        case .system: return nil
         }
     }
 
@@ -91,6 +91,7 @@ struct ContentView: View {
             BudgetellaApp.seedCategoriesIfNeeded(in: modelContext)
             BudgetellaApp.seedSettingsIfNeeded(in: modelContext)
             BudgetellaApp.migrateEnglishCategoryNames(in: modelContext)
+            BudgetellaApp.migrateAddMissingCategories(in: modelContext)
         }
         .onChange(of: appState) { old, new in
             // Login'den (auth → main) geçişte Firestore'dan sync et

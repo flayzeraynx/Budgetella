@@ -15,6 +15,7 @@ struct SettingsView: View {
     @AppStorage("currentUserId") private var currentUserId = ""
     @AppStorage("displayName") private var displayName = ""
     @AppStorage("userEmail") private var userEmail = ""
+    @AppStorage("userPhotoURL") private var userPhotoURL = ""
 
     @State private var authService = AuthService()
     @State private var subscriptionService = SubscriptionService()
@@ -25,7 +26,6 @@ struct SettingsView: View {
     @State private var showThemePicker = false
     @State private var showLanguagePicker = false
     @State private var showCurrencyPicker = false
-    @State private var showDeleteConfirm = false
     @State private var showSignOutConfirm = false
     @State private var showImportPicker = false
     @State private var showImportResult = false
@@ -36,6 +36,14 @@ struct SettingsView: View {
     @State private var supportURL: URL?
 
     private var settings: AppSettings? { settingsArr.first }
+
+    private var preferredScheme: ColorScheme? {
+        switch settings?.theme ?? .system {
+        case .light:  return .light
+        case .dark:   return .dark
+        case .system: return nil
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -152,6 +160,38 @@ struct SettingsView: View {
                     }
                     .listRowBackground(BrandColor.surface.opacity(0.4))
 
+                    // Notifications
+                    Section("Bildirimler") {
+                        NavigationLink {
+                            NotificationSettingsView()
+                        } label: {
+                            HStack(spacing: Spacing.md) {
+                                settingsIconBadge(icon: "bell.fill", color: BrandColor.primary)
+                                Text("Bildirim Yönetimi")
+                                    .font(.brand(.body))
+                                    .foregroundStyle(BrandColor.textPrimary)
+                            }
+                            .padding(.vertical, 2)
+                        }
+                    }
+                    .listRowBackground(BrandColor.surface.opacity(0.4))
+
+                    // Categories
+                    Section("Kategoriler") {
+                        NavigationLink {
+                            CategoryManagementView()
+                        } label: {
+                            HStack(spacing: Spacing.md) {
+                                settingsIconBadge(icon: "tag.fill", color: BrandColor.primaryLight)
+                                Text("Kategori Yönetimi")
+                                    .font(.brand(.body))
+                                    .foregroundStyle(BrandColor.textPrimary)
+                            }
+                            .padding(.vertical, 2)
+                        }
+                    }
+                    .listRowBackground(BrandColor.surface.opacity(0.4))
+
                     // Support
                     Section("Destek") {
                         settingsRow(icon: "questionmark.circle", iconColor: BrandColor.info,
@@ -183,8 +223,8 @@ struct SettingsView: View {
                         }
                         .listRowBackground(BrandColor.surface.opacity(0.4))
 
-                        Button {
-                            showDeleteConfirm = true
+                        NavigationLink {
+                            DeleteAccountView(authService: authService)
                         } label: {
                             HStack(spacing: Spacing.md) {
                                 settingsIconBadge(icon: "trash", color: BrandColor.expense)
@@ -217,7 +257,7 @@ struct SettingsView: View {
                 .listStyle(.insetGrouped)
             }
             .navigationTitle("Ayarlar")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(BrandColor.background, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -264,27 +304,8 @@ struct SettingsView: View {
                     SafariSheet(url: url).ignoresSafeArea()
                 }
             }
-            .brandAlert(
-                title: "Çıkış Yap",
-                message: "Hesabınızdan çıkış yapılacak.",
-                isPresented: $showSignOutConfirm,
-                buttons: [
-                    .destructive("Çıkış Yap") { try? authService.signOut(modelContext: modelContext) },
-                    .cancel()
-                ]
-            )
-            .brandAlert(
-                title: "Hesabı Sil",
-                message: "Tüm verileriniz kalıcı olarak silinecek. Bu işlem geri alınamaz.",
-                isPresented: $showDeleteConfirm,
-                buttons: [
-                    .destructive("Hesabı Kalıcı Olarak Sil") {
-                        Task { try? await authService.deleteAccount(modelContext: modelContext) }
-                    },
-                    .cancel()
-                ]
-            )
         }
+        .preferredColorScheme(preferredScheme)
         .task { await subscriptionService.setup(userId: currentUserId) }
         .fileImporter(
             isPresented: $showImportPicker,
@@ -322,27 +343,52 @@ struct SettingsView: View {
             isPresented: $showImportResult,
             buttons: [.cancel("Tamam")]
         )
+        .brandAlert(
+            title: "Çıkış Yap",
+            message: "Hesabınızdan çıkış yapılacak.",
+            isPresented: $showSignOutConfirm,
+            buttons: [
+                .destructive("Çıkış Yap") { try? authService.signOut(modelContext: modelContext) },
+                .cancel()
+            ]
+        )
     }
 
     // MARK: - Profile card
+
+    private var initialsCircle: some View {
+        ZStack {
+            Circle()
+                .fill(LinearGradient(
+                    colors: [BrandColor.primary, BrandColor.primaryLight],
+                    startPoint: .topLeading, endPoint: .bottomTrailing
+                ))
+                .frame(width: 52, height: 52)
+            Text(String(displayName.prefix(1)).uppercased())
+                .font(.system(size: 20, weight: .bold))
+                .foregroundStyle(.white)
+        }
+    }
 
     private var profileCard: some View {
         Button { showProfile = true } label: {
             HStack(spacing: Spacing.md) {
                 // Avatar
-                ZStack {
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [BrandColor.primary, BrandColor.primaryLight],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 52, height: 52)
-                    Text(String(displayName.prefix(1)).uppercased())
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundStyle(.white)
+                Group {
+                    if let url = URL(string: userPhotoURL), !userPhotoURL.isEmpty {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .success(let img):
+                                img.resizable().scaledToFill()
+                                    .frame(width: 52, height: 52)
+                                    .clipShape(Circle())
+                            default:
+                                initialsCircle
+                            }
+                        }
+                    } else {
+                        initialsCircle
+                    }
                 }
 
                 VStack(alignment: .leading, spacing: 2) {

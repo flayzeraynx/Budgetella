@@ -31,16 +31,19 @@ struct CameraEntryContent: View {
         VStack(spacing: Spacing.xl) {
             Spacer()
 
-            // Receipt icon / image preview
-            receiptDisplay
-
-            // Status
-            statusText
+            // Hide receipt display and status while camera sheet is presenting (no idle flash)
+            if !showCamera || selectedImage != nil {
+                receiptDisplay
+                statusText
+            }
 
             // Action buttons
             switch phase {
             case .idle, .error:
-                photoSourceButtons
+                // Only show source buttons when camera is not already open
+                if !showCamera {
+                    photoSourceButtons
+                }
             case .processing:
                 ProgressView()
                     .tint(BrandColor.primary)
@@ -78,6 +81,9 @@ struct CameraEntryContent: View {
                 Task { await processImage(image) }
             }
             .ignoresSafeArea()
+        }
+        .onAppear {
+            if case .idle = phase { showCamera = true }
         }
     }
 

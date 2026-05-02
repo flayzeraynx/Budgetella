@@ -2,8 +2,7 @@
 //  BudgiView.swift
 //  Budgetella
 //
-//  AI tab — Budgi finans koçu. Proaktif insight'lar SwiftData'dan hesaplanıyor.
-//  Chat (V1.1 premium feature) hâlâ kilitli.
+//  Budgi AI — 2-way chat asistanı. Proaktif insight'lar + kullanıcı soruları.
 //
 
 import SwiftUI
@@ -17,10 +16,11 @@ struct BudgiView: View {
     @AppStorage("currentUserId") private var currentUserId  = ""
     @Environment(\.hideAmounts) private var hideAmounts
 
-    @State private var aiInsights:          [GeminiInsightService.AIInsight] = []
-    @State private var isLoadingAI          = false
-    @State private var aiError:             String? = nil
-    @State private var subscriptionService  = SubscriptionService()
+    @State private var chatMessages:     [BudgiMessage] = []
+    @State private var chatInput         = ""
+    @State private var isSending         = false
+    @State private var subscriptionService = SubscriptionService()
+    @State private var scrollProxy:      ScrollViewProxy? = nil
 
     private var insights: [BudgiInsight] {
         BudgiInsightEngine.compute(transactions: transactions, categories: categories)
@@ -32,74 +32,70 @@ struct BudgiView: View {
                 BrandColor.background.ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    // Header
+                    // ── Header
                     header
 
-                    Divider().background(BrandColor.borderSubtle)
+                    // ── Chat feed
+                    ScrollViewReader { proxy in
+                        ScrollView(showsIndicators: false) {
+                            LazyVStack(alignment: .leading, spacing: Spacing.md) {
+                                // Greeting + proactive insights
+                                ForEach(chatMessages) { msg in
+                                    messageBubble(msg)
+                                        .id(msg.id)
+                                }
 
-                    // Insight feed
-                    ScrollView(showsIndicators: false) {
-                        VStack(alignment: .leading, spacing: Spacing.md) {
-                            // Greeting
-                            assistantBubble {
-                                Text(greetingText)
-                                    .font(.brand(.body))
-                                    .foregroundStyle(BrandColor.textPrimary)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-
-                            if insights.isEmpty {
-                                emptyInsights
-                            } else {
-                                ForEach(insights) { insight in
-                                    assistantBubble(accent: insight.accentColor) {
-                                        insightContent(insight)
-                                    }
+                                if isSending {
+                                    typingIndicator
                                 }
                             }
-
-                            // AI insights section
-                            if !insights.isEmpty {
-                                aiInsightsSection
-                            }
-
-                            // Chat premium gate — hide for premium users
-                            if !subscriptionService.isPremium {
-                                premiumGateCard
-                            }
+                            .padding(.horizontal, 20)
+                            .padding(.top, Spacing.lg)
+                            .padding(.bottom, 20)
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.top, Spacing.lg)
-                        .padding(.bottom, 100)
+                        .onAppear {
+                            scrollProxy = proxy
+                            buildInitialMessages()
+                        }
                     }
 
-                    // Chat input (locked — V1.1)
+                    // ── Input bar
                     chatInputBar
                 }
             }
             .navigationBarHidden(true)
-            .task {
-                await subscriptionService.setup(userId: currentUserId)
-                await loadAIInsights()
-            }
+            .task { await subscriptionService.setup(userId: currentUserId) }
         }
     }
 
-    // MARK: - AI insights load
+    // MARK: - Build initial messages
 
-    private func loadAIInsights() async {
-        guard !transactions.isEmpty else { return }
-        isLoadingAI = true
-        aiError = nil
-        do {
-            aiInsights = try await GeminiInsightService.fetchInsights(
-                transactions: transactions,
-                categories:   categories
-            )
-        } catch {
-            aiError = error.localizedDescription
+    private func buildInitialMessages() {
+        guard chatMessages.isEmpty else { return }
+        var msgs: [BudgiMessage] = []
+
+        // Greeting
+        let firstName = displayName.components(separatedBy: " ").first ?? displayName
+        let name = firstName.isEmpty ? "Ozzy" : firstName
+        let greet: String
+        let hour = Calendar.current.component(.hour, from: .now)
+        switch hour {
+        case 5..<12:  greet = "Günaydın \(name) ☀️"
+        case 12..<18: greet = "İyi günler \(name) 👋"
+        case 18..<23: greet = "İyi akşamlar \(name) 🌙"
+        default:       greet = "Merhaba \(name) 🌙"
         }
-        isLoadingAI = false
+        let intro = insights.isEmpty
+            ? "Henüz analiz edecek yeterli veri yok. Birkaç işlem ekledikten sonra kişisel öneriler burada belirmeye başlar."
+            : "Bu hafta şunları fark ettim:"
+        msgs.append(BudgiMessage(role: .assistant, text: "\(greet) \(intro)", tag: nil, tagColor: .clear))
+
+        // Proactive insights
+        for insight in insights {
+            msgs.append(BudgiMessage(role: .assistant, text: insight.text, tag: insight.tag, tagColor: insight.accentColor))
+        }
+
+        withAnimation { chatMessages = msgs }
     }
 
     // MARK: - Header
@@ -110,8 +106,7 @@ struct BudgiView: View {
                 Circle()
                     .fill(LinearGradient(
                         colors: [BrandColor.primary, BrandColor.primaryLight],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
+                        startPoint: .topLeading, endPoint: .bottomTrailing
                     ))
                     .frame(width: 36, height: 36)
                 Image(systemName: "sparkles")
@@ -130,201 +125,138 @@ struct BudgiView: View {
                 }
             }
             Spacer()
-            Text("PREMIUM")
-                .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(.white)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 3)
-                .background(BrandColor.primary)
-                .clipShape(Capsule())
         }
         .padding(.horizontal, 20)
         .padding(.vertical, Spacing.md)
         .background(BrandColor.background)
-    }
-
-    // MARK: - Insight content
-
-    @ViewBuilder
-    private func insightContent(_ insight: BudgiInsight) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 4) {
-                Image(systemName: insight.icon)
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(insight.accentColor)
-                Text(insight.tag)
-                    .font(.brand(.caption))
-                    .foregroundStyle(insight.accentColor)
-                    .tracking(0.8)
-            }
-            Text(hideAmounts ? insight.redactedText : insight.text)
-                .font(.brand(.footnote))
-                .foregroundStyle(BrandColor.textPrimary)
-                .fixedSize(horizontal: false, vertical: true)
+        .overlay(alignment: .bottom) {
+            Divider().background(BrandColor.borderSubtle)
         }
     }
 
-    // MARK: - AI insights section
-
-    private var aiInsightsSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            if isLoadingAI {
-                assistantBubble {
-                    HStack(spacing: Spacing.sm) {
-                        ProgressView().tint(BrandColor.primary)
-                        Text("Harcamalarını analiz ediyorum…")
-                            .font(.brand(.footnote))
-                            .foregroundStyle(BrandColor.textTertiary)
-                    }
-                }
-            } else if let err = aiError {
-                assistantBubble(accent: BrandColor.expense) {
-                    Text(err)
-                        .font(.brand(.footnote))
-                        .foregroundStyle(BrandColor.expense)
-                }
-            } else {
-                ForEach(aiInsights, id: \.tag) { insight in
-                    assistantBubble(accent: accentColor(for: insight.accent)) {
-                        aiInsightContent(insight)
-                    }
-                    .transition(.opacity.combined(with: .move(edge: .bottom)))
-                }
-            }
-        }
-        .animation(.spring(response: 0.4), value: isLoadingAI)
-        .animation(.spring(response: 0.4), value: aiInsights.count)
-    }
+    // MARK: - Message bubble
 
     @ViewBuilder
-    private func aiInsightContent(_ insight: GeminiInsightService.AIInsight) -> some View {
-        let color = accentColor(for: insight.accent)
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 4) {
-                Image(systemName: insight.icon)
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(color)
-                Text(insight.tag)
-                    .font(.brand(.caption))
-                    .foregroundStyle(color)
-                    .tracking(0.8)
+    private func messageBubble(_ msg: BudgiMessage) -> some View {
+        if msg.role == .user {
+            HStack {
                 Spacer()
-                Text("AI")
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundStyle(BrandColor.primary.opacity(0.7))
-                    .padding(.horizontal, 5)
-                    .padding(.vertical, 2)
-                    .background(BrandColor.primary.opacity(0.1))
-                    .clipShape(Capsule())
+                Text(msg.text)
+                    .font(.brand(.body))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, Spacing.md)
+                    .padding(.vertical, Spacing.sm)
+                    .background(BrandColor.primary)
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .frame(maxWidth: 280, alignment: .trailing)
             }
-            Text(insight.text)
+        } else {
+            HStack(alignment: .top, spacing: Spacing.sm) {
+                // Budgi avatar
+                ZStack {
+                    Circle()
+                        .fill(LinearGradient(colors: [BrandColor.primary, BrandColor.primaryLight],
+                                             startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .frame(width: 28, height: 28)
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(.white)
+                }
+
+                // Card
+                if let tag = msg.tag, !tag.isEmpty {
+                    insightCard(msg: msg, tag: tag)
+                } else {
+                    plainBubble(text: msg.text)
+                }
+
+                Spacer()
+            }
+        }
+    }
+
+    private func insightCard(msg: BudgiMessage, tag: String) -> some View {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            HStack(spacing: 5) {
+                Image(systemName: tagIcon(tag))
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(msg.tagColor)
+                Text(tag)
+                    .font(.brand(.caption))
+                    .foregroundStyle(msg.tagColor)
+                    .tracking(0.8)
+            }
+            Text(hideAmounts ? redact(msg.text) : msg.text)
                 .font(.brand(.footnote))
                 .foregroundStyle(BrandColor.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)
         }
+        .padding(Spacing.md)
+        .frame(maxWidth: 300, alignment: .leading)
+        .background(msg.tagColor.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(msg.tagColor.opacity(0.3), lineWidth: 1)
+        )
     }
 
-    private func accentColor(for key: String) -> Color {
-        switch key {
-        case "income":  return BrandColor.income
-        case "expense": return BrandColor.expense
-        case "warning": return BrandColor.warning
-        case "info":    return BrandColor.info
-        default:        return BrandColor.primary
-        }
+    private func plainBubble(text: String) -> some View {
+        Text(text)
+            .font(.brand(.footnote))
+            .foregroundStyle(BrandColor.textPrimary)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(Spacing.md)
+            .frame(maxWidth: 300, alignment: .leading)
+            .glassCard(cornerRadius: 14)
     }
 
-    private var emptyInsights: some View {
-        assistantBubble {
-            Text("Henüz analiz edebileceğim yeterli veri yok. Birkaç işlem ekledikten sonra buraya gerçek insight'lar gelecek.")
-                .font(.brand(.footnote))
-                .foregroundStyle(BrandColor.textTertiary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-
-    // MARK: - Greeting
-
-    private var greetingText: String {
-        let name = displayName.isEmpty ? "Ozzy" : displayName.components(separatedBy: " ").first ?? displayName
-        let cal = Calendar.current
-        let hour = cal.component(.hour, from: .now)
-        let greeting: String
-        switch hour {
-        case 5..<12:  greeting = "Günaydın \(name) ☀️"
-        case 12..<18: greeting = "İyi günler \(name) 👋"
-        case 18..<23: greeting = "İyi akşamlar \(name) 🌙"
-        default:       greeting = "Merhaba \(name) 🌙"
-        }
-        if insights.isEmpty {
-            return "\(greeting) Henüz inceleyebileceğim yeterli işlem yok."
-        }
-        return "\(greeting) Bu ay için \(insights.count) önemli gözlem var:"
-    }
-
-    // MARK: - Sub-views
-
-    private func assistantBubble<Content: View>(accent: Color = BrandColor.surface, @ViewBuilder content: () -> Content) -> some View {
+    private var typingIndicator: some View {
         HStack(alignment: .top, spacing: Spacing.sm) {
             ZStack {
                 Circle()
                     .fill(LinearGradient(colors: [BrandColor.primary, BrandColor.primaryLight],
-                                        startPoint: .topLeading, endPoint: .bottomTrailing))
+                                         startPoint: .topLeading, endPoint: .bottomTrailing))
                     .frame(width: 28, height: 28)
                 Image(systemName: "sparkles")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(.white)
             }
-            VStack(alignment: .leading) {
-                content()
+            HStack(spacing: 4) {
+                ForEach(0..<3, id: \.self) { i in
+                    Circle()
+                        .fill(BrandColor.textTertiary)
+                        .frame(width: 7, height: 7)
+                        .opacity(isSending ? 1.0 : 0.3)
+                        .animation(.easeInOut(duration: 0.6).repeatForever().delay(Double(i) * 0.2), value: isSending)
+                }
             }
-            .padding(Spacing.md)
-            .background(BrandColor.surface.opacity(0.5))
-            .clipShape(RoundedRectangle(cornerRadius: Spacing.radiusMedium, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: Spacing.radiusMedium, style: .continuous)
-                    .strokeBorder(accent.opacity(0.3), lineWidth: 1)
-            )
+            .padding(.horizontal, Spacing.md)
+            .padding(.vertical, 12)
+            .glassCard(cornerRadius: 14)
             Spacer()
         }
     }
 
-    private var premiumGateCard: some View {
-        VStack(spacing: Spacing.md) {
-            Image(systemName: "lock.fill")
-                .font(.system(size: 24))
-                .foregroundStyle(BrandColor.primary)
-            Text("Budgi ile sohbet Premium özelliği")
-                .font(.brand(.subheadline))
-                .foregroundStyle(BrandColor.textPrimary)
-                .multilineTextAlignment(.center)
-            Text("Harcamalarını analiz et, sorular sor, finansal hedeflerine ulaş.")
-                .font(.brand(.footnote))
-                .foregroundStyle(BrandColor.textTertiary)
-                .multilineTextAlignment(.center)
-        }
-        .padding(Spacing.xl)
-        .frame(maxWidth: .infinity)
-        .glassCard(cornerRadius: Spacing.radiusMedium)
-        .overlay(
-            RoundedRectangle(cornerRadius: Spacing.radiusMedium, style: .continuous)
-                .strokeBorder(BrandColor.primary.opacity(0.2), lineWidth: 1)
-        )
-    }
+    // MARK: - Chat input bar
 
     private var chatInputBar: some View {
         HStack(spacing: Spacing.sm) {
             HStack(spacing: Spacing.sm) {
-                Text("Budgi'ye soru sor...")
+                TextField("Budgi'ye soru sor...", text: $chatInput, axis: .vertical)
                     .font(.brand(.body))
-                    .foregroundStyle(BrandColor.textTertiary)
+                    .foregroundStyle(BrandColor.textPrimary)
+                    .tint(BrandColor.primary)
+                    .lineLimit(4)
+                    .submitLabel(.send)
+                    .onSubmit { Task { await sendMessage() } }
                 Spacer()
                 Image(systemName: "mic")
                     .font(.system(size: 16))
                     .foregroundStyle(BrandColor.textTertiary)
             }
             .padding(.horizontal, Spacing.md)
-            .padding(.vertical, Spacing.md)
+            .padding(.vertical, 10)
             .background(BrandColor.surface.opacity(0.5))
             .clipShape(RoundedRectangle(cornerRadius: Spacing.radiusFull))
             .overlay(
@@ -332,28 +264,158 @@ struct BudgiView: View {
                     .strokeBorder(BrandColor.borderSubtle, lineWidth: 1)
             )
 
-            ZStack {
-                Circle()
-                    .fill(BrandColor.primary)
-                    .frame(width: 40, height: 40)
-                Image(systemName: "arrow.up")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.white)
+            Button {
+                Task { await sendMessage() }
+            } label: {
+                ZStack {
+                    Circle()
+                        .fill(chatInput.trimmingCharacters(in: .whitespaces).isEmpty ? BrandColor.surface : BrandColor.primary)
+                        .frame(width: 40, height: 40)
+                    Image(systemName: "arrow.up")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(chatInput.trimmingCharacters(in: .whitespaces).isEmpty ? BrandColor.textTertiary : .white)
+                }
             }
+            .disabled(chatInput.trimmingCharacters(in: .whitespaces).isEmpty || isSending)
+            .buttonStyle(.plain)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, Spacing.sm)
-        .padding(.bottom, 28)
+        .padding(.bottom, 20)
         .background(BrandColor.background.opacity(0.95))
         .overlay(alignment: .top) {
             Divider().background(BrandColor.borderSubtle)
         }
-        .disabled(!subscriptionService.isPremium)
-        .opacity(subscriptionService.isPremium ? 1.0 : 0.6)
+    }
+
+    // MARK: - Send message
+
+    private func sendMessage() async {
+        let text = chatInput.trimmingCharacters(in: .whitespaces)
+        guard !text.isEmpty, !isSending else { return }
+
+        chatInput = ""
+        chatMessages.append(BudgiMessage(role: .user, text: text, tag: nil, tagColor: .clear))
+        isSending = true
+
+        let context = buildContext()
+        let reply = (try? await BudgiChatService.send(message: text, context: context)) ?? "Şu an cevap veremiyorum. Lütfen daha sonra tekrar dene."
+        chatMessages.append(BudgiMessage(role: .assistant, text: reply, tag: nil, tagColor: BrandColor.primary))
+        isSending = false
+
+        // Scroll to bottom
+        if let last = chatMessages.last {
+            withAnimation { scrollProxy?.scrollTo(last.id, anchor: .bottom) }
+        }
+    }
+
+    private func buildContext() -> String {
+        let cal = Calendar.current
+        let comps = cal.dateComponents([.year, .month], from: .now)
+        guard let start = cal.date(from: comps) else { return "" }
+        let monthTxs = transactions.filter { $0.date >= start }
+        let income  = monthTxs.filter { $0.type == .income  }.reduce(Decimal(0)) { $0 + $1.amount }
+        let expense = monthTxs.filter { $0.type == .expense }.reduce(Decimal(0)) { $0 + $1.amount }
+
+        var catBreakdown = ""
+        var catTotals: [String: Decimal] = [:]
+        for tx in monthTxs where tx.type == .expense {
+            let catName = tx.category?.name ?? "Diğer"
+            catTotals[catName, default: 0] += tx.amount
+        }
+        let sorted = catTotals.sorted { $0.value > $1.value }.prefix(5)
+        catBreakdown = sorted.map { "- \($0.key): \($0.value.fullTRY)" }.joined(separator: "\n")
+
+        return """
+        Kullanıcının bu ayki finans özeti:
+        - Toplam gelir: \(income.fullTRY)
+        - Toplam gider: \(expense.fullTRY)
+        - Net: \((income - expense).fullTRY)
+        Top gider kategorileri:
+        \(catBreakdown.isEmpty ? "- Henüz veri yok" : catBreakdown)
+        Toplam işlem sayısı: \(transactions.count)
+        """
+    }
+
+    // MARK: - Helpers
+
+    private func tagIcon(_ tag: String) -> String {
+        switch tag {
+        case "TASARRUF": return "checkmark.seal.fill"
+        case "AÇIK":     return "exclamationmark.triangle.fill"
+        case "ANOMALİ":  return "exclamationmark.triangle.fill"
+        case "ÖNERİ":   return "lightbulb.fill"
+        case "ARTIŞ":    return "arrow.up.circle.fill"
+        case "AZALIŞ":   return "arrow.down.circle.fill"
+        default:          return "sparkles"
+        }
+    }
+
+    private func redact(_ text: String) -> String {
+        text.replacingOccurrences(of: #"₺[\d,\.]+"#, with: "₺••••", options: .regularExpression)
     }
 }
 
-// MARK: - Insight model
+// MARK: - Chat message model
+
+struct BudgiMessage: Identifiable {
+    let id = UUID()
+    let role: Role
+    let text: String
+    let tag: String?
+    let tagColor: Color
+
+    enum Role { case user, assistant }
+}
+
+// MARK: - Budgi Chat Service
+
+enum BudgiChatService {
+
+    static func send(message: String, context: String) async throws -> String {
+        let apiKey = Bundle.main.infoDictionary?["GEMINI_API_KEY"] as? String ?? ""
+        guard !apiKey.isEmpty else { return "API anahtarı yapılandırılmamış." }
+
+        let urlString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=\(apiKey)"
+        guard let url = URL(string: urlString) else { return "Bağlantı hatası." }
+
+        let systemPrompt = """
+        Sen Budgi'sin — kullanıcının kişisel finans asistanısın. Türkçe konuşuyorsun.
+        Kısa, samimi, ve pratik cevaplar ver. Gereksiz uzun açıklamalar yapma.
+        Sadece finansal konularda yardımcı ol.
+
+        \(context)
+        """
+
+        let requestBody: [String: Any] = [
+            "contents": [
+                ["role": "user", "parts": [["text": systemPrompt + "\n\nKullanıcı: " + message]]]
+            ],
+            "generationConfig": ["maxOutputTokens": 300, "temperature": 0.7]
+        ]
+
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: requestBody)
+
+        let (data, response) = try await URLSession.shared.data(for: req)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+            return "Sunucu hatası. Lütfen tekrar dene."
+        }
+
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let candidates = json["candidates"] as? [[String: Any]],
+              let content = candidates.first?["content"] as? [String: Any],
+              let parts = content["parts"] as? [[String: Any]],
+              let text = parts.first?["text"] as? String
+        else { return "Yanıt ayrıştırılamadı." }
+
+        return text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
+// MARK: - Insight model + engine (unchanged)
 
 struct BudgiInsight: Identifiable {
     let id = UUID()
@@ -363,8 +425,6 @@ struct BudgiInsight: Identifiable {
     let text: String
     let redactedText: String
 }
-
-// MARK: - Insight engine
 
 enum BudgiInsightEngine {
 
@@ -379,36 +439,14 @@ enum BudgiInsightEngine {
 
         let currentTxs = transactions.filter { $0.date >= currentStart && $0.date <= now }
         let prevTxs    = transactions.filter { $0.date >= prevStart && $0.date <= prevEnd }
-
         guard !currentTxs.isEmpty else { return [] }
 
         var results: [BudgiInsight] = []
-
-        // 1. Monthly savings
-        if let savings = savingsInsight(current: currentTxs) {
-            results.append(savings)
-        }
-
-        // 2. Top spending category
-        if let top = topCategoryInsight(current: currentTxs, categories: categories) {
-            results.append(top)
-        }
-
-        // 3. Month-over-month expense change
-        if let mom = monthOverMonthInsight(current: currentTxs, previous: prevTxs) {
-            results.append(mom)
-        }
-
-        // 4. Biggest single expense
-        if let big = biggestExpenseInsight(current: currentTxs) {
-            results.append(big)
-        }
-
-        // 5. Daily average
-        if let daily = dailyAverageInsight(current: currentTxs, start: currentStart, now: now) {
-            results.append(daily)
-        }
-
+        if let s = savingsInsight(current: currentTxs) { results.append(s) }
+        if let t = topCategoryInsight(current: currentTxs, categories: categories) { results.append(t) }
+        if let m = monthOverMonthInsight(current: currentTxs, previous: prevTxs) { results.append(m) }
+        if let b = biggestExpenseInsight(current: currentTxs) { results.append(b) }
+        if let d = dailyAverageInsight(current: currentTxs, start: currentStart, now: now) { results.append(d) }
         return results
     }
 
@@ -417,17 +455,15 @@ enum BudgiInsightEngine {
         let expense = current.filter { $0.type == .expense }.reduce(Decimal(0)) { $0 + $1.amount }
         guard income > 0 else { return nil }
         let savings = income - expense
-        let isPositive = savings >= 0
-        let savingsStr = savings.fullTRY
-        let incomeStr  = income.fullTRY
+        let isPos = savings >= 0
         return BudgiInsight(
-            tag: isPositive ? "TASARRUF" : "AÇIK",
-            icon: isPositive ? "checkmark.seal.fill" : "exclamationmark.triangle.fill",
-            accentColor: isPositive ? BrandColor.income : BrandColor.expense,
-            text: isPositive
-                ? "Bu ay \(incomeStr) gelirinden \(savingsStr) tasarruf ettin. Harika gidişat!"
+            tag: isPos ? "TASARRUF" : "AÇIK",
+            icon: isPos ? "checkmark.seal.fill" : "exclamationmark.triangle.fill",
+            accentColor: isPos ? BrandColor.income : BrandColor.expense,
+            text: isPos
+                ? "Bu ay \(income.fullTRY) gelirinden \(savings.fullTRY) tasarruf ettin."
                 : "Bu ay giderlerin gelirini \((-savings).fullTRY) aştı. Dikkat et.",
-            redactedText: isPositive ? "Bu ay tasarruf ettin. Harika gidişat!" : "Bu ay giderlerin gelirini aştı. Dikkat et."
+            redactedText: isPos ? "Bu ay tasarruf ettin." : "Bu ay giderlerin gelirini aştı."
         )
     }
 
@@ -435,70 +471,47 @@ enum BudgiInsightEngine {
         let expenses = current.filter { $0.type == .expense }
         guard !expenses.isEmpty else { return nil }
         var dict: [UUID: Decimal] = [:]
-        for tx in expenses {
-            guard let cat = tx.category else { continue }
-            dict[cat.id, default: 0] += tx.amount
-        }
+        for tx in expenses { guard let cat = tx.category else { continue }; dict[cat.id, default: 0] += tx.amount }
         guard let topId = dict.max(by: { $0.value < $1.value })?.key,
-              let cat = categories.first(where: { $0.id == topId })
-        else { return nil }
+              let cat = categories.first(where: { $0.id == topId }) else { return nil }
         let amount = dict[topId]!
         let total  = expenses.reduce(Decimal(0)) { $0 + $1.amount }
         let pct    = total > 0 ? Int((Double(truncating: (amount / total) as NSDecimalNumber) * 100).rounded()) : 0
-        return BudgiInsight(
-            tag: "EN YÜKSEK KATEGORİ",
-            icon: "chart.pie.fill",
-            accentColor: BrandColor.primary,
-            text: "\(cat.name) bu ayın en büyük gider kalemi: \(amount.fullTRY) (toplam giderlerin %\(pct)'i).",
-            redactedText: "\(cat.name) bu ayın en büyük gider kalemi (toplam giderlerin %\(pct)'i)."
-        )
+        return BudgiInsight(tag: "EN YÜKSEK KATEGORİ", icon: "chart.pie.fill", accentColor: BrandColor.primary,
+                            text: "\(cat.name) bu ayın en büyük gider kalemi: \(amount.fullTRY) (toplam giderlerin %\(pct)'i).",
+                            redactedText: "\(cat.name) bu ayın en büyük gider kalemi (%\(pct)).")
     }
 
     private static func monthOverMonthInsight(current: [Transaction], previous: [Transaction]) -> BudgiInsight? {
-        let cur = current.filter { $0.type == .expense }.reduce(Decimal(0)) { $0 + $1.amount }
+        let cur = current.filter  { $0.type == .expense }.reduce(Decimal(0)) { $0 + $1.amount }
         let prv = previous.filter { $0.type == .expense }.reduce(Decimal(0)) { $0 + $1.amount }
         guard prv > 0 else { return nil }
-        let curD = (cur as NSDecimalNumber).doubleValue
-        let prvD = (prv as NSDecimalNumber).doubleValue
-        let pct  = ((curD - prvD) / prvD) * 100
-        let absP = abs(pct)
-        guard absP >= 5 else { return nil }
+        let pct = (((cur as NSDecimalNumber).doubleValue - (prv as NSDecimalNumber).doubleValue) / (prv as NSDecimalNumber).doubleValue) * 100
+        guard abs(pct) >= 5 else { return nil }
         let isUp = pct > 0
-        return BudgiInsight(
-            tag: isUp ? "ARTIŞ" : "AZALIŞ",
-            icon: isUp ? "arrow.up.circle.fill" : "arrow.down.circle.fill",
-            accentColor: isUp ? BrandColor.expense : BrandColor.income,
-            text: "Bu ay giderlerin geçen aya göre %\(String(format: "%.0f", absP)) \(isUp ? "arttı" : "azaldı"): \(cur.fullTRY) → \(prv.fullTRY).",
-            redactedText: "Bu ay giderlerin geçen aya göre %\(String(format: "%.0f", absP)) \(isUp ? "arttı" : "azaldı")."
-        )
+        return BudgiInsight(tag: isUp ? "ANOMALİ" : "AZALIŞ", icon: isUp ? "arrow.up.circle.fill" : "arrow.down.circle.fill",
+                            accentColor: isUp ? BrandColor.expense : BrandColor.income,
+                            text: "\(cur.compactTRY) → geçen \(prv.compactTRY). Bu ay giderlerin %\(String(format: "%.0f", abs(pct))) \(isUp ? "arttı" : "azaldı").",
+                            redactedText: "Bu ay giderlerin %\(String(format: "%.0f", abs(pct))) \(isUp ? "arttı" : "azaldı").")
     }
 
     private static func biggestExpenseInsight(current: [Transaction]) -> BudgiInsight? {
         guard let big = current.filter({ $0.type == .expense }).max(by: { $0.amount < $1.amount }) else { return nil }
-        return BudgiInsight(
-            tag: "EN BÜYÜK İŞLEM",
-            icon: "dollarsign.circle.fill",
-            accentColor: BrandColor.warning,
-            text: "Bu ayın en büyük gideri: \"\(big.note)\" — \(big.amount.fullTRY).",
-            redactedText: "Bu ayın en büyük gideri: \"\(big.note)\" — ••••."
-        )
+        return BudgiInsight(tag: "EN BÜYÜK İŞLEM", icon: "dollarsign.circle.fill", accentColor: BrandColor.warning,
+                            text: "Bu ayın en büyük gideri: \"\(big.note)\" — \(big.amount.fullTRY).",
+                            redactedText: "Bu ayın en büyük gideri: \"\(big.note)\" — ••••.")
     }
 
     private static func dailyAverageInsight(current: [Transaction], start: Date, now: Date) -> BudgiInsight? {
         let expenses = current.filter { $0.type == .expense }
         guard !expenses.isEmpty else { return nil }
         let total = expenses.reduce(Decimal(0)) { $0 + $1.amount }
-        let days = max(1, Calendar.current.dateComponents([.day], from: start, to: now).day ?? 1)
+        let days  = max(1, Calendar.current.dateComponents([.day], from: start, to: now).day ?? 1)
         let daily = total / Decimal(days)
-        let cal = Calendar.current
-        let daysInMonth = cal.range(of: .day, in: .month, for: now)?.count ?? 30
+        let daysInMonth = Calendar.current.range(of: .day, in: .month, for: now)?.count ?? 30
         let projected = daily * Decimal(daysInMonth)
-        return BudgiInsight(
-            tag: "GÜNLÜK ORTALAMA",
-            icon: "calendar",
-            accentColor: BrandColor.info,
-            text: "Günlük ortalama harcaman \(daily.fullTRY). Bu hızla ay sonu tahmini: \(projected.fullTRY).",
-            redactedText: "Günlük ortalama harcaman hesaplandı. Bu hızla ay sonuna kadar devam edecek."
-        )
+        return BudgiInsight(tag: "ÖNERİ", icon: "lightbulb.fill", accentColor: BrandColor.info,
+                            text: "Günlük ortalama harcaman \(daily.fullTRY). Bu hızla ay sonu tahmini: \(projected.fullTRY).",
+                            redactedText: "Günlük ortalama harcaman hesaplandı.")
     }
 }

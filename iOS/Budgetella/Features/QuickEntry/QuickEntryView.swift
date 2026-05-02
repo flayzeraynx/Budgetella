@@ -3,6 +3,7 @@
 //  Budgetella
 //
 //  Hızlı giriş — 3 mod: manuel, sesli (premium), kamera (premium)
+//  Mod, FAB blob gesture'ından initialMode olarak gelir.
 //
 
 import SwiftUI
@@ -18,12 +19,25 @@ struct QuickEntryView: View {
     @Environment(\.modelContext) private var modelContext
 
     @Query(sort: \Category.sortOrder) private var categories: [Category]
+    @Query private var settingsArr: [AppSettings]
     @AppStorage("currentUserId") private var userId = ""
 
+    private var preferredScheme: ColorScheme? {
+        switch settingsArr.first?.theme ?? .system {
+        case .light:  return .light
+        case .dark:   return .dark
+        case .system: return nil
+        }
+    }
+
     @State private var vm = QuickEntryViewModel()
-    @State private var mode: EntryMode = .manual
+    @State private var mode: EntryMode
     @State private var isTyping = false
     @State private var showDiscardAlert = false
+
+    init(initialMode: EntryMode = .manual) {
+        _mode = State(initialValue: initialMode)
+    }
 
     private var hasContent: Bool {
         vm.amountDecimal > 0 || !vm.note.isEmpty || vm.selectedCategoryId != nil
@@ -35,21 +49,6 @@ struct QuickEntryView: View {
                 BrandColor.background.ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    // Mode selector — right-aligned below nav bar
-                    HStack {
-                        Spacer()
-                        HStack(spacing: Spacing.xs) {
-                            modePill(.manual, icon: "keyboard",    label: "Manuel")
-                            modePill(.voice,  icon: "mic.fill",    label: "Sesli")
-                            modePill(.camera, icon: "camera.fill", label: "Kamera")
-                        }
-                        .padding(3)
-                        .background(BrandColor.surface.opacity(0.4))
-                        .clipShape(Capsule())
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
-
                     switch mode {
                     case .manual:
                         ManualEntryContent(vm: vm, categories: categories, mode: $mode, isTyping: $isTyping)
@@ -59,15 +58,15 @@ struct QuickEntryView: View {
                             ))
 
                     case .voice:
-                        VoiceEntryContent(vm: vm, mode: $mode)
-                        .transition(.opacity)
+                        VoiceEntryContent(vm: vm, categories: categories, mode: $mode)
+                            .transition(.opacity)
 
                     case .camera:
                         CameraEntryContent(vm: vm, mode: $mode)
-                        .transition(.opacity)
+                            .transition(.opacity)
                     }
 
-                    // Full-width save button — only for manual mode, hidden while keyboard is up
+                    // Save button — only for manual mode, hidden while keyboard is up
                     if mode == .manual && !isTyping {
                         Button {
                             vm.save(modelContext: modelContext, categories: categories, userId: userId)
@@ -105,6 +104,7 @@ struct QuickEntryView: View {
             .animation(.spring(response: 0.3), value: mode)
             .navigationBarTitleDisplayMode(.inline)
             .interactiveDismissDisabled(hasContent)
+            .toolbar(mode == .voice ? .hidden : .visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("İptal") {
@@ -116,7 +116,6 @@ struct QuickEntryView: View {
                     }
                     .foregroundStyle(BrandColor.textSecondary)
                 }
-
             }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
@@ -136,69 +135,7 @@ struct QuickEntryView: View {
                 )
             }
         }
-    }
-
-    // MARK: - Mode pill (toolbar)
-
-    private func modePill(_ m: EntryMode, icon: String, label: String) -> some View {
-        Button {
-            withAnimation(.spring(response: 0.3)) { mode = m }
-        } label: {
-            HStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.system(size: 11, weight: .semibold))
-                Text(label)
-                    .font(.brand(.caption))
-            }
-            .foregroundStyle(mode == m ? .white : BrandColor.textTertiary)
-            .padding(.horizontal, Spacing.sm)
-            .padding(.vertical, 6)
-            .background(mode == m ? BrandColor.primary : Color.clear)
-            .clipShape(Capsule())
-        }
-        .buttonStyle(.plain)
-    }
-
-    // MARK: - Premium gate
-
-    private func premiumGate(icon: String, title: String, subtitle: String) -> some View {
-        VStack(spacing: Spacing.xl) {
-            Spacer()
-            ZStack {
-                Circle()
-                    .fill(BrandColor.primary.opacity(0.1))
-                    .frame(width: 100, height: 100)
-                Image(systemName: icon)
-                    .font(.system(size: 42, weight: .light))
-                    .foregroundStyle(BrandColor.primary)
-                    .symbolRenderingMode(.hierarchical)
-            }
-            VStack(spacing: Spacing.sm) {
-                Text(title)
-                    .font(.brand(.title))
-                    .foregroundStyle(BrandColor.textPrimary)
-                Text(subtitle)
-                    .font(.brand(.body))
-                    .foregroundStyle(BrandColor.textTertiary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-
-            HStack(spacing: 4) {
-                Image(systemName: "lock.fill")
-                    .font(.system(size: 11, weight: .semibold))
-                Text("Premium özellik — V1.1'de geliyor")
-                    .font(.brand(.footnote))
-            }
-            .foregroundStyle(BrandColor.primary)
-            .padding(.horizontal, Spacing.lg)
-            .padding(.vertical, Spacing.sm)
-            .background(BrandColor.primary.opacity(0.1))
-            .clipShape(Capsule())
-
-            Spacer()
-        }
+        .preferredColorScheme(preferredScheme)
     }
 }
 

@@ -78,6 +78,27 @@ extension BudgetellaApp {
         try? context.save()
     }
 
+    static func migrateAddMissingCategories(in context: ModelContext) {
+        guard !UserDefaults.standard.bool(forKey: "migration_addMissingCategories_v1") else { return }
+        let existing = (try? context.fetch(FetchDescriptor<Category>())) ?? []
+        let existingSlugs = Set(existing.map { $0.slug })
+        let missing = CategorySlug.allCases.filter { !existingSlugs.contains($0.rawValue) }
+        missing.enumerated().forEach { index, slug in
+            context.insert(Category(
+                userId: "local",
+                name: slug.turkishName,
+                slug: slug.rawValue,
+                type: slug.type,
+                iconName: slug.defaultIcon,
+                colorHex: slug.defaultColorHex,
+                isDefault: true,
+                sortOrder: existing.count + index
+            ))
+        }
+        if !missing.isEmpty { try? context.save() }
+        UserDefaults.standard.set(true, forKey: "migration_addMissingCategories_v1")
+    }
+
     static func migrateEnglishCategoryNames(in context: ModelContext) {
         guard !UserDefaults.standard.bool(forKey: "migration_englishCategoryNames_v1") else { return }
         let all = (try? context.fetch(FetchDescriptor<Category>())) ?? []

@@ -2,8 +2,6 @@
 //  DashboardView.swift
 //  Budgetella
 //
-//  03 · Glass premium dashboard — yıllık özet + aylık kart + AI insight + kategoriler
-//
 
 import SwiftUI
 import SwiftData
@@ -17,43 +15,39 @@ struct DashboardView: View {
     private var categories: [Category]
 
     @AppStorage("displayName") private var displayName = "Ozzy"
+    @AppStorage("userPhotoURL") private var userPhotoURL = ""
     @State private var vm = DashboardViewModel()
     @State private var showSettings = false
     @Environment(\.hideAmounts) private var hideAmounts
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: Spacing.lg) {
+            VStack(alignment: .leading, spacing: 0) {
 
-                // ── Header
-                header
-                    .padding(.horizontal, 24)
-                    .padding(.top, 8)
+                // ── Hero gradient section
+                heroSection
+                    .padding(.bottom, Spacing.lg)
 
-                // ── Year card
-                YearSummaryCard(
-                    year: vm.selectedYear,
-                    income: vm.yearlyIncome(from: transactions),
-                    expense: vm.yearlyExpense(from: transactions),
-                    availableYears: vm.availableYears,
-                    onYearChange: { vm.selectedYear = $0 }
-                )
-                .padding(.horizontal, 20)
-
-                // ── Month card
-                MonthSummaryCard(
+                // ── Combined year + month card
+                DashboardMainCard(
                     year: vm.selectedYear,
                     month: vm.selectedMonth,
-                    income: vm.monthlyIncome(from: transactions),
-                    expense: vm.monthlyExpense(from: transactions),
+                    yearIncome: vm.yearlyIncome(from: transactions),
+                    yearExpense: vm.yearlyExpense(from: transactions),
+                    monthIncome: vm.monthlyIncome(from: transactions),
+                    monthExpense: vm.monthlyExpense(from: transactions),
                     dailyData: vm.dailyFlowData(from: transactions),
+                    availableYears: vm.availableYears,
+                    onYearChange: { vm.selectedYear = $0 },
                     onMonthChange: { vm.selectedMonth = $0 }
                 )
                 .padding(.horizontal, 20)
+                .padding(.bottom, Spacing.lg)
 
                 // ── AI Insight
                 AIInsightCard()
                     .padding(.horizontal, 20)
+                    .padding(.bottom, Spacing.lg)
 
                 // ── Top categories
                 if !topExpenseCategories.isEmpty {
@@ -61,10 +55,8 @@ struct DashboardView: View {
                         .padding(.horizontal, 20)
                 }
 
-                // Tab bar clearance
                 Spacer(minLength: 100)
             }
-            .padding(.top, 8)
         }
         .background(BrandColor.background.ignoresSafeArea())
         .scrollIndicators(.hidden)
@@ -73,45 +65,78 @@ struct DashboardView: View {
         }
     }
 
-    // MARK: - Header
+    // MARK: - Hero section
 
-    private var header: some View {
-        HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(vm.greeting)
-                    .font(.brand(.subheadline))
-                    .foregroundStyle(BrandColor.textSecondary)
-                HStack(spacing: 6) {
-                    Text(displayName)
-                        .font(.brand(.title))
-                        .foregroundStyle(BrandColor.textPrimary)
-                    Text("👋")
-                        .font(.system(size: 22))
+    private var heroSection: some View {
+        ZStack(alignment: .bottom) {
+            LinearGradient(
+                colors: [BrandColor.primary.opacity(0.28), BrandColor.primary.opacity(0.0)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea(edges: .top)
+
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(vm.greeting)
+                        .font(.brand(.subheadline))
+                        .foregroundStyle(BrandColor.textSecondary)
+                    HStack(spacing: 6) {
+                        Text(displayName)
+                            .font(.brand(.title))
+                            .foregroundStyle(BrandColor.textPrimary)
+                        Text("👋")
+                            .font(.system(size: 22))
+                    }
                 }
+                Spacer()
+                avatarBadge
             }
-            Spacer()
-            avatarBadge
+            .padding(.horizontal, 24)
+            .padding(.top, 16)
+            .padding(.bottom, Spacing.xl)
         }
     }
 
+    // MARK: - Avatar
+
     private var avatarBadge: some View {
         Button { showSettings = true } label: {
-            ZStack {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [BrandColor.primary, BrandColor.primaryLight],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 40, height: 40)
-                Text(String(displayName.prefix(1)).uppercased())
-                    .font(.brand(.headline))
-                    .foregroundStyle(.white)
+            Group {
+                if let url = URL(string: userPhotoURL), !userPhotoURL.isEmpty {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .success(let img):
+                            img.resizable().scaledToFill()
+                                .frame(width: 40, height: 40)
+                                .clipShape(Circle())
+                        default:
+                            initialsCircle
+                        }
+                    }
+                } else {
+                    initialsCircle
+                }
             }
         }
         .buttonStyle(.plain)
+    }
+
+    private var initialsCircle: some View {
+        ZStack {
+            Circle()
+                .fill(
+                    LinearGradient(
+                        colors: [BrandColor.primary, BrandColor.primaryLight],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .frame(width: 40, height: 40)
+            Text(String(displayName.prefix(1)).uppercased())
+                .font(.brand(.headline))
+                .foregroundStyle(.white)
+        }
     }
 
     // MARK: - Category section
@@ -119,7 +144,7 @@ struct DashboardView: View {
     private var topExpenseCategories: [(Category, Decimal)] {
         let monthly = transactions.filter {
             $0.type == .expense &&
-            Calendar.current.component(.year, from: $0.date) == vm.selectedYear &&
+            Calendar.current.component(.year,  from: $0.date) == vm.selectedYear &&
             Calendar.current.component(.month, from: $0.date) == vm.selectedMonth
         }
         var totals: [UUID: Decimal] = [:]

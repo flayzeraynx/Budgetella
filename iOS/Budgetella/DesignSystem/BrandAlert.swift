@@ -55,13 +55,11 @@ private struct BrandAlertOverlay: View {
 
     var body: some View {
         ZStack {
-            // Frosted glass backdrop — material blurs the sibling content below in the ZStack
-            ZStack {
-                Rectangle().fill(.regularMaterial)
-                Color.black.opacity(0.45)
-            }
-            .ignoresSafeArea()
-            .opacity(appeared ? 1 : 0)
+            // Frosted glass backdrop
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .ignoresSafeArea()
+                .opacity(appeared ? 1 : 0)
 
             VStack(spacing: 0) {
                 VStack(spacing: 6) {

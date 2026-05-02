@@ -49,6 +49,7 @@ public final class AuthService: NSObject {
                     UserDefaults.standard.set(user.displayName ?? "", forKey: "displayName")
                     UserDefaults.standard.set(user.email ?? "", forKey: "userEmail")
                     UserDefaults.standard.set(user.uid, forKey: "currentUserId")
+                    UserDefaults.standard.set(user.photoURL?.absoluteString ?? "", forKey: "userPhotoURL")
                     UserDefaults.standard.set(true, forKey: "isSignedIn")
                 } else {
                     KeychainHelper.delete(.firebaseUid)

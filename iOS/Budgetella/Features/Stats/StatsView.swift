@@ -25,13 +25,7 @@ struct StatsView: View {
 
                 ScrollView {
                     VStack(spacing: Spacing.lg) {
-
                         genelContent
-
-                        // Budgi AI teaser
-                        AIInsightCard()
-                            .padding(.horizontal, 20)
-
                         Spacer(minLength: 100)
                     }
                     .padding(.top, Spacing.sm)
@@ -93,6 +87,10 @@ struct StatsView: View {
 
             // Donut chart card
             donutCard(total: total, change: change, breakdown: breakdown, isIncome: showingIncome)
+                .padding(.horizontal, 20)
+
+            // Budgi AI insight — above categories
+            AIInsightCard()
                 .padding(.horizontal, 20)
 
             // Category list
@@ -182,9 +180,10 @@ struct StatsView: View {
 
     private func categoryList(breakdown: [CategoryStat], total: Decimal) -> some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("Kategori dağılımı")
-                .font(.brand(.subheadline))
-                .foregroundStyle(BrandColor.textPrimary)
+            Text("KATEGORİ DAĞILIMI")
+                .font(.brand(.caption))
+                .foregroundStyle(BrandColor.textTertiary)
+                .tracking(1.2)
                 .padding(.horizontal, 4)
 
             VStack(spacing: Spacing.xs) {
@@ -303,7 +302,7 @@ struct StatsView: View {
             }
         } label: {
             HStack(spacing: 4) {
-                Text(turkishMonthShort(vm.selectedMonth))
+                Text(turkishMonthFull(vm.selectedMonth))
                     .font(.brand(.subheadline))
                     .foregroundStyle(BrandColor.textPrimary)
                 Image(systemName: "chevron.down")
