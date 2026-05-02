@@ -52,7 +52,6 @@ struct ThemePickerSheet: View {
                 }
             }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
-            .preferredColorScheme(.dark)
         }
         .presentationDetents([.medium])
         .presentationDragIndicator(.visible)
@@ -117,7 +116,6 @@ struct LanguagePickerSheet: View {
                 }
             }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
-            .preferredColorScheme(.dark)
         }
         .presentationDetents([.medium])
         .presentationDragIndicator(.visible)
@@ -177,7 +175,6 @@ struct CurrencyPickerSheet: View {
                 }
             }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
-            .preferredColorScheme(.dark)
         }
         .presentationDetents([.medium])
         .presentationDragIndicator(.visible)

@@ -35,6 +35,21 @@ struct QuickEntryView: View {
                 BrandColor.background.ignoresSafeArea()
 
                 VStack(spacing: 0) {
+                    // Mode selector — right-aligned below nav bar
+                    HStack {
+                        Spacer()
+                        HStack(spacing: Spacing.xs) {
+                            modePill(.manual, icon: "keyboard",    label: "Manuel")
+                            modePill(.voice,  icon: "mic.fill",    label: "Sesli")
+                            modePill(.camera, icon: "camera.fill", label: "Kamera")
+                        }
+                        .padding(3)
+                        .background(BrandColor.surface.opacity(0.4))
+                        .clipShape(Capsule())
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+
                     switch mode {
                     case .manual:
                         ManualEntryContent(vm: vm, categories: categories, mode: $mode, isTyping: $isTyping)
@@ -44,19 +59,11 @@ struct QuickEntryView: View {
                             ))
 
                     case .voice:
-                        premiumGate(
-                            icon: "mic.fill",
-                            title: "Sesli Giriş",
-                            subtitle: "Harcamanı sesli anlat, AI anlasın ve kaydetsin."
-                        )
+                        VoiceEntryContent(vm: vm, mode: $mode)
                         .transition(.opacity)
 
                     case .camera:
-                        premiumGate(
-                            icon: "camera.fill",
-                            title: "Fiş Tarama",
-                            subtitle: "Kameranla fişi tara, AI tutarı ve mağazayı otomatik okusun."
-                        )
+                        CameraEntryContent(vm: vm, mode: $mode)
                         .transition(.opacity)
                     }
 
@@ -109,6 +116,7 @@ struct QuickEntryView: View {
                     }
                     .foregroundStyle(BrandColor.textSecondary)
                 }
+
             }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
@@ -128,7 +136,27 @@ struct QuickEntryView: View {
                 )
             }
         }
-        .preferredColorScheme(.dark)
+    }
+
+    // MARK: - Mode pill (toolbar)
+
+    private func modePill(_ m: EntryMode, icon: String, label: String) -> some View {
+        Button {
+            withAnimation(.spring(response: 0.3)) { mode = m }
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 11, weight: .semibold))
+                Text(label)
+                    .font(.brand(.caption))
+            }
+            .foregroundStyle(mode == m ? .white : BrandColor.textTertiary)
+            .padding(.horizontal, Spacing.sm)
+            .padding(.vertical, 6)
+            .background(mode == m ? BrandColor.primary : Color.clear)
+            .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Premium gate
@@ -226,6 +254,5 @@ struct CategoryPickerView: View {
                 }
             }
         }
-        .preferredColorScheme(.dark)
     }
 }

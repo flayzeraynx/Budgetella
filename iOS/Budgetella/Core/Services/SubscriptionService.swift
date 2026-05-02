@@ -36,6 +36,12 @@ public final class SubscriptionService {
 
     nonisolated(unsafe) private var transactionListener: Task<Void, Never>?
 
+    // MARK: - Dev override (TestFlight / developer accounts)
+
+    private static let devPremiumUIDs: Set<String> = [
+        "7n48wY1HdMWD8ZdX00hzqwZAcsb2" // Ozzy
+    ]
+
     // MARK: - Product IDs
 
     public enum ProductID {
@@ -56,9 +62,9 @@ public final class SubscriptionService {
 
     // MARK: - Setup
 
-    public func setup() async {
+    public func setup(userId: String = "") async {
         await fetchProducts()
-        await refreshStatus()
+        await refreshStatus(userId: userId)
     }
 
     // MARK: - Products
@@ -78,7 +84,11 @@ public final class SubscriptionService {
     // MARK: - Status
 
     /// Apple'ın sunucusunda verify edilmiş aktif entitlement'ları kontrol eder.
-    public func refreshStatus() async {
+    public func refreshStatus(userId: String = "") async {
+        if !userId.isEmpty && Self.devPremiumUIDs.contains(userId) {
+            isPremium = true
+            return
+        }
         var hasPremium = false
         for await result in StoreKit.Transaction.currentEntitlements {
             if case .verified(let tx) = result,

@@ -17,6 +17,14 @@ struct MainTabView: View {
 
     private var hideAmounts: Bool { settingsArr.first?.hideAmounts ?? false }
 
+    // V1 is dark-first. System theme defaults to dark until light mode is fully supported.
+    private var preferredScheme: ColorScheme {
+        switch settingsArr.first?.theme ?? .system {
+        case .light: return .light
+        default:     return .dark
+        }
+    }
+
     var body: some View {
         ZStack(alignment: .bottom) {
             TabView(selection: $selectedTab) {
@@ -43,13 +51,13 @@ struct MainTabView: View {
             CustomTabBar(selected: $selectedTab, onFABTap: { showQuickEntry = true })
         }
         .environment(\.hideAmounts, hideAmounts)
+        .preferredColorScheme(preferredScheme)
         .ignoresSafeArea(.keyboard)
         .sheet(isPresented: $showQuickEntry) {
             QuickEntryView()
                 .presentationDetents([.large])
                 .presentationDragIndicator(.hidden)
         }
-        .preferredColorScheme(.dark)
     }
 
 }
@@ -99,8 +107,7 @@ struct CustomTabBar: View {
             tabItem(.stats, icon: "chart.bar.fill", label: "Stats")
             tabItem(.ai,    icon: "sparkles",        label: "AI")
         }
-        .padding(.horizontal, Spacing.sm)
-        .padding(.top, Spacing.sm)
+        .padding(.top, 4)
         .safeAreaPadding(.bottom)
         .background(
             BrandColor.background2

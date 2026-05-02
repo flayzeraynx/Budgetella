@@ -11,6 +11,7 @@ import StoreKit
 struct PaywallView: View {
 
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("currentUserId") private var currentUserId = ""
     @State private var subscriptionService = SubscriptionService()
     @State private var selectedPlan: Plan = .yearly
     @State private var isPurchasing = false
@@ -71,8 +72,7 @@ struct PaywallView: View {
                 }
             }
         }
-        .preferredColorScheme(.dark)
-        .task { await subscriptionService.setup() }
+        .task { await subscriptionService.setup(userId: currentUserId) }
         .alert("Hata", isPresented: Binding(
             get: { errorMessage != nil },
             set: { if !$0 { errorMessage = nil } }

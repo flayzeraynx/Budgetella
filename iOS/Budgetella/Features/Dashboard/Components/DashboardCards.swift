@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 import Charts
 
 // MARK: - Year Summary Card
@@ -289,11 +290,43 @@ struct DailyFlowChart: View {
 // MARK: - AI Insight Card
 
 struct AIInsightCard: View {
+
+    @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
+    @Query(sort: \Category.sortOrder) private var categories: [Category]
+    @State private var pickedIndex = 0
+
+    private var allInsights: [(tag: String, text: String, accentColor: Color)] {
+        var result: [(tag: String, text: String, accentColor: Color)] = []
+        if let cached = GeminiInsightService.cachedInsights() {
+            result += cached.map { ($0.tag, $0.text, accentColorFor($0.accent)) }
+        }
+        let ruleBased = BudgiInsightEngine.compute(transactions: transactions, categories: categories)
+        result += ruleBased.map { ($0.tag, $0.text, $0.accentColor) }
+        return result
+    }
+
+    private var displayInsight: (tag: String, text: String, accentColor: Color) {
+        guard !allInsights.isEmpty else {
+            return ("BUDGİ · AI", "Harcama verilerin analiz edilmeye hazır. Birkaç işlem ekledikten sonra kişisel öneriler buraya gelecek.", BrandColor.primary)
+        }
+        return allInsights[pickedIndex % allInsights.count]
+    }
+
+    private func accentColorFor(_ key: String) -> Color {
+        switch key {
+        case "income":  return BrandColor.income
+        case "expense": return BrandColor.expense
+        case "warning": return BrandColor.warning
+        case "info":    return BrandColor.info
+        default:        return BrandColor.primary
+        }
+    }
+
     var body: some View {
+        let insight = displayInsight
         HStack(spacing: Spacing.md) {
-            // Purple left accent bar
             RoundedRectangle(cornerRadius: 2)
-                .fill(BrandColor.primary)
+                .fill(insight.accentColor)
                 .frame(width: 3)
 
             VStack(alignment: .leading, spacing: 4) {
@@ -308,18 +341,19 @@ struct AIInsightCard: View {
                             .tracking(0.8)
                     }
                     Spacer()
-                    Text("UYARI")
+                    Text(insight.tag)
                         .font(.system(size: 9, weight: .bold))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(BrandColor.expense)
+                        .background(insight.accentColor)
                         .clipShape(Capsule())
                 }
-                Text("Bu ay harcamalarınız geçen aya göre %23 artış gösterdi. Alışveriş ve yemek kategorilerini gözden geçirmenizi öneririm.")
+                Text(insight.text)
                     .font(.brand(.footnote))
                     .foregroundStyle(BrandColor.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(3)
             }
         }
         .padding(Spacing.lg)
@@ -328,5 +362,9 @@ struct AIInsightCard: View {
             RoundedRectangle(cornerRadius: Spacing.radiusMedium, style: .continuous)
                 .strokeBorder(BrandColor.primary.opacity(0.25), lineWidth: 1)
         )
+        .onAppear {
+            let count = allInsights.count
+            if count > 1 { pickedIndex = Int.random(in: 0..<count) }
+        }
     }
 }

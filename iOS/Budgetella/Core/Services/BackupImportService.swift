@@ -45,7 +45,7 @@ enum BackupImportService {
         "Maaş":            .salary,
         "Freelance":       .freelance,
         "Serbest Çalışma": .freelance,
-        "Sale":            .investments,
+        "Sale":            .productSale,
         "Yatırım":         .investments,
         "Hediyeler":       .gifts,
         "Yiyecek":         .food,
@@ -163,11 +163,11 @@ enum BackupImportService {
             }
         }
 
-        // Create new category for unknown names
+        // Create new category — use Turkish name when slug is known
         let slug = categoryNameToSlug[name]
         let newCat = Category(
             userId: userId,
-            name: name,
+            name: slug?.turkishName ?? name,
             slug: slug?.rawValue,
             type: slug?.type ?? .expense,
             iconName: slug?.defaultIcon ?? "tag",

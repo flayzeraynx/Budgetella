@@ -118,7 +118,6 @@ struct ProfileView: View {
                 }
             }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
-            .preferredColorScheme(.dark)
             .sheet(isPresented: $showChangePassword) {
                 ChangePasswordView(authService: authService)
             }
@@ -226,7 +225,6 @@ struct ChangePasswordView: View {
                 }
             }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
-            .preferredColorScheme(.dark)
         }
         .presentationDetents([.medium])
     }

@@ -24,18 +24,17 @@ struct ContentView: View {
     @Query private var settingsArr: [AppSettings]
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("isSignedIn") private var isSignedIn = false
-    @AppStorage("appTheme") private var appTheme = "system"
     @State private var appState: AppState = .splash
 
     private var biometricLockEnabled: Bool {
         settingsArr.first?.biometricLockEnabled ?? false
     }
 
-    private var colorScheme: ColorScheme? {
-        switch appTheme {
-        case "dark":  return .dark
-        case "light": return .light
-        default:      return nil
+    // V1 dark-first: system defaults to dark until light mode design is complete
+    private var colorScheme: ColorScheme {
+        switch settingsArr.first?.theme ?? .system {
+        case .light: return .light
+        default:     return .dark
         }
     }
 
@@ -91,6 +90,7 @@ struct ContentView: View {
         .onAppear {
             BudgetellaApp.seedCategoriesIfNeeded(in: modelContext)
             BudgetellaApp.seedSettingsIfNeeded(in: modelContext)
+            BudgetellaApp.migrateEnglishCategoryNames(in: modelContext)
         }
         .onChange(of: appState) { old, new in
             // Login'den (auth → main) geçişte Firestore'dan sync et

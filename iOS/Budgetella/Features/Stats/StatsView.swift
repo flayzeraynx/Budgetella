@@ -15,6 +15,7 @@ struct StatsView: View {
     @Query(sort: \Category.sortOrder) private var categories: [Category]
     @State private var vm = StatsViewModel()
     @State private var didAutoSelect = false
+    @State private var showingIncome = false
     @Environment(\.hideAmounts) private var hideAmounts
 
     var body: some View {
@@ -25,15 +26,11 @@ struct StatsView: View {
                 ScrollView {
                     VStack(spacing: Spacing.lg) {
 
-                        // Segment picker
-                        segmentPicker
-                            .padding(.horizontal, 20)
+                        genelContent
 
-                        switch vm.selectedSegment {
-                        case .genel:  genelContent
-                        case .butce:  premiumSection(title: "Bütçe Takibi", icon: "chart.bar.doc.horizontal")
-                        case .tahmin: premiumSection(title: "Ay Sonu Tahmini", icon: "wand.and.sparkles")
-                        }
+                        // Budgi AI teaser
+                        AIInsightCard()
+                            .padding(.horizontal, 20)
 
                         Spacer(minLength: 100)
                     }
@@ -41,14 +38,13 @@ struct StatsView: View {
                 }
             }
             .navigationTitle("İstatistik")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     monthPicker
                 }
             }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
-            .preferredColorScheme(.dark)
             .onAppear {
                 guard !didAutoSelect else { return }
                 vm.autoSelectPeriod(from: transactions)
@@ -60,37 +56,43 @@ struct StatsView: View {
     // MARK: - Segment picker
 
     private var segmentPicker: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: 2) {
             ForEach(StatsViewModel.Segment.allCases, id: \.self) { seg in
                 Button {
                     withAnimation(.spring(response: 0.3)) { vm.selectedSegment = seg }
                 } label: {
                     Text(seg.rawValue)
-                        .font(.brand(.subheadline))
+                        .font(.brand(.footnote))
                         .foregroundStyle(vm.selectedSegment == seg ? .white : BrandColor.textTertiary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, Spacing.sm)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
                         .background(vm.selectedSegment == seg ? BrandColor.primary : Color.clear)
                         .clipShape(Capsule())
                 }
                 .buttonStyle(.plain)
             }
         }
-        .padding(4)
-        .background(BrandColor.surface.opacity(0.4))
+        .padding(3)
+        .background(BrandColor.surface.opacity(0.5))
         .clipShape(Capsule())
     }
 
     // MARK: - Genel content
 
     private var genelContent: some View {
-        let breakdown = vm.categoryBreakdown(from: transactions, categories: categories)
-        let total     = vm.totalExpense(from: transactions)
-        let change    = vm.percentChange(from: transactions)
+        let expenseBreakdown = vm.categoryBreakdown(from: transactions, categories: categories)
+        let incomeBreakdown  = vm.incomBreakdown(from: transactions, categories: categories)
+        let breakdown = showingIncome ? incomeBreakdown : expenseBreakdown
+        let total     = showingIncome ? vm.totalIncome(from: transactions) : vm.totalExpense(from: transactions)
+        let change    = showingIncome ? nil : vm.percentChange(from: transactions)
 
         return VStack(spacing: Spacing.lg) {
+            // Income / Expense toggle
+            incomeExpenseToggle
+                .padding(.horizontal, 20)
+
             // Donut chart card
-            donutCard(total: total, change: change, breakdown: breakdown)
+            donutCard(total: total, change: change, breakdown: breakdown, isIncome: showingIncome)
                 .padding(.horizontal, 20)
 
             // Category list
@@ -104,51 +106,77 @@ struct StatsView: View {
         }
     }
 
-    private func donutCard(total: Decimal, change: Double?, breakdown: [CategoryStat]) -> some View {
-        VStack(spacing: Spacing.md) {
+    private var incomeExpenseToggle: some View {
+        HStack(spacing: 4) {
+            ForEach([(false, "Gider", BrandColor.expense), (true, "Gelir", BrandColor.income)], id: \.0) { isIncome, label, color in
+                Button {
+                    withAnimation(.spring(response: 0.3)) { showingIncome = isIncome }
+                } label: {
+                    Text(label)
+                        .font(.brand(.footnote))
+                        .foregroundStyle(showingIncome == isIncome ? .white : BrandColor.textTertiary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 6)
+                        .background(showingIncome == isIncome ? color : Color.clear)
+                        .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(3)
+        .background(BrandColor.surface.opacity(0.5))
+        .clipShape(Capsule())
+        .frame(maxWidth: .infinity, alignment: .center)
+    }
+
+    private func donutCard(total: Decimal, change: Double?, breakdown: [CategoryStat], isIncome: Bool) -> some View {
+        HStack(alignment: .center, spacing: Spacing.lg) {
+            // Left: donut only, no labels inside
             ZStack {
                 if breakdown.isEmpty {
                     Circle()
-                        .stroke(BrandColor.borderSubtle, lineWidth: 24)
-                        .frame(width: 160, height: 160)
+                        .stroke(BrandColor.borderSubtle, lineWidth: 20)
+                        .frame(width: 110, height: 110)
                 } else {
                     Chart(breakdown) { stat in
                         SectorMark(
                             angle: .value("Tutar", (stat.amount as NSDecimalNumber).doubleValue),
-                            innerRadius: .ratio(0.62),
+                            innerRadius: .ratio(0.58),
                             angularInset: 2
                         )
                         .cornerRadius(4)
                         .foregroundStyle(Color(hex: stat.category.colorHex))
                     }
-                    .frame(width: 160, height: 160)
+                    .frame(width: 110, height: 110)
                 }
-
-                VStack(spacing: 2) {
-                    Text("TOPLAM GİDER")
-                        .font(.brand(.caption))
-                        .foregroundStyle(BrandColor.textTertiary)
-                        .tracking(0.8)
-                    Text(hideAmounts ? "••••" : total.fullTRY)
-                        .font(.brand(.title))
-                        .foregroundStyle(BrandColor.textPrimary)
-                        .minimumScaleFactor(0.6)
-                        .lineLimit(1)
-                    if let pct = change {
-                        HStack(spacing: 2) {
-                            Image(systemName: pct >= 0 ? "arrow.up" : "arrow.down")
-                                .font(.system(size: 9, weight: .bold))
-                            Text(String(format: "%%%.1f geçen aya göre", abs(pct)))
-                                .font(.brand(.caption))
-                        }
-                        .foregroundStyle(pct >= 0 ? BrandColor.expense : BrandColor.income)
-                    }
-                }
-                .frame(width: 110)
-                .multilineTextAlignment(.center)
             }
+
+            // Right: labels with room to breathe
+            VStack(alignment: .leading, spacing: 6) {
+                Text(isIncome ? "TOPLAM GELİR" : "TOPLAM GİDER")
+                    .font(.brand(.caption))
+                    .foregroundStyle(BrandColor.textTertiary)
+                    .tracking(0.8)
+
+                Text(hideAmounts ? "••••" : total.fullTRY)
+                    .font(.brand(.displayHero))
+                    .foregroundStyle(isIncome ? BrandColor.income : BrandColor.textPrimary)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
+
+                if let pct = change {
+                    HStack(spacing: 3) {
+                        Image(systemName: pct >= 0 ? "arrow.up" : "arrow.down")
+                            .font(.system(size: 10, weight: .bold))
+                        Text(String(format: "%.1f%% geçen aya göre", abs(pct)))
+                            .font(.brand(.footnote))
+                    }
+                    .foregroundStyle(pct >= 0 ? BrandColor.expense : BrandColor.income)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(Spacing.xl)
+        .padding(Spacing.lg)
         .glassCard(cornerRadius: Spacing.radiusMedium)
     }
 

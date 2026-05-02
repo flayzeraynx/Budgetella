@@ -80,7 +80,6 @@ struct SubscriptionView: View {
                 }
             }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
-            .preferredColorScheme(.dark)
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)

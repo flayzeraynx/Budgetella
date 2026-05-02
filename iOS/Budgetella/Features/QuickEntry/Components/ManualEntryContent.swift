@@ -20,45 +20,37 @@ struct ManualEntryContent: View {
     var body: some View {
         VStack(spacing: 0) {
 
-            // ── Type toggle (Gider / Gelir)
+            // 1 ── Type toggle (Gider / Gelir)
             typeToggle
                 .padding(.horizontal, 20)
-                .padding(.top, Spacing.lg)
+                .padding(.top, Spacing.md)
 
-            Spacer(minLength: isTyping ? Spacing.md : Spacing.xl)
-
-            // ── Amount display — hidden when typing to give more space
             if !isTyping {
-                amountDisplay
-                    .padding(.horizontal, 20)
-
-                Spacer(minLength: Spacing.md)
-
-                // ── Mode selector
-                modeSelectorPills
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, Spacing.sm)
-            }
-
-            // ── Description field — always visible
-            descriptionField
-                .padding(.horizontal, 20)
-
-            if isTyping {
-                // Description expands to fill remaining space — no extra content needed
-            } else {
-                // Normal mode: categories, AI chips, numpad
+                // 2 ── Category chips
                 categoryChipsRow
-                    .padding(.top, Spacing.xs)
+                    .padding(.top, Spacing.sm)
 
                 if !vm.aiSuggestions.isEmpty {
                     aiSuggestionRow
                         .padding(.horizontal, 20)
-                        .padding(.top, Spacing.sm)
+                        .padding(.top, Spacing.xs)
                 }
 
-                Spacer(minLength: Spacing.lg)
+                // 3 ── Amount display
+                amountDisplay
+                    .padding(.horizontal, 20)
+                    .padding(.top, Spacing.md)
+            }
 
+            // 4 ── Description field (min 2 lines)
+            descriptionField
+                .padding(.horizontal, 20)
+                .padding(.top, Spacing.sm)
+
+            if !isTyping {
+                Spacer(minLength: Spacing.md)
+
+                // 5 ── Numpad pushed to bottom
                 NumpadGrid(
                     onDigit:   { vm.appendDigit($0) },
                     onDecimal: { vm.appendDecimal() },
@@ -174,25 +166,35 @@ struct ManualEntryContent: View {
 
     private var descriptionField: some View {
         let radius: CGFloat = isTyping ? 20 : Spacing.radiusSmall
-        return HStack(alignment: isTyping ? .top : .center, spacing: Spacing.sm) {
+        return HStack(alignment: .top, spacing: Spacing.sm) {
             Image(systemName: "text.alignleft")
                 .font(.system(size: 14))
                 .foregroundStyle(BrandColor.textTertiary)
-                .padding(.top, isTyping ? 2 : 0)
-            VStack(alignment: .leading, spacing: 0) {
-                TextField("Açıklama ekle…", text: $vm.note)
-                    .font(.brand(.body))
-                    .foregroundStyle(BrandColor.textPrimary)
-                    .tint(BrandColor.primary)
-                    .submitLabel(.done)
-                    .focused($noteFieldFocused)
-                    .onSubmit { noteFieldFocused = false }
-                if isTyping { Spacer(minLength: 0) }
+                .padding(.top, 3)
+
+            TextField("Açıklama ekle…", text: $vm.note, axis: .vertical)
+                .font(.brand(.body))
+                .foregroundStyle(BrandColor.textPrimary)
+                .tint(BrandColor.primary)
+                .lineLimit(isTyping ? 10 : 2)
+                .submitLabel(.done)
+                .focused($noteFieldFocused)
+                .onSubmit { noteFieldFocused = false }
+
+            if isTyping {
+                Button {
+                    noteFieldFocused = false
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 22))
+                        .foregroundStyle(BrandColor.textTertiary)
+                }
+                .buttonStyle(.plain)
             }
         }
         .padding(.horizontal, Spacing.md)
         .padding(.vertical, Spacing.md)
-        .frame(maxHeight: isTyping ? .infinity : nil)
+        .frame(minHeight: 64, maxHeight: isTyping ? .infinity : 64)
         .background(BrandColor.surface.opacity(0.4))
         .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
         .overlay(

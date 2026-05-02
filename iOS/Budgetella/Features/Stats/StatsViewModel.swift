@@ -45,7 +45,15 @@ import Foundation
     }
 
     func categoryBreakdown(from txs: [Transaction], categories: [Category]) -> [CategoryStat] {
-        let filtered = txs.filter { $0.type == .expense && inPeriod($0) }
+        breakdown(type: .expense, from: txs, categories: categories)
+    }
+
+    func incomBreakdown(from txs: [Transaction], categories: [Category]) -> [CategoryStat] {
+        breakdown(type: .income, from: txs, categories: categories)
+    }
+
+    private func breakdown(type: TransactionType, from txs: [Transaction], categories: [Category]) -> [CategoryStat] {
+        let filtered = txs.filter { $0.type == type && inPeriod($0) }
         let total = filtered.reduce(Decimal(0)) { $0 + $1.amount }
         guard total > 0 else { return [] }
 

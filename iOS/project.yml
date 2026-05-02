@@ -16,6 +16,10 @@ options:
   createIntermediateGroups: true
   generateEmptyDirectories: true
 
+configFiles:
+  Debug: Budgetella/Configuration/Secrets.xcconfig
+  Release: Budgetella/Configuration/Secrets.xcconfig
+
 settings:
   base:
     SWIFT_VERSION: "6.0"

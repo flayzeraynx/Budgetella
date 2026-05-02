@@ -31,6 +31,9 @@ struct SettingsView: View {
     @State private var showImportResult = false
     @State private var importResultMessage = ""
     @State private var isImporting = false
+    @State private var exportURL: URL?
+    @State private var showExportSheet = false
+    @State private var supportURL: URL?
 
     private var settings: AppSettings? { settingsArr.first }
 
@@ -128,7 +131,12 @@ struct SettingsView: View {
                             iconColor: BrandColor.primaryLight,
                             title: "Dışa Aktar",
                             value: nil
-                        ) { }
+                        ) {
+                            if let url = try? BackupExportService.export(from: modelContext) {
+                                exportURL = url
+                                showExportSheet = true
+                            }
+                        }
 
                         settingsRow(
                             icon: isImporting ? "arrow.triangle.2.circlepath" : "square.and.arrow.down",
@@ -147,11 +155,17 @@ struct SettingsView: View {
                     // Support
                     Section("Destek") {
                         settingsRow(icon: "questionmark.circle", iconColor: BrandColor.info,
-                                    title: "Yardım & Destek", value: nil) { }
+                                    title: "Yardım & Destek", value: nil) {
+                            supportURL = URL(string: "https://budgetella.app/support")
+                        }
                         settingsRow(icon: "lock.shield", iconColor: BrandColor.textTertiary,
-                                    title: "Gizlilik Politikası", value: nil) { }
+                                    title: "Gizlilik Politikası", value: nil) {
+                            supportURL = URL(string: "https://budgetella.app/privacy")
+                        }
                         settingsRow(icon: "doc.text", iconColor: BrandColor.textTertiary,
-                                    title: "Kullanım Koşulları", value: nil) { }
+                                    title: "Kullanım Koşulları", value: nil) {
+                            supportURL = URL(string: "https://budgetella.app/terms")
+                        }
                     }
                     .listRowBackground(BrandColor.surface.opacity(0.4))
 
@@ -236,6 +250,20 @@ struct SettingsView: View {
             .sheet(isPresented: $showCurrencyPicker) {
                 CurrencyPickerSheet(settings: settings)
             }
+            .sheet(isPresented: $showExportSheet) {
+                if let url = exportURL {
+                    ShareSheet(items: [url])
+                        .ignoresSafeArea()
+                }
+            }
+            .sheet(isPresented: Binding(
+                get: { supportURL != nil },
+                set: { if !$0 { supportURL = nil } }
+            )) {
+                if let url = supportURL {
+                    SafariSheet(url: url).ignoresSafeArea()
+                }
+            }
             .brandAlert(
                 title: "Çıkış Yap",
                 message: "Hesabınızdan çıkış yapılacak.",
@@ -257,7 +285,7 @@ struct SettingsView: View {
                 ]
             )
         }
-        .task { await subscriptionService.setup() }
+        .task { await subscriptionService.setup(userId: currentUserId) }
         .fileImporter(
             isPresented: $showImportPicker,
             allowedContentTypes: [.json],

@@ -94,7 +94,6 @@ struct PaywallModalView: View {
             }
             .padding(.horizontal, 24)
         }
-        .preferredColorScheme(.dark)
         .fullScreenCover(isPresented: $showFullPaywall) {
             PaywallView()
         }

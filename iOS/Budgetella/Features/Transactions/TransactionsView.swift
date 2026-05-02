@@ -44,8 +44,11 @@ struct TransactionsView: View {
                 }
             }
             .navigationTitle("İşlemler")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    typeFilterPicker
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showFilter = true
@@ -66,7 +69,6 @@ struct TransactionsView: View {
                 }
             }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
-            .preferredColorScheme(.dark)
             .sheet(isPresented: $showFilter) {
                 CategoryFilterSheet(vm: vm, categories: categories)
             }
@@ -113,32 +115,40 @@ struct TransactionsView: View {
         )
     }
 
-    // MARK: - Filter chips
+    // MARK: - Type filter (toolbar principal)
+
+    private var typeFilterPicker: some View {
+        HStack(spacing: 2) {
+            ForEach(
+                [(label: "Tümü", type: nil as TransactionType?),
+                 (label: "Gelir", type: .income),
+                 (label: "Gider", type: .expense)],
+                id: \.label
+            ) { item in
+                Button {
+                    withAnimation(.spring(response: 0.28)) { vm.typeFilter = item.type }
+                } label: {
+                    Text(item.label)
+                        .font(.brand(.footnote))
+                        .foregroundStyle(vm.typeFilter == item.type ? .white : BrandColor.textSecondary)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(vm.typeFilter == item.type ? BrandColor.primary : Color.clear)
+                        .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(3)
+        .background(BrandColor.surface.opacity(0.5))
+        .clipShape(Capsule())
+    }
+
+    // MARK: - Category filter chips
 
     private var filterChips: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: Spacing.xs) {
-                // Type filters
-                filterChip(label: "Tümü", isActive: vm.typeFilter == nil) {
-                    withAnimation(.spring(response: 0.28)) { vm.typeFilter = nil }
-                }
-                filterChip(label: "Gelir", isActive: vm.typeFilter == .income) {
-                    withAnimation(.spring(response: 0.28)) {
-                        vm.typeFilter = vm.typeFilter == .income ? nil : .income
-                    }
-                }
-                filterChip(label: "Gider", isActive: vm.typeFilter == .expense) {
-                    withAnimation(.spring(response: 0.28)) {
-                        vm.typeFilter = vm.typeFilter == .expense ? nil : .expense
-                    }
-                }
-
-                Divider()
-                    .frame(width: 1, height: 20)
-                    .background(BrandColor.borderSubtle)
-                    .padding(.horizontal, 2)
-
-                // Category filters
                 ForEach(categories) { cat in
                     let isActive = vm.categoryFilter == cat.id
                     filterChip(
@@ -324,7 +334,6 @@ private struct CategoryFilterSheet: View {
                 }
             }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
-            .preferredColorScheme(.dark)
         }
         .presentationDetents([.medium])
         .presentationDragIndicator(.visible)

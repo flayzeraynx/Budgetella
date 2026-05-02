@@ -77,4 +77,15 @@ extension BudgetellaApp {
         context.insert(AppSettings(userId: "local"))
         try? context.save()
     }
+
+    static func migrateEnglishCategoryNames(in context: ModelContext) {
+        guard !UserDefaults.standard.bool(forKey: "migration_englishCategoryNames_v1") else { return }
+        let all = (try? context.fetch(FetchDescriptor<Category>())) ?? []
+        let renames: [String: String] = ["Sale": "Ürün Satışı", "Utilities": "Faturalar"]
+        for cat in all {
+            if let newName = renames[cat.name] { cat.name = newName }
+        }
+        try? context.save()
+        UserDefaults.standard.set(true, forKey: "migration_englishCategoryNames_v1")
+    }
 }
