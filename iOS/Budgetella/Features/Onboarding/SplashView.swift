@@ -36,20 +36,7 @@ struct SplashView: View {
                             .frame(width: 150, height: 150)
 
                         // Icon
-                        ZStack {
-                            Circle()
-                                .fill(
-                                    LinearGradient(
-                                        colors: [BrandColor.primary, BrandColor.primaryLight],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                                .frame(width: 80, height: 80)
-                            Image(systemName: "chart.line.uptrend.xyaxis")
-                                .font(.system(size: 34, weight: .semibold))
-                                .foregroundStyle(.white)
-                        }
+                        BudgetellaLogoView(size: 80)
                     }
                     .scaleEffect(logoScale)
                     .opacity(logoOpacity)

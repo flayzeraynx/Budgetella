@@ -144,13 +144,13 @@ struct AuthWelcomeView: View {
     // MARK: - ToS attributed string
 
     private var tosAttributedString: AttributedString {
-        var prefix = AttributedString("Devam ederek ")
+        let prefix = AttributedString("Devam ederek ")
 
         var terms = AttributedString("Şartlar")
         terms.link = URL(string: "https://budgetella.app/terms")
         terms.inlinePresentationIntent = .stronglyEmphasized
 
-        var mid = AttributedString(" ve ")
+        let mid = AttributedString(" ve ")
 
         var privacy = AttributedString("Gizlilik")
         privacy.link = URL(string: "https://budgetella.app/privacy")
@@ -164,14 +164,7 @@ struct AuthWelcomeView: View {
     // MARK: - Sub-views
 
     private var appIcon: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(BrandColor.primary)
-                .frame(width: 36, height: 36)
-            Image(systemName: "wallet.pass.fill")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(.white)
-        }
+        BudgetellaLogoView(size: 36)
     }
 
     private var googleLogo: some View {

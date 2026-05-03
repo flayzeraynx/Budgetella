@@ -93,18 +93,6 @@ struct ContentView: View {
             BudgetellaApp.migrateEnglishCategoryNames(in: modelContext)
             BudgetellaApp.migrateAddMissingCategories(in: modelContext)
         }
-        .onChange(of: appState) { old, new in
-            // Login'den (auth → main) geçişte Firestore'dan sync et
-            if old == .auth, new == .main {
-                Task {
-                    guard let uid = Auth.auth().currentUser?.uid else { return }
-                    try? await FirestoreService.shared.fetchAndSync(
-                        userId: uid,
-                        modelContext: modelContext
-                    )
-                }
-            }
-        }
         .onChange(of: isSignedIn) { _, newValue in
             if newValue, appState == .auth {
                 // Only auto-navigate for providers that skip the in-app OTP flow

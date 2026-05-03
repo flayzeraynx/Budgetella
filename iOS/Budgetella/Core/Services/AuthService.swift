@@ -34,8 +34,8 @@ public final class AuthService: NSObject {
     public var errorMessage: String?
 
     // MARK: - Private
-    nonisolated(unsafe) private var authStateListener: AuthStateDidChangeListenerHandle?
-    nonisolated(unsafe) private var currentNonce: String?
+    private var authStateListener: AuthStateDidChangeListenerHandle?
+    private var currentNonce: String?
 
     // MARK: - Init / Deinit
 
@@ -63,8 +63,10 @@ public final class AuthService: NSObject {
     }
 
     deinit {
-        if let handle = authStateListener {
-            Auth.auth().removeStateDidChangeListener(handle)
+        MainActor.assumeIsolated {
+            if let handle = authStateListener {
+                Auth.auth().removeStateDidChangeListener(handle)
+            }
         }
     }
 
@@ -231,15 +233,15 @@ extension AuthService: ASAuthorizationControllerDelegate {
     ) {
         guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
               let tokenData = credential.identityToken,
-              let idToken = String(data: tokenData, encoding: .utf8),
-              let nonce = currentNonce else { return }
+              let idToken = String(data: tokenData, encoding: .utf8) else { return }
 
-        let firebaseCredential = OAuthProvider.appleCredential(
-            withIDToken: idToken,
-            rawNonce: nonce,
-            fullName: credential.fullName
-        )
         Task { @MainActor in
+            guard let nonce = self.currentNonce else { return }
+            let firebaseCredential = OAuthProvider.appleCredential(
+                withIDToken: idToken,
+                rawNonce: nonce,
+                fullName: credential.fullName
+            )
             do {
                 try await Auth.auth().signIn(with: firebaseCredential)
             } catch {

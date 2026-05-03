@@ -44,6 +44,7 @@ struct BudgiView: View {
                                 }
                                 if isSending {
                                     typingIndicator
+                                        .id("typing")
                                 }
                             }
                             .padding(.horizontal, 20)
@@ -55,6 +56,18 @@ struct BudgiView: View {
                         .onAppear {
                             scrollProxy = proxy
                             buildInitialMessages()
+                        }
+                        .onChange(of: chatMessages.count) { _, _ in
+                            withAnimation(.easeOut(duration: 0.25)) {
+                                proxy.scrollTo(chatMessages.last?.id, anchor: .bottom)
+                            }
+                        }
+                        .onChange(of: isSending) { _, sending in
+                            if sending {
+                                withAnimation(.easeOut(duration: 0.25)) {
+                                    proxy.scrollTo("typing", anchor: .bottom)
+                                }
+                            }
                         }
                     }
 
@@ -311,11 +324,6 @@ struct BudgiView: View {
         chatMessages.append(BudgiMessage(role: .assistant, text: reply, tag: nil, accent: "primary"))
         isSending = false
         saveMessages()
-
-        // Scroll to bottom
-        if let last = chatMessages.last {
-            withAnimation { scrollProxy?.scrollTo(last.id, anchor: .bottom) }
-        }
     }
 
     private func buildContext() -> String {

@@ -167,7 +167,7 @@ struct AuthSignUpView: View {
         terms.link = URL(string: "https://budgetella.app/terms")
         terms.inlinePresentationIntent = .stronglyEmphasized
 
-        var mid = AttributedString(" ve ")
+        let mid = AttributedString(" ve ")
 
         var privacy = AttributedString("gizlilik politikası")
         privacy.link = URL(string: "https://budgetella.app/privacy")

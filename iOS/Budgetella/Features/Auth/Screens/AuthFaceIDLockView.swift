@@ -27,15 +27,8 @@ struct AuthFaceIDLockView: View {
                 Spacer()
 
                 // App icon
-                ZStack {
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .fill(BrandColor.primary)
-                        .frame(width: 72, height: 72)
-                    Image(systemName: "wallet.pass.fill")
-                        .font(.system(size: 32, weight: .semibold))
-                        .foregroundStyle(.white)
-                }
-                .padding(.bottom, Spacing.xl)
+                BudgetellaLogoView(size: 72)
+                    .padding(.bottom, Spacing.xl)
 
                 Text("Budgetella")
                     .font(.brand(.title))

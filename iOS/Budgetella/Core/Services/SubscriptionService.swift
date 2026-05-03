@@ -34,7 +34,7 @@ public final class SubscriptionService {
     /// App Store abonelik yönetimi deep link (Apple 5.1.1(v) zorunlu).
     public let managementURL = URL(string: "itms-apps://apps.apple.com/account/subscriptions")!
 
-    nonisolated(unsafe) private var transactionListener: Task<Void, Never>?
+    private var transactionListener: Task<Void, Never>?
 
     // MARK: - Dev override (TestFlight / developer accounts)
 
@@ -57,7 +57,7 @@ public final class SubscriptionService {
     }
 
     deinit {
-        transactionListener?.cancel()
+        MainActor.assumeIsolated { transactionListener?.cancel() }
     }
 
     // MARK: - Setup

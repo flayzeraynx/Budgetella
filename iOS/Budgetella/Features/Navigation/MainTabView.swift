@@ -11,6 +11,8 @@ import SwiftData
 
 struct MainTabView: View {
 
+    @Environment(\.modelContext) private var modelContext
+    @AppStorage("currentUserId") private var currentUserId = ""
     @State private var selectedTab: AppTab = .home
     @State private var showQuickEntry = false
     @State private var entryMode: EntryMode = .manual
@@ -59,6 +61,13 @@ struct MainTabView: View {
             QuickEntryView(initialMode: entryMode)
                 .presentationDetents([.large])
                 .presentationDragIndicator(.hidden)
+        }
+        .task(id: currentUserId) {
+            guard !currentUserId.isEmpty else { return }
+            try? await FirestoreService.shared.fetchAndSync(
+                userId: currentUserId,
+                modelContext: modelContext
+            )
         }
     }
 
