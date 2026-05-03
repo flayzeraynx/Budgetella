@@ -29,21 +29,23 @@ struct SubscriptionView: View {
 
                         // Actions
                         VStack(spacing: Spacing.sm) {
-                            // Manage subscription (Apple deep link)
-                            actionButton(
-                                icon: "gear",
-                                title: "Aboneliği Yönet",
-                                subtitle: "App Store üzerinden düzenle",
-                                color: BrandColor.primary
-                            ) {
-                                UIApplication.shared.open(subscriptionService.managementURL)
+                            // Manage subscription — only for renewable subscriptions, not lifetime
+                            if subscriptionService.isSubscriptionActive {
+                                actionButton(
+                                    icon: "gear",
+                                    title: "Aboneliği Yönet",
+                                    subtitle: "App Store üzerinden düzenle",
+                                    color: BrandColor.primary
+                                ) {
+                                    UIApplication.shared.open(subscriptionService.managementURL)
+                                }
                             }
 
                             // Restore purchases
                             actionButton(
                                 icon: "arrow.clockwise",
                                 title: "Satın Alımları Geri Yükle",
-                                subtitle: "Önceki aboneliğini geri yükle",
+                                subtitle: "Önceki satın alımını geri yükle",
                                 color: BrandColor.info
                             ) {
                                 Task { await restore() }
@@ -126,12 +128,12 @@ struct SubscriptionView: View {
     }
 
     private var activePlanLabel: String {
-        if subscriptionService.monthlyProduct != nil {
-            return "Aylık"
-        } else if subscriptionService.yearlyProduct != nil {
-            return "Yıllık"
+        switch subscriptionService.activePlanProductId {
+        case SubscriptionService.ProductID.monthly:  return "Aylık"
+        case SubscriptionService.ProductID.yearly:   return "Yıllık"
+        case SubscriptionService.ProductID.lifetime: return "Ömür Boyu"
+        default: return "Premium"
         }
-        return "Premium"
     }
 
     private func statColumn(label: String, value: String) -> some View {

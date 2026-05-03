@@ -22,6 +22,7 @@ public final class SubscriptionService {
 
     public var isSubscriptionActive = false
     public var isLifetimePurchased  = false
+    public var activePlanProductId: String?
     public var isLoading = false
     public var errorMessage: String?
 
@@ -92,23 +93,32 @@ public final class SubscriptionService {
         if !userId.isEmpty && Self.devPremiumUIDs.contains(userId) {
             isSubscriptionActive = true
             isLifetimePurchased  = false
+            activePlanProductId  = ProductID.yearly
             return
         }
         var hasSubscription = false
         var hasLifetime     = false
+        var planId: String?
         for await result in StoreKit.Transaction.currentEntitlements {
             guard case .verified(let tx) = result else { continue }
             switch tx.productID {
             case ProductID.monthly, ProductID.yearly:
-                if tx.productType == .autoRenewable { hasSubscription = true }
+                if tx.productType == .autoRenewable {
+                    hasSubscription = true
+                    planId = tx.productID
+                }
             case ProductID.lifetime:
-                if tx.productType == .nonConsumable { hasLifetime = true }
+                if tx.productType == .nonConsumable {
+                    hasLifetime = true
+                    planId = tx.productID
+                }
             default:
                 break
             }
         }
         isSubscriptionActive = hasSubscription
         isLifetimePurchased  = hasLifetime
+        activePlanProductId  = planId
     }
 
     /// SwiftData'ya lokal mirror yazar.
