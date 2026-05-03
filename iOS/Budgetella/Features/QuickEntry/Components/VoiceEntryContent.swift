@@ -2,8 +2,8 @@
 //  VoiceEntryContent.swift
 //  Budgetella
 //
-//  Sesli giriş — immersive dark UI, press-and-hold mic, SFSpeechRecognizer.
-//  Basılı tut → dinle, bırak → parse et.
+//  Sesli giriş — açılınca otomatik kayıt başlar, STOP ile bitirilir.
+//  Final transcript geldikten SONRA parse + navigate yapılır.
 //
 
 import SwiftUI
@@ -18,20 +18,21 @@ struct VoiceEntryContent: View {
 
     @State private var recognizer = SpeechEntryRecognizer()
     @State private var phase: Phase = .idle
-    @State private var hasStartedListening = false
 
     enum Phase {
-        case idle, requesting, listening, parsed, error(String)
+        case idle
+        case listening
+        case parsing
+        case parsed
+        case error(String)
     }
 
     // MARK: - Body
 
     var body: some View {
         ZStack {
-            // Forced dark background
             Color(hex: "#0A0B14").ignoresSafeArea()
 
-            // Radial glow from bottom (reacts to listening state)
             RadialGradient(
                 colors: [Color(hex: "#6E5BFF").opacity(isListening ? 0.22 : 0.07), .clear],
                 center: .bottom,
@@ -42,40 +43,41 @@ struct VoiceEntryContent: View {
             .animation(.easeInOut(duration: 0.5), value: isListening)
 
             VStack(spacing: 0) {
-                // ── Header
                 headerRow
                     .padding(.horizontal, 20)
                     .padding(.top, 16)
 
                 Spacer()
 
-                // ── Center content (transcript / parsed card)
                 centerContent
                     .padding(.horizontal, 24)
 
                 Spacer()
 
-                // ── Waveform (while listening)
                 if isListening {
                     waveformBars
                         .padding(.bottom, 28)
                         .transition(.opacity)
                 }
 
-                // ── Mic button + hint
-                micSection
+                actionSection
                     .padding(.horizontal, 32)
                     .padding(.bottom, 36)
             }
         }
         .colorScheme(.dark)
         .toolbar(.hidden, for: .navigationBar)
-        .onDisappear { recognizer.stop() }
+        .onAppear { startListening() }
+        .onDisappear { recognizer.cancel() }
+        .onChange(of: recognizer.isFinal) { _, isFinal in
+            guard isFinal, case .parsing = phase else { return }
+            parseAndNavigate(recognizer.transcript)
+        }
         .animation(.spring(response: 0.4), value: isListening)
-        .animation(.spring(response: 0.4), value: isParsed)
+        .animation(.spring(response: 0.35), value: isParsing)
     }
 
-    // MARK: - Header row
+    // MARK: - Header
 
     private var headerRow: some View {
         ZStack {
@@ -89,7 +91,7 @@ struct VoiceEntryContent: View {
 
     private var closeButton: some View {
         Button {
-            recognizer.stop()
+            recognizer.cancel()
             withAnimation(.spring(response: 0.3)) { mode = .manual }
         } label: {
             Image(systemName: "xmark")
@@ -105,11 +107,28 @@ struct VoiceEntryContent: View {
     private var statusPill: some View {
         HStack(spacing: 6) {
             switch phase {
+            case .idle:
+                Image(systemName: "mic")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.5))
+                Text("SESLİ GİRİŞ")
+                    .font(.brand(.caption))
+                    .foregroundStyle(.white.opacity(0.5))
+                    .tracking(1.0)
             case .listening:
                 Circle()
                     .fill(Color(hex: "#FF4D4D"))
                     .frame(width: 7, height: 7)
                 Text("DİNLİYOR")
+                    .font(.brand(.caption))
+                    .foregroundStyle(.white)
+                    .tracking(1.0)
+            case .parsing:
+                ProgressView()
+                    .tint(.white)
+                    .scaleEffect(0.65)
+                    .frame(width: 14, height: 14)
+                Text("İŞLENİYOR")
                     .font(.brand(.caption))
                     .foregroundStyle(.white)
                     .tracking(1.0)
@@ -129,14 +148,6 @@ struct VoiceEntryContent: View {
                     .font(.brand(.caption))
                     .foregroundStyle(.white)
                     .tracking(1.0)
-            default:
-                Image(systemName: "mic")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.5))
-                Text("SESLİ GİRİŞ")
-                    .font(.brand(.caption))
-                    .foregroundStyle(.white.opacity(0.5))
-                    .tracking(1.0)
             }
         }
         .padding(.horizontal, 14)
@@ -149,25 +160,36 @@ struct VoiceEntryContent: View {
 
     @ViewBuilder
     private var centerContent: some View {
-        if isParsed {
+        switch phase {
+        case .idle:
+            Text("Hazırlanıyor...")
+                .font(.brand(.title))
+                .foregroundStyle(.white.opacity(0.35))
+                .transition(.opacity)
+
+        case .listening:
+            if recognizer.transcript.isEmpty {
+                listeningPrompt.transition(.opacity)
+            } else {
+                transcriptSection.transition(.opacity)
+            }
+
+        case .parsing:
+            parsingContent.transition(.opacity)
+
+        case .parsed:
             parsedCard
                 .transition(.opacity.combined(with: .scale(scale: 0.96)))
-        } else if case .error(let msg) = phase {
-            errorContent(msg)
-                .transition(.opacity)
-        } else if !recognizer.transcript.isEmpty {
-            transcriptSection
-                .transition(.opacity)
-        } else {
-            idlePrompt
-                .transition(.opacity)
+
+        case .error(let msg):
+            errorContent(msg).transition(.opacity)
         }
     }
 
-    private var idlePrompt: some View {
+    private var listeningPrompt: some View {
         VStack(spacing: Spacing.md) {
-            Text("Basılı tut ve konuş")
-                .font(.brand(.title))
+            Text("Konuşun")
+                .font(.brand(.largeTitle))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
             Text("Örnek: \"120 lira yemek\" ya da \"Kahve kırk beş\"")
@@ -183,13 +205,23 @@ struct VoiceEntryContent: View {
                 .font(.brand(.caption))
                 .foregroundStyle(Color(hex: "#6E5BFF"))
                 .tracking(1.2)
-
             Text("\"\(recognizer.transcript)\"")
                 .font(.brand(.title))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
                 .lineLimit(4)
                 .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var parsingContent: some View {
+        VStack(spacing: Spacing.md) {
+            ProgressView()
+                .tint(.white)
+                .scaleEffect(1.4)
+            Text("Anlaşılıyor...")
+                .font(.brand(.body))
+                .foregroundStyle(.white.opacity(0.5))
         }
     }
 
@@ -210,7 +242,9 @@ struct VoiceEntryContent: View {
                 parsedRow(
                     label: "Tip",
                     value: vm.transactionType == .expense ? "Gider" : "Gelir",
-                    valueColor: vm.transactionType == .expense ? Color(hex: "#FF6B6B") : Color(hex: "#4CAF50")
+                    valueColor: vm.transactionType == .expense
+                        ? Color(hex: "#FF6B6B")
+                        : Color(hex: "#4CAF50")
                 )
                 if !vm.note.isEmpty {
                     parsedRow(label: "Açıklama", value: vm.note)
@@ -230,20 +264,6 @@ struct VoiceEntryContent: View {
                 RoundedRectangle(cornerRadius: Spacing.radiusMedium, style: .continuous)
                     .strokeBorder(.white.opacity(0.1), lineWidth: 1)
             )
-
-            Button {
-                withAnimation(.spring(response: 0.3)) { mode = .manual }
-            } label: {
-                HStack(spacing: 4) {
-                    Text("Manuel düzenle")
-                        .font(.brand(.footnote))
-                        .foregroundStyle(Color(hex: "#6E5BFF"))
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(Color(hex: "#6E5BFF"))
-                }
-            }
-            .buttonStyle(.plain)
         }
     }
 
@@ -291,80 +311,97 @@ struct VoiceEntryContent: View {
         .frame(height: 52)
     }
 
-    // MARK: - Mic section
+    // MARK: - Action section
 
-    private var micSection: some View {
+    @ViewBuilder
+    private var actionSection: some View {
         VStack(spacing: Spacing.sm) {
-            ZStack {
-                // Outer pulse ring when listening
-                if isListening {
-                    Circle()
-                        .stroke(Color(hex: "#6E5BFF").opacity(0.2 + Double(recognizer.audioLevel) * 0.3), lineWidth: 2)
-                        .frame(width: 100 + CGFloat(recognizer.audioLevel) * 24, height: 100 + CGFloat(recognizer.audioLevel) * 24)
-                        .animation(.easeOut(duration: 0.08), value: recognizer.audioLevel)
-                }
+            switch phase {
+            case .listening:
+                stopButton
+                Text("Durdurmak için dokun")
+                    .font(.brand(.caption))
+                    .foregroundStyle(.white.opacity(0.35))
+                    .multilineTextAlignment(.center)
 
-                Circle()
-                    .fill(
-                        isListening
-                        ? LinearGradient(colors: [Color(hex: "#FF4D4D"), Color(hex: "#FF6B35")],
-                                         startPoint: .topLeading, endPoint: .bottomTrailing)
-                        : LinearGradient(colors: [Color(hex: "#6E5BFF"), Color(hex: "#9B8BFF")],
-                                         startPoint: .topLeading, endPoint: .bottomTrailing)
-                    )
-                    .frame(width: 80, height: 80)
-                    .shadow(color: isListening ? Color(hex: "#FF4D4D").opacity(0.5) : Color(hex: "#6E5BFF").opacity(0.5), radius: 20, y: 6)
+            case .error:
+                retryButton
+                Text("veya manuel giriş kullan")
+                    .font(.brand(.caption))
+                    .foregroundStyle(.white.opacity(0.35))
 
-                Image(systemName: isListening ? "mic.fill" : "mic")
-                    .font(.system(size: 30, weight: .medium))
-                    .foregroundStyle(.white)
-                    .symbolRenderingMode(.hierarchical)
+            default:
+                EmptyView()
             }
-            .scaleEffect(isListening ? 1.05 : 1.0)
-            .animation(.spring(response: 0.3), value: isListening)
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { _ in
-                        if !hasStartedListening {
-                            hasStartedListening = true
-                            startListening()
-                        }
-                    }
-                    .onEnded { _ in
-                        hasStartedListening = false
-                        if isListening { stopAndParse() }
-                        else if case .requesting = phase { phase = .idle }
-                    }
-            )
-
-            Text(isListening ? "Konuşmayı bitirmek için bırak" : (isParsed ? "Yeniden kayıt için basılı tut" : "Konuşmak için basılı tut"))
-                .font(.brand(.caption))
-                .foregroundStyle(.white.opacity(0.35))
-                .multilineTextAlignment(.center)
         }
+        .animation(.spring(response: 0.3), value: isListening)
     }
 
-    // MARK: - Helpers
+    private var stopButton: some View {
+        Button { stopAndParse() } label: {
+            ZStack {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [Color(hex: "#FF4D4D"), Color(hex: "#FF6B35")],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 80, height: 80)
+                    .shadow(color: Color(hex: "#FF4D4D").opacity(0.5), radius: 20, y: 6)
+
+                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                    .fill(.white)
+                    .frame(width: 28, height: 28)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var retryButton: some View {
+        Button { startListening() } label: {
+            ZStack {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [Color(hex: "#6E5BFF"), Color(hex: "#9B8BFF")],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 72, height: 72)
+                    .shadow(color: Color(hex: "#6E5BFF").opacity(0.5), radius: 16, y: 4)
+
+                Image(systemName: "mic.fill")
+                    .font(.system(size: 26, weight: .medium))
+                    .foregroundStyle(.white)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Computed
 
     private var isListening: Bool {
         if case .listening = phase { return true }
         return false
     }
 
-    private var isParsed: Bool {
-        if case .parsed = phase { return true }
+    private var isParsing: Bool {
+        if case .parsing = phase { return true }
         return false
     }
 
-    // MARK: - Recognition
+    // MARK: - Logic
 
     private func startListening() {
-        phase = .requesting
+        phase = .idle
         Task { @MainActor in
             let granted = await recognizer.requestAuthorization()
             if granted {
-                phase = .listening
                 recognizer.start()
+                phase = .listening
             } else {
                 phase = .error("Ses tanıma izni verilmedi.\nAyarlar > Budgetella > Konuşma Tanıma")
             }
@@ -372,39 +409,49 @@ struct VoiceEntryContent: View {
     }
 
     private func stopAndParse() {
-        recognizer.stop()
-        let text = recognizer.transcript.trimmingCharacters(in: .whitespaces)
-        guard !text.isEmpty else {
-            phase = .idle
+        phase = .parsing
+        recognizer.stopRecording()
+        // Timeout: if isFinal never fires (network issue etc.), use current transcript
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(3))
+            guard case .parsing = phase else { return }
+            parseAndNavigate(recognizer.transcript)
+        }
+    }
+
+    private func parseAndNavigate(_ text: String) {
+        let trimmed = text.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else {
+            phase = .error("Konuşma algılanamadı.\nTekrar dene.")
             return
         }
-        if let (amount, note) = VoiceParser.parse(text) {
+        if let (amount, note) = VoiceParser.parse(trimmed) {
             vm.rawInput = amount
             vm.note = note
             vm.updateSuggestions()
-            // Auto-select the top AI suggestion — less taps for user
             if let top = vm.aiSuggestions.first,
                let cat = categories.first(where: { $0.slug == top.slug.rawValue }) {
                 vm.selectedCategoryId = cat.id
             }
-            // Skip the intermediate "AI ANLADI" screen; go straight to manual entry
-            withAnimation(.spring(response: 0.3)) { mode = .manual }
+            phase = .parsed
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(450))
+                withAnimation(.spring(response: 0.3)) { mode = .manual }
+            }
         } else {
             phase = .error("Tutar anlaşılamadı.\nTekrar dene veya manuel giriş kullan.")
         }
     }
 }
 
-// MARK: - Speech recognizer wrapper
+// MARK: - Speech recognizer
 
-// @unchecked Sendable: AVAudioEngine/SFSpeech types are not Sendable but we manage
-// concurrency manually — audio props accessed from background tap, UI props updated
-// via Task { @MainActor in } ensuring main-thread observation.
 @Observable
 final class SpeechEntryRecognizer: @unchecked Sendable {
 
     var transcript: String = ""
     var audioLevel: Float = 0
+    var isFinal: Bool = false
 
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "tr-TR"))
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
@@ -427,24 +474,45 @@ final class SpeechEntryRecognizer: @unchecked Sendable {
 
     func start() {
         guard let recognizer = speechRecognizer, recognizer.isAvailable else { return }
+
+        // Full teardown before every start — prevents AUGraphNodeBaseV3::CreateRecordingTap crash
+        audioEngine.stop()
+        audioEngine.inputNode.removeTap(onBus: 0)
+        recognitionTask?.cancel()
+        recognitionTask = nil
+        recognitionRequest = nil
+        isFinal = false
+        transcript = ""
+
         do {
-            let avSession = AVAudioSession.sharedInstance()
-            try avSession.setCategory(.record, mode: .measurement, options: .duckOthers)
-            try avSession.setActive(true, options: .notifyOthersOnDeactivation)
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.record, mode: .measurement, options: .duckOthers)
+            try session.setActive(true, options: .notifyOthersOnDeactivation)
 
             recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
             guard let request = recognitionRequest else { return }
             request.shouldReportPartialResults = true
 
-            recognitionTask = recognizer.recognitionTask(with: request) { [weak self] result, _ in
+            recognitionTask = recognizer.recognitionTask(with: request) { [weak self] result, error in
+                guard let self else { return }
                 if let result {
                     let text = result.bestTranscription.formattedString
-                    Task { @MainActor in self?.transcript = text }
+                    let final = result.isFinal
+                    Task { @MainActor in
+                        self.transcript = text
+                        if final { self.isFinal = true }
+                    }
+                }
+                // Error 301 = intentional cancel — ignore. Other errors trigger finalization.
+                if let error, (error as NSError).code != 301 {
+                    Task { @MainActor in
+                        if !self.isFinal { self.isFinal = true }
+                    }
                 }
             }
 
             let node = audioEngine.inputNode
-            let fmt  = node.outputFormat(forBus: 0)
+            let fmt = node.outputFormat(forBus: 0)
             node.installTap(onBus: 0, bufferSize: 1024, format: fmt) { [weak self] buffer, _ in
                 self?.recognitionRequest?.append(buffer)
                 guard let channelData = buffer.floatChannelData?[0] else { return }
@@ -452,8 +520,7 @@ final class SpeechEntryRecognizer: @unchecked Sendable {
                 var sum: Float = 0
                 for i in 0..<frameLength { sum += abs(channelData[i]) }
                 let avg = frameLength > 0 ? sum / Float(frameLength) : 0
-                let level = min(avg * 300, 1.0)
-                Task { @MainActor in self?.audioLevel = level }
+                Task { @MainActor in self?.audioLevel = min(avg * 300, 1.0) }
             }
 
             audioEngine.prepare()
@@ -463,14 +530,29 @@ final class SpeechEntryRecognizer: @unchecked Sendable {
         }
     }
 
-    func stop() {
+    /// Ends audio input and waits for the final transcript — does NOT cancel the task.
+    func stopRecording() {
+        guard audioEngine.isRunning else { return }
+        audioEngine.stop()
+        audioEngine.inputNode.removeTap(onBus: 0)
+        recognitionRequest?.endAudio()
+        Task { @MainActor in self.audioLevel = 0 }
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+    }
+
+    /// Hard stop — cancels everything and resets state.
+    func cancel() {
         audioEngine.stop()
         audioEngine.inputNode.removeTap(onBus: 0)
         recognitionRequest?.endAudio()
         recognitionTask?.cancel()
         recognitionRequest = nil
         recognitionTask = nil
-        Task { @MainActor in self.audioLevel = 0 }
+        Task { @MainActor in
+            self.audioLevel = 0
+            self.transcript = ""
+            self.isFinal = false
+        }
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
 
@@ -486,21 +568,16 @@ enum VoiceParser {
 
     static func parse(_ text: String) -> (rawAmount: String, note: String)? {
         let lower = text.lowercased()
-
         if let (amount, remainder) = extractDigitAmount(from: lower) {
             return (amount, cleanNote(remainder))
         }
-
         if let (amount, remainder) = extractTurkishAmount(from: lower) {
             return (amount, cleanNote(remainder))
         }
-
         return nil
     }
 
     private static func extractDigitAmount(from text: String) -> (String, String)? {
-        // Normalize Turkish thousands separators: "11.250" → "11250", "1.234.567" → "1234567"
-        // Dot followed by exactly 3 digits is a thousands separator in Turkish locale.
         var normalized = text
         if let thousandsRe = try? NSRegularExpression(pattern: #"(\d+)\.(\d{3})(?!\d)"#) {
             var prev = ""
@@ -513,8 +590,6 @@ enum VoiceParser {
                 )
             }
         }
-
-        // Now match digits, optionally followed by comma+1-2 decimal digits
         let pattern = #"(\d+)(?:,(\d{1,2}))?\s*(?:lira|tl|₺|try)?"#
         guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else { return nil }
         let nsNorm = normalized as NSString
@@ -523,20 +598,13 @@ enum VoiceParser {
         let whole = nsNorm.substring(with: match.range(at: 1))
         var amount = whole
         if match.range(at: 2).location != NSNotFound {
-            let frac = nsNorm.substring(with: match.range(at: 2))
-            amount += ",\(frac)"
+            amount += ",\(nsNorm.substring(with: match.range(at: 2)))"
         }
-
-        let fullMatchRange = match.range(at: 0)
-        let after = (fullMatchRange.location + fullMatchRange.length < nsNorm.length)
-            ? nsNorm.substring(from: fullMatchRange.location + fullMatchRange.length)
-            : ""
-        let before = fullMatchRange.location > 0
-            ? nsNorm.substring(to: fullMatchRange.location)
-            : ""
-
-        let remainder = (before + " " + after).trimmingCharacters(in: .whitespaces)
-        return (amount, remainder)
+        let fullRange = match.range(at: 0)
+        let after  = fullRange.location + fullRange.length < nsNorm.length
+            ? nsNorm.substring(from: fullRange.location + fullRange.length) : ""
+        let before = fullRange.location > 0 ? nsNorm.substring(to: fullRange.location) : ""
+        return (amount, (before + " " + after).trimmingCharacters(in: .whitespaces))
     }
 
     private static let turkishNumbers: [(String, Int)] = [
@@ -551,20 +619,14 @@ enum VoiceParser {
     private static func extractTurkishAmount(from text: String) -> (String, String)? {
         var remaining = text
         var total = 0
-
         for (word, value) in turkishNumbers {
             if remaining.contains(word) {
                 remaining = remaining.replacingOccurrences(of: word, with: "")
                 total += value
             }
         }
-
         guard total > 0 else { return nil }
-
-        for kw in ["lira", "tl", "₺"] {
-            remaining = remaining.replacingOccurrences(of: kw, with: "")
-        }
-
+        for kw in ["lira", "tl", "₺"] { remaining = remaining.replacingOccurrences(of: kw, with: "") }
         return ("\(total)", remaining)
     }
 
