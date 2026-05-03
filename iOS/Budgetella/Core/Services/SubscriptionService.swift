@@ -3,15 +3,11 @@
 //  Budgetella
 //
 //  Native StoreKit 2 wrapper — RevenueCat yok.
-//  Reelight'taki pattern'le aynı yaklaşım: StoreKit.Transaction.currentEntitlements
-//  ile Apple tarafında verify edilen receipt.
-//
-//  NOT: SwiftData'da da `Transaction` modeli var — StoreKit tipine her yerde
-//  `StoreKit.Transaction` olarak explicit erişiyoruz.
 //
 //  Product ID'ler:
-//    budgetella.premium.monthly  — aylık ₺49,90 + 7 gün trial
-//    budgetella.premium.yearly   — yıllık ₺399 + 7 gün trial
+//    com.ozankilic.budgetella.premium.monthly  — aylık $4.99 + 7 gün trial
+//    com.ozankilic.budgetella.premium.yearly   — yıllık $39.99 + 7 gün trial
+//    com.ozankilic.budgetella.premium.lifetime — tek seferlik $99.99 (non-consumable)
 //
 
 import Foundation
@@ -24,19 +20,23 @@ public final class SubscriptionService {
 
     // MARK: - State
 
-    public var isPremium = false
+    public var isSubscriptionActive = false
+    public var isLifetimePurchased  = false
     public var isLoading = false
     public var errorMessage: String?
 
-    public var monthlyProduct: Product?
-    public var yearlyProduct: Product?
+    public var isPremium: Bool { isSubscriptionActive || isLifetimePurchased }
+
+    public var monthlyProduct:  Product?
+    public var yearlyProduct:   Product?
+    public var lifetimeProduct: Product?
 
     /// App Store abonelik yönetimi deep link (Apple 5.1.1(v) zorunlu).
     public let managementURL = URL(string: "itms-apps://apps.apple.com/account/subscriptions")!
 
     private var transactionListener: Task<Void, Never>?
 
-    // MARK: - Dev override (TestFlight / developer accounts)
+    // MARK: - Dev override
 
     private static let devPremiumUIDs: Set<String> = [
         "7n48wY1HdMWD8ZdX00hzqwZAcsb2" // Ozzy
@@ -45,9 +45,10 @@ public final class SubscriptionService {
     // MARK: - Product IDs
 
     public enum ProductID {
-        static let monthly = "budgetella.premium.monthly"
-        static let yearly  = "budgetella.premium.yearly"
-        static var all: [String] { [monthly, yearly] }
+        static let monthly  = "com.ozankilic.budgetella.premium.monthly"
+        static let yearly   = "com.ozankilic.budgetella.premium.yearly"
+        static let lifetime = "com.ozankilic.budgetella.premium.lifetime"
+        static var all: [String] { [monthly, yearly, lifetime] }
     }
 
     // MARK: - Init
@@ -73,8 +74,12 @@ public final class SubscriptionService {
         do {
             let products = try await Product.products(for: ProductID.all)
             for product in products {
-                if product.id == ProductID.monthly { monthlyProduct = product }
-                if product.id == ProductID.yearly  { yearlyProduct  = product }
+                switch product.id {
+                case ProductID.monthly:  monthlyProduct  = product
+                case ProductID.yearly:   yearlyProduct   = product
+                case ProductID.lifetime: lifetimeProduct = product
+                default: break
+                }
             }
         } catch {
             errorMessage = "Ürünler yüklenemedi: \(error.localizedDescription)"
@@ -83,21 +88,27 @@ public final class SubscriptionService {
 
     // MARK: - Status
 
-    /// Apple'ın sunucusunda verify edilmiş aktif entitlement'ları kontrol eder.
     public func refreshStatus(userId: String = "") async {
         if !userId.isEmpty && Self.devPremiumUIDs.contains(userId) {
-            isPremium = true
+            isSubscriptionActive = true
+            isLifetimePurchased  = false
             return
         }
-        var hasPremium = false
+        var hasSubscription = false
+        var hasLifetime     = false
         for await result in StoreKit.Transaction.currentEntitlements {
-            if case .verified(let tx) = result,
-               tx.productType == .autoRenewable,
-               ProductID.all.contains(tx.productID) {
-                hasPremium = true
+            guard case .verified(let tx) = result else { continue }
+            switch tx.productID {
+            case ProductID.monthly, ProductID.yearly:
+                if tx.productType == .autoRenewable { hasSubscription = true }
+            case ProductID.lifetime:
+                if tx.productType == .nonConsumable { hasLifetime = true }
+            default:
+                break
             }
         }
-        isPremium = hasPremium
+        isSubscriptionActive = hasSubscription
+        isLifetimePurchased  = hasLifetime
     }
 
     /// SwiftData'ya lokal mirror yazar.
@@ -106,11 +117,10 @@ public final class SubscriptionService {
         var expiresAt: Date?
 
         for await result in StoreKit.Transaction.currentEntitlements {
-            if case .verified(let tx) = result,
-               ProductID.all.contains(tx.productID) {
-                activeProductId = tx.productID
-                expiresAt = tx.expirationDate
-            }
+            guard case .verified(let tx) = result,
+                  ProductID.all.contains(tx.productID) else { continue }
+            activeProductId = tx.productID
+            expiresAt = tx.expirationDate  // lifetime için nil, doğru
         }
 
         let record = SubscriptionRecord(
@@ -146,9 +156,7 @@ public final class SubscriptionService {
             } else {
                 throw SubscriptionError.verificationFailed
             }
-        case .userCancelled:
-            break
-        case .pending:
+        case .userCancelled, .pending:
             break
         @unknown default:
             break

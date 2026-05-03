@@ -2,7 +2,7 @@
 //  PaywallView.swift
 //  Budgetella
 //
-//  Full-screen premium paywall. $4.99/ay · $39.99/yıl · 7 gün trial.
+//  Full-screen premium paywall. $4.99/ay · $39.99/yıl · $99.99 ömür boyu · 7 gün trial.
 //
 
 import SwiftUI
@@ -17,11 +17,10 @@ struct PaywallView: View {
     @State private var isPurchasing = false
     @State private var errorMessage: String?
 
-    enum Plan { case monthly, yearly }
+    enum Plan { case monthly, yearly, lifetime }
 
     var body: some View {
         ZStack {
-            // Background gradient
             LinearGradient(
                 colors: [BrandColor.background3, BrandColor.background, BrandColor.background],
                 startPoint: .top,
@@ -33,9 +32,7 @@ struct PaywallView: View {
                 // Close button
                 HStack {
                     Spacer()
-                    Button {
-                        dismiss()
-                    } label: {
+                    Button { dismiss() } label: {
                         ZStack {
                             Circle()
                                 .fill(BrandColor.surface.opacity(0.6))
@@ -51,20 +48,10 @@ struct PaywallView: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: Spacing.xl) {
-
-                        // Hero
                         heroSection
-
-                        // Feature list
                         featureList
-
-                        // Plan selector
                         planSelector
-
-                        // CTA
                         ctaSection
-
-                        // Fine print
                         finePrint
                     }
                     .padding(.horizontal, 24)
@@ -123,21 +110,16 @@ struct PaywallView: View {
 
     private var featureList: some View {
         VStack(spacing: Spacing.sm) {
-            featureRow(icon: "wand.and.sparkles", color: BrandColor.primary,
-                       title: "Budgi AI Asistan",
-                       subtitle: "Harcamalarını analiz et, tavsiyeleri al")
-            featureRow(icon: "camera.viewfinder", color: BrandColor.info,
-                       title: "Fiş OCR",
-                       subtitle: "Kamerayla otomatik fiş kaydı")
+            featureRow(icon: "wand.and.sparkles",       color: BrandColor.primary,
+                       title: "Budgi AI Asistan",       subtitle: "Harcamalarını analiz et, tavsiyeleri al")
+            featureRow(icon: "camera.viewfinder",        color: BrandColor.info,
+                       title: "Fiş OCR",                subtitle: "Kamerayla otomatik fiş kaydı")
             featureRow(icon: "chart.bar.doc.horizontal", color: BrandColor.income,
-                       title: "Bütçe & Tahmin",
-                       subtitle: "Aylık hedef koy, ay sonu tahmini gör")
-            featureRow(icon: "square.and.arrow.up", color: BrandColor.warning,
-                       title: "Gelişmiş Dışa Aktarma",
-                       subtitle: "Excel, PDF ve JSON formatları")
-            featureRow(icon: "infinity", color: BrandColor.primaryLight,
-                       title: "Sınırsız İşlem",
-                       subtitle: "Geçmişe dair tüm veriler, sınırsız")
+                       title: "Bütçe & Tahmin",         subtitle: "Aylık hedef koy, ay sonu tahmini gör")
+            featureRow(icon: "square.and.arrow.up",      color: BrandColor.warning,
+                       title: "Gelişmiş Dışa Aktarma",  subtitle: "Excel, PDF ve JSON formatları")
+            featureRow(icon: "infinity",                 color: BrandColor.primaryLight,
+                       title: "Sınırsız İşlem",         subtitle: "Geçmişe dair tüm veriler, sınırsız")
         }
         .padding(Spacing.md)
         .glassCard(cornerRadius: Spacing.radiusMedium)
@@ -172,32 +154,58 @@ struct PaywallView: View {
 
     private var planSelector: some View {
         VStack(spacing: Spacing.sm) {
-            // Yearly plan
             planCard(
                 plan: .yearly,
                 title: "Yıllık Plan",
-                price: "$39.99",
+                price: yearlyDisplayPrice,
                 period: "yıl",
                 badge: "%33 tasarruf",
-                subPrice: "$3.33/ay"
+                subPrice: monthlyEquivalentFromYearly
             )
-            // Monthly plan
             planCard(
                 plan: .monthly,
                 title: "Aylık Plan",
-                price: "$4.99",
+                price: monthlyDisplayPrice,
                 period: "ay",
                 badge: nil,
                 subPrice: nil
             )
+            planCard(
+                plan: .lifetime,
+                title: "Ömür Boyu",
+                price: lifetimeDisplayPrice,
+                period: nil,
+                badge: "Tek seferlik",
+                subPrice: "Bir kez öde, sonsuza kadar kullan"
+            )
         }
+    }
+
+    private var monthlyDisplayPrice: String {
+        subscriptionService.monthlyProduct.map { $0.displayPrice } ?? "$4.99"
+    }
+
+    private var yearlyDisplayPrice: String {
+        subscriptionService.yearlyProduct.map { $0.displayPrice } ?? "$39.99"
+    }
+
+    private var lifetimeDisplayPrice: String {
+        subscriptionService.lifetimeProduct.map { $0.displayPrice } ?? "$99.99"
+    }
+
+    private var monthlyEquivalentFromYearly: String {
+        guard let p = subscriptionService.yearlyProduct,
+              let total = Double(p.displayPrice.filter({ $0.isNumber || $0 == "." })) else {
+            return "$3.33/ay"
+        }
+        return String(format: "$%.2f/ay", (total / 12 * 100).rounded() / 100)
     }
 
     private func planCard(
         plan: Plan,
         title: String,
         price: String,
-        period: String,
+        period: String?,
         badge: String?,
         subPrice: String?
     ) -> some View {
@@ -206,7 +214,6 @@ struct PaywallView: View {
             withAnimation(.spring(response: 0.3)) { selectedPlan = plan }
         } label: {
             HStack(spacing: Spacing.md) {
-                // Radio button
                 ZStack {
                     Circle()
                         .strokeBorder(
@@ -232,7 +239,7 @@ struct PaywallView: View {
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
-                                .background(BrandColor.income)
+                                .background(plan == .lifetime ? BrandColor.primary : BrandColor.income)
                                 .clipShape(Capsule())
                         }
                     }
@@ -249,9 +256,11 @@ struct PaywallView: View {
                     Text(price)
                         .font(.brand(.headline))
                         .foregroundStyle(isSelected ? BrandColor.primary : BrandColor.textPrimary)
-                    Text("/\(period)")
-                        .font(.brand(.caption))
-                        .foregroundStyle(BrandColor.textTertiary)
+                    if let period {
+                        Text("/\(period)")
+                            .font(.brand(.caption))
+                            .foregroundStyle(BrandColor.textTertiary)
+                    }
                 }
             }
             .padding(Spacing.md)
@@ -279,10 +288,9 @@ struct PaywallView: View {
             } label: {
                 ZStack {
                     if isPurchasing {
-                        ProgressView()
-                            .tint(.white)
+                        ProgressView().tint(.white)
                     } else {
-                        Text("7 Gün Ücretsiz Dene")
+                        Text(ctaButtonTitle)
                             .font(.brand(.headline))
                             .foregroundStyle(.white)
                     }
@@ -303,11 +311,8 @@ struct PaywallView: View {
 
             Button {
                 Task {
-                    do {
-                        try await subscriptionService.restorePurchases()
-                    } catch {
-                        errorMessage = error.localizedDescription
-                    }
+                    do { try await subscriptionService.restorePurchases() }
+                    catch { errorMessage = error.localizedDescription }
                 }
             } label: {
                 Text("Satın Alımları Geri Yükle")
@@ -318,14 +323,28 @@ struct PaywallView: View {
         }
     }
 
+    private var ctaButtonTitle: String {
+        switch selectedPlan {
+        case .yearly, .monthly: return "7 Gün Ücretsiz Dene"
+        case .lifetime:         return "Hemen Satın Al"
+        }
+    }
+
     // MARK: - Fine print
 
     private var finePrint: some View {
         VStack(spacing: 4) {
-            Text("Deneme süresi bittikten sonra seçtiğin plan fiyatından otomatik yenilenir.")
-                .font(.brand(.caption))
-                .foregroundStyle(BrandColor.textTertiary)
-                .multilineTextAlignment(.center)
+            if selectedPlan != .lifetime {
+                Text("Deneme süresi bittikten sonra seçtiğin plan fiyatından otomatik yenilenir.")
+                    .font(.brand(.caption))
+                    .foregroundStyle(BrandColor.textTertiary)
+                    .multilineTextAlignment(.center)
+            } else {
+                Text("Tek seferlik ödeme. Abonelik yok, yenileme yok.")
+                    .font(.brand(.caption))
+                    .foregroundStyle(BrandColor.textTertiary)
+                    .multilineTextAlignment(.center)
+            }
             HStack(spacing: Spacing.md) {
                 Link("Gizlilik Politikası", destination: URL(string: "https://budgetella.app/privacy")!)
                     .font(.brand(.caption))
@@ -340,9 +359,12 @@ struct PaywallView: View {
     // MARK: - Purchase
 
     private func startPurchase() async {
-        let product: Product? = selectedPlan == .yearly
-            ? subscriptionService.yearlyProduct
-            : subscriptionService.monthlyProduct
+        let product: Product?
+        switch selectedPlan {
+        case .monthly:  product = subscriptionService.monthlyProduct
+        case .yearly:   product = subscriptionService.yearlyProduct
+        case .lifetime: product = subscriptionService.lifetimeProduct
+        }
         guard let product else {
             errorMessage = "Ürün yüklenemedi. Lütfen tekrar deneyin."
             return
