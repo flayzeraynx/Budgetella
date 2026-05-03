@@ -77,15 +77,17 @@ struct SettingsView: View {
                             icon: "globe",
                             iconColor: BrandColor.info,
                             title: "Dil",
-                            value: settings?.language.displayName ?? "Türkçe"
-                        ) { showLanguagePicker = true }
+                            value: "Yakında",
+                            disabled: true
+                        ) { }
 
                         settingsRow(
                             icon: "dollarsign.circle",
                             iconColor: BrandColor.income,
                             title: "Para Birimi",
-                            value: (settings?.currency.symbol ?? "₺") + " " + (settings?.currency.rawValue ?? "TRY")
-                        ) { showCurrencyPicker = true }
+                            value: "Yakında",
+                            disabled: true
+                        ) { }
                     }
                     .listRowBackground(BrandColor.surface.opacity(0.4))
 
@@ -481,6 +483,7 @@ struct SettingsView: View {
         iconColor: Color,
         title: String,
         value: String?,
+        disabled: Bool = false,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
@@ -495,9 +498,11 @@ struct SettingsView: View {
                         .font(.brand(.footnote))
                         .foregroundStyle(BrandColor.textTertiary)
                 }
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(BrandColor.textTertiary.opacity(0.5))
+                if !disabled {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(BrandColor.textTertiary.opacity(0.5))
+                }
             }
             .padding(.horizontal, 16)
             .frame(maxWidth: .infinity, minHeight: 44)
@@ -505,6 +510,8 @@ struct SettingsView: View {
         .buttonStyle(.plain)
         .highlightOnPress()
         .listRowInsets(EdgeInsets())
+        .disabled(disabled)
+        .opacity(disabled ? 0.45 : 1)
     }
 
     private func settingsIconBadge(icon: String, color: Color) -> some View {

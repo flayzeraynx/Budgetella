@@ -44,13 +44,13 @@ struct TransactionsView: View {
                     Divider().background(BrandColor.borderSubtle)
 
                     // Transaction list
-                    let sections = vm.grouped(myTransactions)
+                    let yearGroups = vm.groupedHierarchical(myTransactions)
                     if firestoreService.isSyncing {
                         syncingPlaceholder
-                    } else if sections.isEmpty {
+                    } else if yearGroups.isEmpty {
                         emptyState
                     } else {
-                        transactionList(sections: sections)
+                        transactionList(yearGroups: yearGroups)
                     }
                 }
             }
@@ -210,40 +210,46 @@ struct TransactionsView: View {
 
     // MARK: - Transaction list
 
-    private func transactionList(sections: [TransactionSection]) -> some View {
+    private func transactionList(yearGroups: [TransactionYearGroup]) -> some View {
         ScrollView {
-            LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
-                ForEach(sections) { section in
-                    Section {
-                        VStack(spacing: 0) {
-                            ForEach(section.transactions) { tx in
-                                TransactionRow(transaction: tx, onDelete: {
-                                    let txId = tx.id
-                                    let txUserId = tx.userId
-                                    modelContext.delete(tx)
-                                    Task {
-                                        try? await FirestoreService.shared.deleteTransaction(id: txId, userId: txUserId)
-                                    }
-                                })
-                                .onTapGesture { editingTransaction = tx }
+            LazyVStack(spacing: 0) {
+                ForEach(yearGroups) { yearGroup in
+                    yearHeader(yearGroup.year)
 
-                                if tx.id != section.transactions.last?.id {
-                                    Divider()
-                                        .background(BrandColor.borderSubtle)
-                                        .padding(.leading, 68)
+                    ForEach(yearGroup.months) { monthGroup in
+                        monthHeader(monthGroup.month)
+
+                        ForEach(monthGroup.days) { dayGroup in
+                            dayHeader(dayGroup.title)
+
+                            VStack(spacing: 0) {
+                                ForEach(dayGroup.transactions) { tx in
+                                    TransactionRow(transaction: tx, onDelete: {
+                                        let txId = tx.id
+                                        let txUserId = tx.userId
+                                        modelContext.delete(tx)
+                                        Task {
+                                            try? await FirestoreService.shared.deleteTransaction(id: txId, userId: txUserId)
+                                        }
+                                    })
+                                    .onTapGesture { editingTransaction = tx }
+
+                                    if tx.id != dayGroup.transactions.last?.id {
+                                        Divider()
+                                            .background(BrandColor.borderSubtle)
+                                            .padding(.leading, 68)
+                                    }
                                 }
                             }
+                            .background(BrandColor.surface.opacity(0.3))
+                            .clipShape(RoundedRectangle(cornerRadius: Spacing.radiusMedium, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: Spacing.radiusMedium, style: .continuous)
+                                    .strokeBorder(BrandColor.borderSubtle, lineWidth: 1)
+                            )
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, Spacing.sm)
                         }
-                        .background(BrandColor.surface.opacity(0.3))
-                        .clipShape(RoundedRectangle(cornerRadius: Spacing.radiusMedium, style: .continuous))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: Spacing.radiusMedium, style: .continuous)
-                                .strokeBorder(BrandColor.borderSubtle, lineWidth: 1)
-                        )
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, Spacing.sm)
-                    } header: {
-                        sectionHeader(section)
                     }
                 }
 
@@ -254,52 +260,140 @@ struct TransactionsView: View {
         .scrollDismissesKeyboard(.interactively)
     }
 
-    private func sectionHeader(_ section: TransactionSection) -> some View {
-        HStack {
-            Text(section.title)
-                .font(.brand(.caption))
-                .foregroundStyle(BrandColor.textTertiary)
-                .tracking(0.8)
-            Spacer()
-            let isPositive = section.netAmount >= 0
-            Text((isPositive ? "+" : "") + section.netAmount.fullTRY)
-                .font(.brand(.caption))
-                .foregroundStyle(isPositive ? BrandColor.income : BrandColor.expense)
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, Spacing.xs)
-        .background(BrandColor.background)
+    private func yearHeader(_ year: Int) -> some View {
+        Text(String(year))
+            .font(.brand(.title))
+            .foregroundStyle(BrandColor.textPrimary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 20)
+            .padding(.top, Spacing.lg)
+            .padding(.bottom, 2)
+    }
+
+    private func monthHeader(_ month: Int) -> some View {
+        Text(turkishMonthFull(month))
+            .font(.brand(.headline))
+            .foregroundStyle(BrandColor.primary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 20)
+            .padding(.top, Spacing.md)
+            .padding(.bottom, Spacing.xs)
+    }
+
+    private func dayHeader(_ title: String) -> some View {
+        Text(title)
+            .font(.brand(.caption))
+            .foregroundStyle(BrandColor.textTertiary)
+            .tracking(0.6)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 20)
+            .padding(.top, Spacing.sm)
+            .padding(.bottom, 4)
     }
 
     // MARK: - Syncing placeholder
 
     private var syncingPlaceholder: some View {
-        VStack(spacing: Spacing.sm) {
-            ForEach(0..<6, id: \.self) { _ in
-                HStack(spacing: Spacing.md) {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(BrandColor.surface)
-                        .frame(width: 40, height: 40)
-                    VStack(alignment: .leading, spacing: 6) {
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(BrandColor.surface)
-                            .frame(height: 13)
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(BrandColor.surface)
-                            .frame(width: 80, height: 11)
-                    }
-                    Spacer()
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(BrandColor.surface)
-                        .frame(width: 64, height: 13)
-                }
+        VStack(spacing: Spacing.xs) {
+            // Month header skeleton
+            RoundedRectangle(cornerRadius: 4, style: .continuous)
+                .fill(BrandColor.surface)
+                .frame(width: 80, height: 14)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 20)
-                .padding(.vertical, 10)
+                .padding(.top, Spacing.lg)
+                .padding(.bottom, Spacing.xs)
+
+            // Row group — glass card
+            VStack(spacing: 0) {
+                ForEach(0..<3, id: \.self) { i in
+                    HStack(spacing: Spacing.md) {
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(BrandColor.surface)
+                            .frame(width: 40, height: 40)
+                        VStack(alignment: .leading, spacing: 6) {
+                            RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                .fill(BrandColor.surface)
+                                .frame(width: i == 1 ? 110 : 88, height: 13)
+                            RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                .fill(BrandColor.surface.opacity(0.7))
+                                .frame(width: i == 1 ? 60 : 76, height: 11)
+                        }
+                        Spacer()
+                        RoundedRectangle(cornerRadius: 4, style: .continuous)
+                            .fill(BrandColor.surface)
+                            .frame(width: i == 0 ? 72 : 56, height: 13)
+                    }
+                    .padding(.horizontal, Spacing.md)
+                    .padding(.vertical, 12)
+
+                    if i < 2 {
+                        Divider()
+                            .background(BrandColor.borderSubtle)
+                            .padding(.leading, 68)
+                    }
+                }
             }
+            .background(BrandColor.surface.opacity(0.3))
+            .clipShape(RoundedRectangle(cornerRadius: Spacing.radiusMedium, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: Spacing.radiusMedium, style: .continuous)
+                    .strokeBorder(BrandColor.borderSubtle, lineWidth: 1)
+            )
+            .padding(.horizontal, 20)
+            .padding(.bottom, Spacing.sm)
+
+            // Day header skeleton
+            RoundedRectangle(cornerRadius: 4, style: .continuous)
+                .fill(BrandColor.surface.opacity(0.6))
+                .frame(width: 56, height: 11)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 20)
+                .padding(.top, Spacing.sm)
+                .padding(.bottom, 4)
+
+            // Second row group
+            VStack(spacing: 0) {
+                ForEach(0..<2, id: \.self) { i in
+                    HStack(spacing: Spacing.md) {
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(BrandColor.surface)
+                            .frame(width: 40, height: 40)
+                        VStack(alignment: .leading, spacing: 6) {
+                            RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                .fill(BrandColor.surface)
+                                .frame(width: i == 0 ? 96 : 120, height: 13)
+                            RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                .fill(BrandColor.surface.opacity(0.7))
+                                .frame(width: i == 0 ? 68 : 50, height: 11)
+                        }
+                        Spacer()
+                        RoundedRectangle(cornerRadius: 4, style: .continuous)
+                            .fill(BrandColor.surface)
+                            .frame(width: i == 0 ? 64 : 80, height: 13)
+                    }
+                    .padding(.horizontal, Spacing.md)
+                    .padding(.vertical, 12)
+
+                    if i < 1 {
+                        Divider()
+                            .background(BrandColor.borderSubtle)
+                            .padding(.leading, 68)
+                    }
+                }
+            }
+            .background(BrandColor.surface.opacity(0.3))
+            .clipShape(RoundedRectangle(cornerRadius: Spacing.radiusMedium, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: Spacing.radiusMedium, style: .continuous)
+                    .strokeBorder(BrandColor.borderSubtle, lineWidth: 1)
+            )
+            .padding(.horizontal, 20)
+
             Spacer()
         }
-        .redacted(reason: .placeholder)
-        .padding(.top, Spacing.md)
+        .shimmer()
+        .padding(.top, Spacing.sm)
     }
 
     // MARK: - Empty state

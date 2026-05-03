@@ -8,8 +8,8 @@ import Foundation
 @MainActor @Observable final class TransactionsViewModel {
 
     var searchText     = ""
-    var typeFilter: TransactionType? = nil  // nil = Tümü
-    var categoryFilter: UUID?               // nil = all categories
+    var typeFilter: TransactionType? = nil
+    var categoryFilter: UUID?
 
     // MARK: - Filtering
 
@@ -24,42 +24,69 @@ import Foundation
         }
     }
 
-    func grouped(_ txs: [Transaction]) -> [TransactionSection] {
-        let cal = Calendar.current
-        let byDay = Dictionary(grouping: filtered(txs)) { tx in
-            cal.startOfDay(for: tx.date)
-        }
-        return byDay.keys.sorted(by: >).map { date in
-            let dayTxs = byDay[date]!.sorted { $0.date > $1.date }
-            let net = dayTxs.reduce(Decimal(0)) { $0 + $1.signedAmount }
-            return TransactionSection(
-                id: date.timeIntervalSince1970.description,
-                title: sectionTitle(for: date, cal: cal),
-                netAmount: net,
-                transactions: dayTxs
-            )
-        }
-    }
+    // MARK: - Hierarchical grouping (Year → Month → Day)
 
-    private func sectionTitle(for date: Date, cal: Calendar) -> String {
-        if cal.isDateInToday(date)     { return "BUGÜN" }
-        if cal.isDateInYesterday(date) { return "DÜN" }
-        if cal.isDate(date, equalTo: .now, toGranularity: .weekOfYear) {
-            let fmt = DateFormatter()
-            fmt.locale = Locale(identifier: "tr_TR")
-            fmt.dateFormat = "EEEE"
-            return fmt.string(from: date).uppercased()
+    func groupedHierarchical(_ txs: [Transaction]) -> [TransactionYearGroup] {
+        let cal = Calendar.current
+        let filtered = filtered(txs)
+
+        let byYear = Dictionary(grouping: filtered) { tx in
+            cal.component(.year, from: tx.date)
         }
-        let fmt = DateFormatter()
-        fmt.locale = Locale(identifier: "tr_TR")
-        fmt.dateFormat = "d MMM"
-        return fmt.string(from: date).uppercased()
+
+        return byYear.keys.sorted(by: >).map { year in
+            let yearTxs = byYear[year]!
+
+            let byMonth = Dictionary(grouping: yearTxs) { tx in
+                cal.component(.month, from: tx.date)
+            }
+
+            let months = byMonth.keys.sorted(by: >).map { month in
+                let monthTxs = byMonth[month]!
+
+                let byDay = Dictionary(grouping: monthTxs) { tx in
+                    cal.startOfDay(for: tx.date)
+                }
+
+                let fmt = DateFormatter()
+                fmt.locale = Locale(identifier: "tr_TR")
+                fmt.dateFormat = "d MMMM"
+
+                let days = byDay.keys.sorted(by: >).map { date in
+                    TransactionDayGroup(
+                        id: date.timeIntervalSince1970.description,
+                        date: date,
+                        title: fmt.string(from: date),
+                        transactions: byDay[date]!.sorted { $0.date > $1.date }
+                    )
+                }
+
+                return TransactionMonthGroup(id: "\(year)-\(month)", month: month, year: year, days: days)
+            }
+
+            return TransactionYearGroup(id: year, year: year, months: months)
+        }
     }
 }
 
-struct TransactionSection: Identifiable {
+// MARK: - Hierarchical group models
+
+struct TransactionYearGroup: Identifiable {
+    let id: Int
+    let year: Int
+    let months: [TransactionMonthGroup]
+}
+
+struct TransactionMonthGroup: Identifiable {
     let id: String
+    let month: Int
+    let year: Int
+    let days: [TransactionDayGroup]
+}
+
+struct TransactionDayGroup: Identifiable {
+    let id: String
+    let date: Date
     let title: String
-    let netAmount: Decimal
     let transactions: [Transaction]
 }

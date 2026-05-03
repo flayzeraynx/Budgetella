@@ -30,82 +30,88 @@ struct DashboardView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
+        ZStack(alignment: .top) {
+            BrandColor.background.ignoresSafeArea()
 
-                // ── Hero gradient section
-                heroSection
-                    .padding(.bottom, Spacing.lg)
-
-                // ── Combined year + month card
-                DashboardMainCard(
-                    year: vm.selectedYear,
-                    month: vm.selectedMonth,
-                    yearIncome: vm.yearlyIncome(from: myTransactions),
-                    yearExpense: vm.yearlyExpense(from: myTransactions),
-                    monthIncome: vm.monthlyIncome(from: myTransactions),
-                    monthExpense: vm.monthlyExpense(from: myTransactions),
-                    dailyData: vm.dailyFlowData(from: myTransactions),
-                    availableYears: vm.availableYears,
-                    onYearChange: { vm.selectedYear = $0 },
-                    onMonthChange: { vm.selectedMonth = $0 }
-                )
-                .redacted(reason: firestoreService.isSyncing ? .placeholder : [])
-                .padding(.horizontal, 20)
-                .padding(.bottom, Spacing.lg)
-
-                // ── AI Insight
-                AIInsightCard()
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, Spacing.lg)
-
-                // ── Top categories
-                if !topExpenseCategories.isEmpty {
-                    categorySection
-                        .padding(.horizontal, 20)
-                }
-
-                Spacer(minLength: 100)
-            }
-        }
-        .background(BrandColor.background.ignoresSafeArea())
-        .scrollIndicators(.hidden)
-        .sheet(isPresented: $showSettings) {
-            SettingsView()
-        }
-    }
-
-    // MARK: - Hero section
-
-    private var heroSection: some View {
-        ZStack(alignment: .bottom) {
+            // Fixed gradient — always covers status bar, does not scroll
             LinearGradient(
                 colors: [BrandColor.primary.opacity(0.28), BrandColor.primary.opacity(0.0)],
                 startPoint: .top,
                 endPoint: .bottom
             )
+            .frame(maxWidth: .infinity)
+            .frame(height: 220)
             .ignoresSafeArea(edges: .top)
+            .allowsHitTesting(false)
 
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(vm.greeting)
-                        .font(.brand(.subheadline))
-                        .foregroundStyle(BrandColor.textSecondary)
-                    HStack(spacing: 6) {
-                        Text(displayName)
-                            .font(.brand(.title))
-                            .foregroundStyle(BrandColor.textPrimary)
-                        Text("👋")
-                            .font(.system(size: 22))
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+
+                    // ── Hero content (no gradient wrapper)
+                    heroContent
+                        .padding(.bottom, Spacing.lg)
+
+                    // ── Combined year + month card
+                    DashboardMainCard(
+                        year: vm.selectedYear,
+                        month: vm.selectedMonth,
+                        yearIncome: vm.yearlyIncome(from: myTransactions),
+                        yearExpense: vm.yearlyExpense(from: myTransactions),
+                        monthIncome: vm.monthlyIncome(from: myTransactions),
+                        monthExpense: vm.monthlyExpense(from: myTransactions),
+                        dailyData: vm.dailyFlowData(from: myTransactions),
+                        availableYears: vm.availableYears(from: myTransactions),
+                        onYearChange: { vm.selectedYear = $0 },
+                        onMonthChange: { vm.selectedMonth = $0 }
+                    )
+                    .redacted(reason: firestoreService.isSyncing ? .placeholder : [])
+                    .shimmer(active: firestoreService.isSyncing)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, Spacing.lg)
+
+                    // ── AI Insight
+                    AIInsightCard()
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, Spacing.lg)
+
+                    // ── Top categories
+                    if !topExpenseCategories.isEmpty {
+                        categorySection
+                            .padding(.horizontal, 20)
                     }
+
+                    Spacer(minLength: 100)
                 }
-                Spacer()
-                avatarBadge
             }
-            .padding(.horizontal, 24)
-            .padding(.top, 16)
-            .padding(.bottom, Spacing.xl)
+            .scrollIndicators(.hidden)
         }
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
+        }
+    }
+
+    // MARK: - Hero content
+
+    private var heroContent: some View {
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(vm.greeting)
+                    .font(.brand(.subheadline))
+                    .foregroundStyle(BrandColor.textSecondary)
+                HStack(spacing: 6) {
+                    Text(displayName)
+                        .font(.brand(.title))
+                        .foregroundStyle(BrandColor.textPrimary)
+                    Text("👋")
+                        .font(.system(size: 22))
+                }
+            }
+            Spacer()
+            avatarBadge
+        }
+        .padding(.horizontal, 24)
+        .padding(.top, 16)
+        .padding(.bottom, Spacing.xl)
     }
 
     // MARK: - Avatar

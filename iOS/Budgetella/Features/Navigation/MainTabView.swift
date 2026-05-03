@@ -94,15 +94,15 @@ struct CustomTabBar: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            tabItem(.home,  icon: "house.fill",    label: "Home")
-            tabItem(.list,  icon: "list.bullet",   label: "List")
+            tabItem(.home,  icon: "house.fill",    label: "Ev")
+            tabItem(.list,  icon: "list.bullet",   label: "Liste")
 
             // FAB placeholder — fixed size, gesture-only, no layout effect from blob
             fabButton
                 .frame(maxWidth: .infinity)
                 .offset(y: -10)
 
-            tabItem(.stats, icon: "chart.bar.fill", label: "Stats")
+            tabItem(.stats, icon: "chart.bar.fill", label: "İstatistik")
             tabItem(.ai,    icon: "sparkles",        label: "AI")
         }
         .padding(.top, 4)

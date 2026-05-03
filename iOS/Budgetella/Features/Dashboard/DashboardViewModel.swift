@@ -99,9 +99,11 @@ import Foundation
 
     // MARK: - Available periods
 
-    var availableYears: [Int] {
+    func availableYears(from txs: [Transaction]) -> [Int] {
         let current = Calendar.current.component(.year, from: .now)
-        return Array(stride(from: current, through: current - 5, by: -1))
+        var years = Set(txs.map { Calendar.current.component(.year, from: $0.date) })
+        years.insert(current)
+        return years.sorted(by: >)
     }
 
     // MARK: - Helpers
