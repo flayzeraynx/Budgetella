@@ -31,13 +31,12 @@ final class AuthViewModel {
     var name = ""
     var email = ""
     var password = ""
-    var otpCode = ""
     var termsAccepted = false
 
     // MARK: - UI State
     var isLoading = false
     var errorMessage: String?
-    var otpCountdown = 42
+    var otpCountdown = 60
     var otpResendEnabled = false
     private var countdownTask: Task<Void, Never>?
 
@@ -51,6 +50,11 @@ final class AuthViewModel {
     // MARK: - Navigation
 
     func navigate(to screen: AuthScreen) {
+        if screen == .signIn {
+            email = ""
+            password = ""
+            errorMessage = nil
+        }
         withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
             self.screen = screen
         }
@@ -87,6 +91,7 @@ final class AuthViewModel {
         defer { isLoading = false }
         do {
             try await authService.signUp(email: email, password: password, displayName: name)
+            try? await authService.sendEmailVerification()
             startOTPCountdown()
             navigate(to: .otp(email: email))
             return true
@@ -125,37 +130,43 @@ final class AuthViewModel {
             try await authService.signInWithGoogle()
             return true
         } catch {
+            // GIDSignInError.canceled == -5 — user dismissed the sheet, no toast needed
+            let ns = error as NSError
+            if ns.domain == "com.google.GIDSignIn" && ns.code == -5 { return false }
             errorMessage = friendlyError(error)
             return false
         }
     }
 
-    // MARK: - OTP / Email Verification
+    // MARK: - Email Verification
 
     func verifyOTP() async -> Bool {
-        // V1: Firebase email verification link tabanlı.
-        // OTP UI gösterilir, arka planda currentUser.isEmailVerified check edilir.
-        // Gerçek 6 haneli OTP için Cloud Function V1.1'de eklenir.
-        guard otpCode.count == 6 else {
-            errorMessage = "6 haneli kodu gir."
+        isLoading = true
+        errorMessage = nil
+        defer { isLoading = false }
+        do {
+            let verified = try await authService.reloadAndCheckVerified()
+            if verified {
+                return true
+            } else {
+                errorMessage = "E-posta henüz doğrulanmadı. Mailine gelen linke tıkla, sonra tekrar dene."
+                return false
+            }
+        } catch {
+            errorMessage = friendlyError(error)
             return false
         }
-        isLoading = true
-        defer { isLoading = false }
-        // Simüle: OTP match check (production'da Cloud Function)
-        try? await Task.sleep(for: .seconds(0.8))
-        return true
     }
 
     func resendOTP() {
         guard otpResendEnabled else { return }
         otpResendEnabled = false
-        otpCode = ""
         startOTPCountdown()
+        Task { try? await authService.sendEmailVerification() }
     }
 
     private func startOTPCountdown() {
-        otpCountdown = 42
+        otpCountdown = 60
         otpResendEnabled = false
         countdownTask?.cancel()
         countdownTask = Task {
@@ -215,7 +226,8 @@ final class AuthViewModel {
     private func friendlyError(_ error: Error) -> String {
         let msg = error.localizedDescription
         if msg.contains("email-already-in-use") { return "Bu e-posta zaten kayıtlı." }
-        if msg.contains("wrong-password") || msg.contains("invalid-credential") { return "E-posta veya şifre hatalı." }
+        if msg.contains("wrong-password") { return "E-posta veya şifre hatalı." }
+        if msg.contains("invalid-credential") { return "Oturum süresi dolmuş. Lütfen tekrar giriş yap." }
         if msg.contains("user-not-found") { return "Bu e-postayla kayıtlı hesap bulunamadı." }
         if msg.contains("network") { return "İnternet bağlantını kontrol et." }
         return msg

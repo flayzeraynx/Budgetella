@@ -5,6 +5,7 @@
 
 import SwiftUI
 import SwiftData
+import FirebaseAuth
 
 struct DeleteAccountView: View {
 
@@ -18,6 +19,10 @@ struct DeleteAccountView: View {
     @State private var isDeleting = false
     @State private var showError = false
     @State private var errorMessage = ""
+    @State private var showReAuthSheet = false
+    @State private var reAuthPassword = ""
+    @State private var isReAuthing = false
+    @State private var reAuthError: String?
 
     private var canDelete: Bool { confirmText.lowercased() == "sil" }
 
@@ -57,6 +62,109 @@ struct DeleteAccountView: View {
             isPresented: $showError,
             buttons: [.cancel("Tamam")]
         )
+        .sheet(isPresented: $showReAuthSheet) {
+            reAuthSheet
+        }
+    }
+
+    // MARK: - Re-auth sheet (shown when Firebase requiresRecentLogin)
+
+    private var reAuthSheet: some View {
+        NavigationStack {
+            VStack(spacing: Spacing.lg) {
+                VStack(spacing: Spacing.sm) {
+                    Image(systemName: "lock.shield.fill")
+                        .font(.system(size: 44))
+                        .foregroundStyle(BrandColor.primary)
+                    Text("Kimliğini doğrula")
+                        .font(.brand(.title))
+                        .foregroundStyle(BrandColor.textPrimary)
+                    Text("Hesap silme güvenli bir işlemdir. Devam etmek için şifreni gir.")
+                        .font(.brand(.body))
+                        .foregroundStyle(BrandColor.textSecondary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.top, Spacing.xl)
+
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    Text("Şifre")
+                        .font(.brand(.footnote))
+                        .foregroundStyle(BrandColor.textTertiary)
+                    SecureField("••••••••", text: $reAuthPassword)
+                        .font(.brand(.body))
+                        .foregroundStyle(BrandColor.textPrimary)
+                        .padding(.horizontal, Spacing.md)
+                        .padding(.vertical, Spacing.sm)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .fill(BrandColor.surface)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                        .strokeBorder(BrandColor.borderMedium, lineWidth: 1)
+                                )
+                        )
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                }
+                .padding(.horizontal, Spacing.xl)
+
+                if let err = reAuthError {
+                    Text(err)
+                        .font(.brand(.footnote))
+                        .foregroundStyle(BrandColor.expense)
+                        .padding(.horizontal, Spacing.xl)
+                }
+
+                Button {
+                    Task { await performReAuth() }
+                } label: {
+                    Group {
+                        if isReAuthing {
+                            ProgressView().tint(.white)
+                        } else {
+                            Text("Onayla ve Sil")
+                                .font(.brand(.subheadline).bold())
+                        }
+                    }
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(reAuthPassword.isEmpty ? BrandColor.expense.opacity(0.3) : BrandColor.expense)
+                    )
+                }
+                .disabled(reAuthPassword.isEmpty || isReAuthing)
+                .padding(.horizontal, Spacing.xl)
+
+                Spacer()
+            }
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("İptal") { showReAuthSheet = false }
+                        .foregroundStyle(BrandColor.textSecondary)
+                }
+            }
+            .background(BrandColor.background.ignoresSafeArea())
+        }
+        .presentationDetents([.medium])
+    }
+
+    private func performReAuth() async {
+        isReAuthing = true
+        reAuthError = nil
+        do {
+            try await authService.reauthenticate(password: reAuthPassword)
+            isReAuthing = false
+            showReAuthSheet = false
+            reAuthPassword = ""
+            await performDelete()
+        } catch {
+            isReAuthing = false
+            reAuthError = "Şifre hatalı. Tekrar dene."
+        }
     }
 
     // MARK: - Warning card
@@ -237,8 +345,14 @@ struct DeleteAccountView: View {
 
     private func performDelete() async {
         isDeleting = true
+        isReAuthing = false
         do {
             try await authService.deleteAccount(modelContext: modelContext)
+        } catch let error as NSError
+            where error.domain == "FIRAuthErrorDomain" && error.code == 17014 {
+            // requiresRecentLogin — ask user to re-authenticate first
+            isDeleting = false
+            showReAuthSheet = true
         } catch {
             isDeleting = false
             errorMessage = error.localizedDescription

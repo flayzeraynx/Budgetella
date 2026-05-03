@@ -42,7 +42,7 @@ struct AuthSignInView: View {
                         fieldLabel("E-posta")
                         AuthTextField(
                             icon: "envelope",
-                            placeholder: "ozzy@budgetella.app",
+                            placeholder: "ornek@email.com",
                             text: $vm.email,
                             keyboardType: .emailAddress,
                             textContentType: .emailAddress,

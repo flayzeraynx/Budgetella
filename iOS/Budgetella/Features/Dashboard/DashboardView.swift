@@ -14,11 +14,20 @@ struct DashboardView: View {
     @Query(sort: \Category.sortOrder)
     private var categories: [Category]
 
-    @AppStorage("displayName") private var displayName = "Ozzy"
+    @AppStorage("displayName") private var displayName = ""
     @AppStorage("userPhotoURL") private var userPhotoURL = ""
+    @AppStorage("currentUserId") private var currentUserId = ""
     @State private var vm = DashboardViewModel()
     @State private var showSettings = false
     @Environment(\.hideAmounts) private var hideAmounts
+    @Environment(FirestoreService.self) private var firestoreService
+
+    private var myTransactions: [Transaction] {
+        transactions.filter { $0.userId == currentUserId }
+    }
+    private var myCategories: [Category] {
+        categories.filter { $0.userId == currentUserId }
+    }
 
     var body: some View {
         ScrollView {
@@ -32,15 +41,16 @@ struct DashboardView: View {
                 DashboardMainCard(
                     year: vm.selectedYear,
                     month: vm.selectedMonth,
-                    yearIncome: vm.yearlyIncome(from: transactions),
-                    yearExpense: vm.yearlyExpense(from: transactions),
-                    monthIncome: vm.monthlyIncome(from: transactions),
-                    monthExpense: vm.monthlyExpense(from: transactions),
-                    dailyData: vm.dailyFlowData(from: transactions),
+                    yearIncome: vm.yearlyIncome(from: myTransactions),
+                    yearExpense: vm.yearlyExpense(from: myTransactions),
+                    monthIncome: vm.monthlyIncome(from: myTransactions),
+                    monthExpense: vm.monthlyExpense(from: myTransactions),
+                    dailyData: vm.dailyFlowData(from: myTransactions),
                     availableYears: vm.availableYears,
                     onYearChange: { vm.selectedYear = $0 },
                     onMonthChange: { vm.selectedMonth = $0 }
                 )
+                .redacted(reason: firestoreService.isSyncing ? .placeholder : [])
                 .padding(.horizontal, 20)
                 .padding(.bottom, Spacing.lg)
 
@@ -142,7 +152,7 @@ struct DashboardView: View {
     // MARK: - Category section
 
     private var topExpenseCategories: [(Category, Decimal)] {
-        let monthly = transactions.filter {
+        let monthly = myTransactions.filter {
             $0.type == .expense &&
             Calendar.current.component(.year,  from: $0.date) == vm.selectedYear &&
             Calendar.current.component(.month, from: $0.date) == vm.selectedMonth
@@ -152,7 +162,7 @@ struct DashboardView: View {
             guard let cat = tx.category else { continue }
             totals[cat.id, default: 0] += tx.amount
         }
-        return categories
+        return myCategories
             .filter { totals[$0.id] != nil }
             .map { ($0, totals[$0.id]!) }
             .sorted { $0.1 > $1.1 }

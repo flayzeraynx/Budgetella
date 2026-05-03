@@ -19,10 +19,13 @@ import SwiftData
 @preconcurrency import FirebaseFirestore
 
 @MainActor
+@Observable
 public final class FirestoreService {
 
     public static let shared = FirestoreService()
     private init() {}
+
+    public var isSyncing = false
 
     private let db = Firestore.firestore()
 
@@ -101,6 +104,22 @@ public final class FirestoreService {
     /// - Yeni kullanıcı (boş Firestore): lokal default kategorileri Firestore'a yükler.
     /// - Mevcut kullanıcı: kategorileri + transaksiyonları indirir, kategori ilişkilerini kurar.
     public func fetchAndSync(userId: String, modelContext: ModelContext) async throws {
+        isSyncing = true
+        defer { isSyncing = false }
+
+        // Purge any local data that belongs to a different user before proceeding.
+        // This guards against cross-user leaks when the auth session changes without
+        // a proper sign-out (e.g. token expiry, account switching).
+        let wrongTxs = ((try? modelContext.fetch(FetchDescriptor<Transaction>())) ?? [])
+            .filter { $0.userId != userId }
+        let wrongCats = ((try? modelContext.fetch(FetchDescriptor<Category>())) ?? [])
+            .filter { $0.userId != userId }
+        if !wrongTxs.isEmpty || !wrongCats.isEmpty {
+            wrongTxs.forEach { modelContext.delete($0) }
+            wrongCats.forEach { modelContext.delete($0) }
+            try? modelContext.save()
+        }
+
         async let txFetch  = transactionsRef(userId).getDocuments()
         async let catFetch = categoriesRef(userId).getDocuments()
         let (txDocs, catDocs) = try await (txFetch, catFetch)

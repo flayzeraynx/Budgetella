@@ -203,7 +203,7 @@ struct SettingsView: View {
                     Section("Destek") {
                         settingsRow(icon: "questionmark.circle", iconColor: BrandColor.info,
                                     title: "Yardım & Destek", value: nil) {
-                            if let url = URL(string: "mailto:info@budgetella.app") {
+                            if let url = URL(string: "mailto:support@budgetella.app") {
                                 UIApplication.shared.open(url)
                             }
                         }

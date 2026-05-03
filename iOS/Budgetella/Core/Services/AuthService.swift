@@ -96,6 +96,18 @@ public final class AuthService: NSObject {
         try await Auth.auth().sendPasswordReset(withEmail: email)
     }
 
+    public func sendEmailVerification() async throws {
+        guard let user = Auth.auth().currentUser else { return }
+        try await user.sendEmailVerification()
+    }
+
+    /// Kullanıcıyı Firebase'den yeniden yükler ve e-posta doğrulama durumunu döner.
+    public func reloadAndCheckVerified() async throws -> Bool {
+        guard let user = Auth.auth().currentUser else { return false }
+        try await user.reload()
+        return user.isEmailVerified
+    }
+
     /// Mevcut şifreyi reauthenticate edip yenisini set eder.
     public func updatePassword(current: String, new: String) async throws {
         guard let user = currentUser, let email = user.email else {
@@ -178,6 +190,16 @@ public final class AuthService: NSObject {
     private func clearLocalData(modelContext: ModelContext) {
         try? modelContext.delete(model: Transaction.self)
         try? modelContext.delete(model: Category.self)
+        try? modelContext.delete(model: SubscriptionRecord.self)
+    }
+
+    /// Reauthenticate the current user with their email/password before a sensitive operation.
+    public func reauthenticate(password: String) async throws {
+        guard let user = currentUser, let email = user.email else {
+            throw AuthError.noUser
+        }
+        let credential = EmailAuthProvider.credential(withEmail: email, password: password)
+        try await user.reauthenticate(with: credential)
     }
 
     @MainActor

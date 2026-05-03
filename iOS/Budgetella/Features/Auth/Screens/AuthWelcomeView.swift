@@ -119,25 +119,46 @@ struct AuthWelcomeView: View {
                         .foregroundStyle(BrandColor.textPrimary))
                         .font(.brand(.footnote))
                 }
-                .padding(.top, Spacing.xs)
+                .padding(.vertical, Spacing.sm)
             }
             .padding(.horizontal, 28)
             .opacity(appeared ? 1 : 0)
             .offset(y: appeared ? 0 : 16)
             .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(0.25), value: appeared)
 
-            // ── ToS caption
-            Text("Devam ederek **Şartlar** ve **Gizlilik**'i kabul edersin.")
+            // ── ToS caption with clickable links
+            Text(tosAttributedString)
                 .font(.brand(.caption))
                 .foregroundStyle(BrandColor.textTertiary)
+                .tint(BrandColor.primary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 28)
-                .padding(.top, Spacing.sm)
+                .padding(.top, Spacing.xs)
                 .padding(.bottom, 36)
                 .opacity(appeared ? 1 : 0)
                 .animation(.easeOut.delay(0.4), value: appeared)
         }
         .onAppear { appeared = true }
+    }
+
+    // MARK: - ToS attributed string
+
+    private var tosAttributedString: AttributedString {
+        var prefix = AttributedString("Devam ederek ")
+
+        var terms = AttributedString("Şartlar")
+        terms.link = URL(string: "https://budgetella.app/terms")
+        terms.inlinePresentationIntent = .stronglyEmphasized
+
+        var mid = AttributedString(" ve ")
+
+        var privacy = AttributedString("Gizlilik")
+        privacy.link = URL(string: "https://budgetella.app/privacy")
+        privacy.inlinePresentationIntent = .stronglyEmphasized
+
+        let suffix = AttributedString("'i kabul edersin.")
+
+        return prefix + terms + mid + privacy + suffix
     }
 
     // MARK: - Sub-views

@@ -106,12 +106,23 @@ struct ContentView: View {
             }
         }
         .onChange(of: isSignedIn) { _, newValue in
+            if newValue, appState == .auth {
+                // Only auto-navigate for providers that skip the in-app OTP flow
+                // (Apple, Google). Email/password users have isEmailVerified = false
+                // until they click the verification link — keep them in the auth flow.
+                if Auth.auth().currentUser?.isEmailVerified == true {
+                    withAnimation(.easeInOut(duration: 0.4)) {
+                        appState = biometricLockEnabled ? .biometricLock : .main
+                    }
+                }
+            }
             if !newValue, appState == .main {
                 withAnimation(.easeInOut(duration: 0.4)) {
                     appState = .auth
                 }
             }
         }
+        .environment(FirestoreService.shared)
         // Pre-warm iOS keyboard so first TextField focus is instant
         .background(KeyboardPrewarmView())
     }

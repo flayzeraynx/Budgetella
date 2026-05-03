@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Budgetella — Paran nereye gidiyor, sonunda anlaşılır.</title>
+<title>Budgetella — Paran nereye gidiyor, takip et!</title>
 <meta name="description" content="Harcamalarını takip et, bütçeni yönet, finansal hedeflerine ulaş. Fişten otomatik giriş, AI destekli kategoriler, bulut senkronizasyonu.">
 <meta name="theme-color" content="#F5F1EA">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -47,6 +47,7 @@
   font-size: 13px; color: var(--muted); font-family: var(--font-mono);
 }
 .hero-meta-item { display: inline-flex; align-items: center; gap: 6px; }
+.hero-meta-item svg { width: 14px; height: 14px; flex-shrink: 0; }
 
 /* ─── Phone ─── */
 .hero-visual {
@@ -223,13 +224,14 @@
   font-size: 14px; color: rgba(255,255,255,0.85); display: flex; align-items: center; gap: 8px;
 }
 .compare-row:last-child .compare-cell { border-bottom: none; }
+.compare-row { display: contents; }
 .compare-cell.head {
   font-family: var(--font-mono); font-size: 11px; font-weight: 500;
   letter-spacing: 0.1em; text-transform: uppercase;
   color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.03); padding: 12px 20px;
 }
 .compare-cell.head.hl { color: #fff; background: rgba(110,91,255,0.18); }
-.compare-cell.feat { color: rgba(255,255,255,0.75); }
+.compare-cell.feat { color: rgba(255,255,255,0.75); font-weight: 400; }
 .compare-cell.hl { background: rgba(110,91,255,0.06); color: #fff; }
 .tick {
   display: inline-grid; place-items: center; width: 18px; height: 18px;
@@ -337,6 +339,162 @@
 .store-btn-label { font-size: 11px; color: rgba(255,255,255,0.6); line-height: 1; }
 .store-btn-name { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; }
 .store-note { margin-top: 20px; font-size: 13px; color: rgba(255,255,255,0.4); font-family: var(--font-mono); position: relative; }
+
+/* ─── Mobile-first ────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* 1. Global — daha az padding bölümler arası */
+  .section { padding: 44px 0; }
+  .section-head { grid-template-columns: 1fr; gap: 12px; margin-bottom: 28px; }
+  .section-head .lede { justify-self: start; max-width: 100%; font-size: 15px; }
+
+  /* ── Hero ── */
+  .hero { padding: 28px 0 36px; }
+  .hero-grid { grid-template-columns: 1fr; gap: 0; }
+  /* Phone visual: centered above text on mobile */
+  .hero-visual {
+    display: flex;
+    order: -1;
+    height: 320px;
+    margin-bottom: 28px;
+    justify-content: center;
+    align-items: center;
+  }
+  .hero-glow-1 { width: 280px; height: 280px; top: -40px; right: -20px; opacity: 0.5; }
+  .hero-glow-2 { width: 200px; height: 200px; bottom: -20px; left: -20px; opacity: 0.5; }
+  .phone {
+    width: 168px; height: 336px;
+    border-radius: 38px; padding: 5px;
+    transform: perspective(900px) rotateY(0deg) rotateX(0deg);
+  }
+  .phone-screen { border-radius: 33px; }
+  .phone-notch { width: 68px; height: 18px; top: 9px; border-radius: 9px; }
+  .app { padding: 36px 9px 9px; }
+  .app-top { font-size: 10px; margin-bottom: 14px; }
+  .app-balance { font-size: 22px; }
+  .app-balance-delta { font-size: 10px; }
+  .app-chips { font-size: 9px; margin: 10px 0; }
+  .chip { padding: 3px 6px; border-radius: 5px; }
+  .tx { padding: 6px 8px; border-radius: 8px; }
+  .tx-icon { width: 22px; height: 22px; font-size: 10px; border-radius: 5px; }
+  .tx-name { font-size: 10px; }
+  .tx-time { font-size: 9px; }
+  .tx-amt { font-size: 10px; }
+  /* Float cards — repositioned close to phone */
+  .fc-ocr { top: 16px; right: -2px; width: 148px; padding: 10px 12px; }
+  .fc-ocr-amt { font-size: 14px; }
+  .fc-ocr-meta { font-size: 10px; }
+  .fc-progress { bottom: 24px; left: -2px; width: 152px; padding: 10px 12px; }
+  .fc-progress-amt { font-size: 13px; }
+  .fc-progress-cap { font-size: 10px; }
+  .hero h1 { font-size: clamp(36px, 9vw, 50px); letter-spacing: -0.03em; }
+  .hero-sub { font-size: 15px; margin-top: 14px; max-width: 100%; }
+  /* Prevent CSS transition fighting GSAP on mobile */
+  .hero-cta .btn { transition: background 200ms, box-shadow 200ms, border-color 200ms; }
+  .hero-cta { margin-top: 24px; flex-direction: column; gap: 10px; }
+  .hero-cta .btn { width: 100%; justify-content: center; padding: 14px 20px; font-size: 15px; }
+  .hero-meta { flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+  .hero-meta-item { font-size: 12px; }
+
+  /* ── Trust bar ── */
+  .trust-bar { padding: 18px 0; }
+  .trust-grid { grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+  .trust-item { font-size: 12px; gap: 7px; }
+
+  /* ── Features: icon left, text right ── */
+  .features-grid { grid-template-columns: 1fr; border-radius: 16px; gap: 0; }
+  .feature { grid-column: span 1 !important; min-height: 0; padding: 18px 16px; justify-content: flex-start; }
+  .feature > div {
+    display: grid;
+    grid-template-columns: 38px 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 12px;
+  }
+  .feature-icon {
+    width: 38px; height: 38px; font-size: 17px; border-radius: 9px;
+    margin-bottom: 0; grid-column: 1; grid-row: 1 / 3; align-self: center;
+  }
+  .feature h3 { grid-column: 2; grid-row: 1; font-size: 15px; margin-bottom: 2px; font-weight: 500; }
+  .feature p  { grid-column: 2; grid-row: 2; font-size: 13px; line-height: 1.5; }
+
+  /* ── Why ── */
+  .why { border-radius: 18px; padding: 32px 18px; margin: 28px 0; }
+  .why h2 { font-size: clamp(24px, 7vw, 34px); }
+  .section-head-inner {
+    grid-template-columns: 1fr !important; gap: 10px !important;
+    margin-top: 12px !important; margin-bottom: 0 !important;
+  }
+
+  /* 3. Compare table → mobile cards (table hidden) */
+  .compare-wrapper { display: none; }
+  .compare-cards {
+    display: flex; flex-direction: column; gap: 8px; margin-top: 24px;
+  }
+  .compare-card {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px; padding: 14px 16px;
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  }
+  .compare-card-feat {
+    font-size: 14px; color: rgba(255,255,255,0.75); flex: 1;
+  }
+  .compare-card-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; font-family: var(--font-mono);
+    background: rgba(6,181,133,0.18); color: var(--success);
+    padding: 4px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0;
+  }
+
+  /* 2. Steps — number left, text right — properly aligned */
+  .steps { grid-template-columns: 1fr; gap: 0; }
+  .steps::before { display: none; }
+  .step {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 14px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .step:last-child { border-bottom: none; }
+  .step-num {
+    width: 40px; height: 40px; font-size: 14px; border-radius: 11px; margin-bottom: 0;
+    grid-column: 1; grid-row: 1 / 3; align-self: center;
+  }
+  .step h3 { grid-column: 2; grid-row: 1; font-size: 16px; margin-bottom: 4px; font-weight: 500; align-self: end; }
+  .step p  { grid-column: 2; grid-row: 2; font-size: 14px; line-height: 1.5; align-self: start; }
+
+  /* ── Pricing ── */
+  .pricing-grid { grid-template-columns: 1fr; max-width: 100%; margin-top: 28px; gap: 10px; }
+  .pricing-card { padding: 22px 18px; border-radius: 16px; }
+  .pricing-price { font-size: 40px; }
+  .pricing-feats { gap: 8px; margin-bottom: 18px; }
+  .pricing-feats li { font-size: 13px; }
+  .pricing-card.popular { order: -1; }
+
+  /* 4. Download — no overflow */
+  #download { padding: 0 0 48px; }
+  .download-cta { border-radius: 18px; padding: 40px 20px; overflow: hidden; }
+  .download-cta h2 { font-size: clamp(26px, 7vw, 36px); }
+  .download-cta .lede { font-size: 14px; margin-top: 12px; }
+  .download-cta .btns { margin-top: 28px; flex-direction: column; align-items: stretch; gap: 10px; }
+  .store-btn {
+    width: 100%; justify-content: center;
+    padding: 14px 18px; border-radius: 12px;
+  }
+  .store-btn svg { width: 22px; height: 22px; flex-shrink: 0; }
+  .store-btn-name { font-size: 15px; }
+  .store-note { font-size: 12px; margin-top: 16px; }
+
+  /* ── FAQ ── */
+  .faq-list { border-radius: 14px; }
+  .faq-q { font-size: 14px; padding: 16px 18px; text-align: left; }
+  .faq-a { font-size: 14px; line-height: 1.6; padding: 0 18px; }
+  .faq-item.open .faq-a { padding: 0 18px 16px; }
+}
+
+/* Hide mobile compare cards on desktop */
+.compare-cards { display: none; }
 </style>
 </head>
 <body>
@@ -347,26 +505,23 @@
   <div class="container">
     <div class="hero-grid">
       <div>
-        <div class="hero-tag reveal">
-          <span class="dot"></span> iOS için mevcut · TestFlight
-        </div>
-        <h1 class="reveal">Paran<br>nereye gidiyor,<br>sonunda anlaşılır.</h1>
-        <p class="hero-sub reveal">Harcamalarını takip et, bütçeni yönet, finansal hedeflerine ulaş. Banka bağlantısı yok, reklam yok, gizliliğe saygılı.</p>
-        <div class="hero-cta reveal">
+        <h1>Paran<br>nereye gidiyor,<br>takip et!</h1>
+        <p class="hero-sub">Harcamalarını takip et, bütçeni yönet, finansal hedeflerine ulaş. Banka bağlantısı yok, reklam yok, gizliliğe saygılı.</p>
+        <div class="hero-cta">
           <a href="#download" class="btn btn-primary btn-lg">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
             App Store'dan İndir
           </a>
           <a href="#features" class="btn btn-outline btn-lg">Özellikleri keşfet</a>
         </div>
-        <div class="hero-meta reveal">
+        <div class="hero-meta">
           <span class="hero-meta-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             KVKK Uyumlu
           </span>
           <span class="hero-meta-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            Türkçe yapıldı
+            Türkiye'de üretildi
           </span>
           <span class="hero-meta-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m8 21 4-4 4 4"/></svg>
@@ -376,7 +531,7 @@
       </div>
 
       <!-- Phone mockup -->
-      <div class="hero-visual reveal">
+      <div class="hero-visual">
         <div class="hero-glow-1"></div>
         <div class="hero-glow-2"></div>
 
@@ -548,6 +703,20 @@
           <p>Tüm verilerini JSON formatında dışa aktar, istediğin zaman geri al.</p>
         </div>
       </div>
+      <div class="feature">
+        <div>
+          <div class="feature-icon">🎤</div>
+          <h3>Sesli İşlem Girişi</h3>
+          <p>"Kahve 45 lira" de, AI tutarı ve kategoriyi tanıyarak işlemi anında kaydeder.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <div>
+          <div class="feature-icon">🔔</div>
+          <h3>Bütçe Limitleri & Uyarılar</h3>
+          <p>Kategori bazlı harcama limiti belirle, aşım yaklaştığında bildirim al.</p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -561,6 +730,7 @@
         <h2>Diğer uygulamalar<br>çok şey istiyor</h2>
         <p class="lede">Banka şifren, kart bilgilerin, sürekli bildirimler. Biz sadece ne harcadığını bilmek istiyoruz — o kadar.</p>
       </div>
+      <div class="compare-wrapper">
       <div class="compare">
         <div class="compare-row">
           <div class="compare-cell head feat">Özellik</div>
@@ -597,6 +767,31 @@
           <div class="compare-cell hl"><span class="tick"><svg viewBox="0 0 12 12" fill="currentColor"><path d="M2 6l3 3 5-5"/></svg></span> Var</div>
           <div class="compare-cell"><span class="tick no"><svg viewBox="0 0 12 12" fill="currentColor"><path d="M9 3L3 9M3 3l6 6"/></svg></span> Yok</div>
           <div class="compare-cell"><span class="tick no"><svg viewBox="0 0 12 12" fill="currentColor"><path d="M9 3L3 9M3 3l6 6"/></svg></span> Yok</div>
+        </div>
+      </div>
+      </div><!-- /compare-wrapper -->
+
+      <!-- Mobile-only: compare cards -->
+      <div class="compare-cards">
+        <div class="compare-card">
+          <span class="compare-card-feat">Banka bağlantısı gerektirmez</span>
+          <span class="compare-card-badge">✓ Sadece biz</span>
+        </div>
+        <div class="compare-card">
+          <span class="compare-card-feat">Reklam & veri satışı yok</span>
+          <span class="compare-card-badge">✓ Sadece biz</span>
+        </div>
+        <div class="compare-card">
+          <span class="compare-card-feat">Fişten otomatik giriş</span>
+          <span class="compare-card-badge">✓ Sadece biz</span>
+        </div>
+        <div class="compare-card">
+          <span class="compare-card-feat">Face ID kilidi</span>
+          <span class="compare-card-badge">✓ Sadece biz</span>
+        </div>
+        <div class="compare-card">
+          <span class="compare-card-feat">Tam veri kontrolü (JSON export)</span>
+          <span class="compare-card-badge">✓ Sadece biz</span>
         </div>
       </div>
     </div>
@@ -764,6 +959,8 @@
 
 <div id="mount-footer"></div>
 <script src="/assets/site.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
   // FAQ accordion
   document.querySelectorAll('.faq-q').forEach(btn => {
@@ -774,6 +971,75 @@
       if (!isOpen) item.classList.add('open');
     });
   });
+
+  // GSAP animations
+  (function () {
+    if (typeof gsap === 'undefined') return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+    if (isMobile) {
+      // Mobile: simple entrance, no opacity fighting
+      gsap.fromTo('.phone',       { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', delay: 0.1 });
+      gsap.fromTo('.fc-ocr',      { x: 16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, ease: 'power3.out', delay: 0.45 });
+      gsap.fromTo('.fc-progress', { x: -16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, ease: 'power3.out', delay: 0.55 });
+      gsap.fromTo('.hero h1',     { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out', delay: 0.3 });
+      gsap.fromTo('.hero-sub',    { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out', delay: 0.5 });
+      gsap.fromTo('.hero-cta > *',{ y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, stagger: 0.1, ease: 'power3.out', delay: 0.65 });
+      gsap.fromTo('.hero-meta-item',{ y: 8, opacity: 0 },{ y: 0, opacity: 1, duration: 0.4, stagger: 0.07, ease: 'power3.out', delay: 0.85 });
+      // Gentle float on cards
+      gsap.to('.fc-ocr',      { y: '+=7', duration: 3.0, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.2 });
+      gsap.to('.fc-progress', { y: '+=8', duration: 3.4, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.5 });
+    } else {
+      // Desktop: full staggered entrance
+      const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      heroTl
+        .from('.hero h1',        { y: 30, opacity: 0, duration: 0.9 })
+        .from('.hero-sub',       { y: 20, opacity: 0, duration: 0.7 }, '-=0.5')
+        .from('.hero-cta > *',   { y: 16, opacity: 0, duration: 0.5, stagger: 0.08 }, '-=0.4')
+        .from('.hero-meta-item', { y: 10, opacity: 0, duration: 0.4, stagger: 0.07 }, '-=0.3')
+        .from('.phone',          { y: 60, opacity: 0, scale: 0.96, duration: 1.0, ease: 'expo.out' }, '-=1.0')
+        .from('.fc-ocr',         { y: -20, x: 20, opacity: 0, scale: 0.92, duration: 0.7 }, '-=0.5')
+        .from('.fc-progress',    { y: 20, x: -20, opacity: 0, scale: 0.92, duration: 0.7 }, '-=0.55');
+
+      // Floating loop
+      gsap.to('.fc-ocr',      { y: '+=10', duration: 3.2, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+      gsap.to('.fc-progress', { y: '+=12', duration: 3.6, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 0.4 });
+
+      // Mouse parallax + tilt on phone
+      const visual = document.querySelector('.hero-visual');
+      const phone  = document.querySelector('.phone');
+      if (visual && phone) {
+        visual.addEventListener('mousemove', (e) => {
+          const r = visual.getBoundingClientRect();
+          const x = (e.clientX - r.left) / r.width  - 0.5;
+          const y = (e.clientY - r.top)  / r.height - 0.5;
+          gsap.to(phone, { rotateY: -6 + x * 8, rotateX: 2 - y * 6, duration: 0.6, ease: 'power2.out' });
+        });
+        visual.addEventListener('mouseleave', () => {
+          gsap.to(phone, { rotateY: -6, rotateX: 2, duration: 0.8, ease: 'power3.out' });
+        });
+      }
+
+      // Scroll parallax on glow orbs
+      gsap.to('.hero-glow-1', { y: 200, scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
+      gsap.to('.hero-glow-2', { y: -150, scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
+
+      // Magnetic hover on primary CTAs
+      document.querySelectorAll('.btn-primary, .btn-accent').forEach(btn => {
+        btn.addEventListener('mousemove', (e) => {
+          const r  = btn.getBoundingClientRect();
+          const mx = e.clientX - r.left - r.width  / 2;
+          const my = e.clientY - r.top  - r.height / 2;
+          gsap.to(btn, { x: mx * 0.15, y: my * 0.25, duration: 0.4, ease: 'power2.out' });
+        });
+        btn.addEventListener('mouseleave', () => {
+          gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.5)' });
+        });
+      });
+    }
+  })();
 </script>
 </body>
 </html>

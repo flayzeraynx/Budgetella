@@ -44,7 +44,7 @@ struct AuthSignUpView: View {
                         fieldLabel("Ad")
                         AuthTextField(
                             icon: "person",
-                            placeholder: "Ozzy",
+                            placeholder: "Ad Soyad",
                             text: $vm.name,
                             textContentType: .name,
                             submitLabel: .next,
@@ -57,7 +57,7 @@ struct AuthSignUpView: View {
                         fieldLabel("E-posta")
                         AuthTextField(
                             icon: "envelope",
-                            placeholder: "ozzy@budgetella.app",
+                            placeholder: "ornek@email.com",
                             text: $vm.email,
                             keyboardType: .emailAddress,
                             textContentType: .emailAddress,

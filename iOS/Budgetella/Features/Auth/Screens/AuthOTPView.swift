@@ -2,7 +2,7 @@
 //  AuthOTPView.swift
 //  Budgetella
 //
-//  Auth 04 · E-postanı doğrula — 6 haneli OTP + auto-fill hint + countdown
+//  Auth 04 · E-postanı doğrula — Firebase link verification
 //
 
 import SwiftUI
@@ -14,7 +14,6 @@ struct AuthOTPView: View {
     var onVerified: () -> Void
 
     @State private var appeared = false
-    @State private var showSuccess = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -23,39 +22,53 @@ struct AuthOTPView: View {
                 .padding(.horizontal, 28)
                 .padding(.top, 16)
 
-            VStack(alignment: .leading, spacing: Spacing.xs) {
+            Spacer()
+
+            // Icon
+            ZStack {
+                Circle()
+                    .fill(BrandColor.primary.opacity(0.12))
+                    .frame(width: 88, height: 88)
+                Image(systemName: "envelope.badge.fill")
+                    .font(.system(size: 36))
+                    .foregroundStyle(BrandColor.primary)
+            }
+            .padding(.bottom, Spacing.xl)
+
+            // Title + subtitle
+            VStack(spacing: Spacing.sm) {
                 Text("E-postanı doğrula")
                     .font(.brand(.largeTitle))
                     .foregroundStyle(BrandColor.textPrimary)
-                Text("6 haneli kodu **\(email)**'ye gönderdik. Birazdan gelir.")
+                    .multilineTextAlignment(.center)
+
+                Text("**\(email)**\nadresine bir doğrulama linki gönderdik.\nLinke tıkla, sonra aşağıdaki butona bas.")
                     .font(.brand(.body))
                     .foregroundStyle(BrandColor.textTertiary)
+                    .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 28)
-            .padding(.top, Spacing.xl)
-            .padding(.bottom, Spacing.xxl)
+                    .lineSpacing(2)
 
-            // OTP boxes
-            OTPFieldView(code: $vm.otpCode)
-                .padding(.horizontal, 28)
-
-            // Auto-fill hint (kod 4+ hane girilince göster)
-            if vm.otpCode.count >= 4 {
-                autoFillHint
-                    .padding(.horizontal, 28)
-                    .padding(.top, Spacing.md)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                HStack(spacing: 4) {
+                    Image(systemName: "exclamationmark.circle")
+                        .font(.system(size: 12))
+                    Text("Spam / Junk klasörünü de kontrol et")
+                        .font(.brand(.caption))
+                }
+                .foregroundStyle(BrandColor.textTertiary.opacity(0.7))
+                .padding(.top, Spacing.xs)
             }
+            .padding(.horizontal, 36)
 
             // Hata
             if let error = vm.errorMessage {
                 Text(error)
                     .font(.brand(.footnote))
                     .foregroundStyle(BrandColor.expense)
+                    .multilineTextAlignment(.center)
                     .padding(.horizontal, 28)
-                    .padding(.top, Spacing.sm)
+                    .padding(.top, Spacing.lg)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
             }
 
             Spacer()
@@ -64,24 +77,25 @@ struct AuthOTPView: View {
             Button {
                 vm.resendOTP()
             } label: {
-                if vm.otpResendEnabled {
-                    (Text("Kod gelmedi mi? ")
-                        .foregroundStyle(BrandColor.textSecondary)
-                     + Text("Tekrar gönder")
-                        .foregroundStyle(BrandColor.primary))
-                        .font(.brand(.footnote))
-                } else {
-                    (Text("Kod gelmedi mi? ")
-                        .foregroundStyle(BrandColor.textTertiary)
-                     + Text("Tekrar gönder (\(formattedCountdown))")
-                        .foregroundStyle(BrandColor.textTertiary))
-                        .font(.brand(.footnote))
+                Group {
+                    if vm.otpResendEnabled {
+                        (Text("Link gelmedi mi? ")
+                            .foregroundStyle(BrandColor.textSecondary)
+                         + Text("Tekrar gönder")
+                            .foregroundStyle(BrandColor.primary))
+                    } else {
+                        (Text("Link gelmedi mi? ")
+                            .foregroundStyle(BrandColor.textTertiary)
+                         + Text("Tekrar gönder (\(formattedCountdown))")
+                            .foregroundStyle(BrandColor.textTertiary))
+                    }
                 }
+                .font(.brand(.footnote))
             }
             .disabled(!vm.otpResendEnabled)
             .padding(.bottom, Spacing.lg)
 
-            // Doğrula CTA
+            // CTA
             Button {
                 Task {
                     let ok = await vm.verifyOTP()
@@ -89,45 +103,23 @@ struct AuthOTPView: View {
                 }
             } label: {
                 if vm.isLoading {
-                    ProgressView().tint(.white).frame(maxWidth: .infinity).frame(height: 56)
-                        .background(LinearGradient(colors: [BrandColor.primary, BrandColor.primaryLight], startPoint: .leading, endPoint: .trailing))
+                    ProgressView().tint(.white)
+                        .frame(maxWidth: .infinity).frame(height: 56)
+                        .background(LinearGradient(colors: [BrandColor.primary, BrandColor.primaryLight],
+                                                   startPoint: .leading, endPoint: .trailing))
                         .clipShape(Capsule())
                 } else {
-                    primaryButtonLabel("Doğrula ve devam et")
+                    primaryButtonLabel("Doğrulamayı kontrol et")
                 }
             }
-            .disabled(vm.otpCode.count < 6)
-            .opacity(vm.otpCode.count < 6 ? 0.5 : 1)
             .padding(.horizontal, 28)
             .padding(.bottom, 48)
         }
-        .animation(.spring(response: 0.3), value: vm.otpCode.count)
+        .animation(.spring(response: 0.3), value: vm.errorMessage)
         .opacity(appeared ? 1 : 0)
         .offset(y: appeared ? 0 : 20)
         .animation(.spring(response: 0.4, dampingFraction: 0.85), value: appeared)
         .onAppear { appeared = true }
-    }
-
-    private var autoFillHint: some View {
-        HStack(spacing: Spacing.sm) {
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(BrandColor.income)
-                .font(.system(size: 16))
-            Text("Klavyeden **\"\(vm.otpCode)\"**yi otomatik dolduralım")
-                .font(.brand(.footnote))
-                .foregroundStyle(BrandColor.textSecondary)
-        }
-        .padding(.horizontal, Spacing.md)
-        .padding(.vertical, Spacing.sm)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: Spacing.radiusSmall, style: .continuous)
-                .fill(BrandColor.income.opacity(0.08))
-                .overlay(
-                    RoundedRectangle(cornerRadius: Spacing.radiusSmall, style: .continuous)
-                        .strokeBorder(BrandColor.income.opacity(0.2), lineWidth: 1)
-                )
-        )
     }
 
     private var formattedCountdown: String {

@@ -94,15 +94,15 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: -0.01em;
 }
 .brand-mark {
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
   background: linear-gradient(135deg, var(--accent), var(--accent-hi));
   display: grid;
   place-items: center;
   color: #fff;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 18px;
   letter-spacing: -0.04em;
   position: relative;
   box-shadow: 0 4px 14px rgba(110,91,255,0.25);
@@ -284,9 +284,14 @@ p { margin: 0; line-height: 1.6; color: var(--ink-soft); }
 }
 .footer-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 2fr 3fr;
   gap: 48px;
   margin-bottom: 64px;
+}
+.footer-cols-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
 }
 .footer-brand {
   max-width: 320px;
@@ -332,11 +337,33 @@ p { margin: 0; line-height: 1.6; color: var(--ink-soft); }
   font-family: var(--font-mono);
 }
 @media (max-width: 900px) {
-  .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 36px; }
+  .footer-brand { max-width: 480px; }
 }
 @media (max-width: 600px) {
-  .footer-grid { grid-template-columns: 1fr; gap: 32px; }
-  .footer-bottom { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .footer { padding: 48px 0 28px; margin-top: 48px; }
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin-bottom: 40px;
+  }
+  /* Brand block */
+  .footer-brand {
+    max-width: 100%;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 24px;
+  }
+  /* 3 link columns in a single compact row */
+  .footer-cols-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .footer-col h4 { margin-bottom: 12px; font-size: 10px; }
+  .footer-col ul { gap: 8px; }
+  .footer-col a { font-size: 13px; }
+  .footer-bottom { flex-direction: column; gap: 8px; align-items: flex-start; font-size: 12px; }
 }
 
 /* ─── Animations / reveal ─────────────────────────────────── */

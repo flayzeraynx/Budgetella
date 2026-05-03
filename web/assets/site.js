@@ -23,7 +23,7 @@
   const footerHTML = `
 <footer class="footer">
   <div class="container">
-    <div class="footer-grid" style="grid-template-columns: 2fr 1fr 1fr 1fr;">
+    <div class="footer-grid">
       <div class="footer-brand">
         <div class="brand">
           <div class="brand-mark">B</div>
@@ -34,34 +34,36 @@
           <a href="mailto:info@budgetella.app" style="color:var(--accent)">info@budgetella.app</a>
         </p>
       </div>
-      <div class="footer-col">
-        <h4>Ürün</h4>
-        <ul>
-          <li><a href="/index.html#features">Özellikler</a></li>
-          <li><a href="/index.html#pricing">Fiyatlandırma</a></li>
-          <li><a href="/index.html#download">İndir</a></li>
-          <li><a href="/index.html#faq">SSS</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Yasal</h4>
-        <ul>
-          <li><a href="/privacy.html">Gizlilik</a></li>
-          <li><a href="/terms.html">Kullanım Şartları</a></li>
-          <li><a href="/privacy.html#kvkk">KVKK</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Destek</h4>
-        <ul>
-          <li><a href="/support.html">Yardım Merkezi</a></li>
-          <li><a href="mailto:support@budgetella.app">Destek</a></li>
-          <li><a href="https://apps.apple.com/account/subscriptions" target="_blank" rel="noopener">Abonelik</a></li>
-        </ul>
+      <div class="footer-cols-row">
+        <div class="footer-col">
+          <h4>Ürün</h4>
+          <ul>
+            <li><a href="/index.html#features">Özellikler</a></li>
+            <li><a href="/index.html#pricing">Fiyatlandırma</a></li>
+            <li><a href="/index.html#download">İndir</a></li>
+            <li><a href="/index.html#faq">SSS</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Yasal</h4>
+          <ul>
+            <li><a href="/privacy.html">Gizlilik</a></li>
+            <li><a href="/terms.html">Kullanım Şartları</a></li>
+            <li><a href="/privacy.html#kvkk">KVKK</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Destek</h4>
+          <ul>
+            <li><a href="/support.html">Yardım Merkezi</a></li>
+            <li><a href="mailto:support@budgetella.app">Destek</a></li>
+            <li><a href="https://apps.apple.com/account/subscriptions" target="_blank" rel="noopener">Abonelik</a></li>
+          </ul>
+        </div>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2025 Budgetella · İstanbul</span>
+      <span>© 2026 Budgetella</span>
       <span class="mono">v1.0 · iOS</span>
     </div>
   </div>

@@ -9,9 +9,18 @@ import SwiftData
 struct TransactionsView: View {
 
     @Environment(\.modelContext) private var modelContext
+    @Environment(FirestoreService.self) private var firestoreService
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @Query(sort: \Category.sortOrder) private var categories: [Category]
+    @AppStorage("currentUserId") private var currentUserId = ""
     @State private var vm = TransactionsViewModel()
+
+    private var myTransactions: [Transaction] {
+        transactions.filter { $0.userId == currentUserId }
+    }
+    private var myCategories: [Category] {
+        categories.filter { $0.userId == currentUserId }
+    }
     @State private var showFilter = false
     @State private var editingTransaction: Transaction?
     @FocusState private var isSearchFocused: Bool
@@ -35,8 +44,10 @@ struct TransactionsView: View {
                     Divider().background(BrandColor.borderSubtle)
 
                     // Transaction list
-                    let sections = vm.grouped(transactions)
-                    if sections.isEmpty {
+                    let sections = vm.grouped(myTransactions)
+                    if firestoreService.isSyncing {
+                        syncingPlaceholder
+                    } else if sections.isEmpty {
                         emptyState
                     } else {
                         transactionList(sections: sections)
@@ -70,10 +81,10 @@ struct TransactionsView: View {
             }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
             .sheet(isPresented: $showFilter) {
-                CategoryFilterSheet(vm: vm, categories: categories)
+                CategoryFilterSheet(vm: vm, categories: myCategories)
             }
             .sheet(item: $editingTransaction) { tx in
-                EditTransactionSheet(transaction: tx, categories: categories)
+                EditTransactionSheet(transaction: tx, categories: myCategories)
                     .presentationDetents([.large])
                     .presentationDragIndicator(.visible)
             }
@@ -149,7 +160,7 @@ struct TransactionsView: View {
     private var filterChips: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: Spacing.xs) {
-                ForEach(categories) { cat in
+                ForEach(myCategories) { cat in
                     let isActive = vm.categoryFilter == cat.id
                     filterChip(
                         label: cat.name,
@@ -258,6 +269,37 @@ struct TransactionsView: View {
         .padding(.horizontal, 20)
         .padding(.vertical, Spacing.xs)
         .background(BrandColor.background)
+    }
+
+    // MARK: - Syncing placeholder
+
+    private var syncingPlaceholder: some View {
+        VStack(spacing: Spacing.sm) {
+            ForEach(0..<6, id: \.self) { _ in
+                HStack(spacing: Spacing.md) {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(BrandColor.surface)
+                        .frame(width: 40, height: 40)
+                    VStack(alignment: .leading, spacing: 6) {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(BrandColor.surface)
+                            .frame(height: 13)
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(BrandColor.surface)
+                            .frame(width: 80, height: 11)
+                    }
+                    Spacer()
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(BrandColor.surface)
+                        .frame(width: 64, height: 13)
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+            }
+            Spacer()
+        }
+        .redacted(reason: .placeholder)
+        .padding(.top, Spacing.md)
     }
 
     // MARK: - Empty state
