@@ -66,8 +66,8 @@ struct QuickEntryView: View {
                             .transition(.opacity)
                     }
 
-                    // Save button — only for manual mode, hidden while keyboard is up
-                    if mode == .manual && !isTyping {
+                    // Save button — always visible in manual mode
+                    if mode == .manual {
                         Button {
                             vm.save(modelContext: modelContext, categories: categories, userId: userId)
                             if vm.errorMessage == nil { dismiss() }

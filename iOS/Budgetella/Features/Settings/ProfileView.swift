@@ -59,7 +59,7 @@ struct ProfileView: View {
     private struct Achievement: Identifiable {
         let id: String
         let emoji: String
-        let name: String
+        let name: LocalizedStringKey
         let isUnlocked: Bool
         let colors: [Color]
     }
@@ -176,7 +176,7 @@ struct ProfileView: View {
                 }
 
                 // Name
-                Text(displayName.isEmpty ? "İsim girilmemiş" : displayName)
+                Text(displayName.isEmpty ? String(localized: "İsim girilmemiş") : displayName)
                     .font(.system(size: 22, weight: .bold))
                     .foregroundStyle(BrandColor.textPrimary)
 
@@ -189,7 +189,7 @@ struct ProfileView: View {
                         Text("·")
                             .foregroundStyle(BrandColor.textTertiary)
                         HStack(spacing: 3) {
-                            Text("\(streak) günlük seri")
+                            Text(String(format: String(localized: "%d günlük seri"), streak))
                                 .font(.brand(.footnote))
                                 .foregroundStyle(BrandColor.textTertiary)
                             Text("🔥")
@@ -230,7 +230,7 @@ struct ProfileView: View {
         }
     }
 
-    private func statCell(value: String, label: String) -> some View {
+    private func statCell(value: String, label: LocalizedStringKey) -> some View {
         VStack(spacing: 4) {
             Text(value)
                 .font(.system(size: 22, weight: .bold, design: .rounded))
@@ -261,8 +261,8 @@ struct ProfileView: View {
                 .tracking(1.2)
 
             Text(isPositive
-                 ? "Geçen aya göre \(savings.fullTRY) daha fazla biriktirdin. Çok iyi gidiyorsun 🚀"
-                 : "Bu ay \((-savings).fullTRY) açık var. Harcamaları gözden geçir.")
+                 ? String(format: String(localized: "Geçen aya göre %@ daha fazla biriktirdin. Çok iyi gidiyorsun 🚀"), savings.fullTRY)
+                 : String(format: String(localized: "Bu ay %@ açık var. Harcamaları gözden geçir."), (-savings).fullTRY))
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(.white)
                 .fixedSize(horizontal: false, vertical: true)
@@ -386,10 +386,10 @@ struct ChangePasswordView: View {
 
     private var strengthLabel: String {
         if newPw.isEmpty { return "" }
-        if passwordStrength < 0.34 { return "Çok zayıf" }
-        if passwordStrength < 0.5  { return "Zayıf" }
-        if passwordStrength < 0.85 { return "Orta" }
-        return "Güçlü"
+        if passwordStrength < 0.34 { return String(localized: "Çok zayıf") }
+        if passwordStrength < 0.5  { return String(localized: "Zayıf") }
+        if passwordStrength < 0.85 { return String(localized: "Orta") }
+        return String(localized: "Güçlü")
     }
 
     var body: some View {
@@ -487,7 +487,7 @@ struct ChangePasswordView: View {
         .presentationDetents([.medium])
     }
 
-    private func pwField(_ placeholder: String, text: Binding<String>) -> some View {
+    private func pwField(_ placeholder: LocalizedStringKey, text: Binding<String>) -> some View {
         SecureField(placeholder, text: text)
             .font(.brand(.body))
             .foregroundStyle(BrandColor.textPrimary)

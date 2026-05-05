@@ -202,7 +202,7 @@ struct DashboardView: View {
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Color(hex: cat.colorHex))
             }
-            Text(cat.name)
+            Text(cat.localizedDisplayName)
                 .font(.brand(.subheadline))
                 .foregroundStyle(BrandColor.textPrimary)
             Spacer()

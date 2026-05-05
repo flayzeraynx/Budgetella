@@ -131,10 +131,10 @@ struct TransactionsView: View {
     private var typeFilterPicker: some View {
         HStack(spacing: 2) {
             ForEach(
-                [(label: "Tümü", type: nil as TransactionType?),
-                 (label: "Gelir", type: .income),
-                 (label: "Gider", type: .expense)],
-                id: \.label
+                [(id: 0, label: LocalizedStringKey("Tümü"),  type: Optional<TransactionType>.none),
+                 (id: 1, label: LocalizedStringKey("Gelir"), type: Optional<TransactionType>.some(.income)),
+                 (id: 2, label: LocalizedStringKey("Gider"), type: Optional<TransactionType>.some(.expense))],
+                id: \.id
             ) { item in
                 Button {
                     withAnimation(.spring(response: 0.28)) { vm.typeFilter = item.type }
@@ -163,7 +163,7 @@ struct TransactionsView: View {
                 ForEach(myCategories) { cat in
                     let isActive = vm.categoryFilter == cat.id
                     filterChip(
-                        label: cat.name,
+                        label: cat.localizedDisplayName,
                         dotColor: Color(hex: cat.colorHex),
                         isActive: isActive
                     ) {
@@ -271,7 +271,7 @@ struct TransactionsView: View {
     }
 
     private func monthHeader(_ month: Int) -> some View {
-        Text(turkishMonthFull(month))
+        Text(monthFull(month))
             .font(.brand(.headline))
             .foregroundStyle(BrandColor.primary)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -442,7 +442,7 @@ private struct CategoryFilterSheet: View {
                         }
                         ForEach(categories) { cat in
                             filterRow(
-                                label: cat.name,
+                                label: cat.localizedDisplayName,
                                 dotColor: Color(hex: cat.colorHex),
                                 isSelected: vm.categoryFilter == cat.id
                             ) {

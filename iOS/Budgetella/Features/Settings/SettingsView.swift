@@ -77,17 +77,15 @@ struct SettingsView: View {
                             icon: "globe",
                             iconColor: BrandColor.info,
                             title: "Dil",
-                            value: "Yakında",
-                            disabled: true
-                        ) { }
+                            value: settings?.language.displayName ?? AppLanguage.english.displayName
+                        ) { showLanguagePicker = true }
 
                         settingsRow(
                             icon: "dollarsign.circle",
                             iconColor: BrandColor.income,
                             title: "Para Birimi",
-                            value: "Yakında",
-                            disabled: true
-                        ) { }
+                            value: "\(settings?.currency.symbol ?? "₺") \(settings?.currency.rawValue ?? "TRY")"
+                        ) { showCurrencyPicker = true }
                     }
                     .listRowBackground(BrandColor.surface.opacity(0.4))
 
@@ -154,8 +152,9 @@ struct SettingsView: View {
                         settingsRow(
                             icon: isImporting ? "arrow.triangle.2.circlepath" : "square.and.arrow.down",
                             iconColor: BrandColor.primaryLight,
-                            title: isImporting ? "İçe aktarılıyor…" : "Yedeği İçe Aktar",
-                            value: nil
+                            title: importRowTitle,
+                            value: nil,
+                            disabled: isImporting
                         ) {
                             guard !isImporting else { return }
                             showImportPicker = true
@@ -355,7 +354,7 @@ struct SettingsView: View {
         }
         .brandAlert(
             title: "İçe Aktarma Tamamlandı",
-            message: importResultMessage,
+            dynamicMessage: importResultMessage,
             isPresented: $showImportResult,
             buttons: [.cancel("Tamam")]
         )
@@ -481,7 +480,7 @@ struct SettingsView: View {
     private func settingsRow(
         icon: String,
         iconColor: Color,
-        title: String,
+        title: LocalizedStringKey,
         value: String?,
         disabled: Bool = false,
         action: @escaping () -> Void
@@ -525,12 +524,24 @@ struct SettingsView: View {
         }
     }
 
-    private func themeLabel(_ theme: AppTheme) -> String {
+    private func themeDisplayName(_ theme: AppTheme) -> LocalizedStringKey {
         switch theme {
-        case .dark: return "Koyu"
-        case .light: return "Açık"
+        case .dark:   return "Karanlık"
+        case .light:  return "Açık"
         case .system: return "Sistem"
         }
+    }
+
+    private func themeLabel(_ theme: AppTheme) -> String {
+        switch theme {
+        case .dark:   return String(localized: "Karanlık")
+        case .light:  return String(localized: "Açık")
+        case .system: return String(localized: "Sistem")
+        }
+    }
+
+    private var importRowTitle: LocalizedStringKey {
+        isImporting ? "İçe aktarılıyor…" : "Yedeği İçe Aktar"
     }
 
     private var appVersion: String {

@@ -33,11 +33,14 @@ struct OnboardingView: View {
             Group {
                 switch vm.currentStep {
                 case 0:
-                    OnboardingWelcomeView(vm: vm)
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .trailing),
-                            removal: .move(edge: .leading)
-                        ))
+                    OnboardingWelcomeView(vm: vm, onSkipToAuth: {
+                        UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
+                        onComplete()
+                    })
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing),
+                        removal: .move(edge: .leading)
+                    ))
                 case 1:
                     OnboardingFeaturesView(vm: vm)
                         .transition(.asymmetric(

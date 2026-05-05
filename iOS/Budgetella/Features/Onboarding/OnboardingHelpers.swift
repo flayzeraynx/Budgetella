@@ -31,7 +31,7 @@ func stepHeader(current: Int, total: Int, onSkip: @escaping () -> Void) -> some 
 
 /// Tam genişlik, accent gradient, capsule CTA
 @ViewBuilder
-func primaryButtonLabel(_ title: String) -> some View {
+func primaryButtonLabel(_ title: LocalizedStringKey) -> some View {
     Text(title)
         .font(.brand(.subheadline))
         .foregroundStyle(.white)

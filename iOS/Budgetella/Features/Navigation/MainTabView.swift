@@ -69,6 +69,12 @@ struct MainTabView: View {
                 modelContext: modelContext
             )
         }
+        // Widget "Ekle" butonu deep link: budgetella://add
+        .onOpenURL { url in
+            guard url.scheme == "budgetella", url.host == "add" else { return }
+            entryMode = .manual
+            showQuickEntry = true
+        }
     }
 
 }
@@ -195,7 +201,7 @@ struct CustomTabBar: View {
         )
     }
 
-    private func blobOption(_ option: EntryMode, icon: String, label: String) -> some View {
+    private func blobOption(_ option: EntryMode, icon: String, label: LocalizedStringKey) -> some View {
         let isSelected = hoveredOption == option
         return VStack(spacing: 4) {
             ZStack {
@@ -218,7 +224,7 @@ struct CustomTabBar: View {
     // MARK: - Tab items
 
     @ViewBuilder
-    private func tabItem(_ tab: AppTab, icon: String, label: String) -> some View {
+    private func tabItem(_ tab: AppTab, icon: String, label: LocalizedStringKey) -> some View {
         Button {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                 selected = tab

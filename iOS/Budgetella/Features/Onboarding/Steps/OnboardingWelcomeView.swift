@@ -11,6 +11,7 @@ import SwiftUI
 struct OnboardingWelcomeView: View {
 
     var vm: OnboardingViewModel
+    var onSkipToAuth: () -> Void = {}
 
     @State private var floatOffset: CGFloat = 0
     @State private var appeared = false
@@ -68,9 +69,7 @@ struct OnboardingWelcomeView: View {
                 }
 
                 Button {
-                    // Auth flow'a yönlendir — şimdilik advance ile geç
-                    // TODO: Auth sequence #5 hazır olunca direct route
-                    vm.currentStep = 99
+                    onSkipToAuth()
                 } label: {
                     Text("Hesabın var mı? ")
                         .foregroundStyle(BrandColor.textSecondary)

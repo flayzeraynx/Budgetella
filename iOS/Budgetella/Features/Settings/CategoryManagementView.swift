@@ -121,7 +121,7 @@ struct CategoryManagementView: View {
         .listRowBackground(BrandColor.primary.opacity(0.06))
     }
 
-    private func categorySection(title: String, items: [Category]) -> some View {
+    private func categorySection(title: LocalizedStringKey, items: [Category]) -> some View {
         Section(title) {
             ForEach(items) { cat in
                 categoryRow(cat)
@@ -143,7 +143,7 @@ struct CategoryManagementView: View {
                     .foregroundStyle(Color(hex: cat.colorHex))
             }
 
-            Text(cat.name)
+            Text(cat.localizedDisplayName)
                 .font(.brand(.body))
                 .foregroundStyle(BrandColor.textPrimary)
 
@@ -349,7 +349,7 @@ struct AddCategorySheet: View {
         .presentationDragIndicator(.visible)
     }
 
-    private func typeButton(_ type: TransactionType, label: String, icon: String) -> some View {
+    private func typeButton(_ type: TransactionType, label: LocalizedStringKey, icon: String) -> some View {
         let isSelected = selectedType == type
         return Button {
             selectedType = type

@@ -85,8 +85,8 @@ struct OnboardingPermissionsView: View {
 
     private func permissionRow(
         icon: String,
-        title: String,
-        description: String,
+        title: LocalizedStringKey,
+        description: LocalizedStringKey,
         isEnabled: Bool,
         delay: Double,
         onToggle: @escaping () -> Void

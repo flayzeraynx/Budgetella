@@ -94,6 +94,9 @@ import SwiftData
         modelContext.insert(tx)
         try? modelContext.save()
         reset()
+        // Widget snapshot güncelle — UserDefaults'tan okur (SubscriptionService tarafından yazılır)
+        let isPremium = UserDefaults.standard.bool(forKey: "budgetella.isPremium")
+        WidgetDataManager.refresh(context: modelContext, isPremium: isPremium)
         // Firestore'a push (fire & forget)
         Task {
             try? await FirestoreService.shared.uploadTransaction(tx)

@@ -106,7 +106,7 @@ struct StatsView: View {
 
     private var incomeExpenseToggle: some View {
         HStack(spacing: 4) {
-            ForEach([(false, "Gider", BrandColor.expense), (true, "Gelir", BrandColor.income)], id: \.0) { isIncome, label, color in
+            ForEach([(false, "Gider" as LocalizedStringKey, BrandColor.expense), (true, "Gelir" as LocalizedStringKey, BrandColor.income)], id: \.0) { isIncome, label, color in
                 Button {
                     withAnimation(.spring(response: 0.3)) { showingIncome = isIncome }
                 } label: {
@@ -166,7 +166,7 @@ struct StatsView: View {
                     HStack(spacing: 3) {
                         Image(systemName: pct >= 0 ? "arrow.up" : "arrow.down")
                             .font(.system(size: 10, weight: .bold))
-                        Text(String(format: "%.1f%% geçen aya göre", abs(pct)))
+                        Text(String(format: String(localized: "%.1f%% geçen aya göre"), abs(pct)))
                             .font(.brand(.footnote))
                     }
                     .foregroundStyle(pct >= 0 ? BrandColor.expense : BrandColor.income)
@@ -198,7 +198,7 @@ struct StatsView: View {
         let color = Color(hex: stat.category.colorHex)
         return HStack(spacing: Spacing.sm) {
             Circle().fill(color).frame(width: 8, height: 8)
-            Text(stat.category.name)
+            Text(stat.category.localizedDisplayName)
                 .font(.brand(.subheadline))
                 .foregroundStyle(BrandColor.textPrimary)
                 .frame(maxWidth: 100, alignment: .leading)
@@ -293,7 +293,7 @@ struct StatsView: View {
                 Section("\(yr)") {
                     let maxMonth = yr == currentYear ? currentMonth : 12
                     ForEach(Array(stride(from: maxMonth, through: 1, by: -1)), id: \.self) { m in
-                        Button(turkishMonthFull(m)) {
+                        Button(monthFull(m)) {
                             vm.selectedYear  = yr
                             vm.selectedMonth = m
                         }
@@ -302,7 +302,7 @@ struct StatsView: View {
             }
         } label: {
             HStack(spacing: 4) {
-                Text(turkishMonthFull(vm.selectedMonth))
+                Text(monthFull(vm.selectedMonth))
                     .font(.brand(.subheadline))
                     .foregroundStyle(BrandColor.textPrimary)
                 Image(systemName: "chevron.down")

@@ -58,7 +58,7 @@ struct DeleteAccountView: View {
         .toolbarBackground(.visible, for: .navigationBar)
         .brandAlert(
             title: "Hata",
-            message: errorMessage,
+            dynamicMessage: errorMessage,
             isPresented: $showError,
             buttons: [.cancel("Tamam")]
         )

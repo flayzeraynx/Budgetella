@@ -89,11 +89,13 @@ struct DashboardMainCard: View {
     private var yearPicker: some View {
         Menu {
             ForEach(availableYears, id: \.self) { y in
-                Button("\(y)") { onYearChange(y) }
+                Button(action: { onYearChange(y) }) {
+                    Text(verbatim: String(y))
+                }
             }
         } label: {
             HStack(spacing: 4) {
-                Text("\(year)")
+                Text(verbatim: String(year))
                     .font(.brand(.caption))
                     .foregroundStyle(BrandColor.textPrimary)
                 Image(systemName: "chevron.down")
@@ -107,7 +109,7 @@ struct DashboardMainCard: View {
         }
     }
 
-    private func yearStatColumn(arrow: String, label: String, amount: String, color: Color) -> some View {
+    private func yearStatColumn(arrow: String, label: LocalizedStringKey, amount: String, color: Color) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 4) {
                 Image(systemName: arrow)
@@ -174,7 +176,7 @@ struct DashboardMainCard: View {
                 Image(systemName: isNegativeNet ? "arrow.down" : "arrow.up")
                     .font(.system(size: 10, weight: .bold))
                     .foregroundStyle(isNegativeNet ? BrandColor.expense : BrandColor.income)
-                Text(hideAmounts ? "Net •••• (\(turkishMonthFull(month)))" : "Net \(isNegativeNet ? "−" : "+")\(abs(monthNet).fullTRY) (\(turkishMonthFull(month)))")
+                Text(hideAmounts ? "Net •••• (\(monthFull(month)))" : "Net \(isNegativeNet ? "−" : "+")\(abs(monthNet).fullTRY) (\(monthFull(month)))")
                     .font(.brand(.footnote))
                     .foregroundStyle(isNegativeNet ? BrandColor.expense : BrandColor.income)
                 Spacer()
@@ -182,7 +184,7 @@ struct DashboardMainCard: View {
 
             VStack(spacing: Spacing.xs) {
                 HStack {
-                    Text("GÜNLÜK AKIŞ · \(turkishMonthFull(month).uppercased())")
+                    Text("GÜNLÜK AKIŞ · \(monthFull(month).uppercased())")
                         .font(.brand(.caption))
                         .foregroundStyle(BrandColor.textTertiary)
                         .tracking(1.0)
@@ -208,11 +210,11 @@ struct DashboardMainCard: View {
     private var monthPicker: some View {
         Menu {
             ForEach(availableMonths, id: \.self) { m in
-                Button(turkishMonthFull(m)) { onMonthChange(m) }
+                Button(monthFull(m)) { onMonthChange(m) }
             }
         } label: {
             HStack(spacing: 4) {
-                Text(turkishMonthFull(month))
+                Text(monthFull(month))
                     .font(.brand(.caption))
                     .foregroundStyle(BrandColor.textPrimary)
                 Image(systemName: "chevron.down")
@@ -226,7 +228,7 @@ struct DashboardMainCard: View {
         }
     }
 
-    private func monthAmountColumn(arrow: String, label: String, amount: String, color: Color) -> some View {
+    private func monthAmountColumn(arrow: String, label: LocalizedStringKey, amount: String, color: Color) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 3) {
                 Image(systemName: arrow)
@@ -245,7 +247,7 @@ struct DashboardMainCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private func legendDot(color: Color, label: String) -> some View {
+    private func legendDot(color: Color, label: LocalizedStringKey) -> some View {
         HStack(spacing: 3) {
             RoundedRectangle(cornerRadius: 2)
                 .fill(color)
@@ -305,11 +307,13 @@ struct YearSummaryCard: View {
     private var yearPicker: some View {
         Menu {
             ForEach(availableYears, id: \.self) { y in
-                Button("\(y)") { onYearChange(y) }
+                Button(action: { onYearChange(y) }) {
+                    Text(verbatim: String(y))
+                }
             }
         } label: {
             HStack(spacing: 4) {
-                Text("\(year)")
+                Text(verbatim: String(year))
                     .font(.brand(.caption))
                     .foregroundStyle(BrandColor.textPrimary)
                 Image(systemName: "chevron.down")
@@ -323,7 +327,7 @@ struct YearSummaryCard: View {
         }
     }
 
-    private func statColumn(arrow: String, label: String, amount: String, color: Color) -> some View {
+    private func statColumn(arrow: String, label: LocalizedStringKey, amount: String, color: Color) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 4) {
                 Image(systemName: arrow)
@@ -412,7 +416,7 @@ struct MonthSummaryCard: View {
                 Image(systemName: isNegativeNet ? "arrow.down" : "arrow.up")
                     .font(.system(size: 10, weight: .bold))
                     .foregroundStyle(isNegativeNet ? BrandColor.expense : BrandColor.income)
-                Text(hideAmounts ? "Net •••• (\(turkishMonthFull(month)))" : "Net \(isNegativeNet ? "−" : "+")\((abs(net)).fullTRY) (\(turkishMonthFull(month)))")
+                Text(hideAmounts ? "Net •••• (\(monthFull(month)))" : "Net \(isNegativeNet ? "−" : "+")\((abs(net)).fullTRY) (\(monthFull(month)))")
                     .font(.brand(.footnote))
                     .foregroundStyle(isNegativeNet ? BrandColor.expense : BrandColor.income)
                 Spacer()
@@ -421,7 +425,7 @@ struct MonthSummaryCard: View {
             // Chart
             VStack(spacing: Spacing.xs) {
                 HStack {
-                    Text("GÜNLÜK AKIŞ · \(turkishMonthFull(month).uppercased())")
+                    Text("GÜNLÜK AKIŞ · \(monthFull(month).uppercased())")
                         .font(.brand(.caption))
                         .foregroundStyle(BrandColor.textTertiary)
                         .tracking(1.0)
@@ -449,11 +453,11 @@ struct MonthSummaryCard: View {
     private var monthPicker: some View {
         Menu {
             ForEach(availableMonths, id: \.self) { m in
-                Button(turkishMonthFull(m)) { onMonthChange(m) }
+                Button(monthFull(m)) { onMonthChange(m) }
             }
         } label: {
             HStack(spacing: 4) {
-                Text(turkishMonthFull(month))
+                Text(monthFull(month))
                     .font(.brand(.caption))
                     .foregroundStyle(BrandColor.textPrimary)
                 Image(systemName: "chevron.down")
@@ -467,7 +471,7 @@ struct MonthSummaryCard: View {
         }
     }
 
-    private func amountColumn(arrow: String, label: String, amount: String, color: Color) -> some View {
+    private func amountColumn(arrow: String, label: LocalizedStringKey, amount: String, color: Color) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 3) {
                 Image(systemName: arrow)
@@ -486,7 +490,7 @@ struct MonthSummaryCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private func legendDot(color: Color, label: String) -> some View {
+    private func legendDot(color: Color, label: LocalizedStringKey) -> some View {
         HStack(spacing: 3) {
             RoundedRectangle(cornerRadius: 2)
                 .fill(color)
@@ -516,16 +520,16 @@ struct DailyFlowChart: View {
         } else {
             Chart(data) { point in
                 LineMark(
-                    x: .value("Gün", point.day),
-                    y: .value("Tutar", point.amount)
+                    x: .value(String(localized: "Gün"), point.day),
+                    y: .value(String(localized: "Tutar"), point.amount)
                 )
-                .foregroundStyle(by: .value("Tür", point.kind == .income ? "Gelir" : "Gider"))
+                .foregroundStyle(by: .value(String(localized: "Tür"), point.kind == .income ? String(localized: "Gelir") : String(localized: "Gider")))
                 .interpolationMethod(.catmullRom)
                 .lineStyle(StrokeStyle(lineWidth: 1.5))
             }
             .chartForegroundStyleScale([
-                "Gelir": BrandColor.income,
-                "Gider": BrandColor.expense
+                String(localized: "Gelir"): BrandColor.income,
+                String(localized: "Gider"): BrandColor.expense
             ])
             .chartLegend(.hidden)
             .chartXAxis(.hidden)
@@ -589,7 +593,7 @@ struct AIInsightCard: View {
                             .tracking(0.8)
                     }
                     Spacer()
-                    Text(insight.tag)
+                    Text(LocalizedStringKey(insight.tag))
                         .font(.system(size: 9, weight: .bold))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 6)

@@ -79,11 +79,11 @@ final class AuthViewModel {
 
     func signUp() async -> Bool {
         guard termsAccepted else {
-            errorMessage = "Devam etmek için kullanım şartlarını kabul et."
+            errorMessage = String(localized: "Devam etmek için kullanım şartlarını kabul et.")
             return false
         }
         guard PasswordStrength.evaluate(password).score >= 2 else {
-            errorMessage = "Daha güçlü bir şifre seç."
+            errorMessage = String(localized: "Daha güçlü bir şifre seç.")
             return false
         }
         isLoading = true
@@ -149,7 +149,7 @@ final class AuthViewModel {
             if verified {
                 return true
             } else {
-                errorMessage = "E-posta henüz doğrulanmadı. Mailine gelen linke tıkla, sonra tekrar dene."
+                errorMessage = String(localized: "E-posta henüz doğrulanmadı. Mailine gelen linke tıkla, sonra tekrar dene.")
                 return false
             }
         } catch {
@@ -183,7 +183,7 @@ final class AuthViewModel {
 
     func sendPasswordReset() async -> Bool {
         guard !email.isEmpty else {
-            errorMessage = "E-posta adresini gir."
+            errorMessage = String(localized: "E-posta adresini gir.")
             return false
         }
         isLoading = true
@@ -204,13 +204,13 @@ final class AuthViewModel {
         let context = LAContext()
         var error: NSError?
         guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
-            errorMessage = "Face ID bu cihazda kullanılamıyor."
+            errorMessage = String(localized: "Face ID bu cihazda kullanılamıyor.")
             return false
         }
         do {
             let success = try await context.evaluatePolicy(
                 .deviceOwnerAuthenticationWithBiometrics,
-                localizedReason: "Budgetella'ya hızlı girmek için Face ID'yi etkinleştir"
+                localizedReason: String(localized: "Budgetella'ya hızlı girmek için Face ID'yi etkinleştir")
             )
             if success {
                 KeychainHelper.set(true, for: .biometricEnabled)
@@ -225,11 +225,11 @@ final class AuthViewModel {
 
     private func friendlyError(_ error: Error) -> String {
         let msg = error.localizedDescription
-        if msg.contains("email-already-in-use") { return "Bu e-posta zaten kayıtlı." }
-        if msg.contains("wrong-password") { return "E-posta veya şifre hatalı." }
-        if msg.contains("invalid-credential") { return "Oturum süresi dolmuş. Lütfen tekrar giriş yap." }
-        if msg.contains("user-not-found") { return "Bu e-postayla kayıtlı hesap bulunamadı." }
-        if msg.contains("network") { return "İnternet bağlantını kontrol et." }
+        if msg.contains("email-already-in-use") { return String(localized: "Bu e-posta zaten kayıtlı.") }
+        if msg.contains("wrong-password")       { return String(localized: "E-posta veya şifre hatalı.") }
+        if msg.contains("invalid-credential")   { return String(localized: "Oturum süresi dolmuş. Lütfen tekrar giriş yap.") }
+        if msg.contains("user-not-found")       { return String(localized: "Bu e-postayla kayıtlı hesap bulunamadı.") }
+        if msg.contains("network")              { return String(localized: "İnternet bağlantını kontrol et.") }
         return msg
     }
 }

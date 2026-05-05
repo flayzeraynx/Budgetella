@@ -21,6 +21,7 @@ enum AppState {
 struct ContentView: View {
 
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
     @Query private var settingsArr: [AppSettings]
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("isSignedIn") private var isSignedIn = false
@@ -31,7 +32,9 @@ struct ContentView: View {
     }
 
     private var colorScheme: ColorScheme? {
-        switch settingsArr.first?.theme ?? .system {
+        // Default to dark before AppSettings is seeded to prevent light-mode flash
+        guard let settings = settingsArr.first else { return .dark }
+        switch settings.theme {
         case .light:  return .light
         case .dark:   return .dark
         case .system: return nil
@@ -92,6 +95,12 @@ struct ContentView: View {
             BudgetellaApp.seedSettingsIfNeeded(in: modelContext)
             BudgetellaApp.migrateEnglishCategoryNames(in: modelContext)
             BudgetellaApp.migrateAddMissingCategories(in: modelContext)
+            refreshWidget()
+            // Re-register App Shortcuts after UI is ready (helps Siri indexing)
+            BudgetellaShortcuts.updateAppShortcutParameters()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active { refreshWidget() }
         }
         .onChange(of: isSignedIn) { _, newValue in
             if newValue, appState == .auth {
@@ -113,6 +122,13 @@ struct ContentView: View {
         .environment(FirestoreService.shared)
         // Pre-warm iOS keyboard so first TextField focus is instant
         .background(KeyboardPrewarmView())
+    }
+
+    // MARK: - Widget
+
+    private func refreshWidget() {
+        let isPremium = UserDefaults.standard.bool(forKey: "budgetella.isPremium")
+        WidgetDataManager.refresh(context: modelContext, isPremium: isPremium)
     }
 }
 

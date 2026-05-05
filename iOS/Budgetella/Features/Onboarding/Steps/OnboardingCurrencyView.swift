@@ -12,11 +12,10 @@ struct OnboardingCurrencyView: View {
     var vm: OnboardingViewModel
     @State private var appeared = false
 
-    private let currencies: [(currency: AppCurrency, flag: String, name: String)] = [
+    // V1: TRY + USD only. EUR/GBP unlock with V2 multi-currency.
+    private let currencies: [(currency: AppCurrency, flag: String, nameKey: String)] = [
         (.tryLira, "🇹🇷", "Türk Lirası"),
-        (.usd,     "🇺🇸", "ABD Doları"),
-        (.eur,     "🇪🇺", "Euro"),
-        (.gbp,     "🇬🇧", "İngiliz Sterlini"),
+        (.usd,     "🇺🇸", "US Dollar"),
     ]
 
     var body: some View {
@@ -67,7 +66,7 @@ struct OnboardingCurrencyView: View {
         .onAppear { appeared = true }
     }
 
-    private func currencyRow(item: (currency: AppCurrency, flag: String, name: String)) -> some View {
+    private func currencyRow(item: (currency: AppCurrency, flag: String, nameKey: String)) -> some View {
         let isSelected = vm.selectedCurrency == item.currency
 
         return Button {
@@ -80,7 +79,7 @@ struct OnboardingCurrencyView: View {
                     .font(.system(size: 28))
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(item.name)
+                    Text(LocalizedStringKey(item.nameKey))
                         .font(.brand(.subheadline))
                         .foregroundStyle(BrandColor.textPrimary)
                     Text("\(item.currency.rawValue) · \(item.currency.symbol)")

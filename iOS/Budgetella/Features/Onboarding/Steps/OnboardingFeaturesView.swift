@@ -12,7 +12,7 @@ struct OnboardingFeaturesView: View {
     var vm: OnboardingViewModel
     @State private var appeared = false
 
-    private let features: [(icon: String, title: String, description: String)] = [
+    private let features: [(icon: String, title: LocalizedStringKey, description: LocalizedStringKey)] = [
         ("mic.fill",
          "Sesle gir",
          "\"100 lira benzin\" — tamam. Sesini söyle, işlem anında kaydolsun."),
@@ -75,7 +75,7 @@ struct OnboardingFeaturesView: View {
         .onAppear { appeared = true }
     }
 
-    private func featureRow(icon: String, title: String, description: String) -> some View {
+    private func featureRow(icon: String, title: LocalizedStringKey, description: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: Spacing.lg) {
             ZStack {
                 RoundedRectangle(cornerRadius: Spacing.radiusSmall, style: .continuous)

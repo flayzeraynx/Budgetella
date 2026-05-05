@@ -28,6 +28,14 @@
 				<string>com.googleusercontent.apps.523687846942-uqecfl8c1qhih6thai55uubuqkqsba0n</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>Budgetella</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>budgetella</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
@@ -43,6 +51,8 @@
 	<string>Used for voice entry — say an amount and Budgetella logs it instantly.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Used to select receipt photos from your library.</string>
+	<key>NSSiriUsageDescription</key>
+	<string>Budgetella uses Siri so you can add transactions with your voice.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Used to convert your voice into transaction entries.</string>
 	<key>UILaunchScreen</key>

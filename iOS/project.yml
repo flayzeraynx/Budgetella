@@ -25,7 +25,7 @@ settings:
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: complete
     MARKETING_VERSION: "1.0.0"
-    CURRENT_PROJECT_VERSION: "5"
+    CURRENT_PROJECT_VERSION: "13"
     DEVELOPMENT_TEAM: ZS9KW29SGF
     ENABLE_USER_SCRIPT_SANDBOXING: YES
     ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
@@ -44,11 +44,15 @@ targets:
           - CFBundleURLName: "GoogleSignIn"
             CFBundleURLSchemes:
               - "com.googleusercontent.apps.523687846942-uqecfl8c1qhih6thai55uubuqkqsba0n"
+          - CFBundleURLName: "Budgetella"
+            CFBundleURLSchemes:
+              - "budgetella"
         NSCameraUsageDescription: "Used to scan receipts and automatically create expense entries."
         NSMicrophoneUsageDescription: "Used for voice entry — say an amount and Budgetella logs it instantly."
         NSSpeechRecognitionUsageDescription: "Used to convert your voice into transaction entries."
         NSFaceIDUsageDescription: "Protects your account with Face ID for fast, secure access."
         NSPhotoLibraryUsageDescription: "Used to select receipt photos from your library."
+        NSSiriUsageDescription: "Budgetella uses Siri so you can add transactions with your voice."
         UIRequiresFullScreen: true
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
@@ -74,6 +78,8 @@ targets:
       properties:
         com.apple.developer.applesignin:
           - Default
+        com.apple.security.application-groups:
+          - group.com.ozankilic.budgetella
     dependencies:
       - package: Firebase
         product: FirebaseAuth
@@ -83,6 +89,34 @@ targets:
         product: FirebaseMessaging
       - package: GoogleSignIn
         product: GoogleSignIn
+      - target: BudgetellaWidgetExtension
+        embed: true
+
+  BudgetellaWidgetExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: BudgetellaWidgetExtension
+        excludes:
+          - "**/.DS_Store"
+    info:
+      path: BudgetellaWidgetExtension/Info.plist
+      properties:
+        CFBundleDisplayName: "Budgetella Widget"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ozankilic.budgetella.widget
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        SKIP_INSTALL: YES
+    entitlements:
+      path: BudgetellaWidgetExtension/BudgetellaWidgetExtension.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.ozankilic.budgetella
 
   BudgetellaTests:
     type: bundle.unit-test

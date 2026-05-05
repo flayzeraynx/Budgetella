@@ -24,9 +24,9 @@ struct ThemePickerSheet: View {
                         // Options
                         VStack(spacing: Spacing.xs) {
                             let active = settings?.theme ?? .dark
-                            themeRow(.dark,   icon: "moon.fill",             subtitle: active == .dark   ? "Şu an aktif" : "")
-                            themeRow(.light,  icon: "sun.max.fill",           subtitle: active == .light  ? "Şu an aktif" : "")
-                            themeRow(.system, icon: "circle.lefthalf.filled", subtitle: active == .system ? "Şu an aktif" : "")
+                            themeRow(.dark,   icon: "moon.fill",             isCurrentlyActive: active == .dark)
+                            themeRow(.light,  icon: "sun.max.fill",           isCurrentlyActive: active == .light)
+                            themeRow(.system, icon: "circle.lefthalf.filled", isCurrentlyActive: active == .system)
                         }
                         .padding(.horizontal, 20)
 
@@ -54,7 +54,7 @@ struct ThemePickerSheet: View {
         .presentationDragIndicator(.visible)
     }
 
-    private func themeRow(_ theme: AppTheme, icon: String, subtitle: String) -> some View {
+    private func themeRow(_ theme: AppTheme, icon: String, isCurrentlyActive: Bool) -> some View {
         let isActive = settings?.theme == theme
         return Button {
             settings?.theme = theme
@@ -74,8 +74,8 @@ struct ThemePickerSheet: View {
                     Text(themeLabel(theme))
                         .font(.brand(.body))
                         .foregroundStyle(BrandColor.textPrimary)
-                    if !subtitle.isEmpty {
-                        Text(subtitle)
+                    if isCurrentlyActive {
+                        Text("Şu an aktif")
                             .font(.brand(.caption))
                             .foregroundStyle(isActive ? BrandColor.primary : BrandColor.textTertiary)
                     }
@@ -132,7 +132,7 @@ struct ThemePickerSheet: View {
         }
     }
 
-    private func themeLabel(_ t: AppTheme) -> String {
+    private func themeLabel(_ t: AppTheme) -> LocalizedStringKey {
         switch t {
         case .dark:   return "Karanlık"
         case .light:  return "Açık"
@@ -147,6 +147,7 @@ struct LanguagePickerSheet: View {
 
     var settings: AppSettings?
     @Environment(\.dismiss) private var dismiss
+    @State private var showRestartAlert = false
 
     var body: some View {
         NavigationStack {
@@ -155,7 +156,7 @@ struct LanguagePickerSheet: View {
 
                 ScrollView {
                     VStack(spacing: Spacing.xs) {
-                        ForEach(AppLanguage.allCases, id: \.self) { lang in
+                        ForEach(AppLanguage.v1Cases, id: \.self) { lang in
                             languageRow(lang)
                         }
                     }
@@ -183,16 +184,26 @@ struct LanguagePickerSheet: View {
             }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
+            .alert("Dil değişikliği için uygulamayı yeniden başlatın.", isPresented: $showRestartAlert) {
+                Button("Tamam") {}
+            }
         }
         .presentationDetents([.medium])
         .presentationDragIndicator(.visible)
     }
 
+    private func applyLanguage(_ lang: AppLanguage) {
+        settings?.language = lang
+        settings?.updatedAt = .now
+        UserDefaults.standard.set([lang.rawValue], forKey: "AppleLanguages")
+        UserDefaults.standard.synchronize()
+        showRestartAlert = true
+    }
+
     private func languageRow(_ lang: AppLanguage) -> some View {
         let isActive = settings?.language == lang
         return Button {
-            settings?.language = lang
-            settings?.updatedAt = .now
+            applyLanguage(lang)
         } label: {
             HStack(spacing: Spacing.md) {
                 Text(lang.flagEmoji)
@@ -240,8 +251,17 @@ struct CurrencyPickerSheet: View {
         let q = search.lowercased()
         return all.filter {
             $0.rawValue.lowercased().contains(q) ||
-            currencyName($0).lowercased().contains(q) ||
+            currencyNameRaw($0).lowercased().contains(q) ||
             $0.symbol.contains(q)
+        }
+    }
+
+    private func currencyNameRaw(_ c: AppCurrency) -> String {
+        switch c {
+        case .tryLira: return "Türk Lirası"
+        case .usd:     return "US Dollar"
+        case .eur:     return "Euro"
+        case .gbp:     return "British Pound"
         }
     }
 
@@ -335,7 +355,7 @@ struct CurrencyPickerSheet: View {
         .cardHighlightOnPress(cornerRadius: 14)
     }
 
-    private func currencyName(_ c: AppCurrency) -> String {
+    private func currencyName(_ c: AppCurrency) -> LocalizedStringKey {
         switch c {
         case .tryLira: return "Türk Lirası"
         case .usd:     return "US Dollar"

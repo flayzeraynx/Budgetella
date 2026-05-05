@@ -178,7 +178,7 @@ struct EditTransactionSheet: View {
         }
     }
 
-    private func typeButton(_ t: TransactionType, label: String, icon: String) -> some View {
+    private func typeButton(_ t: TransactionType, label: LocalizedStringKey, icon: String) -> some View {
         let selected = type == t
         let color: Color = t == .expense ? BrandColor.expense : BrandColor.income
         return Button {
@@ -231,7 +231,7 @@ struct EditTransactionSheet: View {
                         .font(.system(size: 18, weight: .medium))
                         .foregroundStyle(color)
                 }
-                Text(cat.name)
+                Text(cat.localizedDisplayName)
                     .font(.brand(.caption))
                     .foregroundStyle(isSelected ? BrandColor.textPrimary : BrandColor.textTertiary)
                     .lineLimit(1)
@@ -353,7 +353,7 @@ struct EditTransactionSheet: View {
                         } label: {
                             HStack(spacing: Spacing.sm) {
                                 Circle().fill(Color(hex: cat.colorHex)).frame(width: 10, height: 10)
-                                Text(cat.name).font(.brand(.body)).foregroundStyle(BrandColor.textPrimary)
+                                Text(cat.localizedDisplayName).font(.brand(.body)).foregroundStyle(BrandColor.textPrimary)
                                 Spacer()
                                 if selectedCategory?.id == cat.id {
                                     Image(systemName: "checkmark").foregroundStyle(BrandColor.primary)

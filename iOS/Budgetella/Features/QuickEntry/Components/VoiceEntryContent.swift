@@ -253,7 +253,7 @@ struct VoiceEntryContent: View {
                    let cat = categories.first(where: { $0.slug == suggestion.slug.rawValue }) {
                     parsedRow(
                         label: "Kategori",
-                        value: "\(cat.name) · \(Int(suggestion.confidence * 100))%"
+                        value: "\(cat.localizedDisplayName) · \(Int(suggestion.confidence * 100))%"
                     )
                 }
             }

@@ -60,6 +60,16 @@ public final class Category {
 }
 
 public extension Category {
+    /// Locale-aware display name.
+    /// Default categories → xcstrings `category.slug.<slug>` key.
+    /// Custom (premium) categories → stored `name` as-is.
+    var localizedDisplayName: String {
+        guard isDefault, let slug else { return name }
+        return String(localized: String.LocalizationValue("category.slug.\(slug)"))
+    }
+}
+
+public extension Category {
     /// Onboarding'de seed edilecek default kategoriler.
     /// CategorySlug + iconName + colorHex KeywordCategorizer'dan geliyor.
     static func seedDefaults(for userId: String) -> [Category] {

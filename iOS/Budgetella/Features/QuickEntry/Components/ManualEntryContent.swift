@@ -107,7 +107,7 @@ struct ManualEntryContent: View {
         }
     }
 
-    private func typeButton(_ type: TransactionType, label: String, icon: String) -> some View {
+    private func typeButton(_ type: TransactionType, label: LocalizedStringKey, icon: String) -> some View {
         let selected = vm.transactionType == type
         let color: Color = type == .expense ? BrandColor.expense : BrandColor.income
 
@@ -196,7 +196,7 @@ struct ManualEntryContent: View {
         }
         .padding(.horizontal, Spacing.md)
         .padding(.vertical, Spacing.md)
-        .frame(minHeight: 64, maxHeight: isTyping ? .infinity : 64, alignment: .topLeading)
+        .frame(minHeight: 64, maxHeight: isTyping ? 160 : 64, alignment: .topLeading)
         .background(BrandColor.surface.opacity(0.4))
         .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
         .overlay(
@@ -247,7 +247,7 @@ struct ManualEntryContent: View {
                         .font(.system(size: 18, weight: .medium))
                         .foregroundStyle(color)
                 }
-                Text(cat.name)
+                Text(cat.localizedDisplayName)
                     .font(.brand(.caption))
                     .foregroundStyle(isSelected ? BrandColor.textPrimary : BrandColor.textTertiary)
                     .lineLimit(1)
@@ -281,7 +281,7 @@ struct ManualEntryContent: View {
                             Circle()
                                 .fill(cat.map { Color(hex: $0.colorHex) } ?? BrandColor.primary)
                                 .frame(width: 6, height: 6)
-                            Text(cat?.name ?? suggestion.slug.rawValue)
+                            Text(cat?.localizedDisplayName ?? suggestion.slug.rawValue)
                                 .font(.brand(.footnote))
                                 .foregroundStyle(isSelected ? .white : BrandColor.textPrimary)
                             if suggestion.confidence < 1.0 {

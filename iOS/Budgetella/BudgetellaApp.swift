@@ -9,6 +9,7 @@
 
 import SwiftUI
 import SwiftData
+import AppIntents
 @preconcurrency import FirebaseCore
 
 @main
@@ -19,6 +20,9 @@ struct BudgetellaApp: App {
     init() {
         // Firebase — GoogleService-Info.plist'ten otomatik konfigürasyon
         FirebaseApp.configure()
+
+        // Siri App Shortcuts — register phrases with the system
+        BudgetellaShortcuts.updateAppShortcutParameters()
 
         // SwiftData ModelContainer
         do {

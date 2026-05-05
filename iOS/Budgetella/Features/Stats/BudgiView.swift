@@ -100,14 +100,14 @@ struct BudgiView: View {
         let hour = Calendar.current.component(.hour, from: .now)
         let greet: String
         switch hour {
-        case 5..<12:  greet = "Günaydın \(name) ☀️"
-        case 12..<18: greet = "İyi günler \(name) 👋"
-        case 18..<23: greet = "İyi akşamlar \(name) 🌙"
-        default:       greet = "Merhaba \(name) 🌙"
+        case 5..<12:  greet = String(format: String(localized: "Günaydın %@ ☀️"), name)
+        case 12..<18: greet = String(format: String(localized: "İyi günler %@ 👋"), name)
+        case 18..<23: greet = String(format: String(localized: "İyi akşamlar %@ 🌙"), name)
+        default:       greet = String(format: String(localized: "Merhaba %@ 🌙"), name)
         }
         let intro = insights.isEmpty
-            ? "Henüz analiz edecek yeterli veri yok. Birkaç işlem ekledikten sonra kişisel öneriler burada belirmeye başlar."
-            : "Bu hafta şunları fark ettim:"
+            ? String(localized: "Henüz analiz edecek yeterli veri yok. Birkaç işlem ekledikten sonra kişisel öneriler burada belirmeye başlar.")
+            : String(localized: "Bu hafta şunları fark ettim:")
         msgs.append(BudgiMessage(role: .assistant, text: "\(greet) \(intro)", tag: nil, accent: "clear"))
 
         for insight in insights {
@@ -209,7 +209,7 @@ struct BudgiView: View {
                 Image(systemName: tagIcon(tag))
                     .font(.system(size: 11, weight: .bold))
                     .foregroundStyle(msg.tagColor)
-                Text(tag)
+                Text(LocalizedStringKey(tag))
                     .font(.brand(.caption))
                     .foregroundStyle(msg.tagColor)
                     .tracking(0.8)
@@ -320,7 +320,7 @@ struct BudgiView: View {
         isSending = true
 
         let context = buildContext()
-        let reply = (try? await BudgiChatService.send(message: text, context: context)) ?? "Şu an cevap veremiyorum. Lütfen daha sonra tekrar dene."
+        let reply = (try? await BudgiChatService.send(message: text, context: context)) ?? String(localized: "Şu an cevap veremiyorum. Lütfen daha sonra tekrar dene.")
         chatMessages.append(BudgiMessage(role: .assistant, text: reply, tag: nil, accent: "primary"))
         isSending = false
         saveMessages()
@@ -421,7 +421,14 @@ enum BudgiChatService {
         let urlString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=\(apiKey)"
         guard let url = URL(string: urlString) else { return "Bağlantı hatası." }
 
-        let systemPrompt = """
+        let isEnglish = (Locale.current.language.languageCode?.identifier ?? "tr") == "en"
+        let systemPrompt = isEnglish ? """
+        You are Budgi, the user's personal finance assistant. Respond in English.
+        Keep answers short, friendly, and practical. No unnecessary long explanations.
+        Help only with financial topics.
+
+        \(context)
+        """ : """
         Sen Budgi'sin — kullanıcının kişisel finans asistanısın. Türkçe konuşuyorsun.
         Kısa, samimi, ve pratik cevaplar ver. Gereksiz uzun açıklamalar yapma.
         Sadece finansal konularda yardımcı ol.
@@ -483,6 +490,10 @@ struct BudgiInsight: Identifiable {
 
 enum BudgiInsightEngine {
 
+    static var isEnglish: Bool {
+        (Locale.current.language.languageCode?.identifier ?? "tr") == "en"
+    }
+
     static func compute(transactions: [Transaction], categories: [Category]) -> [BudgiInsight] {
         let cal = Calendar.current
         let now = Date.now
@@ -516,9 +527,13 @@ enum BudgiInsightEngine {
             icon: isPos ? "checkmark.seal.fill" : "exclamationmark.triangle.fill",
             accent: isPos ? "income" : "expense",
             text: isPos
-                ? "Bu ay \(income.fullTRY) gelirinden \(savings.fullTRY) tasarruf ettin."
-                : "Bu ay giderlerin gelirini \((-savings).fullTRY) aştı. Dikkat et.",
-            redactedText: isPos ? "Bu ay tasarruf ettin." : "Bu ay giderlerin gelirini aştı."
+                ? (isEnglish ? "You saved \(savings.fullTRY) from \(income.fullTRY) income this month."
+                             : "Bu ay \(income.fullTRY) gelirinden \(savings.fullTRY) tasarruf ettin.")
+                : (isEnglish ? "Expenses exceeded income by \((-savings).fullTRY) this month. Keep an eye on it."
+                             : "Bu ay giderlerin gelirini \((-savings).fullTRY) aştı. Dikkat et."),
+            redactedText: isPos
+                ? (isEnglish ? "You saved this month." : "Bu ay tasarruf ettin.")
+                : (isEnglish ? "Expenses exceeded income." : "Bu ay giderlerin gelirini aştı.")
         )
     }
 
@@ -533,8 +548,12 @@ enum BudgiInsightEngine {
         let total  = expenses.reduce(Decimal(0)) { $0 + $1.amount }
         let pct    = total > 0 ? Int((Double(truncating: (amount / total) as NSDecimalNumber) * 100).rounded()) : 0
         return BudgiInsight(tag: "EN YÜKSEK KATEGORİ", icon: "chart.pie.fill", accent: "primary",
-                            text: "\(cat.name) bu ayın en büyük gider kalemi: \(amount.fullTRY) (toplam giderlerin %\(pct)'i).",
-                            redactedText: "\(cat.name) bu ayın en büyük gider kalemi (%\(pct)).")
+                            text: isEnglish
+                                ? "\(cat.localizedDisplayName) is the top expense this month: \(amount.fullTRY) (\(pct)% of total spending)."
+                                : "\(cat.localizedDisplayName) bu ayın en büyük gider kalemi: \(amount.fullTRY) (toplam giderlerin %\(pct)'i).",
+                            redactedText: isEnglish
+                                ? "\(cat.localizedDisplayName) is the top expense (\(pct)%)."
+                                : "\(cat.localizedDisplayName) bu ayın en büyük gider kalemi (%\(pct)).")
     }
 
     private static func monthOverMonthInsight(current: [Transaction], previous: [Transaction]) -> BudgiInsight? {
@@ -546,15 +565,23 @@ enum BudgiInsightEngine {
         let isUp = pct > 0
         return BudgiInsight(tag: isUp ? "ANOMALİ" : "AZALIŞ", icon: isUp ? "arrow.up.circle.fill" : "arrow.down.circle.fill",
                             accent: isUp ? "expense" : "income",
-                            text: "\(cur.compactTRY) → geçen \(prv.compactTRY). Bu ay giderlerin %\(String(format: "%.0f", abs(pct))) \(isUp ? "arttı" : "azaldı").",
-                            redactedText: "Bu ay giderlerin %\(String(format: "%.0f", abs(pct))) \(isUp ? "arttı" : "azaldı").")
+                            text: isEnglish
+                                ? "\(cur.compactTRY) → last month \(prv.compactTRY). Spending \(isUp ? "increased" : "decreased") \(String(format: "%.0f", abs(pct)))% this month."
+                                : "\(cur.compactTRY) → geçen \(prv.compactTRY). Bu ay giderlerin %\(String(format: "%.0f", abs(pct))) \(isUp ? "arttı" : "azaldı").",
+                            redactedText: isEnglish
+                                ? "Spending \(isUp ? "increased" : "decreased") \(String(format: "%.0f", abs(pct)))% this month."
+                                : "Bu ay giderlerin %\(String(format: "%.0f", abs(pct))) \(isUp ? "arttı" : "azaldı").")
     }
 
     private static func biggestExpenseInsight(current: [Transaction]) -> BudgiInsight? {
         guard let big = current.filter({ $0.type == .expense }).max(by: { $0.amount < $1.amount }) else { return nil }
         return BudgiInsight(tag: "EN BÜYÜK İŞLEM", icon: "dollarsign.circle.fill", accent: "warning",
-                            text: "Bu ayın en büyük gideri: \"\(big.note)\" — \(big.amount.fullTRY).",
-                            redactedText: "Bu ayın en büyük gideri: \"\(big.note)\" — ••••.")
+                            text: isEnglish
+                                ? "Biggest expense this month: \"\(big.note)\" — \(big.amount.fullTRY)."
+                                : "Bu ayın en büyük gideri: \"\(big.note)\" — \(big.amount.fullTRY).",
+                            redactedText: isEnglish
+                                ? "Biggest expense this month: \"\(big.note)\" — ••••."
+                                : "Bu ayın en büyük gideri: \"\(big.note)\" — ••••.")
     }
 
     private static func dailyAverageInsight(current: [Transaction], start: Date, now: Date) -> BudgiInsight? {
@@ -566,7 +593,11 @@ enum BudgiInsightEngine {
         let daysInMonth = Calendar.current.range(of: .day, in: .month, for: now)?.count ?? 30
         let projected = daily * Decimal(daysInMonth)
         return BudgiInsight(tag: "ÖNERİ", icon: "lightbulb.fill", accent: "info",
-                            text: "Günlük ortalama harcaman \(daily.fullTRY). Bu hızla ay sonu tahmini: \(projected.fullTRY).",
-                            redactedText: "Günlük ortalama harcaman hesaplandı.")
+                            text: isEnglish
+                                ? "Your daily average spending is \(daily.fullTRY). At this pace, end-of-month estimate: \(projected.fullTRY)."
+                                : "Günlük ortalama harcaman \(daily.fullTRY). Bu hızla ay sonu tahmini: \(projected.fullTRY).",
+                            redactedText: isEnglish
+                                ? "Your daily spending average has been calculated."
+                                : "Günlük ortalama harcaman hesaplandı.")
     }
 }

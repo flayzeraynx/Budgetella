@@ -9,32 +9,53 @@
 import SwiftUI
 
 struct BrandAlertButton {
-    let title: String
+    let title: LocalizedStringKey
     let role: ButtonRole?
     let action: () -> Void
 
-    static func destructive(_ title: String, action: @escaping () -> Void) -> BrandAlertButton {
+    static func destructive(_ title: LocalizedStringKey, action: @escaping () -> Void) -> BrandAlertButton {
         BrandAlertButton(title: title, role: .destructive, action: action)
     }
-    static func cancel(_ title: String = "Vazgeç") -> BrandAlertButton {
+    static func cancel(_ title: LocalizedStringKey = "Vazgeç") -> BrandAlertButton {
         BrandAlertButton(title: title, role: .cancel, action: {})
     }
 }
 
 extension View {
+    /// Use for static localized strings (string literals auto-convert to LocalizedStringKey).
     func brandAlert(
-        title: String,
-        message: String? = nil,
+        title: LocalizedStringKey,
+        message: LocalizedStringKey? = nil,
         isPresented: Binding<Bool>,
         buttons: [BrandAlertButton]
     ) -> some View {
-        // ZStack sibling — material blur samples the rendered content of self
         ZStack {
             self
             if isPresented.wrappedValue {
                 BrandAlertOverlay(
                     title: title,
-                    message: message,
+                    message: message.map { Text($0) },
+                    isPresented: isPresented,
+                    buttons: buttons
+                )
+                .ignoresSafeArea()
+            }
+        }
+    }
+
+    /// Use for dynamic runtime strings (e.g. import result messages).
+    func brandAlert(
+        title: LocalizedStringKey,
+        dynamicMessage: String?,
+        isPresented: Binding<Bool>,
+        buttons: [BrandAlertButton]
+    ) -> some View {
+        ZStack {
+            self
+            if isPresented.wrappedValue {
+                BrandAlertOverlay(
+                    title: title,
+                    message: dynamicMessage.map { Text(verbatim: $0) },
                     isPresented: isPresented,
                     buttons: buttons
                 )
@@ -46,8 +67,8 @@ extension View {
 
 private struct BrandAlertOverlay: View {
 
-    let title: String
-    let message: String?
+    let title: LocalizedStringKey
+    let message: Text?
     @Binding var isPresented: Bool
     let buttons: [BrandAlertButton]
 
@@ -68,7 +89,7 @@ private struct BrandAlertOverlay: View {
                         .foregroundStyle(BrandColor.textPrimary)
                         .multilineTextAlignment(.center)
                     if let msg = message {
-                        Text(msg)
+                        msg
                             .font(.brand(.footnote))
                             .foregroundStyle(BrandColor.textSecondary)
                             .multilineTextAlignment(.center)
@@ -126,6 +147,11 @@ private struct BrandAlertOverlay: View {
             .opacity(appeared ? 1 : 0)
         }
         .onAppear {
+            // Dismiss keyboard so the alert is never obscured
+            UIApplication.shared.sendAction(
+                #selector(UIResponder.resignFirstResponder),
+                to: nil, from: nil, for: nil
+            )
             withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
                 appeared = true
             }

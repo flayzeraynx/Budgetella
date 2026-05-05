@@ -22,11 +22,12 @@ import Foundation
     // MARK: - Greeting
 
     var greeting: String {
-        switch Calendar.current.component(.hour, from: .now) {
-        case 6..<12:  return "Günaydın,"
-        case 12..<17: return "İyi günler,"
-        case 17..<22: return "İyi akşamlar,"
-        default:      return "İyi geceler,"
+        let hour = Calendar.current.component(.hour, from: .now)
+        switch hour {
+        case 6..<12:  return String(localized: "Günaydın,")
+        case 12..<17: return String(localized: "İyi günler,")
+        case 17..<22: return String(localized: "İyi akşamlar,")
+        default:      return String(localized: "İyi geceler,")
         }
     }
 
@@ -152,14 +153,23 @@ extension Decimal {
 
 // MARK: - Month name helpers
 
-func turkishMonthShort(_ month: Int) -> String {
-    let names = ["Oca","Şub","Mar","Nis","Mayıs","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"]
+func monthShort(_ month: Int) -> String {
+    let formatter = DateFormatter()
+    formatter.locale = Locale.current
     guard (1...12).contains(month) else { return "" }
-    return names[month - 1]
+    return formatter.shortMonthSymbols[month - 1]
 }
 
-func turkishMonthFull(_ month: Int) -> String {
-    let names = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"]
+func monthFull(_ month: Int) -> String {
+    let formatter = DateFormatter()
+    formatter.locale = Locale.current
     guard (1...12).contains(month) else { return "" }
-    return names[month - 1]
+    return formatter.monthSymbols[month - 1]
 }
+
+// Compatibility shims — call site renames handled in each view file.
+@available(*, deprecated, renamed: "monthShort")
+func turkishMonthShort(_ month: Int) -> String { monthShort(month) }
+
+@available(*, deprecated, renamed: "monthFull")
+func turkishMonthFull(_ month: Int) -> String { monthFull(month) }

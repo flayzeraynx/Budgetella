@@ -27,7 +27,7 @@ func backButton(action: @escaping () -> Void) -> some View {
 // MARK: - Field Label
 
 @ViewBuilder
-func fieldLabel(_ title: String) -> some View {
+func fieldLabel(_ title: LocalizedStringKey) -> some View {
     Text(title)
         .font(.brand(.footnote))
         .foregroundStyle(BrandColor.textTertiary)

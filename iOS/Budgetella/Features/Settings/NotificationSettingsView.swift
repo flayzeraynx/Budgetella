@@ -85,8 +85,8 @@ struct NotificationSettingsView: View {
     private func toggleRow(
         icon: String,
         iconColor: Color,
-        title: String,
-        subtitle: String,
+        title: LocalizedStringKey,
+        subtitle: LocalizedStringKey,
         binding: Binding<Bool>
     ) -> some View {
         HStack(spacing: Spacing.md) {

@@ -73,7 +73,7 @@ struct TransactionRow: View {
 
                 HStack(spacing: 4) {
                     if let cat = transaction.category {
-                        Text(cat.name)
+                        Text(cat.localizedDisplayName)
                             .font(.brand(.caption))
                             .foregroundStyle(BrandColor.textTertiary)
                         Text("·")

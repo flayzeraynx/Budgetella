@@ -151,8 +151,8 @@ struct SubscriptionView: View {
 
     private func actionButton(
         icon: String,
-        title: String,
-        subtitle: String,
+        title: LocalizedStringKey,
+        subtitle: LocalizedStringKey,
         color: Color,
         action: @escaping () -> Void
     ) -> some View {

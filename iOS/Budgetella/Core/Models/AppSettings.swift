@@ -21,6 +21,9 @@ public enum AppLanguage: String, Codable, CaseIterable, Sendable {
     case english = "en"
     case german = "de"
 
+    /// Languages shown in V1 UI — German hidden until V2 international rollout.
+    public static let v1Cases: [AppLanguage] = [.english, .turkish]
+
     public var displayName: String {
         switch self {
         case .turkish: return "Türkçe"
@@ -72,7 +75,7 @@ public final class AppSettings {
     public init(
         userId: String,
         currency: AppCurrency = .tryLira,
-        language: AppLanguage = .turkish,
+        language: AppLanguage = .english,
         theme: AppTheme = .system,
         hideAmounts: Bool = false,
         biometricLockEnabled: Bool = false,
@@ -96,7 +99,7 @@ public extension AppSettings {
     }
 
     var language: AppLanguage {
-        get { AppLanguage(rawValue: languageRaw) ?? .turkish }
+        get { AppLanguage(rawValue: languageRaw) ?? .english }
         set { languageRaw = newValue.rawValue; updatedAt = .now }
     }
 

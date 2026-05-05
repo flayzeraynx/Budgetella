@@ -94,6 +94,7 @@ public final class SubscriptionService {
             isSubscriptionActive = true
             isLifetimePurchased  = false
             activePlanProductId  = ProductID.yearly
+            Self.persistPremiumState(true)
             return
         }
         var hasSubscription = false
@@ -119,6 +120,12 @@ public final class SubscriptionService {
         isSubscriptionActive = hasSubscription
         isLifetimePurchased  = hasLifetime
         activePlanProductId  = planId
+        Self.persistPremiumState(isSubscriptionActive || isLifetimePurchased)
+    }
+
+    /// UserDefaults'a yazar — widget ve QuickEntry buradan okur.
+    private static func persistPremiumState(_ value: Bool) {
+        UserDefaults.standard.set(value, forKey: "budgetella.isPremium")
     }
 
     /// SwiftData'ya lokal mirror yazar.
