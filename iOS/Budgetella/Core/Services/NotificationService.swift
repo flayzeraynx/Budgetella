@@ -45,6 +45,14 @@ final class NotificationService: NSObject {
     func configure() {
         UNUserNotificationCenter.current().delegate = self
         Messaging.messaging().delegate = self
+        // Her app açılışında APNs kaydını yenile — izin varsa APNs token gelir →
+        // Messaging.apnsToken set edilir → MessagingDelegate FCM token üretir.
+        // İzin yoksa iOS bunu sessizce ignore eder.
+        Task {
+            let status = await UNUserNotificationCenter.current().notificationSettings()
+            guard status.authorizationStatus == .authorized else { return }
+            await UIApplication.shared.registerForRemoteNotifications()
+        }
     }
 
     // MARK: - Permission + APNs registration
@@ -60,11 +68,52 @@ final class NotificationService: NSObject {
 
     func syncToken(_ token: String, userId: String) {
         guard !userId.isEmpty else { return }
+        print("[FCM] Writing token to Firestore for uid: \(userId)")
         Firestore.firestore()
             .collection("users").document(userId)
             .setData(["fcmToken": token,
                       "fcmTokenUpdatedAt": FieldValue.serverTimestamp()],
-                     merge: true)
+                     merge: true) { error in
+            if let error {
+                print("[FCM] Firestore write FAILED: \(error.localizedDescription)")
+            } else {
+                print("[FCM] Firestore write SUCCESS ✓")
+            }
+        }
+    }
+
+    /// Login sonrası çağır — token login'den önce geldiyse Firestore'a yazar.
+    /// APNs token henüz gelmemişse 5'e kadar exponential backoff ile retry eder.
+    func syncPendingTokenIfNeeded(userId: String, attempt: Int = 1) {
+        guard !userId.isEmpty else { return }
+
+        // 1. Önce UserDefaults cache'e bak — MessagingDelegate daha önce attıysa vardır
+        if let cached = UserDefaults.standard.string(forKey: "pendingFCMToken"), !cached.isEmpty {
+            print("[FCM] Using cached token (attempt \(attempt)): \(cached.prefix(20))...")
+            syncToken(cached, userId: userId)
+            return
+        }
+
+        // 2. Firebase'den al (APNs token hazırsa anında döner)
+        Messaging.messaging().token { [weak self] token, error in
+            if let token, error == nil {
+                print("[FCM] Got fresh token: \(token.prefix(20))...")
+                UserDefaults.standard.set(token, forKey: "pendingFCMToken")
+                Task { @MainActor in
+                    self?.syncToken(token, userId: userId)
+                }
+            } else if attempt <= 6 {
+                // APNs henüz hazır değil — artan beklemeyle retry (3, 6, 9, 12, 15, 18 sn)
+                let delay = Double(attempt) * 3.0
+                print("[FCM] APNs not ready, retry \(attempt)/6 in \(Int(delay))s...")
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                    self?.syncPendingTokenIfNeeded(userId: userId, attempt: attempt + 1)
+                }
+            } else {
+                print("[FCM] All retries exhausted. MessagingDelegate will sync when token arrives.")
+            }
+        }
     }
 
     func removeToken(userId: String) {
@@ -142,9 +191,11 @@ extension NotificationService: MessagingDelegate {
     nonisolated func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         guard let token = fcmToken else { return }
         print("[FCM] Token: \(token)")
+        // Her zaman cache'le — login'den önce gelirse syncPendingTokenIfNeeded alır
+        UserDefaults.standard.set(token, forKey: "pendingFCMToken")
         Task { @MainActor in
             let uid = UserDefaults.standard.string(forKey: "currentUserId") ?? ""
-            self.syncToken(token, userId: uid)
+            self.syncToken(token, userId: uid)   // uid boşsa guard içinde kesilir
         }
     }
 }
@@ -152,6 +203,23 @@ extension NotificationService: MessagingDelegate {
 // MARK: - Local notifications
 
 extension NotificationService {
+
+    /// Bildirim toggle açılınca anında test bildirimi — 2 saniye sonra gelir.
+    func scheduleTestNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = LocaleHelper.string("Bildirimler Aktif ✓")
+        content.body  = LocaleHelper.string("Budgetella bildirimleri başarıyla etkinleştirildi.")
+        content.sound = .default
+        content.userInfo = ["kind": NotificationKind.systemMessage.rawValue]
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 2, repeats: false)
+        let req = UNNotificationRequest(
+            identifier: "notif-test-\(UUID().uuidString)",
+            content: content,
+            trigger: trigger
+        )
+        UNUserNotificationCenter.current().add(req)
+    }
 
     /// Achievement unlock — anında göster.
     func scheduleAchievementNotification(title: String, body: String) {

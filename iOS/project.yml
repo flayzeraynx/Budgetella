@@ -72,7 +72,7 @@ targets:
         ENABLE_PREVIEWS: YES
       configs:
         Release:
-          UPLOAD_SYMBOLS: NO
+          UPLOAD_SYMBOLS: YES
     entitlements:
       path: Budgetella/Budgetella.entitlements
       properties:
@@ -80,6 +80,7 @@ targets:
           - Default
         com.apple.security.application-groups:
           - group.com.ozankilic.budgetella
+        aps-environment: production
     dependencies:
       - package: Firebase
         product: FirebaseAuth

@@ -64,6 +64,9 @@ struct MainTabView: View {
         }
         .task(id: currentUserId) {
             guard !currentUserId.isEmpty else { return }
+            // FCM token login'den önce geldiyse (MessagingDelegate'te uid boştu)
+            // şimdi proaktif olarak Firestore'a yaz
+            NotificationService.shared.syncPendingTokenIfNeeded(userId: currentUserId)
             try? await FirestoreService.shared.fetchAndSync(
                 userId: currentUserId,
                 modelContext: modelContext

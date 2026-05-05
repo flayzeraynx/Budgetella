@@ -113,8 +113,15 @@ struct NotificationSettingsView: View {
             let settings = await UNUserNotificationCenter.current().notificationSettings()
             systemAuthStatus = settings.authorizationStatus
         }
-        .onChange(of: allEnabled) { _, _ in
+        .onChange(of: allEnabled) { _, newValue in
             NotificationService.shared.scheduleWeeklyDigest()
+            if newValue {
+                // Test: toggle açılınca 2 sn sonra bildirim gelir → push çalışıyor mu doğrular
+                NotificationService.shared.scheduleTestNotification()
+                // FCM token hâlâ Firestore'a yazılmadıysa şimdi zorla sync et
+                let uid = UserDefaults.standard.string(forKey: "currentUserId") ?? ""
+                NotificationService.shared.syncPendingTokenIfNeeded(userId: uid)
+            }
         }
         .onChange(of: weeklyDigest) { _, _ in
             NotificationService.shared.scheduleWeeklyDigest()
