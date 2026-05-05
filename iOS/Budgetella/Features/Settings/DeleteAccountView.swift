@@ -24,7 +24,10 @@ struct DeleteAccountView: View {
     @State private var isReAuthing = false
     @State private var reAuthError: String?
 
-    private var canDelete: Bool { confirmText.lowercased() == "sil" }
+    private var confirmKeyword: String {
+        (Locale.current.language.languageCode?.identifier ?? "tr") == "en" ? "delete" : "sil"
+    }
+    private var canDelete: Bool { confirmText.lowercased() == confirmKeyword }
 
     var body: some View {
         ZStack {
@@ -222,7 +225,7 @@ struct DeleteAccountView: View {
                             .background(BrandColor.expense.opacity(0.1))
                             .clipShape(Circle())
 
-                        Text(item)
+                        Text(LocalizedStringKey(item))
                             .font(.brand(.subheadline))
                             .foregroundStyle(BrandColor.textPrimary)
 
@@ -316,8 +319,13 @@ struct DeleteAccountView: View {
                             Image(systemName: "trash.fill")
                                 .font(.system(size: 14, weight: .semibold))
                         }
-                        Text(isDeleting ? "Siliniyor…" : "Hesabı Kalıcı Olarak Sil")
-                            .font(.brand(.subheadline).bold())
+                        if isDeleting {
+                            Text("Siliniyor…")
+                                .font(.brand(.subheadline).bold())
+                        } else {
+                            Text("Hesabı Kalıcı Olarak Sil")
+                                .font(.brand(.subheadline).bold())
+                        }
                     }
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)

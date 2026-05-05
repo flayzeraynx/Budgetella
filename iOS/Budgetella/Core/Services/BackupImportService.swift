@@ -172,7 +172,7 @@ enum BackupImportService {
             type: slug?.type ?? .expense,
             iconName: slug?.defaultIcon ?? "tag",
             colorHex: slug?.defaultColorHex ?? "#94a3b8",
-            isDefault: false,
+            isDefault: slug != nil,   // known slug = default category
             sortOrder: 999
         )
         modelContext.insert(newCat)

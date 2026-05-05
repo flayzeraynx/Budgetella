@@ -185,7 +185,10 @@ struct LanguagePickerSheet: View {
             .toolbarBackground(BrandColor.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .alert("Dil değişikliği için uygulamayı yeniden başlatın.", isPresented: $showRestartAlert) {
-                Button("Tamam") {}
+                Button("Uygulamayı Yeniden Başlat", role: .destructive) {
+                    exit(0)
+                }
+                Button("Daha Sonra", role: .cancel) {}
             }
         }
         .presentationDetents([.medium])
@@ -245,11 +248,13 @@ struct CurrencyPickerSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var search = ""
 
+    /// V1: TRY + USD only. EUR/GBP unlock with V2 multi-currency.
+    private let v1Currencies: [AppCurrency] = [.tryLira, .usd]
+
     private var filteredCurrencies: [AppCurrency] {
-        let all = AppCurrency.allCases
-        guard !search.isEmpty else { return all }
+        guard !search.isEmpty else { return v1Currencies }
         let q = search.lowercased()
-        return all.filter {
+        return v1Currencies.filter {
             $0.rawValue.lowercased().contains(q) ||
             currencyNameRaw($0).lowercased().contains(q) ||
             $0.symbol.contains(q)

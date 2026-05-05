@@ -64,8 +64,11 @@ public extension Category {
     /// Default categories → xcstrings `category.slug.<slug>` key.
     /// Custom (premium) categories → stored `name` as-is.
     var localizedDisplayName: String {
-        guard isDefault, let slug else { return name }
-        return String(localized: String.LocalizationValue("category.slug.\(slug)"))
+        // If slug is set → known category → xcstrings lookup by computed key.
+        // NSLocalizedString handles runtime-computed keys; value: is the fallback.
+        // Custom (premium) categories have slug == nil → return stored name as-is.
+        guard let slug else { return name }
+        return NSLocalizedString("category.slug.\(slug)", value: name, comment: "")
     }
 }
 
