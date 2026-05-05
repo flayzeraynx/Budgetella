@@ -24,10 +24,10 @@ import Foundation
     var greeting: String {
         let hour = Calendar.current.component(.hour, from: .now)
         switch hour {
-        case 6..<12:  return String(localized: "Günaydın,")
-        case 12..<17: return String(localized: "İyi günler,")
-        case 17..<22: return String(localized: "İyi akşamlar,")
-        default:      return String(localized: "İyi geceler,")
+        case 6..<12:  return LocaleHelper.string("Günaydın,")
+        case 12..<17: return LocaleHelper.string("İyi günler,")
+        case 17..<22: return LocaleHelper.string("İyi akşamlar,")
+        default:      return LocaleHelper.string("İyi geceler,")
         }
     }
 
@@ -130,16 +130,24 @@ struct DailyFlowPoint: Identifiable {
 // MARK: - Decimal formatting
 
 extension Decimal {
+    /// Currency symbol read at runtime from UserDefaults so it reflects the
+    /// user's in-app currency selection without needing AppSettings in scope.
+    private static var currencySymbol: String {
+        UserDefaults.standard.string(forKey: "selectedCurrencySymbol") ?? "₺"
+    }
+
     var compactTRY: String {
+        let sym = Decimal.currencySymbol
         let d = (self as NSDecimalNumber).doubleValue
         switch abs(d) {
-        case 1_000_000...: return String(format: "₺%.2fM", d / 1_000_000)
-        case 1_000...:     return String(format: "₺%.1fB", d / 1_000)
-        default:           return String(format: "₺%.0f", d)
+        case 1_000_000...: return String(format: "\(sym)%.2fM", d / 1_000_000)
+        case 1_000...:     return String(format: "\(sym)%.1fB", d / 1_000)
+        default:           return String(format: "\(sym)%.0f", d)
         }
     }
 
     var fullTRY: String {
+        let sym = Decimal.currencySymbol
         let d = (self as NSDecimalNumber).doubleValue
         let fmt = NumberFormatter()
         fmt.numberStyle = .decimal
@@ -147,7 +155,7 @@ extension Decimal {
         fmt.maximumFractionDigits = 0
         fmt.groupingSeparator = "."
         let s = fmt.string(from: NSNumber(value: d)) ?? "0"
-        return "₺\(s)"
+        return "\(sym)\(s)"
     }
 }
 
@@ -155,14 +163,14 @@ extension Decimal {
 
 func monthShort(_ month: Int) -> String {
     let formatter = DateFormatter()
-    formatter.locale = Locale.current
+    formatter.locale = LocaleHelper.currentLocale
     guard (1...12).contains(month) else { return "" }
     return formatter.shortMonthSymbols[month - 1]
 }
 
 func monthFull(_ month: Int) -> String {
     let formatter = DateFormatter()
-    formatter.locale = Locale.current
+    formatter.locale = LocaleHelper.currentLocale
     guard (1...12).contains(month) else { return "" }
     return formatter.monthSymbols[month - 1]
 }

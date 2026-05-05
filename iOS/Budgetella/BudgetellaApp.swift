@@ -51,13 +51,30 @@ struct BudgetellaApp: App {
         }
     }
 
+    @State private var appReloadToken = UUID()
+    @State private var appLocale: Locale = {
+        let code = UserDefaults.standard.stringArray(forKey: "AppleLanguages")?.first ?? "tr"
+        return Locale(identifier: code)
+    }()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .id(appReloadToken)
+                .environment(\.locale, appLocale)
+                .onReceive(NotificationCenter.default.publisher(for: .appLanguageDidChange)) { _ in
+                    let code = UserDefaults.standard.stringArray(forKey: "AppleLanguages")?.first ?? "tr"
+                    appLocale = Locale(identifier: code)
+                    appReloadToken = UUID()
+                }
         }
         .modelContainer(modelContainer)
         .backgroundTask(.appRefresh("seed")) { }
     }
+}
+
+extension Notification.Name {
+    static let appLanguageDidChange = Notification.Name("appLanguageDidChange")
 }
 
 // MARK: - Seed on first launch

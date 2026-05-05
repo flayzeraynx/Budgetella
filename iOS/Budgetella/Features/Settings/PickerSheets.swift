@@ -147,7 +147,6 @@ struct LanguagePickerSheet: View {
 
     var settings: AppSettings?
     @Environment(\.dismiss) private var dismiss
-    @State private var showRestartAlert = false
 
     var body: some View {
         NavigationStack {
@@ -164,7 +163,7 @@ struct LanguagePickerSheet: View {
                     .padding(.top, Spacing.lg)
 
                     // Footer note
-                    Text("Dil değişikliği uygulamayı yeniden başlatır. Para birimi formatı dilden bağımsız ayrıca seçilebilir.")
+                    Text("Dil değişikliği anında uygulanır. Para birimi formatı dilden bağımsız ayrıca seçilebilir.")
                         .font(.brand(.footnote))
                         .foregroundStyle(BrandColor.textTertiary)
                         .multilineTextAlignment(.center)
@@ -184,12 +183,6 @@ struct LanguagePickerSheet: View {
             }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .alert("Dil değişikliği için uygulamayı yeniden başlatın.", isPresented: $showRestartAlert) {
-                Button("Uygulamayı Yeniden Başlat", role: .destructive) {
-                    exit(0)
-                }
-                Button("Daha Sonra", role: .cancel) {}
-            }
         }
         .presentationDetents([.medium])
         .presentationDragIndicator(.visible)
@@ -200,7 +193,11 @@ struct LanguagePickerSheet: View {
         settings?.updatedAt = .now
         UserDefaults.standard.set([lang.rawValue], forKey: "AppleLanguages")
         UserDefaults.standard.synchronize()
-        showRestartAlert = true
+        dismiss()
+        // Slight delay so sheet dismiss animation completes before root rebuild
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            NotificationCenter.default.post(name: .appLanguageDidChange, object: nil)
+        }
     }
 
     private func languageRow(_ lang: AppLanguage) -> some View {
@@ -325,6 +322,8 @@ struct CurrencyPickerSheet: View {
         return Button {
             settings?.currency = currency
             settings?.updatedAt = .now
+            // Persist symbol so Decimal.compactTRY/fullTRY can read it without ModelContext
+            UserDefaults.standard.set(currency.symbol, forKey: "selectedCurrencySymbol")
         } label: {
             HStack(spacing: Spacing.md) {
                 ZStack {

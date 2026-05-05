@@ -9,19 +9,23 @@ struct TransactionRow: View {
 
     let transaction: Transaction
     var onDelete: (() -> Void)? = nil
+    var onTap: (() -> Void)? = nil
 
     @Environment(\.hideAmounts) private var hideAmounts
     @State private var swipeOffset: CGFloat = 0
+    @State private var showDeleteConfirm = false
     private let deleteWidth: CGFloat = 76
 
     var body: some View {
         ZStack(alignment: .trailing) {
-            // Delete button (behind row, revealed on swipe)
+            // Delete button revealed on swipe — shows confirmation dialog,
+            // never propagates to the row's onTap handler.
             Button {
+                // Snap back first so the row is fully visible behind the dialog
                 withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
                     swipeOffset = 0
                 }
-                onDelete?()
+                showDeleteConfirm = true
             } label: {
                 VStack(spacing: 4) {
                     Image(systemName: "trash.fill")
@@ -36,10 +40,20 @@ struct TransactionRow: View {
             }
             .opacity(swipeOffset < -8 ? 1 : 0)
 
-            // Main row content
+            // Main row content — tap opens edit, swipe reveals delete.
+            // onTapGesture is scoped to rowContent only, so the delete
+            // button behind it is never accidentally triggered.
             rowContent
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    guard swipeOffset == 0 else {
+                        // First tap on a swiped row just closes it
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { swipeOffset = 0 }
+                        return
+                    }
+                    onTap?()
+                }
                 .offset(x: swipeOffset)
-                .background(BrandColor.surface.opacity(0.001)) // extends tap area
                 .gesture(
                     DragGesture(minimumDistance: 12, coordinateSpace: .local)
                         .onChanged { value in
@@ -59,6 +73,19 @@ struct TransactionRow: View {
                 )
         }
         .clipped()
+        .confirmationDialog(
+            LocaleHelper.string("Bu işlemi silmek istediğinizden emin misiniz?"),
+            isPresented: $showDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            Button(LocaleHelper.string("Sil"), role: .destructive) { onDelete?() }
+            Button(LocaleHelper.string("İptal"), role: .cancel) { }
+        } message: {
+            let label = transaction.note.isEmpty
+                ? LocaleHelper.string("İsimsiz")
+                : transaction.note
+            Text(label)
+        }
     }
 
     private var rowContent: some View {

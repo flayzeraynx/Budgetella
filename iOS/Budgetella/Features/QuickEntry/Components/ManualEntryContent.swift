@@ -15,6 +15,9 @@ struct ManualEntryContent: View {
     @Binding var mode: EntryMode
     @Binding var isTyping: Bool
 
+    @Query private var settingsArr: [AppSettings]
+    private var currencySymbol: String { settingsArr.first?.currency.symbol ?? "₺" }
+
     @FocusState private var noteFieldFocused: Bool
 
     var body: some View {
@@ -143,7 +146,7 @@ struct ManualEntryContent: View {
                 .tracking(1.2)
 
             HStack(alignment: .firstTextBaseline, spacing: 2) {
-                Text("₺")
+                Text(currencySymbol)
                     .font(.brand(.title))
                     .foregroundStyle(amountColor)
                 Text(vm.wholePart)

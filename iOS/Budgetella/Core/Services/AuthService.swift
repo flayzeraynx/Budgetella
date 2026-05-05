@@ -77,6 +77,12 @@ public final class AuthService: NSObject {
     public var displayName: String? { currentUser?.displayName }
     public var email: String? { currentUser?.email }
 
+    /// True only when the user has an email/password provider (not Apple/Google SSO).
+    /// Use this to show/hide the Change Password option in settings.
+    public var isEmailProvider: Bool {
+        currentUser?.providerData.contains(where: { $0.providerID == "password" }) ?? false
+    }
+
     // MARK: - Email / Password
 
     public func signUp(email: String, password: String, displayName: String) async throws {

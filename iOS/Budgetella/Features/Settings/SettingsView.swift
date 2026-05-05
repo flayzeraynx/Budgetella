@@ -31,8 +31,7 @@ struct SettingsView: View {
     @State private var showImportResult = false
     @State private var importResultMessage = ""
     @State private var isImporting = false
-    @State private var exportURL: URL?
-    @State private var showExportSheet = false
+    @State private var isExporting = false
 
     private var settings: AppSettings? { settingsArr.first }
 
@@ -92,44 +91,50 @@ struct SettingsView: View {
                     // Security
                     Section("Güvenlik") {
                         if let s = settings {
-                            HStack {
-                                settingsIconBadge(icon: "faceid", color: .green)
-                                Text("Face ID / Touch ID")
-                                    .font(.brand(.body))
-                                    .foregroundStyle(BrandColor.textPrimary)
-                                Spacer()
-                                Toggle("", isOn: Binding(
-                                    get: { s.biometricLockEnabled },
-                                    set: {
-                                        s.biometricLockEnabled = $0
-                                        s.updatedAt = .now
-                                    }
-                                ))
-                                .tint(BrandColor.primary)
-                                .labelsHidden()
+                            Button {
+                                s.biometricLockEnabled.toggle()
+                                s.updatedAt = .now
+                            } label: {
+                                HStack {
+                                    settingsIconBadge(icon: "faceid", color: .green)
+                                    Text("Face ID / Touch ID")
+                                        .font(.brand(.body))
+                                        .foregroundStyle(BrandColor.textPrimary)
+                                    Spacer()
+                                    Toggle("", isOn: .constant(s.biometricLockEnabled))
+                                        .tint(BrandColor.primary)
+                                        .labelsHidden()
+                                        .allowsHitTesting(false)
+                                }
+                                .padding(.horizontal, 16)
+                                .frame(maxWidth: .infinity, minHeight: 44)
+                                .contentShape(Rectangle())
                             }
-                            .padding(.horizontal, 16)
-                            .frame(maxWidth: .infinity, minHeight: 44)
+                            .buttonStyle(.plain)
+                            .highlightOnPress()
                             .listRowInsets(EdgeInsets())
 
-                            HStack {
-                                settingsIconBadge(icon: "eye.slash", color: BrandColor.warning)
-                                Text("Tutarları Gizle")
-                                    .font(.brand(.body))
-                                    .foregroundStyle(BrandColor.textPrimary)
-                                Spacer()
-                                Toggle("", isOn: Binding(
-                                    get: { s.hideAmounts },
-                                    set: {
-                                        s.hideAmounts = $0
-                                        s.updatedAt = .now
-                                    }
-                                ))
-                                .tint(BrandColor.primary)
-                                .labelsHidden()
+                            Button {
+                                s.hideAmounts.toggle()
+                                s.updatedAt = .now
+                            } label: {
+                                HStack {
+                                    settingsIconBadge(icon: "eye.slash", color: BrandColor.warning)
+                                    Text("Tutarları Gizle")
+                                        .font(.brand(.body))
+                                        .foregroundStyle(BrandColor.textPrimary)
+                                    Spacer()
+                                    Toggle("", isOn: .constant(s.hideAmounts))
+                                        .tint(BrandColor.primary)
+                                        .labelsHidden()
+                                        .allowsHitTesting(false)
+                                }
+                                .padding(.horizontal, 16)
+                                .frame(maxWidth: .infinity, minHeight: 44)
+                                .contentShape(Rectangle())
                             }
-                            .padding(.horizontal, 16)
-                            .frame(maxWidth: .infinity, minHeight: 44)
+                            .buttonStyle(.plain)
+                            .highlightOnPress()
                             .listRowInsets(EdgeInsets())
                         }
                     }
@@ -138,14 +143,25 @@ struct SettingsView: View {
                     // Data
                     Section("Veriler") {
                         settingsRow(
-                            icon: "square.and.arrow.up",
+                            icon: isExporting ? "arrow.triangle.2.circlepath" : "square.and.arrow.up",
                             iconColor: BrandColor.primaryLight,
                             title: "Dışa Aktar",
-                            value: nil
+                            value: nil,
+                            disabled: isExporting
                         ) {
-                            if let url = try? BackupExportService.export(from: modelContext) {
-                                exportURL = url
-                                showExportSheet = true
+                            guard !isExporting else { return }
+                            isExporting = true
+                            Task { @MainActor in
+                                defer { isExporting = false }
+                                guard let url = try? BackupExportService.export(from: modelContext) else { return }
+                                // Present UIActivityViewController from the topmost VC so it
+                                // works correctly even when SettingsView is inside a sheet.
+                                guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                                      let rootVC = scene.keyWindow?.rootViewController else { return }
+                                var topVC = rootVC
+                                while let presented = topVC.presentedViewController { topVC = presented }
+                                let shareVC = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+                                topVC.present(shareVC, animated: true)
                             }
                         }
 
@@ -237,6 +253,7 @@ struct SettingsView: View {
                             }
                             .padding(.horizontal, 16)
                             .frame(maxWidth: .infinity, minHeight: 44)
+                            .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
                         .highlightOnPress()
@@ -278,6 +295,13 @@ struct SettingsView: View {
                 }
                 .scrollContentBackground(.hidden)
                 .listStyle(.insetGrouped)
+                .onAppear {
+                    // Eliminate the first-tap delay that UIScrollView adds in List rows
+                    UIScrollView.appearance().delaysContentTouches = false
+                }
+                .onDisappear {
+                    UIScrollView.appearance().delaysContentTouches = true
+                }
             }
             .navigationTitle("Ayarlar")
             .navigationBarTitleDisplayMode(.inline)
@@ -312,12 +336,6 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showCurrencyPicker) {
                 CurrencyPickerSheet(settings: settings)
-            }
-            .sheet(isPresented: $showExportSheet) {
-                if let url = exportURL {
-                    ShareSheet(items: [url])
-                        .ignoresSafeArea()
-                }
             }
         }
         .preferredColorScheme(preferredScheme)
@@ -505,6 +523,7 @@ struct SettingsView: View {
             }
             .padding(.horizontal, 16)
             .frame(maxWidth: .infinity, minHeight: 44)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .highlightOnPress()
@@ -534,9 +553,9 @@ struct SettingsView: View {
 
     private func themeLabel(_ theme: AppTheme) -> String {
         switch theme {
-        case .dark:   return String(localized: "Karanlık")
-        case .light:  return String(localized: "Açık")
-        case .system: return String(localized: "Sistem")
+        case .dark:   return LocaleHelper.string("Karanlık")
+        case .light:  return LocaleHelper.string("Açık")
+        case .system: return LocaleHelper.string("Sistem")
         }
     }
 

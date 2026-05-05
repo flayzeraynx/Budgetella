@@ -64,11 +64,18 @@ public extension Category {
     /// Default categories → xcstrings `category.slug.<slug>` key.
     /// Custom (premium) categories → stored `name` as-is.
     var localizedDisplayName: String {
-        // If slug is set → known category → xcstrings lookup by computed key.
-        // NSLocalizedString handles runtime-computed keys; value: is the fallback.
         // Custom (premium) categories have slug == nil → return stored name as-is.
         guard let slug else { return name }
-        return NSLocalizedString("category.slug.\(slug)", value: name, comment: "")
+        let key = "category.slug.\(slug)"
+        // Respect runtime language selection: read active lproj bundle from AppleLanguages.
+        let langCode = UserDefaults.standard.stringArray(forKey: "AppleLanguages")?.first
+            ?? Locale.current.language.languageCode?.identifier
+            ?? "tr"
+        if let path = Bundle.main.path(forResource: langCode, ofType: "lproj"),
+           let bundle = Bundle(path: path) {
+            return bundle.localizedString(forKey: key, value: name, table: nil)
+        }
+        return NSLocalizedString(key, value: name, comment: "")
     }
 }
 

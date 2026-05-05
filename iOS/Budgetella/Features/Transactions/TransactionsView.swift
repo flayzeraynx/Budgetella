@@ -224,15 +224,18 @@ struct TransactionsView: View {
 
                             VStack(spacing: 0) {
                                 ForEach(dayGroup.transactions) { tx in
-                                    TransactionRow(transaction: tx, onDelete: {
-                                        let txId = tx.id
-                                        let txUserId = tx.userId
-                                        modelContext.delete(tx)
-                                        Task {
-                                            try? await FirestoreService.shared.deleteTransaction(id: txId, userId: txUserId)
-                                        }
-                                    })
-                                    .onTapGesture { editingTransaction = tx }
+                                    TransactionRow(
+                                        transaction: tx,
+                                        onDelete: {
+                                            let txId = tx.id
+                                            let txUserId = tx.userId
+                                            modelContext.delete(tx)
+                                            Task {
+                                                try? await FirestoreService.shared.deleteTransaction(id: txId, userId: txUserId)
+                                            }
+                                        },
+                                        onTap: { editingTransaction = tx }
+                                    )
 
                                     if tx.id != dayGroup.transactions.last?.id {
                                         Divider()

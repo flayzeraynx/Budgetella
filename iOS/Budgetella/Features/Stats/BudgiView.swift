@@ -77,6 +77,12 @@ struct BudgiView: View {
             .toolbar(.hidden, for: .navigationBar)
         }
         .task { await subscriptionService.setup(userId: currentUserId) }
+        .onReceive(NotificationCenter.default.publisher(for: .appLanguageDidChange)) { _ in
+            // Clear cached chat so greetings and insights regenerate in the new language
+            UserDefaults.standard.removeObject(forKey: chatHistoryKey)
+            chatMessages = []
+            buildInitialMessages()
+        }
     }
 
     // MARK: - Build initial messages
@@ -100,14 +106,14 @@ struct BudgiView: View {
         let hour = Calendar.current.component(.hour, from: .now)
         let greet: String
         switch hour {
-        case 5..<12:  greet = String(format: String(localized: "Günaydın %@ ☀️"), name)
-        case 12..<18: greet = String(format: String(localized: "İyi günler %@ 👋"), name)
-        case 18..<23: greet = String(format: String(localized: "İyi akşamlar %@ 🌙"), name)
-        default:       greet = String(format: String(localized: "Merhaba %@ 🌙"), name)
+        case 5..<12:  greet = String(format: LocaleHelper.string("Günaydın %@ ☀️"), name)
+        case 12..<18: greet = String(format: LocaleHelper.string("İyi günler %@ 👋"), name)
+        case 18..<23: greet = String(format: LocaleHelper.string("İyi akşamlar %@ 🌙"), name)
+        default:       greet = String(format: LocaleHelper.string("Merhaba %@ 🌙"), name)
         }
         let intro = insights.isEmpty
-            ? String(localized: "Henüz analiz edecek yeterli veri yok. Birkaç işlem ekledikten sonra kişisel öneriler burada belirmeye başlar.")
-            : String(localized: "Bu hafta şunları fark ettim:")
+            ? LocaleHelper.string("Henüz analiz edecek yeterli veri yok. Birkaç işlem ekledikten sonra kişisel öneriler burada belirmeye başlar.")
+            : LocaleHelper.string("Bu hafta şunları fark ettim:")
         msgs.append(BudgiMessage(role: .assistant, text: "\(greet) \(intro)", tag: nil, accent: "clear"))
 
         for insight in insights {
@@ -421,7 +427,7 @@ enum BudgiChatService {
         let urlString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=\(apiKey)"
         guard let url = URL(string: urlString) else { return "Bağlantı hatası." }
 
-        let isEnglish = (Locale.current.language.languageCode?.identifier ?? "tr") == "en"
+        let isEnglish = LocaleHelper.isEnglish
         let systemPrompt = isEnglish ? """
         You are Budgi, the user's personal finance assistant. Respond in English.
         Keep answers short, friendly, and practical. No unnecessary long explanations.
@@ -490,9 +496,7 @@ struct BudgiInsight: Identifiable {
 
 enum BudgiInsightEngine {
 
-    static var isEnglish: Bool {
-        (Locale.current.language.languageCode?.identifier ?? "tr") == "en"
-    }
+    static var isEnglish: Bool { LocaleHelper.isEnglish }
 
     static func compute(transactions: [Transaction], categories: [Category]) -> [BudgiInsight] {
         let cal = Calendar.current

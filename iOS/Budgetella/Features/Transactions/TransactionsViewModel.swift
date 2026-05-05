@@ -49,7 +49,7 @@ import Foundation
                 }
 
                 let fmt = DateFormatter()
-                fmt.locale = Locale.current
+                fmt.locale = LocaleHelper.currentLocale
                 fmt.dateFormat = "d MMMM"
 
                 let days = byDay.keys.sorted(by: >).map { date in

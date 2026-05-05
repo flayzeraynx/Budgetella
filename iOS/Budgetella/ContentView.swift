@@ -95,6 +95,10 @@ struct ContentView: View {
             BudgetellaApp.seedSettingsIfNeeded(in: modelContext)
             BudgetellaApp.migrateEnglishCategoryNames(in: modelContext)
             BudgetellaApp.migrateAddMissingCategories(in: modelContext)
+            // Sync currency symbol to UserDefaults so Decimal formatters pick it up
+            if let symbol = settingsArr.first?.currency.symbol {
+                UserDefaults.standard.set(symbol, forKey: "selectedCurrencySymbol")
+            }
             refreshWidget()
             // Re-register App Shortcuts after UI is ready (helps Siri indexing)
             BudgetellaShortcuts.updateAppShortcutParameters()

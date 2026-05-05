@@ -323,30 +323,33 @@ struct ProfileView: View {
 
     private var accountActions: some View {
         VStack(spacing: Spacing.xs) {
-            Button {
-                showChangePassword = true
-            } label: {
-                HStack(spacing: Spacing.md) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(BrandColor.primary.opacity(0.12))
-                            .frame(width: 32, height: 32)
-                        Image(systemName: "lock.rotation")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(BrandColor.primary)
+            // Only show password change for email/password accounts, not Apple/Google SSO
+            if authService.isEmailProvider {
+                Button {
+                    showChangePassword = true
+                } label: {
+                    HStack(spacing: Spacing.md) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .fill(BrandColor.primary.opacity(0.12))
+                                .frame(width: 32, height: 32)
+                            Image(systemName: "lock.rotation")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundStyle(BrandColor.primary)
+                        }
+                        Text("Şifre Değiştir")
+                            .font(.brand(.body))
+                            .foregroundStyle(BrandColor.textPrimary)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12))
+                            .foregroundStyle(BrandColor.textTertiary)
                     }
-                    Text("Şifre Değiştir")
-                        .font(.brand(.body))
-                        .foregroundStyle(BrandColor.textPrimary)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 12))
-                        .foregroundStyle(BrandColor.textTertiary)
+                    .padding(Spacing.md)
+                    .glassCard(cornerRadius: 14)
                 }
-                .padding(Spacing.md)
-                .glassCard(cornerRadius: 14)
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
     }
 
