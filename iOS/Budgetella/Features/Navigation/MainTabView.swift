@@ -69,11 +69,35 @@ struct MainTabView: View {
                 modelContext: modelContext
             )
         }
-        // Widget "Ekle" butonu deep link: budgetella://add
+        .onAppear {
+            // Schedule weekly digest local notification
+            NotificationService.shared.scheduleWeeklyDigest()
+        }
+        // Widget deep link + push notification deep link
         .onOpenURL { url in
-            guard url.scheme == "budgetella", url.host == "add" else { return }
+            handleDeepLink(url)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .appDeepLinkReceived)) { note in
+            if let url = note.userInfo?["url"] as? URL {
+                handleDeepLink(url)
+            }
+        }
+    }
+
+    private func handleDeepLink(_ url: URL) {
+        guard url.scheme == "budgetella" else { return }
+        switch url.host {
+        case "add":
             entryMode = .manual
             showQuickEntry = true
+        case "transactions":
+            withAnimation { selectedTab = .list }
+        case "stats":
+            withAnimation { selectedTab = .stats }
+        case "ai":
+            withAnimation { selectedTab = .ai }
+        default:
+            withAnimation { selectedTab = .home }
         }
     }
 

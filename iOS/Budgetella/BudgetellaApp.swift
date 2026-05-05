@@ -15,11 +15,16 @@ import AppIntents
 @main
 struct BudgetellaApp: App {
 
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     let modelContainer: ModelContainer
 
     init() {
         // Firebase — GoogleService-Info.plist'ten otomatik konfigürasyon
         FirebaseApp.configure()
+
+        // Notification delegates — UNUserNotificationCenter + FCM
+        NotificationService.shared.configure()
 
         // Siri App Shortcuts — register phrases with the system
         BudgetellaShortcuts.updateAppShortcutParameters()

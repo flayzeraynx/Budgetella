@@ -12,6 +12,8 @@ struct NotificationSettingsView: View {
     @AppStorage("notifAnomalyAlerts")      private var anomalyAlerts = true
     @AppStorage("notifSavingsSuggestions") private var savingsSuggestions = true
 
+    @State private var systemAuthStatus: UNAuthorizationStatus = .notDetermined
+
     var body: some View {
         ZStack {
             BrandColor.background.ignoresSafeArea()
@@ -75,11 +77,48 @@ struct NotificationSettingsView: View {
             }
             .scrollContentBackground(.hidden)
             .listStyle(.insetGrouped)
+
+            // System permission denied banner
+            if systemAuthStatus == .denied {
+                VStack(spacing: Spacing.sm) {
+                    Image(systemName: "bell.slash.fill")
+                        .font(.system(size: 28))
+                        .foregroundStyle(BrandColor.warning)
+                    Text("Sistem bildirimleri kapalı")
+                        .font(.brand(.subheadline))
+                        .foregroundStyle(BrandColor.textPrimary)
+                    Text("Bildirimleri almak için Ayarlar > Budgetella > Bildirimler'i açın.")
+                        .font(.brand(.footnote))
+                        .foregroundStyle(BrandColor.textTertiary)
+                        .multilineTextAlignment(.center)
+                    Button("Sistem Ayarlarına Git") {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    }
+                    .font(.brand(.subheadline).bold())
+                    .foregroundStyle(BrandColor.primary)
+                }
+                .padding(Spacing.xl)
+                .glassCard(cornerRadius: 16)
+                .padding(.horizontal, 24)
+                .padding(.bottom, Spacing.xl)
+            }
         }
         .navigationTitle("Bildirimler")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(BrandColor.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
+        .task {
+            let settings = await UNUserNotificationCenter.current().notificationSettings()
+            systemAuthStatus = settings.authorizationStatus
+        }
+        .onChange(of: allEnabled) { _, _ in
+            NotificationService.shared.scheduleWeeklyDigest()
+        }
+        .onChange(of: weeklyDigest) { _, _ in
+            NotificationService.shared.scheduleWeeklyDigest()
+        }
     }
 
     private func toggleRow(

@@ -118,10 +118,31 @@ struct ContentView: View {
                 }
             }
             if !newValue, appState == .main {
+                // Sign-out: remove FCM token from Firestore
+                let uid = UserDefaults.standard.string(forKey: "currentUserId") ?? ""
+                NotificationService.shared.removeToken(userId: uid)
                 withAnimation(.easeInOut(duration: 0.4)) {
                     appState = .auth
                 }
             }
+        }
+        // Push notification received → mirror to SwiftData
+        .onReceive(NotificationCenter.default.publisher(for: .appPushReceived)) { note in
+            guard let info = note.userInfo,
+                  let title = info["title"] as? String,
+                  let body  = info["body"]  as? String else { return }
+            let kindRaw  = info["kind"]     as? String ?? NotificationKind.systemMessage.rawValue
+            let deepLink = info["deepLink"] as? String
+            let uid = UserDefaults.standard.string(forKey: "currentUserId") ?? "local"
+            let record = NotificationRecord(
+                userId: uid,
+                kind: NotificationKind(rawValue: kindRaw) ?? .systemMessage,
+                title: title,
+                body: body,
+                deepLink: deepLink
+            )
+            modelContext.insert(record)
+            try? modelContext.save()
         }
         .environment(FirestoreService.shared)
         // Pre-warm iOS keyboard so first TextField focus is instant

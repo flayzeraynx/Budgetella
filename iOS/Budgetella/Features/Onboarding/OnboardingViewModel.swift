@@ -50,9 +50,9 @@ final class OnboardingViewModel {
     }
 
     func requestNotifications() async {
-        let center = UNUserNotificationCenter.current()
-        let granted = (try? await center.requestAuthorization(options: [.alert, .badge, .sound])) ?? false
-        notificationsEnabled = granted
+        await NotificationService.shared.requestPermissionAndRegister()
+        let settings = await UNUserNotificationCenter.current().notificationSettings()
+        notificationsEnabled = settings.authorizationStatus == .authorized
     }
 
     // MARK: - Complete
