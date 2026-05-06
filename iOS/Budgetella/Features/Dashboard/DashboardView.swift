@@ -85,7 +85,12 @@ struct DashboardView: View {
                     if !topExpenseCategories.isEmpty {
                         categorySection
                             .padding(.horizontal, 20)
+                            .padding(.bottom, Spacing.lg)
                     }
+
+                    // ── Income vs Expense bar chart
+                    IncomeExpenseBarChart(data: vm.sixMonthFlowData(from: myTransactions))
+                        .padding(.horizontal, 20)
 
                     Spacer(minLength: 100)
                 }

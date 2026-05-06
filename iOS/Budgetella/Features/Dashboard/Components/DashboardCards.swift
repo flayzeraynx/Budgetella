@@ -539,6 +539,82 @@ struct DailyFlowChart: View {
     }
 }
 
+// MARK: - Income vs Expense Bar Chart (Last 6 Months)
+
+struct IncomeExpenseBarChart: View {
+    let data: [MonthlyFlowPoint]
+
+    private var incomeLabel: String { String(localized: "Gelir") }
+    private var expenseLabel: String { String(localized: "Gider") }
+
+    var body: some View {
+        VStack(spacing: Spacing.sm) {
+            // Header
+            HStack {
+                Text("GELİR & GİDER")
+                    .font(.brand(.caption))
+                    .foregroundStyle(BrandColor.textTertiary)
+                    .tracking(1.2)
+                Spacer()
+                HStack(spacing: Spacing.sm) {
+                    legendPill(color: BrandColor.income, label: "Gelir")
+                    legendPill(color: BrandColor.expense, label: "Gider")
+                }
+            }
+
+            if data.isEmpty {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(BrandColor.borderSubtle.opacity(0.3))
+                    .frame(height: 140)
+                    .overlay(
+                        Text("Veri yok")
+                            .font(.brand(.caption))
+                            .foregroundStyle(BrandColor.textTertiary)
+                    )
+            } else {
+                Chart(data) { point in
+                    let label = point.kind == .income ? incomeLabel : expenseLabel
+                    BarMark(
+                        x: .value(String(localized: "Ay"), monthShort(point.month)),
+                        y: .value(String(localized: "Tutar"), point.amount),
+                        width: .ratio(0.75)
+                    )
+                    .foregroundStyle(by: .value("Tür", label))
+                    .position(by: .value("Tür", label))
+                    .cornerRadius(4)
+                }
+                .chartForegroundStyleScale([
+                    incomeLabel:  BrandColor.income,
+                    expenseLabel: BrandColor.expense
+                ])
+                .chartLegend(.hidden)
+                .chartXAxis {
+                    AxisMarks(values: .automatic) { _ in
+                        AxisValueLabel()
+                            .font(.brand(.caption))
+                            .foregroundStyle(BrandColor.textTertiary)
+                    }
+                }
+                .chartYAxis(.hidden)
+                .frame(height: 140)
+            }
+        }
+        .padding(Spacing.lg)
+        .glassCard(cornerRadius: Spacing.radiusMedium)
+    }
+
+    private func legendPill(color: Color, label: LocalizedStringKey) -> some View {
+        HStack(spacing: 4) {
+            RoundedRectangle(cornerRadius: 2)
+                .fill(color)
+                .frame(width: 10, height: 6)
+            Text(label)
+                .font(.brand(.caption))
+                .foregroundStyle(BrandColor.textTertiary)
+        }
+    }
+}
+
 // MARK: - AI Insight Card
 
 struct AIInsightCard: View {

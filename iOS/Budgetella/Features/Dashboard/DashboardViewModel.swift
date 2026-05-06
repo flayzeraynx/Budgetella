@@ -98,6 +98,25 @@ import Foundation
         return diff.doubleValue / prev.doubleValue * 100
     }
 
+    // MARK: - 6-month income vs expense data
+
+    func sixMonthFlowData(from txs: [Transaction]) -> [MonthlyFlowPoint] {
+        let cal = Calendar.current
+        let now = Date.now
+        var result: [MonthlyFlowPoint] = []
+        for offset in stride(from: 5, through: 0, by: -1) {
+            guard let date = cal.date(byAdding: .month, value: -offset, to: now) else { continue }
+            let yr = cal.component(.year, from: date)
+            let mo = cal.component(.month, from: date)
+            let monthTxs = txs.filter { calYear($0) == yr && calMonth($0) == mo }
+            let inc = monthTxs.filter { $0.type == .income }.reduce(Decimal(0)) { $0 + $1.amount }
+            let exp = monthTxs.filter { $0.type == .expense }.reduce(Decimal(0)) { $0 + $1.amount }
+            result.append(MonthlyFlowPoint(year: yr, month: mo, kind: .income,  amount: (inc as NSDecimalNumber).doubleValue))
+            result.append(MonthlyFlowPoint(year: yr, month: mo, kind: .expense, amount: (exp as NSDecimalNumber).doubleValue))
+        }
+        return result
+    }
+
     // MARK: - Available periods
 
     func availableYears(from txs: [Transaction]) -> [Int] {
@@ -118,11 +137,19 @@ import Foundation
     }
 }
 
-// MARK: - Chart data point
+// MARK: - Chart data points
 
 struct DailyFlowPoint: Identifiable {
     let id = UUID()
     let day: Int
+    let kind: TransactionType
+    let amount: Double
+}
+
+struct MonthlyFlowPoint: Identifiable {
+    let id = UUID()
+    let year: Int
+    let month: Int
     let kind: TransactionType
     let amount: Double
 }
