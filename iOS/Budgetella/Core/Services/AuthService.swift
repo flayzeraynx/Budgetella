@@ -186,6 +186,8 @@ public final class AuthService: NSObject {
         // Firestore cleanup best-effort while still authenticated
         try? await Firestore.firestore().collection("users").document(uid).delete()
         clearLocalData(modelContext: modelContext)
+        // Full wipe on delete — AppSettings not preserved (unlike signOut)
+        try? modelContext.delete(model: AppSettings.self)
         // Auth deletion is the definitive step — errors propagate to caller
         try await user.delete()
         KeychainHelper.clearAll()

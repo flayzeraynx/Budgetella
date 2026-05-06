@@ -197,6 +197,7 @@ enum BackupImportService {
         )
         modelContext.insert(newCat)
         cache[name] = newCat
+        if let turkishName = slug?.turkishName { cache[turkishName] = newCat }
         created += 1
         return newCat
     }

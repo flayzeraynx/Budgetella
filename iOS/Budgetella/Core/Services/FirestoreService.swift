@@ -93,7 +93,11 @@ public final class FirestoreService {
     public func batchUploadTransactions(_ txs: [Transaction]) {
         for tx in txs {
             Task {
-                try? await self.uploadTransaction(tx)
+                do {
+                    try await self.uploadTransaction(tx)
+                } catch {
+                    print("[FirestoreService] batchUpload failed for \(tx.id): \(error.localizedDescription)")
+                }
             }
         }
     }

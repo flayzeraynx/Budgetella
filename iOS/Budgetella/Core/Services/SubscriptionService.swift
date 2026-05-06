@@ -197,11 +197,11 @@ public final class SubscriptionService {
     // MARK: - Transaction Listener
 
     private func listenForTransactions() -> Task<Void, Never> {
-        Task(priority: .background) {
+        Task.detached(priority: .background) { [weak self] in
             for await result in StoreKit.Transaction.updates {
                 if case .verified(let tx) = result {
                     await tx.finish()
-                    await self.refreshStatus()
+                    await self?.refreshStatus()
                 }
             }
         }
