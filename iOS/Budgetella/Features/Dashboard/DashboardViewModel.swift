@@ -152,8 +152,9 @@ extension Decimal {
         let fmt = NumberFormatter()
         fmt.numberStyle = .decimal
         fmt.minimumFractionDigits = 0
-        fmt.maximumFractionDigits = 0
+        fmt.maximumFractionDigits = 2
         fmt.groupingSeparator = "."
+        fmt.decimalSeparator = ","
         let s = fmt.string(from: NSNumber(value: d)) ?? "0"
         return "\(sym)\(s)"
     }

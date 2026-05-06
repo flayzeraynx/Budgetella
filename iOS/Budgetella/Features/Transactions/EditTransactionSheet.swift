@@ -33,7 +33,15 @@ struct EditTransactionSheet: View {
 
     // MARK: - Computed amount helpers
 
-    private var wholePart: String { rawInput.components(separatedBy: ",").first ?? "0" }
+    private var wholePart: String {
+        let intStr = rawInput.components(separatedBy: ",").first ?? "0"
+        guard let intValue = Int(intStr) else { return intStr.isEmpty ? "0" : intStr }
+        let fmt = NumberFormatter()
+        fmt.numberStyle = .decimal
+        fmt.groupingSeparator = "."
+        fmt.usesGroupingSeparator = true
+        return fmt.string(from: NSNumber(value: intValue)) ?? intStr
+    }
     private var fracPart: String? {
         guard rawInput.contains(",") else { return nil }
         return rawInput.components(separatedBy: ",").last ?? ""

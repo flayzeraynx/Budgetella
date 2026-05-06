@@ -34,7 +34,7 @@ public final class AuthService: NSObject {
     public var errorMessage: String?
 
     // MARK: - Private
-    private var authStateListener: AuthStateDidChangeListenerHandle?
+    nonisolated(unsafe) private var authStateListener: AuthStateDidChangeListenerHandle?
     private var currentNonce: String?
 
     // MARK: - Init / Deinit
@@ -137,6 +137,7 @@ public final class AuthService: NSObject {
 
     /// Apple login flow başlatır. ASAuthorizationController callback'i bu class'a gelir.
     public func signInWithApple() {
+        isLoading = true
         let nonce = randomNonce()
         currentNonce = nonce
         let request = ASAuthorizationAppleIDProvider().createRequest()
@@ -204,6 +205,7 @@ public final class AuthService: NSObject {
         try? modelContext.delete(model: Budget.self)
         try? modelContext.delete(model: NotificationRecord.self)
         try? modelContext.delete(model: User.self)
+        try? modelContext.save()
     }
 
     /// Reauthenticate the current user with their email/password before a sensitive operation.

@@ -30,11 +30,17 @@ import SwiftData
         return Decimal(string: normalized) ?? 0
     }
 
-    /// Tam sayı kısmı ("240")
+    /// Tam sayı kısmı — binlik nokta ayracıyla ("1.240")
     var wholePart: String {
         guard !rawInput.isEmpty else { return "0" }
-        return rawInput.split(separator: ",", omittingEmptySubsequences: false)
+        let intStr = rawInput.split(separator: ",", omittingEmptySubsequences: false)
             .first.map(String.init) ?? "0"
+        guard let intValue = Int(intStr) else { return intStr.isEmpty ? "0" : intStr }
+        let fmt = NumberFormatter()
+        fmt.numberStyle = .decimal
+        fmt.groupingSeparator = "."
+        fmt.usesGroupingSeparator = true
+        return fmt.string(from: NSNumber(value: intValue)) ?? intStr
     }
 
     /// Kuruş kısmı: nil = ondalık girilmedi, "" = sadece virgül, "5" veya "50"
@@ -80,7 +86,7 @@ import SwiftData
 
     func save(modelContext: ModelContext, categories: [Category], userId: String) {
         guard amountDecimal > 0 else {
-            errorMessage = "Tutar 0'dan büyük olmalı."
+            errorMessage = String(localized: "Tutar 0'dan büyük olmalı.")
             return
         }
         let category = selectedCategoryId.flatMap { id in categories.first { $0.id == id } }

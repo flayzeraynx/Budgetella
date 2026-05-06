@@ -366,7 +366,7 @@ struct PaywallView: View {
         case .lifetime: product = subscriptionService.lifetimeProduct
         }
         guard let product else {
-            errorMessage = "Ürün yüklenemedi. Lütfen tekrar deneyin."
+            errorMessage = String(localized: "Ürün yüklenemedi. Lütfen tekrar deneyin.")
             return
         }
         isPurchasing = true

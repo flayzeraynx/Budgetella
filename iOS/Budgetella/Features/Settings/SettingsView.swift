@@ -353,9 +353,9 @@ struct SettingsView: View {
                 defer { if accessing { url.stopAccessingSecurityScopedResource() } }
                 do {
                     let res = try BackupImportService.importFromURL(url, modelContext: modelContext, userId: userId)
-                    importResultMessage = "\(res.imported) işlem aktarıldı.\n\(res.skipped) tekrar atlandı."
+                    importResultMessage = String(format: String(localized: "%d işlem aktarıldı.\n%d tekrar atlandı."), res.imported, res.skipped)
                     if res.categoriesCreated > 0 {
-                        importResultMessage += "\n\(res.categoriesCreated) yeni kategori oluşturuldu."
+                        importResultMessage += String(format: String(localized: "\n%d yeni kategori oluşturuldu."), res.categoriesCreated)
                     }
                     isImporting = false
                     showImportResult = true

@@ -143,12 +143,12 @@ enum GeminiInsightService {
         let topCats = catTotals.sorted { $0.value > $1.value }.prefix(5).compactMap { entry -> String? in
             guard let cat = categories.first(where: { $0.id == entry.key }) else { return nil }
             let pct = expense > 0 ? Int((Double(truncating: (entry.value / expense) as NSDecimalNumber) * 100).rounded()) : 0
-            return "  - \(cat.name): ₺\(entry.value.formatted()) (%\(pct))"
+            return "  - \(cat.name): \(entry.value.fullTRY) (%\(pct))"
         }.joined(separator: "\n")
 
         // Biggest single expense
         let biggest = currentTxs.filter { $0.type == .expense }.max(by: { $0.amount < $1.amount })
-        let biggestStr = biggest.map { "₺\($0.amount.formatted()) (\($0.note))" } ?? "—"
+        let biggestStr = biggest.map { "\($0.amount.fullTRY) (\($0.note))" } ?? "—"
 
         // Daily avg + projected
         let days = max(1, cal.dateComponents([.day], from: currentStart, to: now).day ?? 1)
@@ -157,19 +157,19 @@ enum GeminiInsightService {
         let projected = daily * Decimal(daysInMonth)
 
         var lines = [
-            "Bu ay gelir: ₺\(income.formatted())",
-            "Bu ay gider: ₺\(expense.formatted())",
-            "Tasarruf: ₺\(savings.formatted())",
+            "Bu ay gelir: \(income.fullTRY)",
+            "Bu ay gider: \(expense.fullTRY)",
+            "Tasarruf: \(savings.fullTRY)",
         ]
         if prevExp > 0 {
             let prevD  = (prevExp as NSDecimalNumber).doubleValue
             let curD   = (expense as NSDecimalNumber).doubleValue
             let change = prevD > 0 ? ((curD - prevD) / prevD * 100) : 0
-            lines.append("Geçen ay gider: ₺\(prevExp.formatted()) (değişim: \(String(format: "%+.0f", change))%)")
+            lines.append("Geçen ay gider: \(prevExp.fullTRY) (değişim: \(String(format: "%+.0f", change))%)")
         }
         lines.append("Top kategoriler:\n\(topCats)")
         lines.append("En büyük tek işlem: \(biggestStr)")
-        lines.append("Günlük ortalama: ₺\(daily.formatted()) | Ay sonu tahmini: ₺\(projected.formatted())")
+        lines.append("Günlük ortalama: \(daily.fullTRY) | Ay sonu tahmini: \(projected.fullTRY)")
 
         return lines.joined(separator: "\n")
     }

@@ -166,7 +166,7 @@ struct DeleteAccountView: View {
             await performDelete()
         } catch {
             isReAuthing = false
-            reAuthError = "Şifre hatalı. Tekrar dene."
+            reAuthError = String(localized: "Şifre hatalı. Tekrar dene.")
         }
     }
 

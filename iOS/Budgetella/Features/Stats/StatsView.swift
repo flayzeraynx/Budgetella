@@ -55,7 +55,7 @@ struct StatsView: View {
                 Button {
                     withAnimation(.spring(response: 0.3)) { vm.selectedSegment = seg }
                 } label: {
-                    Text(seg.rawValue)
+                    Text(LocalizedStringKey(seg.rawValue))
                         .font(.brand(.footnote))
                         .foregroundStyle(vm.selectedSegment == seg ? .white : BrandColor.textTertiary)
                         .padding(.horizontal, 10)

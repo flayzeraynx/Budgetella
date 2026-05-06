@@ -184,13 +184,20 @@ public final class FirestoreService {
     // MARK: - Delete User Data (hesap sil)
 
     public func deleteUserData(userId: String) async throws {
-        let batch = db.batch()
         let txDocs  = try await transactionsRef(userId).getDocuments()
         let catDocs = try await categoriesRef(userId).getDocuments()
-        txDocs.documents.forEach  { batch.deleteDocument($0.reference) }
-        catDocs.documents.forEach { batch.deleteDocument($0.reference) }
-        batch.deleteDocument(userRef(userId))
-        try await batch.commit()
+        let allRefs: [DocumentReference] = txDocs.documents.map { $0.reference }
+            + catDocs.documents.map { $0.reference }
+            + [userRef(userId)]
+        // Firestore batch limit is 500 — chunk to stay safe
+        let chunks = stride(from: 0, to: allRefs.count, by: 490).map {
+            Array(allRefs[$0..<min($0 + 490, allRefs.count)])
+        }
+        for chunk in chunks {
+            let batch = db.batch()
+            chunk.forEach { batch.deleteDocument($0) }
+            try await batch.commit()
+        }
     }
 
     // MARK: - Private Mappers

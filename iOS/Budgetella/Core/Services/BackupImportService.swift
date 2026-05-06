@@ -110,7 +110,7 @@ enum BackupImportService {
 
         for raw in backup.transactions {
             let note = raw.description
-            let amount = Decimal(raw.amount)
+            let amount = NSDecimalNumber(value: raw.amount).decimalValue
 
             // Parse date
             let date = dateFormatter.date(from: raw.date)

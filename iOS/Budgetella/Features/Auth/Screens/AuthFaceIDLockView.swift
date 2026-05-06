@@ -115,13 +115,13 @@ struct AuthFaceIDLockView: View {
                 let ctx = LAContext()
                 let success = try await ctx.evaluatePolicy(
                     .deviceOwnerAuthentication,
-                    localizedReason: "Budgetella'ya girmek için kimliğini doğrula"
+                    localizedReason: String(localized: "Budgetella'ya girmek için kimliğini doğrula")
                 )
                 scanning = false
                 if success { onUnlocked() }
             } catch {
                 scanning = false
-                withAnimation { errorMessage = "Kimlik doğrulanamadı. Tekrar dene." }
+                withAnimation { errorMessage = String(localized: "Kimlik doğrulanamadı. Tekrar dene.") }
             }
         }
     }
@@ -138,16 +138,16 @@ struct AuthFaceIDLockView: View {
                     let code = (authError as? LAError)?.code
                     if code == .biometryLockout {
                         // Biometri kilitli — şifre fallback'e yönlendir
-                        withAnimation { errorMessage = "Yüz tanıma kilitlendi. Şifre kullanın." }
+                        withAnimation { errorMessage = String(localized: "Yüz tanıma kilitlendi. Şifre kullanın.") }
                         triggerPasscode()
                     } else {
-                        withAnimation { errorMessage = "Biyometrik doğrulama kullanılamıyor. Şifre kullanın." }
+                        withAnimation { errorMessage = String(localized: "Biyometrik doğrulama kullanılamıyor. Şifre kullanın.") }
                     }
                     return
                 }
                 let success = try await ctx.evaluatePolicy(
                     .deviceOwnerAuthenticationWithBiometrics,
-                    localizedReason: "Budgetella'ya girmek için kimliğini doğrula"
+                    localizedReason: String(localized: "Budgetella'ya girmek için kimliğini doğrula")
                 )
                 scanning = false
                 if success { onUnlocked() }
@@ -155,15 +155,15 @@ struct AuthFaceIDLockView: View {
                 scanning = false
                 withAnimation {
                     if error.code == .biometryLockout {
-                        errorMessage = "Yüz tanıma kilitlendi. Şifre kullanın."
+                        errorMessage = String(localized: "Yüz tanıma kilitlendi. Şifre kullanın.")
                         triggerPasscode()
                     } else {
-                        errorMessage = "Kimlik doğrulanamadı. Tekrar dene."
+                        errorMessage = String(localized: "Kimlik doğrulanamadı. Tekrar dene.")
                     }
                 }
             } catch {
                 scanning = false
-                withAnimation { errorMessage = "Kimlik doğrulanamadı. Tekrar dene." }
+                withAnimation { errorMessage = String(localized: "Kimlik doğrulanamadı. Tekrar dene.") }
             }
         }
     }

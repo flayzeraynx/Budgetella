@@ -35,7 +35,7 @@ public final class SubscriptionService {
     /// App Store abonelik yönetimi deep link (Apple 5.1.1(v) zorunlu).
     public let managementURL = URL(string: "itms-apps://apps.apple.com/account/subscriptions")!
 
-    private var transactionListener: Task<Void, Never>?
+    nonisolated(unsafe) private var transactionListener: Task<Void, Never>?
 
     // MARK: - Dev override
 
@@ -87,7 +87,7 @@ public final class SubscriptionService {
                 }
             }
         } catch {
-            errorMessage = "Ürünler yüklenemedi: \(error.localizedDescription)"
+            errorMessage = String(format: String(localized: "Ürünler yüklenemedi: %@"), error.localizedDescription)
         }
     }
 
