@@ -36,6 +36,18 @@ struct ImportResult {
     let categoriesCreated: Int
 }
 
+enum ImportError: LocalizedError {
+    case fileTooLarge
+    case invalidURL
+
+    var errorDescription: String? {
+        switch self {
+        case .fileTooLarge: return String(localized: "Yedek dosyası çok büyük (maks. 50 MB). Lütfen dosyayı kontrol edin.")
+        case .invalidURL:   return String(localized: "Geçersiz dosya yolu. Lütfen dosyayı tekrar seçin.")
+        }
+    }
+}
+
 // MARK: - Service
 
 enum BackupImportService {
@@ -65,6 +77,14 @@ enum BackupImportService {
         userId: String
     ) throws -> ImportResult {
 
+        guard url.isFileURL else {
+            throw ImportError.invalidURL
+        }
+        let attrs = try FileManager.default.attributesOfItem(atPath: url.path)
+        let fileSize = (attrs[.size] as? Int) ?? 0
+        guard fileSize <= 50 * 1024 * 1024 else {
+            throw ImportError.fileTooLarge
+        }
         let data = try Data(contentsOf: url)
         let backup = try JSONDecoder().decode(BackupFile.self, from: data)
 

@@ -63,10 +63,8 @@ public final class AuthService: NSObject {
     }
 
     deinit {
-        MainActor.assumeIsolated {
-            if let handle = authStateListener {
-                Auth.auth().removeStateDidChangeListener(handle)
-            }
+        if let handle = authStateListener {
+            Auth.auth().removeStateDidChangeListener(handle)
         }
     }
 
@@ -182,13 +180,13 @@ public final class AuthService: NSObject {
 
     public func deleteAccount(modelContext: ModelContext) async throws {
         guard let user = currentUser else { throw AuthError.noUser }
+        let uid = user.uid
         isLoading = true
         defer { isLoading = false }
-        try await Firestore.firestore()
-            .collection("users")
-            .document(user.uid)
-            .delete()
+        // Firestore cleanup best-effort while still authenticated
+        try? await Firestore.firestore().collection("users").document(uid).delete()
         clearLocalData(modelContext: modelContext)
+        // Auth deletion is the definitive step — errors propagate to caller
         try await user.delete()
         KeychainHelper.clearAll()
     }
@@ -199,6 +197,11 @@ public final class AuthService: NSObject {
         try? modelContext.delete(model: Transaction.self)
         try? modelContext.delete(model: Category.self)
         try? modelContext.delete(model: SubscriptionRecord.self)
+        try? modelContext.delete(model: Achievement.self)
+        try? modelContext.delete(model: Goal.self)
+        try? modelContext.delete(model: Budget.self)
+        try? modelContext.delete(model: NotificationRecord.self)
+        try? modelContext.delete(model: User.self)
     }
 
     /// Reauthenticate the current user with their email/password before a sensitive operation.
@@ -294,9 +297,9 @@ public enum AuthError: LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .noUser:               return "Kullanıcı oturumu bulunamadı."
-        case .noRootViewController: return "Uygulama arayüzü hazır değil."
-        case .googleTokenMissing:   return "Google giriş token'ı alınamadı."
+        case .noUser:               return String(localized: "Kullanıcı oturumu bulunamadı.")
+        case .noRootViewController: return String(localized: "Uygulama arayüzü hazır değil.")
+        case .googleTokenMissing:   return String(localized: "Google giriş token'ı alınamadı.")
         }
     }
 }

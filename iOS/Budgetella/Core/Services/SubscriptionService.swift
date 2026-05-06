@@ -39,9 +39,13 @@ public final class SubscriptionService {
 
     // MARK: - Dev override
 
+    #if DEBUG
     private static let devPremiumUIDs: Set<String> = [
-        "7n48wY1HdMWD8ZdX00hzqwZAcsb2" // Ozzy
+        "7n48wY1HdMWD8ZdX00hzqwZAcsb2" // Ozzy — debug only, stripped from Release
     ]
+    #else
+    private static let devPremiumUIDs: Set<String> = []
+    #endif
 
     // MARK: - Product IDs
 
@@ -59,7 +63,7 @@ public final class SubscriptionService {
     }
 
     deinit {
-        MainActor.assumeIsolated { transactionListener?.cancel() }
+        transactionListener?.cancel()
     }
 
     // MARK: - Setup
@@ -156,6 +160,7 @@ public final class SubscriptionService {
         )
         existing?.forEach { modelContext.delete($0) }
         modelContext.insert(record)
+        try? modelContext.save()
     }
 
     // MARK: - Purchase
@@ -192,11 +197,11 @@ public final class SubscriptionService {
     // MARK: - Transaction Listener
 
     private func listenForTransactions() -> Task<Void, Never> {
-        Task.detached(priority: .background) { [weak self] in
+        Task(priority: .background) {
             for await result in StoreKit.Transaction.updates {
                 if case .verified(let tx) = result {
                     await tx.finish()
-                    await self?.refreshStatus()
+                    await self.refreshStatus()
                 }
             }
         }
@@ -209,6 +214,6 @@ public enum SubscriptionError: LocalizedError {
     case verificationFailed
 
     public var errorDescription: String? {
-        "Satın alma doğrulanamadı. Lütfen tekrar deneyin."
+        String(localized: "Satın alma doğrulanamadı. Lütfen tekrar deneyin.")
     }
 }

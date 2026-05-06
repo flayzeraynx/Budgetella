@@ -205,11 +205,11 @@ enum InsightError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .missingAPIKey: return "Gemini API anahtarı bulunamadı."
-        case .noData:        return "Yeterli işlem verisi yok."
-        case .invalidURL:    return "Servis URL'i geçersiz."
-        case .serverError:   return "Sunucu hatası, lütfen tekrar dene."
-        case .parseError:    return "AI yanıtı işlenemedi."
+        case .missingAPIKey: return String(localized: "Gemini API anahtarı bulunamadı.")
+        case .noData:        return String(localized: "Yeterli işlem verisi yok.")
+        case .invalidURL:    return String(localized: "Servis URL'i geçersiz.")
+        case .serverError:   return String(localized: "Sunucu hatası, lütfen tekrar dene.")
+        case .parseError:    return String(localized: "AI yanıtı işlenemedi.")
         }
     }
 }

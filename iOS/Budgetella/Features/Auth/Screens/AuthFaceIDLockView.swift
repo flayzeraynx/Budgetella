@@ -134,20 +134,36 @@ struct AuthFaceIDLockView: View {
                 let ctx = LAContext()
                 var authError: NSError?
                 guard ctx.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &authError) else {
-                    throw authError ?? NSError(domain: "LAError", code: -1)
+                    scanning = false
+                    let code = (authError as? LAError)?.code
+                    if code == .biometryLockout {
+                        // Biometri kilitli — şifre fallback'e yönlendir
+                        withAnimation { errorMessage = "Yüz tanıma kilitlendi. Şifre kullanın." }
+                        triggerPasscode()
+                    } else {
+                        withAnimation { errorMessage = "Biyometrik doğrulama kullanılamıyor. Şifre kullanın." }
+                    }
+                    return
                 }
-                // iOS 16+ async evaluatePolicy
                 let success = try await ctx.evaluatePolicy(
                     .deviceOwnerAuthenticationWithBiometrics,
                     localizedReason: "Budgetella'ya girmek için kimliğini doğrula"
                 )
                 scanning = false
                 if success { onUnlocked() }
-            } catch {
+            } catch let error as LAError {
                 scanning = false
                 withAnimation {
-                    errorMessage = "Kimlik doğrulanamadı. Tekrar dene."
+                    if error.code == .biometryLockout {
+                        errorMessage = "Yüz tanıma kilitlendi. Şifre kullanın."
+                        triggerPasscode()
+                    } else {
+                        errorMessage = "Kimlik doğrulanamadı. Tekrar dene."
+                    }
                 }
+            } catch {
+                scanning = false
+                withAnimation { errorMessage = "Kimlik doğrulanamadı. Tekrar dene." }
             }
         }
     }

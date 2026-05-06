@@ -30,29 +30,44 @@ struct BudgetellaApp: App {
         BudgetellaShortcuts.updateAppShortcutParameters()
 
         // SwiftData ModelContainer
+        // Declared outside do-catch so both the try and the recovery path share the same schema/config
+        let schema = Schema([
+            Transaction.self,
+            Category.self,
+            User.self,
+            AppSettings.self,
+            Achievement.self,
+            Budget.self,
+            Goal.self,
+            NotificationRecord.self,
+            SubscriptionRecord.self,
+        ])
+        let configuration = ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: false,
+            cloudKitDatabase: .none // V1: pure local; iCloud sync premium V1.1+
+        )
         do {
-            let schema = Schema([
-                Transaction.self,
-                Category.self,
-                User.self,
-                AppSettings.self,
-                Achievement.self,
-                Budget.self,
-                Goal.self,
-                NotificationRecord.self,
-                SubscriptionRecord.self,
-            ])
-            let configuration = ModelConfiguration(
-                schema: schema,
-                isStoredInMemoryOnly: false,
-                cloudKitDatabase: .none // V1: pure local; iCloud sync premium V1.1+
-            )
             self.modelContainer = try ModelContainer(
                 for: schema,
                 configurations: [configuration]
             )
         } catch {
-            fatalError("SwiftData ModelContainer init failed: \(error)")
+            // Migration or store corruption — wipe and recreate once rather than hard-crash
+            let fm = FileManager.default
+            if let appSupport = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+                let storeFiles = (try? fm.contentsOfDirectory(at: appSupport, includingPropertiesForKeys: nil)) ?? []
+                // Target only SwiftData's default store files — leave Firestore cache intact
+                storeFiles
+                    .filter { $0.lastPathComponent.hasPrefix("default.store") }
+                    .forEach { try? fm.removeItem(at: $0) }
+            }
+            UserDefaults.standard.set(true, forKey: "storeWipedOnLaunch")
+            do {
+                self.modelContainer = try ModelContainer(for: schema, configurations: [configuration])
+            } catch {
+                fatalError("SwiftData failed after store reset: \(error)")
+            }
         }
     }
 

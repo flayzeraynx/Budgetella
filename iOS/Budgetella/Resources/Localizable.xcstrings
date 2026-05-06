@@ -5123,6 +5123,127 @@
           }
         }
       }
+    },
+    "AI yanıtı işlenemedi." : {
+      "comment" : "InsightError.parseError — Gemini response could not be parsed.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI response could not be processed."
+          }
+        }
+      }
+    },
+    "Gemini API anahtarı bulunamadı." : {
+      "comment" : "InsightError.missingAPIKey",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gemini API key not found."
+          }
+        }
+      }
+    },
+    "Geçersiz dosya yolu. Lütfen dosyayı tekrar seçin." : {
+      "comment" : "ImportError.invalidURL",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invalid file path. Please select the file again."
+          }
+        }
+      }
+    },
+    "Google giriş token'ı alınamadı." : {
+      "comment" : "AuthError.googleTokenMissing",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Google sign-in token could not be retrieved."
+          }
+        }
+      }
+    },
+    "Kullanıcı oturumu bulunamadı." : {
+      "comment" : "AuthError.noUser",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "User session not found."
+          }
+        }
+      }
+    },
+    "Satın alma doğrulanamadı. Lütfen tekrar deneyin." : {
+      "comment" : "SubscriptionError.verificationFailed",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Purchase could not be verified. Please try again."
+          }
+        }
+      }
+    },
+    "Servis URL'i geçersiz." : {
+      "comment" : "InsightError.invalidURL",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Service URL is invalid."
+          }
+        }
+      }
+    },
+    "Sunucu hatası, lütfen tekrar dene." : {
+      "comment" : "InsightError.serverError",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Server error, please try again."
+          }
+        }
+      }
+    },
+    "Uygulama arayüzü hazır değil." : {
+      "comment" : "AuthError.noRootViewController",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App interface is not ready."
+          }
+        }
+      }
+    },
+    "Yedek dosyası çok büyük (maks. 50 MB). Lütfen dosyayı kontrol edin." : {
+      "comment" : "ImportError.fileTooLarge",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup file is too large (max 50 MB). Please check the file."
+          }
+        }
+      }
+    },
+    "Yeterli işlem verisi yok." : {
+      "comment" : "InsightError.noData",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insufficient transaction data."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
