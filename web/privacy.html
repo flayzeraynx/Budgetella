@@ -59,7 +59,7 @@
     <div class="eyebrow">Yasal</div>
     <h1>Gizlilik Politikası</h1>
     <p class="lead">Verin, senin. Budgetella senin verilerini nasıl topluyor, kullanıyor ve koruyor — açık ve sade dille.</p>
-    <p style="margin-top: 18px; font-family: var(--font-mono); font-size: 13px; color: var(--muted);">Son güncelleme: 2 Mayıs 2026 · Yürürlük: 1 Mayıs 2026</p>
+    <p style="margin-top: 18px; font-family: var(--font-mono); font-size: 13px; color: var(--muted);">Son güncelleme: 6 Mayıs 2026 · Yürürlük: 1 Mayıs 2026</p>
   </div>
 </header>
 
@@ -124,7 +124,7 @@
     <p>Verini sınırlı durumlarda <strong>veri işleyen</strong> sıfatıyla aşağıdaki hizmet sağlayıcılarla paylaşıyoruz:</p>
     <ul>
       <li><strong>Hosting &amp; altyapı:</strong> Firebase (Google Cloud) — şifrelenmiş veri depolama ve kimlik doğrulama.</li>
-      <li><strong>AI sağlayıcı:</strong> Budgi'ye soru sorduğunda, soru ve ilgili (anonimleştirilmiş) finansal bağlam AI sağlayıcımıza şifreli kanal üzerinden iletilir. <strong>Modelin eğitiminde kullanılmaz.</strong> 30 günden fazla saklanmaz.</li>
+      <li><strong>Google Gemini API (AI sağlayıcı):</strong> Budgi AI asistanı veya fiş tarama özelliğini kullandığında, ilgili veri (anonimleştirilmiş harcama özeti veya fiş fotoğrafı) <strong>Google LLC</strong> tarafından işletilen Gemini API'ye şifreli kanal üzerinden iletilir. Bu veri modelin eğitiminde kullanılmaz ve 30 günden fazla saklanmaz. Veri aktarımı yalnızca <strong>açık onayın</strong> alınmasının ardından gerçekleşir. Google'ın gizlilik politikasına <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">buradan</a> ulaşabilirsin.</li>
       <li><strong>Hata izleme:</strong> Kişisel veri filtrelenmiş hata logları.</li>
     </ul>
     <p>Tüm sağlayıcılar KVKK uyumlu veri işleme sözleşmesi (DPA) ile bağlıdır.</p>
@@ -151,14 +151,20 @@
     </ul>
     <p>Talebine en geç <strong>30 gün</strong> içinde yanıt veririz, ücret almayız.</p>
 
-    <h2 id="ai">7. AI &amp; Budgi hakkında özel bilgilendirme</h2>
-    <p>Budgi'ye soru sorduğunda iki şey gerçekleşir:</p>
-    <ol>
-      <li>Sorduğun soru ve <strong>sadece o soru için gereken</strong> finansal bağlam (ör. son 30 günlük yeme-içme toplamı) çıkarılır.</li>
-      <li>Bu paket, AI sağlayıcımıza şifreli kanal üzerinden gönderilir; cevap geri döner, ekrana basılır.</li>
-    </ol>
-    <p>Sağlayıcımızla yaptığımız sözleşme: <strong>(1)</strong> verin model eğitiminde kullanılamaz, <strong>(2)</strong> 30 günden fazla saklanamaz, <strong>(3)</strong> başka bir müşteriye gösterilemez.</p>
-    <p>İstersen Ayarlar &gt; Gizlilik &gt; <em>"Budgi'yi devre dışı bırak"</em> ile bu özelliği tamamen kapatabilirsin.</p>
+    <h2 id="ai">7. AI özellikleri &amp; üçüncü taraf veri paylaşımı</h2>
+    <p>Budgetella'nın AI özellikleri <strong>Google Gemini API</strong> (Google LLC) kullanır. Aşağıdaki durumlarda verin Google'a iletilir:</p>
+    <ul>
+      <li><strong>Budgi AI asistanı:</strong> Mesaj gönderdiğinde, sorun ve ilgili anonimleştirilmiş harcama özeti (tutarlar, kategoriler — isim veya hesap bilgisi olmaksızın) Gemini API'ye gönderilir.</li>
+      <li><strong>Fiş tarama (OCR):</strong> Kamera veya galeriden seçilen fiş fotoğrafı, tutar ve mağaza bilgisinin çıkarılması için Gemini API'ye gönderilir.</li>
+    </ul>
+    <p><strong>Onay zorunluluğu:</strong> Bu özelliklerden herhangi birini ilk kez kullanmadan önce uygulama içi bir bildirim ile onayın istenir. Onay vermeden veri gönderilmez.</p>
+    <p><strong>Google ile sözleşme kapsamında:</strong></p>
+    <ul>
+      <li>Verin model eğitiminde kullanılamaz.</li>
+      <li>30 günden fazla saklanamaz.</li>
+      <li>Başka bir müşteriye gösterilemez.</li>
+    </ul>
+    <p>Google'ın gizlilik politikası: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a></p>
 
     <h2 id="cookies">8. Çerezler &amp; benzeri teknolojiler</h2>
     <p>budgetella.app sitesi yalnızca <strong>zorunlu</strong> çerezleri kullanır (oturum, dil tercihi). Reklam ya da analitik çerez kullanmıyoruz. Mobil uygulama hiçbir reklam SDK'sı içermez.</p>
