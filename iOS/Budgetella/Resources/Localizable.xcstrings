@@ -69,11 +69,34 @@
       }
     },
     "/%@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "/%@"
+          }
+        }
+      }
+    },
+    "/ay" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/month"
+          }
+        }
+      }
+    },
+    "/yıl" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/year"
           }
         }
       }
@@ -150,6 +173,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@%%"
+          }
+        }
+      }
+    },
+    "%33 tasarruf" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "33% savings"
           }
         }
       }
@@ -238,6 +272,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Try 7 days free"
+          }
+        }
+      }
+    },
+    "7 Gün Ücretsiz Dene" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try Free for 7 Days"
           }
         }
       }
@@ -779,6 +824,17 @@
         }
       }
     },
+    "ay" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "month"
+          }
+        }
+      }
+    },
     "Ayarlar" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -815,6 +871,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Monthly"
+          }
+        }
+      }
+    },
+    "Aylık Plan" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monthly Plan"
           }
         }
       }
@@ -975,6 +1042,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "One look unlocks your budget. The password era is over."
+          }
+        }
+      }
+    },
+    "Bir kez öde, sonsuza kadar kullan" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pay once, use forever"
           }
         }
       }
@@ -1223,6 +1301,17 @@
         }
       }
     },
+    "Budgi AI Asistan" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budgi AI Assistant"
+          }
+        }
+      }
+    },
     "Budgi'ye soru sor..." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1298,6 +1387,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bütçe & hedefler"
+          }
+        }
+      }
+    },
+    "Bütçe & Tahmin" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budget & Forecast"
           }
         }
       }
@@ -2172,6 +2272,17 @@
         }
       }
     },
+    "Excel, PDF ve JSON formatları" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excel, PDF and JSON formats"
+          }
+        }
+      }
+    },
     "Face ID / Touch ID" : {
       "localizations" : {
         "en" : {
@@ -2279,6 +2390,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Take a receipt photo and instantly create a transaction."
+          }
+        }
+      }
+    },
+    "Fiş OCR" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Receipt OCR"
           }
         }
       }
@@ -2396,6 +2518,17 @@
         }
       }
     },
+    "Geçmişe dair tüm veriler, sınırsız" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All historical data, unlimited"
+          }
+        }
+      }
+    },
     "Gelecek bildirimler burada görünecek." : {
       "localizations" : {
         "en" : {
@@ -2459,6 +2592,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "INCOME & EXPENSES"
+          }
+        }
+      }
+    },
+    "Gelişmiş Dışa Aktarma" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Advanced Export"
           }
         }
       }
@@ -2717,6 +2861,17 @@
         }
       }
     },
+    "Harcamalarını analiz et, tavsiyeleri al" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyze your spending, get recommendations"
+          }
+        }
+      }
+    },
     "HATA" : {
       "comment" : "A label displayed when the voice entry fails.",
       "isCommentAutoGenerated" : true,
@@ -2737,6 +2892,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Preparing..."
+          }
+        }
+      }
+    },
+    "Hemen Satın Al" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buy Now"
           }
         }
       }
@@ -3271,6 +3437,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "The camera reads the amount, store, and category for you."
+          }
+        }
+      }
+    },
+    "Kamerayla otomatik fiş kaydı" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic receipt scanning with camera"
           }
         }
       }
@@ -4482,6 +4659,17 @@
         }
       }
     },
+    "Sınırsız İşlem" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlimited Transactions"
+          }
+        }
+      }
+    },
     "Sonraki" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4742,6 +4930,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "DANGER ZONE"
+          }
+        }
+      }
+    },
+    "Tek seferlik" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One-time"
           }
         }
       }
@@ -5379,6 +5578,17 @@
         }
       }
     },
+    "yıl" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "year"
+          }
+        }
+      }
+    },
     "Yıllık" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5386,6 +5596,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Annual"
+          }
+        }
+      }
+    },
+    "Yıllık Plan" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annual Plan"
           }
         }
       }

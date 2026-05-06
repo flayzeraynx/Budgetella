@@ -125,7 +125,7 @@ struct PaywallView: View {
         .glassCard(cornerRadius: Spacing.radiusMedium)
     }
 
-    private func featureRow(icon: String, color: Color, title: String, subtitle: String) -> some View {
+    private func featureRow(icon: String, color: Color, title: LocalizedStringKey, subtitle: LocalizedStringKey) -> some View {
         HStack(spacing: Spacing.md) {
             ZStack {
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
@@ -155,20 +155,20 @@ struct PaywallView: View {
     private var planSelector: some View {
         VStack(spacing: Spacing.sm) {
             planCard(
-                plan: .yearly,
-                title: "Yıllık Plan",
-                price: yearlyDisplayPrice,
-                period: "yıl",
-                badge: "%33 tasarruf",
-                subPrice: monthlyEquivalentFromYearly
-            )
-            planCard(
                 plan: .monthly,
                 title: "Aylık Plan",
                 price: monthlyDisplayPrice,
                 period: "ay",
                 badge: nil,
                 subPrice: nil
+            )
+            planCard(
+                plan: .yearly,
+                title: "Yıllık Plan",
+                price: yearlyDisplayPrice,
+                period: "yıl",
+                badge: "%33 tasarruf",
+                subPrice: monthlyEquivalentFromYearly
             )
             planCard(
                 plan: .lifetime,
@@ -194,19 +194,20 @@ struct PaywallView: View {
     }
 
     private var monthlyEquivalentFromYearly: String {
+        let perMonth = String(localized: "/ay")
         guard let p = subscriptionService.yearlyProduct,
               let total = Double(p.displayPrice.filter({ $0.isNumber || $0 == "." })) else {
-            return "$3.33/ay"
+            return "$3.33\(perMonth)"
         }
-        return String(format: "$%.2f/ay", (total / 12 * 100).rounded() / 100)
+        return String(format: "$%.2f\(perMonth)", (total / 12 * 100).rounded() / 100)
     }
 
     private func planCard(
         plan: Plan,
-        title: String,
+        title: LocalizedStringKey,
         price: String,
         period: String?,
-        badge: String?,
+        badge: LocalizedStringKey?,
         subPrice: String?
     ) -> some View {
         let isSelected = selectedPlan == plan
@@ -244,7 +245,7 @@ struct PaywallView: View {
                         }
                     }
                     if let sub = subPrice {
-                        Text(sub)
+                        Text(LocalizedStringKey(sub))
                             .font(.brand(.caption))
                             .foregroundStyle(BrandColor.textTertiary)
                     }
@@ -257,7 +258,7 @@ struct PaywallView: View {
                         .font(.brand(.headline))
                         .foregroundStyle(isSelected ? BrandColor.primary : BrandColor.textPrimary)
                     if let period {
-                        Text("/\(period)")
+                        Text(LocalizedStringKey("/" + period))
                             .font(.brand(.caption))
                             .foregroundStyle(BrandColor.textTertiary)
                     }
@@ -323,7 +324,7 @@ struct PaywallView: View {
         }
     }
 
-    private var ctaButtonTitle: String {
+    private var ctaButtonTitle: LocalizedStringKey {
         switch selectedPlan {
         case .yearly, .monthly: return "7 Gün Ücretsiz Dene"
         case .lifetime:         return "Hemen Satın Al"
