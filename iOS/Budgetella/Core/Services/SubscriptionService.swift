@@ -6,7 +6,7 @@
 //
 //  Product ID'ler:
 //    com.ozankilic.budgetella.premium.monthly  — aylık $4.99 + 7 gün trial
-//    com.ozankilic.budgetella.premium.yearly   — yıllık $39.99 + 7 gün trial
+//    com.ozankilic.budgetella.premium.annually  — yıllık $39.99 + 7 gün trial
 //    com.ozankilic.budgetella.premium.lifetime — tek seferlik $99.99 (non-consumable)
 //
 
@@ -51,7 +51,7 @@ public final class SubscriptionService {
 
     public enum ProductID {
         static let monthly  = "com.ozankilic.budgetella.premium.monthly"
-        static let yearly   = "com.ozankilic.budgetella.premium.yearly"
+        static let yearly   = "com.ozankilic.budgetella.premium.annually"
         static let lifetime = "com.ozankilic.budgetella.premium.lifetime"
         static var all: [String] { [monthly, yearly, lifetime] }
     }

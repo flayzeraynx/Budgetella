@@ -16,9 +16,12 @@ struct BudgiView: View {
     @AppStorage("currentUserId") private var currentUserId  = ""
     @Environment(\.hideAmounts) private var hideAmounts
 
+    @AppStorage("aiDataConsentGiven") private var aiConsentGiven = false
     @State private var chatMessages:     [BudgiMessage] = []
     @State private var chatInput         = ""
     @State private var isSending         = false
+    @State private var showConsentAlert  = false
+    @State private var pendingSend       = false
     @State private var subscriptionService = SubscriptionService()
     @State private var scrollProxy:      ScrollViewProxy? = nil
     @FocusState private var isInputFocused: Bool
@@ -77,6 +80,18 @@ struct BudgiView: View {
             .toolbar(.hidden, for: .navigationBar)
         }
         .task { await subscriptionService.setup(userId: currentUserId) }
+        .alert("AI Veri Bildirimi", isPresented: $showConsentAlert) {
+            Button("Kabul Et") {
+                aiConsentGiven = true
+                if pendingSend {
+                    pendingSend = false
+                    Task { await sendMessage() }
+                }
+            }
+            Button("İptal", role: .cancel) { pendingSend = false }
+        } message: {
+            Text("Budgi'nin AI özellikleri, harcama özetlerini Google Gemini API'ye gönderir. Kişisel kimlik bilgileri dahil edilmez. Daha fazla bilgi için Gizlilik Politikamızı inceleyin.")
+        }
         .onReceive(NotificationCenter.default.publisher(for: .appLanguageDidChange)) { _ in
             // Clear cached chat so greetings and insights regenerate in the new language
             UserDefaults.standard.removeObject(forKey: chatHistoryKey)
@@ -275,7 +290,14 @@ struct BudgiView: View {
                     .lineLimit(4)
                     .submitLabel(.send)
                     .focused($isInputFocused)
-                    .onSubmit { Task { await sendMessage() } }
+                    .onSubmit {
+                        if aiConsentGiven {
+                            Task { await sendMessage() }
+                        } else {
+                            pendingSend = true
+                            showConsentAlert = true
+                        }
+                    }
                 Spacer()
                 Image(systemName: "mic")
                     .font(.system(size: 16))
@@ -291,7 +313,12 @@ struct BudgiView: View {
             )
 
             Button {
-                Task { await sendMessage() }
+                if aiConsentGiven {
+                    Task { await sendMessage() }
+                } else {
+                    pendingSend = true
+                    showConsentAlert = true
+                }
             } label: {
                 ZStack {
                     RoundedRectangle(cornerRadius: 14, style: .continuous)

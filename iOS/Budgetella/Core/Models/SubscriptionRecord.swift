@@ -64,7 +64,7 @@ public extension SubscriptionRecord {
     }
 
     var isYearly: Bool {
-        productId?.contains("yearly") == true
+        productId?.contains("annually") == true
     }
 
     /// Abonelik süresi dolmuş mu? Grace period dahil premium sayılır.

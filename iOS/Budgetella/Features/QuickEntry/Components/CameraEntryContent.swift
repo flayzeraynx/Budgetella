@@ -14,11 +14,14 @@ struct CameraEntryContent: View {
     @Bindable var vm: QuickEntryViewModel
     @Binding var mode: EntryMode
 
+    @AppStorage("aiDataConsentGiven") private var aiConsentGiven = false
     @State private var phase: Phase = .idle
     @State private var pickerItem: PhotosPickerItem?
     @State private var showPicker = false
     @State private var showCamera = false
     @State private var selectedImage: UIImage?
+    @State private var showConsentAlert = false
+    @State private var pendingAction: (() -> Void)?
 
     enum Phase {
         case idle
@@ -88,7 +91,26 @@ struct CameraEntryContent: View {
             .ignoresSafeArea()
         }
         .onAppear {
-            if case .idle = phase { showCamera = true }
+            if case .idle = phase {
+                if aiConsentGiven {
+                    showCamera = true
+                } else {
+                    pendingAction = { showCamera = true }
+                    showConsentAlert = true
+                }
+            }
+        }
+        .alert("AI Veri Bildirimi", isPresented: $showConsentAlert) {
+            Button("Kabul Et") {
+                aiConsentGiven = true
+                pendingAction?()
+                pendingAction = nil
+            }
+            Button("İptal", role: .cancel) {
+                pendingAction = nil
+            }
+        } message: {
+            Text("Fiş tarama özelliği, fotoğrafınızı Google Gemini API'ye gönderir. Kişisel kimlik bilgileri dahil edilmez.")
         }
     }
 
@@ -180,7 +202,12 @@ struct CameraEntryContent: View {
     private var photoSourceButtons: some View {
         HStack(spacing: Spacing.md) {
             Button {
-                showCamera = true
+                if aiConsentGiven {
+                    showCamera = true
+                } else {
+                    pendingAction = { showCamera = true }
+                    showConsentAlert = true
+                }
             } label: {
                 VStack(spacing: Spacing.sm) {
                     Image(systemName: "camera.fill")
@@ -201,7 +228,12 @@ struct CameraEntryContent: View {
             .buttonStyle(.plain)
 
             Button {
-                showPicker = true
+                if aiConsentGiven {
+                    showPicker = true
+                } else {
+                    pendingAction = { showPicker = true }
+                    showConsentAlert = true
+                }
             } label: {
                 VStack(spacing: Spacing.sm) {
                     Image(systemName: "photo.on.rectangle")

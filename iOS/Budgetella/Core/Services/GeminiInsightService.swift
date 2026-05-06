@@ -29,6 +29,10 @@ enum GeminiInsightService {
         transactions: [Transaction],
         categories:   [Category]
     ) async throws -> [AIInsight] {
+        guard UserDefaults.standard.bool(forKey: "aiDataConsentGiven") else {
+            throw InsightError.consentRequired
+        }
+
         // Return cached result if fetched today
         if let cached = loadCache() { return cached }
 
@@ -201,15 +205,16 @@ enum GeminiInsightService {
 // MARK: - Errors
 
 enum InsightError: LocalizedError {
-    case missingAPIKey, noData, invalidURL, serverError, parseError
+    case missingAPIKey, noData, invalidURL, serverError, parseError, consentRequired
 
     var errorDescription: String? {
         switch self {
-        case .missingAPIKey: return String(localized: "Gemini API anahtarı bulunamadı.")
-        case .noData:        return String(localized: "Yeterli işlem verisi yok.")
-        case .invalidURL:    return String(localized: "Servis URL'i geçersiz.")
-        case .serverError:   return String(localized: "Sunucu hatası, lütfen tekrar dene.")
-        case .parseError:    return String(localized: "AI yanıtı işlenemedi.")
+        case .missingAPIKey:    return String(localized: "Gemini API anahtarı bulunamadı.")
+        case .noData:           return String(localized: "Yeterli işlem verisi yok.")
+        case .invalidURL:       return String(localized: "Servis URL'i geçersiz.")
+        case .serverError:      return String(localized: "Sunucu hatası, lütfen tekrar dene.")
+        case .parseError:       return String(localized: "AI yanıtı işlenemedi.")
+        case .consentRequired:  return String(localized: "AI özelliklerini kullanmak için veri iznini kabul etmelisin.")
         }
     }
 }
