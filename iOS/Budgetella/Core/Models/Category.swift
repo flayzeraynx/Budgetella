@@ -68,9 +68,11 @@ public extension Category {
         guard let slug else { return name }
         let key = "category.slug.\(slug)"
         // Respect runtime language selection: read active lproj bundle from AppleLanguages.
-        let langCode = UserDefaults.standard.stringArray(forKey: "AppleLanguages")?.first
+        // Normalise regional variants ("en-US" → "en"). Default: device locale, then "en".
+        let raw = UserDefaults.standard.stringArray(forKey: "AppleLanguages")?.first
             ?? Locale.current.language.languageCode?.identifier
-            ?? "tr"
+            ?? "en"
+        let langCode = String(raw.prefix(2))
         if let path = Bundle.main.path(forResource: langCode, ofType: "lproj"),
            let bundle = Bundle(path: path) {
             return bundle.localizedString(forKey: key, value: name, table: nil)

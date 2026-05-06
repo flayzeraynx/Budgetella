@@ -13,8 +13,13 @@ import Foundation
 enum LocaleHelper {
 
     /// The active language code set by the user (e.g. "en", "tr").
+    /// Normalises regional variants ("en-US" → "en", "tr-TR" → "tr").
+    /// Falls back to the device locale, then "en" as the app default.
     static var currentLanguageCode: String {
-        UserDefaults.standard.stringArray(forKey: "AppleLanguages")?.first ?? "tr"
+        let raw = UserDefaults.standard.stringArray(forKey: "AppleLanguages")?.first
+                  ?? Locale.current.language.languageCode?.identifier
+                  ?? "en"
+        return String(raw.prefix(2))
     }
 
     /// Locale built from the user-selected language code.

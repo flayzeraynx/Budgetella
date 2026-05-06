@@ -58,8 +58,10 @@ struct BudgetellaApp: App {
 
     @State private var appReloadToken = UUID()
     @State private var appLocale: Locale = {
-        let code = UserDefaults.standard.stringArray(forKey: "AppleLanguages")?.first ?? "tr"
-        return Locale(identifier: code)
+        let raw = UserDefaults.standard.stringArray(forKey: "AppleLanguages")?.first
+                  ?? Locale.current.language.languageCode?.identifier
+                  ?? "en"
+        return Locale(identifier: String(raw.prefix(2)))
     }()
 
     var body: some Scene {
@@ -68,8 +70,10 @@ struct BudgetellaApp: App {
                 .id(appReloadToken)
                 .environment(\.locale, appLocale)
                 .onReceive(NotificationCenter.default.publisher(for: .appLanguageDidChange)) { _ in
-                    let code = UserDefaults.standard.stringArray(forKey: "AppleLanguages")?.first ?? "tr"
-                    appLocale = Locale(identifier: code)
+                    let raw = UserDefaults.standard.stringArray(forKey: "AppleLanguages")?.first
+                              ?? Locale.current.language.languageCode?.identifier
+                              ?? "en"
+                    appLocale = Locale(identifier: String(raw.prefix(2)))
                     appReloadToken = UUID()
                 }
         }

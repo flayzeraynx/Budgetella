@@ -29,6 +29,9 @@ extension Notification.Name {
     /// Payload: userInfo["title"], ["body"], ["kind"], ["deepLink"]
     /// ContentView dinleyerek NotificationRecord ekler.
     static let appPushReceived = Notification.Name("appPushReceived")
+
+    /// Bildirim kutusu aç — DashboardView dinler, showNotifications = true yapar.
+    static let appShowNotifications = Notification.Name("appShowNotifications")
 }
 
 // MARK: - NotificationService
@@ -37,6 +40,14 @@ extension Notification.Name {
 final class NotificationService: NSObject {
 
     static let shared = NotificationService()
+
+    /// Stores the deep-link URL from a push-notification tap so that
+    /// `MainTabView` can handle it on cold launch, before any views are mounted.
+    /// Cleared immediately once consumed.
+    var pendingDeepLinkURL: URL?
+
+    /// Fallback deep-link when a push notification carries no `deepLink` key.
+    static let notificationsInboxURL = URL(string: "budgetella://notifications")!
 
     private override init() { super.init() }
 
@@ -170,17 +181,28 @@ extension NotificationService: UNUserNotificationCenterDelegate {
                        ?? NotificationKind.systemMessage.rawValue
         let deepLink = response.notification.request.content.userInfo["deepLink"] as? String
 
+        // handler() MUST be called synchronously, before the Task runs.
+        // Moving it inside the Task would violate Apple's delegate contract and
+        // prevent the system from cleaning up the notification. This is intentional.
+        handler()
+
         Task { @MainActor in
-            if let dl = deepLink, let url = URL(string: dl) {
-                NotificationCenter.default.post(
-                    name: .appDeepLinkReceived,
-                    object: nil,
-                    userInfo: ["url": url]
-                )
-            }
+            // Deep link varsa oraya git; yoksa bildirim kutusunu aç
+            let destination: URL = {
+                if let dl = deepLink, let url = URL(string: dl) { return url }
+                return NotificationService.notificationsInboxURL
+            }()
+            // Store for cold-launch: if MainTabView isn't mounted yet the
+            // NotificationCenter post below fires into the void. The .task
+            // modifier in MainTabView consumes pendingDeepLinkURL on first appear.
+            self.pendingDeepLinkURL = destination
+            NotificationCenter.default.post(
+                name: .appDeepLinkReceived,
+                object: nil,
+                userInfo: ["url": destination]
+            )
             self.dispatchPushReceived(title: title, body: body, kind: kind, deepLink: deepLink)
         }
-        handler()
     }
 }
 

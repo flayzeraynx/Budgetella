@@ -19,8 +19,15 @@ struct DashboardView: View {
     @AppStorage("currentUserId") private var currentUserId = ""
     @State private var vm = DashboardViewModel()
     @State private var showSettings = false
+    @State private var showNotifications = false
     @Environment(\.hideAmounts) private var hideAmounts
     @Environment(FirestoreService.self) private var firestoreService
+
+    // Okunmamış bildirim sayısı — bell badge için
+    @Query private var allNotifications: [NotificationRecord]
+    private var unreadCount: Int {
+        allNotifications.filter { !$0.isRead && ($0.userId == currentUserId || $0.userId == "local") }.count
+    }
 
     private var myTransactions: [Transaction] {
         transactions.filter { $0.userId == currentUserId }
@@ -88,6 +95,12 @@ struct DashboardView: View {
         .sheet(isPresented: $showSettings) {
             SettingsView()
         }
+        .sheet(isPresented: $showNotifications) {
+            NotificationsInboxView()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .appShowNotifications)) { _ in
+            showNotifications = true
+        }
     }
 
     // MARK: - Hero content
@@ -107,11 +120,48 @@ struct DashboardView: View {
                 }
             }
             Spacer()
-            avatarBadge
+            HStack(spacing: Spacing.sm) {
+                bellButton
+                avatarBadge
+            }
         }
         .padding(.horizontal, 24)
         .padding(.top, 16)
         .padding(.bottom, Spacing.xl)
+    }
+
+    // MARK: - Bell button
+
+    private var bellButton: some View {
+        Button { showNotifications = true } label: {
+            ZStack(alignment: .topTrailing) {
+                Circle()
+                    .fill(BrandColor.surface.opacity(0.7))
+                    .frame(width: 40, height: 40)
+                    .overlay {
+                        Circle().strokeBorder(BrandColor.borderSubtle, lineWidth: 1)
+                    }
+
+                Image(systemName: unreadCount > 0 ? "bell.fill" : "bell")
+                    .font(.system(size: 17, weight: .medium))
+                    .foregroundStyle(unreadCount > 0 ? BrandColor.primary : BrandColor.textSecondary)
+                    .frame(width: 40, height: 40)
+
+                // Badge
+                if unreadCount > 0 {
+                    ZStack {
+                        Circle()
+                            .fill(BrandColor.expense)
+                            .frame(width: 18, height: 18)
+                        Text(unreadCount > 9 ? "9+" : "\(unreadCount)")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(.white)
+                    }
+                    .offset(x: 5, y: -5)
+                }
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Avatar

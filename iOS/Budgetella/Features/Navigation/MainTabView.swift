@@ -71,6 +71,14 @@ struct MainTabView: View {
                 userId: currentUserId,
                 modelContext: modelContext
             )
+            // Cold-launch deep-link: if a push tap fired before MainTabView was
+            // mounted the NotificationCenter post fired into the void. Consume the
+            // stored URL here, AFTER sync so the UI is ready. The .onReceive below
+            // clears this value for warm-launch taps, so no double-fire risk.
+            if let url = NotificationService.shared.pendingDeepLinkURL {
+                NotificationService.shared.pendingDeepLinkURL = nil
+                handleDeepLink(url)
+            }
         }
         .onAppear {
             // Schedule weekly digest local notification
@@ -82,6 +90,8 @@ struct MainTabView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .appDeepLinkReceived)) { note in
             if let url = note.userInfo?["url"] as? URL {
+                // Warm-launch: clear cold-launch store so .task(id:) doesn't re-fire.
+                NotificationService.shared.pendingDeepLinkURL = nil
                 handleDeepLink(url)
             }
         }
@@ -99,6 +109,13 @@ struct MainTabView: View {
             withAnimation { selectedTab = .stats }
         case "ai":
             withAnimation { selectedTab = .ai }
+        case "notifications":
+            // Tab switch is ~0.3 s spring; delay lets DashboardView settle before
+            // it receives .appShowNotifications and presents the inbox sheet.
+            withAnimation { selectedTab = .home }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                NotificationCenter.default.post(name: .appShowNotifications, object: nil)
+            }
         default:
             withAnimation { selectedTab = .home }
         }
