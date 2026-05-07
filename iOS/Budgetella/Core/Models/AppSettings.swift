@@ -76,7 +76,7 @@ public final class AppSettings {
         userId: String,
         currency: AppCurrency = .tryLira,
         language: AppLanguage = .english,
-        theme: AppTheme = .system,
+        theme: AppTheme = .dark,
         hideAmounts: Bool = false,
         biometricLockEnabled: Bool = false,
         notificationsEnabled: Bool = true
