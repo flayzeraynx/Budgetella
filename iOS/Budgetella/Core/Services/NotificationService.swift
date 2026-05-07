@@ -32,6 +32,9 @@ extension Notification.Name {
 
     /// Bildirim kutusu aç — DashboardView dinler, showNotifications = true yapar.
     static let appShowNotifications = Notification.Name("appShowNotifications")
+
+    /// AIInsightCard'a tap — MainTabView'a AI tabına geçmesini söyler.
+    static let navigateToBudgiTab = Notification.Name("navigateToBudgiTab")
 }
 
 // MARK: - NotificationService

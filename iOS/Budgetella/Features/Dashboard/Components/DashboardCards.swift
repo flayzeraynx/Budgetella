@@ -694,5 +694,8 @@ struct AIInsightCard: View {
             let count = allInsights.count
             if count > 1 { pickedIndex = Int.random(in: 0..<count) }
         }
+        .onTapGesture {
+            NotificationCenter.default.post(name: .navigateToBudgiTab, object: nil)
+        }
     }
 }

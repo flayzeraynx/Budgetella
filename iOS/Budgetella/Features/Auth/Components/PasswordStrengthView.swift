@@ -11,7 +11,7 @@ struct PasswordStrength {
     let score: Int          // 0-4
     let metCriteria: Int    // kaç kriter sağlandı
 
-    var label: String {
+    var label: LocalizedStringKey {
         switch score {
         case 0: return "Çok zayıf"
         case 1: return "Zayıf"

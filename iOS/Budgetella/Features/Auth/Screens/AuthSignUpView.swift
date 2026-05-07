@@ -163,17 +163,17 @@ struct AuthSignUpView: View {
     }
 
     private var tosAttributedString: AttributedString {
-        var terms = AttributedString("Kullanım şartları")
+        var terms = AttributedString(String(localized: "Kullanım şartları"))
         terms.link = URL(string: "https://budgetella.app/terms")
         terms.inlinePresentationIntent = .stronglyEmphasized
 
-        let mid = AttributedString(" ve ")
+        let mid = AttributedString(String(localized: " ve "))
 
-        var privacy = AttributedString("gizlilik politikası")
+        var privacy = AttributedString(String(localized: "gizlilik politikası"))
         privacy.link = URL(string: "https://budgetella.app/privacy")
         privacy.inlinePresentationIntent = .stronglyEmphasized
 
-        let suffix = AttributedString("'nı okudum, kabul ediyorum.")
+        let suffix = AttributedString(String(localized: "'nı okudum, kabul ediyorum."))
 
         return terms + mid + privacy + suffix
     }

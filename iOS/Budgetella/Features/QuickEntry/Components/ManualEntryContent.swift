@@ -19,6 +19,8 @@ struct ManualEntryContent: View {
     private var currencySymbol: String { settingsArr.first?.currency.symbol ?? "₺" }
 
     @FocusState private var noteFieldFocused: Bool
+    @FocusState private var amountFocused: Bool
+    @State private var amountText: String = ""
 
     var body: some View {
         VStack(spacing: 0) {
@@ -28,44 +30,69 @@ struct ManualEntryContent: View {
                 .padding(.horizontal, 20)
                 .padding(.top, Spacing.md)
 
-            if !isTyping {
-                // 2 ── Category chips
-                categoryChipsRow
-                    .padding(.top, Spacing.sm)
+            // 2 ── Category chips
+            categoryChipsRow
+                .padding(.top, Spacing.sm)
 
-                if !vm.aiSuggestions.isEmpty {
-                    aiSuggestionRow
-                        .padding(.horizontal, 20)
-                        .padding(.top, Spacing.xs)
-                }
-
-                // 3 ── Amount display
-                amountDisplay
+            if !vm.aiSuggestions.isEmpty {
+                aiSuggestionRow
                     .padding(.horizontal, 20)
-                    .padding(.top, Spacing.md)
-
-                // Flexible space — expands the amount area and anchors description+numpad to bottom
-                Spacer(minLength: Spacing.lg)
+                    .padding(.top, Spacing.xs)
             }
+
+            // 3 ── Amount display
+            amountDisplay
+                .padding(.horizontal, 20)
+                .padding(.top, Spacing.md)
+
+            // Flexible space — expands the amount area and anchors description+numpad to bottom
+            Spacer(minLength: Spacing.lg)
 
             // 4 ── Description field
             descriptionField
                 .padding(.horizontal, 20)
                 .padding(.top, Spacing.sm)
 
-            if !isTyping {
-                // 5 ── Numpad — small gap above, pushed to bottom
-                NumpadGrid(
-                    onDigit:   { vm.appendDigit($0) },
-                    onDecimal: { vm.appendDecimal() },
-                    onDelete:  { vm.backspace() }
-                )
-                .padding(.horizontal, 12)
-                .padding(.top, Spacing.sm)
-                .padding(.bottom, Spacing.xs)
-            }
+            // 5 ── Recurring toggle + interval chips
+            recurringRow
+                .padding(.horizontal, 20)
+                .padding(.top, Spacing.xs)
+                .padding(.bottom, Spacing.lg)
         }
         .animation(.spring(response: 0.3), value: isTyping)
+        .task {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            amountFocused = true
+        }
+        .onAppear {
+            let decimal = Locale.current.decimalSeparator ?? "."
+            amountText = vm.rawInput.replacingOccurrences(of: ",", with: decimal)
+        }
+        .onChange(of: amountText) { _, newVal in
+            let decimal = Locale.current.decimalSeparator ?? "."
+            let normalized = newVal
+                .replacingOccurrences(of: decimal, with: ",")
+                .replacingOccurrences(of: ".", with: ",")
+            let filtered = String(normalized.filter { $0.isNumber || $0 == "," })
+            let parts = filtered.components(separatedBy: ",")
+            var result: String
+            if parts.count >= 2 {
+                result = parts[0] + "," + String(parts[1].prefix(2))
+            } else {
+                result = filtered
+            }
+            guard result.filter({ $0.isNumber }).count <= 10 else {
+                let decimal2 = Locale.current.decimalSeparator ?? "."
+                amountText = vm.rawInput.replacingOccurrences(of: ",", with: decimal2)
+                return
+            }
+            if vm.rawInput != result { vm.rawInput = result }
+        }
+        .onChange(of: vm.rawInput) { _, newVal in
+            let decimal = Locale.current.decimalSeparator ?? "."
+            let synced = newVal.replacingOccurrences(of: ",", with: decimal)
+            if amountText != synced { amountText = synced }
+        }
     }
 
     // MARK: - Mode selector pills
@@ -139,27 +166,40 @@ struct ManualEntryContent: View {
     // MARK: - Amount display
 
     private var amountDisplay: some View {
-        VStack(spacing: 4) {
-            Text("TUTAR")
-                .font(.brand(.caption))
-                .foregroundStyle(BrandColor.textTertiary)
-                .tracking(1.2)
+        ZStack {
+            VStack(spacing: 4) {
+                Text("TUTAR")
+                    .font(.brand(.caption))
+                    .foregroundStyle(BrandColor.textTertiary)
+                    .tracking(1.2)
 
-            HStack(alignment: .firstTextBaseline, spacing: 2) {
-                Text(currencySymbol)
-                    .font(.brand(.title))
-                    .foregroundStyle(amountColor)
-                Text(vm.wholePart)
-                    .font(.brand(.displayHero))
-                    .foregroundStyle(amountColor)
-                    .contentTransition(.numericText())
-                    .animation(.spring(response: 0.2), value: vm.wholePart)
-                if let frac = vm.fracPart {
-                    Text(",\(frac)_".prefix(frac.isEmpty ? 2 : frac.count + 1))
+                HStack(alignment: .firstTextBaseline, spacing: 2) {
+                    Text(currencySymbol)
                         .font(.brand(.title))
-                        .foregroundStyle(amountColor.opacity(0.7))
+                        .foregroundStyle(amountColor)
+                    Text(vm.wholePart)
+                        .font(.brand(.displayHero))
+                        .foregroundStyle(amountColor)
+                        .contentTransition(.numericText())
+                        .animation(.spring(response: 0.2), value: vm.wholePart)
+                    if let frac = vm.fracPart {
+                        Text(",\(frac)_".prefix(frac.isEmpty ? 2 : frac.count + 1))
+                            .font(.brand(.title))
+                            .foregroundStyle(amountColor.opacity(0.7))
+                    }
                 }
             }
+            // Hidden text field captures numeric keyboard input
+            TextField("", text: $amountText)
+                .keyboardType(.decimalPad)
+                .focused($amountFocused)
+                .opacity(0.001)
+                .allowsHitTesting(false)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            noteFieldFocused = false
+            amountFocused = true
         }
     }
 
@@ -170,36 +210,34 @@ struct ManualEntryContent: View {
     // MARK: - Description field
 
     private var descriptionField: some View {
-        let radius: CGFloat = isTyping ? 20 : Spacing.radiusSmall
+        let radius: CGFloat = Spacing.radiusSmall
         return HStack(alignment: .top, spacing: Spacing.sm) {
             Image(systemName: "text.alignleft")
                 .font(.system(size: 14))
                 .foregroundStyle(BrandColor.textTertiary)
                 .padding(.top, 3)
 
-            TextField("Açıklama ekle…", text: $vm.note, axis: .vertical)
-                .font(.brand(.body))
-                .foregroundStyle(BrandColor.textPrimary)
-                .tint(BrandColor.primary)
-                .lineLimit(isTyping ? 10 : 2)
-                .submitLabel(.done)
-                .focused($noteFieldFocused)
-                .onSubmit { noteFieldFocused = false }
-
-            if isTyping {
-                Button {
-                    noteFieldFocused = false
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 22))
-                        .foregroundStyle(BrandColor.textTertiary)
+            ZStack(alignment: .topLeading) {
+                if vm.note.isEmpty {
+                    Text("Açıklama ekle…")
+                        .font(.brand(.body))
+                        .foregroundStyle(BrandColor.textSecondary)
+                        .allowsHitTesting(false)
                 }
-                .buttonStyle(.plain)
+                TextField("", text: $vm.note, axis: .vertical)
+                    .font(.brand(.body))
+                    .foregroundStyle(BrandColor.textPrimary)
+                    .tint(BrandColor.primary)
+                    .lineLimit(2)
+                    .submitLabel(.done)
+                    .focused($noteFieldFocused)
+                    .onSubmit { noteFieldFocused = false }
             }
+
         }
         .padding(.horizontal, Spacing.md)
         .padding(.vertical, Spacing.md)
-        .frame(minHeight: 64, maxHeight: isTyping ? 160 : 64, alignment: .topLeading)
+        .frame(minHeight: 64, maxHeight: 64, alignment: .topLeading)
         .background(BrandColor.surface.opacity(0.4))
         .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
         .overlay(
@@ -261,6 +299,68 @@ struct ManualEntryContent: View {
         .buttonStyle(.plain)
     }
 
+    // MARK: - Recurring row
+
+    private var recurringRow: some View {
+        VStack(spacing: Spacing.xs) {
+            HStack {
+                Image(systemName: "repeat.circle")
+                    .font(.system(size: 14))
+                    .foregroundStyle(BrandColor.textTertiary)
+                Text("Tekrarlayan işlem")
+                    .font(.brand(.body))
+                    .foregroundStyle(BrandColor.textSecondary)
+                Spacer()
+                Toggle("", isOn: $vm.isRecurring)
+                    .labelsHidden()
+                    .tint(BrandColor.primary)
+            }
+            .padding(.horizontal, Spacing.md)
+            .padding(.vertical, Spacing.md)
+            .background(BrandColor.surface.opacity(0.4))
+            .clipShape(RoundedRectangle(cornerRadius: Spacing.radiusSmall, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: Spacing.radiusSmall, style: .continuous)
+                    .strokeBorder(
+                        vm.isRecurring ? BrandColor.primary.opacity(0.4) : BrandColor.borderSubtle,
+                        lineWidth: 1
+                    )
+            )
+
+            if vm.isRecurring {
+                HStack(spacing: Spacing.xs) {
+                    ForEach(RecurringInterval.allCases, id: \.self) { interval in
+                        intervalChip(interval)
+                    }
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+        .animation(.spring(response: 0.3), value: vm.isRecurring)
+    }
+
+    private func intervalChip(_ interval: RecurringInterval) -> some View {
+        let selected = vm.recurringInterval == interval
+        return Button {
+            withAnimation(.spring(response: 0.25)) {
+                vm.recurringInterval = interval
+            }
+        } label: {
+            Text(interval.localizedLabel)
+                .font(.brand(.subheadline))
+                .foregroundStyle(selected ? .white : BrandColor.textTertiary)
+                .frame(maxWidth: .infinity)
+                .frame(height: 40)
+                .background(selected ? BrandColor.primary : BrandColor.surface.opacity(0.5))
+                .clipShape(Capsule())
+                .overlay(
+                    Capsule()
+                        .strokeBorder(selected ? Color.clear : BrandColor.borderSubtle, lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
+    }
+
     // MARK: - AI suggestion chips
 
     private var aiSuggestionRow: some View {
@@ -306,62 +406,3 @@ struct ManualEntryContent: View {
     }
 }
 
-// MARK: - Numpad Grid
-
-struct NumpadGrid: View {
-
-    let onDigit:   (String) -> Void
-    let onDecimal: () -> Void
-    let onDelete:  () -> Void
-
-    private let layout: [[String]] = [
-        ["1","2","3"],
-        ["4","5","6"],
-        ["7","8","9"],
-        [",","0","⌫"]
-    ]
-
-    var body: some View {
-        VStack(spacing: Spacing.xs) {
-            ForEach(layout, id: \.self) { row in
-                HStack(spacing: Spacing.xs) {
-                    ForEach(row, id: \.self) { key in
-                        numpadKey(key)
-                    }
-                }
-            }
-        }
-    }
-
-    private func numpadKey(_ key: String) -> some View {
-        Button {
-            switch key {
-            case "⌫": onDelete()
-            case ",": onDecimal()
-            default:  onDigit(key)
-            }
-        } label: {
-            ZStack {
-                RoundedRectangle(cornerRadius: Spacing.radiusSmall, style: .continuous)
-                    .fill(key == "⌫" ? BrandColor.expense.opacity(0.12) : BrandColor.surface.opacity(0.4))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Spacing.radiusSmall, style: .continuous)
-                            .strokeBorder(BrandColor.borderSubtle, lineWidth: 1)
-                    )
-
-                if key == "⌫" {
-                    Image(systemName: "delete.left")
-                        .font(.system(size: 18, weight: .regular))
-                        .foregroundStyle(BrandColor.expense)
-                } else {
-                    Text(key)
-                        .font(.system(size: 24, weight: .medium))
-                        .foregroundStyle(BrandColor.textPrimary)
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 64)
-        }
-        .buttonStyle(.plain)
-    }
-}

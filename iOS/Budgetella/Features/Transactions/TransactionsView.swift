@@ -136,15 +136,27 @@ struct TransactionsView: View {
                  (id: 2, label: LocalizedStringKey("Gider"), type: Optional<TransactionType>.some(.expense))],
                 id: \.id
             ) { item in
+                let isSelected = vm.typeFilter == item.type
+                let activeColor: Color = {
+                    switch item.type {
+                    case .none:               return BrandColor.primary
+                    case .some(.income):      return BrandColor.income
+                    case .some(.expense):     return BrandColor.expense
+                    }
+                }()
+                let activeTextColor: Color = item.type == .some(.income)
+                    ? Color.black.opacity(0.75)
+                    : .white
+
                 Button {
                     withAnimation(.spring(response: 0.28)) { vm.typeFilter = item.type }
                 } label: {
                     Text(item.label)
                         .font(.brand(.footnote))
-                        .foregroundStyle(vm.typeFilter == item.type ? .white : BrandColor.textSecondary)
+                        .foregroundStyle(isSelected ? activeTextColor : BrandColor.textSecondary)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 5)
-                        .background(vm.typeFilter == item.type ? BrandColor.primary : Color.clear)
+                        .background(isSelected ? activeColor : Color.clear)
                         .clipShape(Capsule())
                 }
                 .buttonStyle(.plain)

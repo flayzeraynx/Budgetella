@@ -15,7 +15,7 @@ struct StatsView: View {
     @Query(sort: \Category.sortOrder) private var categories: [Category]
     @State private var vm = StatsViewModel()
     @State private var didAutoSelect = false
-    @State private var showingIncome = false
+    @State private var showingIncome = true
     @Environment(\.hideAmounts) private var hideAmounts
 
     var body: some View {
@@ -112,7 +112,11 @@ struct StatsView: View {
                 } label: {
                     Text(label)
                         .font(.brand(.footnote))
-                        .foregroundStyle(showingIncome == isIncome ? .white : BrandColor.textTertiary)
+                        .foregroundStyle(
+                            showingIncome == isIncome
+                                ? (isIncome ? Color.black.opacity(0.75) : .white)
+                                : BrandColor.textTertiary
+                        )
                         .padding(.horizontal, 16)
                         .padding(.vertical, 6)
                         .background(showingIncome == isIncome ? color : Color.clear)
@@ -201,7 +205,9 @@ struct StatsView: View {
             Text(stat.category.localizedDisplayName)
                 .font(.brand(.subheadline))
                 .foregroundStyle(BrandColor.textPrimary)
-                .frame(maxWidth: 100, alignment: .leading)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .frame(maxWidth: 110, alignment: .leading)
 
             GeometryReader { geo in
                 ZStack(alignment: .leading) {

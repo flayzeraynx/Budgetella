@@ -144,19 +144,19 @@ struct AuthWelcomeView: View {
     // MARK: - ToS attributed string
 
     private var tosAttributedString: AttributedString {
-        let prefix = AttributedString("Devam ederek ")
+        let prefix = AttributedString(String(localized: "Devam ederek "))
 
-        var terms = AttributedString("Şartlar")
+        var terms = AttributedString(String(localized: "Şartlar"))
         terms.link = URL(string: "https://budgetella.app/terms")
         terms.inlinePresentationIntent = .stronglyEmphasized
 
-        let mid = AttributedString(" ve ")
+        let mid = AttributedString(String(localized: " ve "))
 
-        var privacy = AttributedString("Gizlilik")
+        var privacy = AttributedString(String(localized: "Gizlilik"))
         privacy.link = URL(string: "https://budgetella.app/privacy")
         privacy.inlinePresentationIntent = .stronglyEmphasized
 
-        let suffix = AttributedString("'i kabul edersin.")
+        let suffix = AttributedString(String(localized: "'i kabul edersin."))
 
         return prefix + terms + mid + privacy + suffix
     }

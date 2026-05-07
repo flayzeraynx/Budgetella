@@ -9,6 +9,7 @@
 
 import Foundation
 import SwiftData
+import SwiftUI
 
 public enum TransactionType: String, Codable, CaseIterable, Sendable {
     case income
@@ -26,6 +27,15 @@ public enum RecurringInterval: String, Codable, CaseIterable, Sendable {
     case weekly
     case monthly
     case yearly
+
+    var localizedLabel: LocalizedStringKey {
+        switch self {
+        case .daily:   return "Günlük"
+        case .weekly:  return "Haftalık"
+        case .monthly: return "Aylık"
+        case .yearly:  return "Yıllık"
+        }
+    }
 }
 
 @Model

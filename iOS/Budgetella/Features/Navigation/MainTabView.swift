@@ -95,6 +95,34 @@ struct MainTabView: View {
                 handleDeepLink(url)
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .navigateToBudgiTab)) { _ in
+            withAnimation(.spring(response: 0.3)) { selectedTab = .ai }
+        }
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 50, coordinateSpace: .local)
+                .onEnded { value in
+                    let dx = value.translation.width
+                    let dy = value.translation.height
+                    guard abs(dx) > abs(dy) * 2.5 else { return }
+                    // List tab'de nav swipe ile swipe-to-delete çakışmasını önle:
+                    // Delete yavaş/kasıtlı swipe, nav flick — velocity ile ayırt et.
+                    if selectedTab == .list {
+                        guard abs(value.velocity.width) > 600 else { return }
+                    }
+                    let tabs = AppTab.allCases
+                    if dx < 0 {
+                        if let idx = tabs.firstIndex(of: selectedTab), idx < tabs.count - 1 {
+                            withAnimation(.spring(response: 0.3)) { selectedTab = tabs[idx + 1] }
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        }
+                    } else {
+                        if let idx = tabs.firstIndex(of: selectedTab), idx > 0 {
+                            withAnimation(.spring(response: 0.3)) { selectedTab = tabs[idx - 1] }
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        }
+                    }
+                }
+        )
     }
 
     private func handleDeepLink(_ url: URL) {

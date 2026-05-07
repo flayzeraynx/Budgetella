@@ -167,7 +167,7 @@ struct PaywallView: View {
                 title: "Yıllık Plan",
                 price: yearlyDisplayPrice,
                 period: "yıl",
-                badge: "%33 tasarruf",
+                badge: "33% Off",
                 subPrice: monthlyEquivalentFromYearly
             )
             planCard(
@@ -195,11 +195,11 @@ struct PaywallView: View {
 
     private var monthlyEquivalentFromYearly: String {
         let perMonth = String(localized: "/ay")
-        guard let p = subscriptionService.yearlyProduct,
-              let total = Double(p.displayPrice.filter({ $0.isNumber || $0 == "." })) else {
+        guard let p = subscriptionService.yearlyProduct else {
             return "$3.33\(perMonth)"
         }
-        return String(format: "$%.2f\(perMonth)", (total / 12 * 100).rounded() / 100)
+        let monthly = p.price / 12
+        return "\(monthly.formatted(p.priceFormatStyle))\(perMonth)"
     }
 
     private func planCard(

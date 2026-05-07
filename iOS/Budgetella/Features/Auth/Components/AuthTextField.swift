@@ -10,7 +10,7 @@ import SwiftUI
 struct AuthTextField: View {
 
     let icon: String
-    let placeholder: String
+    let placeholder: LocalizedStringKey
     @Binding var text: String
     var isSecure: Bool = false
     var keyboardType: UIKeyboardType = .default

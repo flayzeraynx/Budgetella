@@ -17,6 +17,9 @@ struct EditTransactionSheet: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss)      private var dismiss
 
+    @Query private var settingsArr: [AppSettings]
+    private var currencySymbol: String { settingsArr.first?.currency.symbol ?? "₺" }
+
     @State private var showDeleteConfirm = false
     @State private var showCategoryPicker = false
 
@@ -26,10 +29,16 @@ struct EditTransactionSheet: View {
     @State private var type:             TransactionType  = .expense
     @State private var selectedCategory: Category?        = nil
     @State private var date:             Date             = .now
-    @State private var isRecurring:      Bool             = false
-    @State private var isTyping:         Bool             = false
+    @State private var isRecurring:        Bool               = false
+    @State private var recurringInterval:  RecurringInterval  = .monthly
+    @State private var recurringEndDate:   Date?              = nil
+    @State private var isTyping:           Bool               = false
+    @State private var showRecurringScope: Bool               = false
+    @State private var pendingAmount:      Decimal?           = nil
 
     @FocusState private var noteFocused: Bool
+    @FocusState private var amountFocused: Bool
+    @State private var amountText: String = ""
 
     // MARK: - Computed amount helpers
 
@@ -47,22 +56,6 @@ struct EditTransactionSheet: View {
         return rawInput.components(separatedBy: ",").last ?? ""
     }
     private var amountColor: Color { type == .expense ? BrandColor.expense : BrandColor.income }
-
-    private func appendDigit(_ d: String) {
-        let digits = rawInput.filter { $0.isNumber }
-        guard digits.count < 10 else { return }
-        if rawInput == "0" { rawInput = d; return }
-        rawInput += d
-    }
-    private func appendDecimal() {
-        if rawInput.isEmpty { rawInput = "0,"; return }
-        if rawInput.contains(",") { return }
-        rawInput += ","
-    }
-    private func backspace() {
-        guard !rawInput.isEmpty else { return }
-        rawInput.removeLast()
-    }
 
     // MARK: - Body
 
@@ -101,22 +94,18 @@ struct EditTransactionSheet: View {
                                 dateRow
                                     .padding(.horizontal, 20)
                                     .padding(.top, Spacing.xs)
+
+                                // 6 — Recurring toggle + interval chips
+                                recurringRow
+                                    .padding(.horizontal, 20)
+                                    .padding(.top, Spacing.xs)
                             }
                         }
                         .padding(.bottom, Spacing.sm)
                     }
 
                     if !isTyping {
-                        // 6 — Numpad
-                        NumpadGrid(
-                            onDigit:   { appendDigit($0) },
-                            onDecimal: { appendDecimal() },
-                            onDelete:  { backspace() }
-                        )
-                        .padding(.horizontal, 12)
-                        .padding(.top, Spacing.xs)
-
-                        // 7 — Save button
+                        // 6 — Save button
                         Button { saveChanges() } label: {
                             Text("Kaydet")
                                 .font(.brand(.headline))
@@ -157,6 +146,42 @@ struct EditTransactionSheet: View {
                 }
             }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Bitti") {
+                        amountFocused = false
+                        noteFocused = false
+                    }
+                    .font(.brand(.subheadline))
+                    .foregroundStyle(BrandColor.primary)
+                }
+            }
+            .onChange(of: amountText) { _, newVal in
+                let decimal = Locale.current.decimalSeparator ?? "."
+                let normalized = newVal
+                    .replacingOccurrences(of: decimal, with: ",")
+                    .replacingOccurrences(of: ".", with: ",")
+                let filtered = String(normalized.filter { $0.isNumber || $0 == "," })
+                let parts = filtered.components(separatedBy: ",")
+                var result: String
+                if parts.count >= 2 {
+                    result = parts[0] + "," + String(parts[1].prefix(2))
+                } else {
+                    result = filtered
+                }
+                guard result.filter({ $0.isNumber }).count <= 10 else {
+                    let decimal2 = Locale.current.decimalSeparator ?? "."
+                    amountText = rawInput.replacingOccurrences(of: ",", with: decimal2)
+                    return
+                }
+                if rawInput != result { rawInput = result }
+            }
+            .onChange(of: rawInput) { _, newVal in
+                let decimal = Locale.current.decimalSeparator ?? "."
+                let synced = newVal.replacingOccurrences(of: ",", with: decimal)
+                if amountText != synced { amountText = synced }
+            }
             .sheet(isPresented: $showCategoryPicker) { editCategoryPicker }
             .brandAlert(
                 title: "İşlemi Sil",
@@ -173,6 +198,32 @@ struct EditTransactionSheet: View {
                     .cancel()
                 ]
             )
+            .confirmationDialog(
+                "Tekrarlayan İşlemi Düzenle",
+                isPresented: $showRecurringScope,
+                titleVisibility: .visible
+            ) {
+                if transaction.originalTransactionId == nil {
+                    // Editing the template — offer: this record only vs all in series
+                    Button("Sadece Bu Kaydı") {
+                        if let amt = pendingAmount { performSave(amount: amt, scope: .thisOnly) }
+                    }
+                    Button("Tüm Seriyi Güncelle") {
+                        if let amt = pendingAmount { performSave(amount: amt, scope: .allInSeries) }
+                    }
+                } else {
+                    // Editing a derived instance — offer: this record only vs template too
+                    Button("Sadece Bu Kaydı") {
+                        if let amt = pendingAmount { performSave(amount: amt, scope: .thisOnly) }
+                    }
+                    Button("Şablonu da Güncelle") {
+                        if let amt = pendingAmount { performSave(amount: amt, scope: .templateToo) }
+                    }
+                }
+                Button("Vazgeç", role: .cancel) { pendingAmount = nil }
+            } message: {
+                Text("Bu değişiklikleri nasıl uygulamak istersin?")
+            }
         }
         .onAppear { loadFromTransaction() }
     }
@@ -253,26 +304,39 @@ struct EditTransactionSheet: View {
     // MARK: - Amount display
 
     private var amountDisplay: some View {
-        VStack(spacing: 4) {
-            Text("TUTAR")
-                .font(.brand(.caption))
-                .foregroundStyle(BrandColor.textTertiary)
-                .tracking(1.2)
-            HStack(alignment: .firstTextBaseline, spacing: 2) {
-                Text("₺")
-                    .font(.brand(.title))
-                    .foregroundStyle(amountColor)
-                Text(wholePart.isEmpty ? "0" : wholePart)
-                    .font(.brand(.displayHero))
-                    .foregroundStyle(amountColor)
-                    .contentTransition(.numericText())
-                    .animation(.spring(response: 0.2), value: wholePart)
-                if let frac = fracPart {
-                    Text(",\(frac)_".prefix(frac.isEmpty ? 2 : frac.count + 1))
+        ZStack {
+            VStack(spacing: 4) {
+                Text("TUTAR")
+                    .font(.brand(.caption))
+                    .foregroundStyle(BrandColor.textTertiary)
+                    .tracking(1.2)
+                HStack(alignment: .firstTextBaseline, spacing: 2) {
+                    Text(currencySymbol)
                         .font(.brand(.title))
-                        .foregroundStyle(amountColor.opacity(0.7))
+                        .foregroundStyle(amountColor)
+                    Text(wholePart.isEmpty ? "0" : wholePart)
+                        .font(.brand(.displayHero))
+                        .foregroundStyle(amountColor)
+                        .contentTransition(.numericText())
+                        .animation(.spring(response: 0.2), value: wholePart)
+                    if let frac = fracPart {
+                        Text(",\(frac)_".prefix(frac.isEmpty ? 2 : frac.count + 1))
+                            .font(.brand(.title))
+                            .foregroundStyle(amountColor.opacity(0.7))
+                    }
                 }
             }
+            // Hidden text field captures numeric keyboard input
+            TextField("", text: $amountText)
+                .keyboardType(.decimalPad)
+                .focused($amountFocused)
+                .opacity(0.001)
+                .allowsHitTesting(false)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            noteFocused = false
+            amountFocused = true
         }
     }
 
@@ -335,6 +399,68 @@ struct EditTransactionSheet: View {
         )
     }
 
+    // MARK: - Recurring row
+
+    private var recurringRow: some View {
+        VStack(spacing: Spacing.xs) {
+            HStack {
+                Image(systemName: "repeat.circle")
+                    .font(.system(size: 14))
+                    .foregroundStyle(BrandColor.textTertiary)
+                Text("Tekrarlayan işlem")
+                    .font(.brand(.body))
+                    .foregroundStyle(BrandColor.textSecondary)
+                Spacer()
+                Toggle("", isOn: $isRecurring)
+                    .labelsHidden()
+                    .tint(BrandColor.primary)
+            }
+            .padding(.horizontal, Spacing.md)
+            .padding(.vertical, Spacing.md)
+            .background(BrandColor.surface.opacity(0.4))
+            .clipShape(RoundedRectangle(cornerRadius: Spacing.radiusSmall, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: Spacing.radiusSmall, style: .continuous)
+                    .strokeBorder(
+                        isRecurring ? BrandColor.primary.opacity(0.4) : BrandColor.borderSubtle,
+                        lineWidth: 1
+                    )
+            )
+
+            if isRecurring {
+                HStack(spacing: Spacing.xs) {
+                    ForEach(RecurringInterval.allCases, id: \.self) { interval in
+                        intervalChip(interval)
+                    }
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+        .animation(.spring(response: 0.3), value: isRecurring)
+    }
+
+    private func intervalChip(_ interval: RecurringInterval) -> some View {
+        let selected = recurringInterval == interval
+        return Button {
+            withAnimation(.spring(response: 0.25)) {
+                recurringInterval = interval
+            }
+        } label: {
+            Text(interval.localizedLabel)
+                .font(.brand(.subheadline))
+                .foregroundStyle(selected ? .white : BrandColor.textTertiary)
+                .frame(maxWidth: .infinity)
+                .frame(height: 40)
+                .background(selected ? BrandColor.primary : BrandColor.surface.opacity(0.5))
+                .clipShape(Capsule())
+                .overlay(
+                    Capsule()
+                        .strokeBorder(selected ? Color.clear : BrandColor.borderSubtle, lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
+    }
+
     // MARK: - Category picker sheet
 
     private var editCategoryPicker: some View {
@@ -395,28 +521,109 @@ struct EditTransactionSheet: View {
     }
 
     private func loadFromTransaction() {
-        note             = transaction.note
-        type             = transaction.type
-        selectedCategory = transaction.category
-        date             = transaction.date
-        isRecurring      = transaction.isRecurring
+        note              = transaction.note
+        type              = transaction.type
+        selectedCategory  = transaction.category
+        date              = transaction.date
+        isRecurring       = transaction.isRecurring
+        recurringInterval = transaction.recurringInterval ?? .monthly
+        recurringEndDate  = transaction.recurringEndDate
         // Convert Decimal to display string
         let str = "\(transaction.amount)"
         rawInput = str.contains(".") ? str.replacingOccurrences(of: ".", with: ",") : str
+        let decimal = Locale.current.decimalSeparator ?? "."
+        amountText = rawInput.replacingOccurrences(of: ",", with: decimal)
     }
 
     private func saveChanges() {
         let normalized = rawInput.replacingOccurrences(of: ",", with: ".")
         guard let val = Decimal(string: normalized), val > 0 else { return }
-        transaction.note      = note
-        transaction.amount    = val
-        transaction.type      = type
-        transaction.category  = selectedCategory
-        transaction.date      = date
-        transaction.isRecurring = isRecurring
-        transaction.updatedAt = .now
-        let tx = transaction
-        Task { try? await FirestoreService.shared.uploadTransaction(tx) }
+        // If the original transaction was already recurring, ask the user
+        // which scope to apply before committing any changes.
+        if transaction.isRecurring {
+            pendingAmount = val
+            showRecurringScope = true
+            return
+        }
+        performSave(amount: val, scope: .thisOnly)
+    }
+
+    private func performSave(amount: Decimal, scope: RecurringEditScope) {
+        // Snapshot the original template link before we mutate anything.
+        let originalId = transaction.originalTransactionId
+
+        // ── Apply changes to this transaction ───────────────────────────────
+        transaction.note              = note
+        transaction.amount            = amount
+        transaction.type              = type
+        transaction.category          = selectedCategory
+        transaction.date              = date
+        transaction.isRecurring       = isRecurring
+        transaction.recurringInterval = isRecurring ? recurringInterval : nil
+        transaction.recurringEndDate  = isRecurring ? recurringEndDate  : nil
+        // If recurring was turned off, detach from series.
+        if !isRecurring { transaction.originalTransactionId = nil }
+        transaction.updatedAt         = .now
+        let mainTx = transaction
+        Task { try? await FirestoreService.shared.uploadTransaction(mainTx) }
+
+        // ── Scope fan-out ────────────────────────────────────────────────────
+        switch scope {
+
+        case .thisOnly:
+            break   // already saved above
+
+        case .allInSeries:
+            // Template is being edited — propagate to all derived instances.
+            // Each instance keeps its own date; only shared fields are updated.
+            let templateId = transaction.id
+            if let all = try? modelContext.fetch(FetchDescriptor<Transaction>()) {
+                for instance in all where instance.originalTransactionId == templateId {
+                    instance.note              = note
+                    instance.amount            = amount
+                    instance.type              = type
+                    instance.category          = selectedCategory
+                    instance.isRecurring       = isRecurring
+                    instance.recurringInterval = isRecurring ? recurringInterval : nil
+                    instance.recurringEndDate  = isRecurring ? recurringEndDate  : nil
+                    if !isRecurring { instance.originalTransactionId = nil }
+                    instance.updatedAt         = .now
+                    let tx = instance
+                    Task { try? await FirestoreService.shared.uploadTransaction(tx) }
+                }
+            }
+
+        case .templateToo:
+            // Derived instance is being edited — propagate changes up to the template.
+            // Template keeps its own date.
+            if let tplId = originalId,
+               let all  = try? modelContext.fetch(FetchDescriptor<Transaction>()),
+               let tpl  = all.first(where: { $0.id == tplId }) {
+                tpl.note              = note
+                tpl.amount            = amount
+                tpl.type              = type
+                tpl.category          = selectedCategory
+                tpl.isRecurring       = isRecurring
+                tpl.recurringInterval = isRecurring ? recurringInterval : nil
+                tpl.recurringEndDate  = isRecurring ? recurringEndDate  : nil
+                tpl.updatedAt         = .now
+                let tx = tpl
+                Task { try? await FirestoreService.shared.uploadTransaction(tx) }
+            }
+        }
+
+        pendingAmount = nil
         dismiss()
     }
+}
+
+// MARK: - RecurringEditScope
+
+private enum RecurringEditScope {
+    /// Save changes only to the transaction that was opened for editing.
+    case thisOnly
+    /// Template edit: update the template + all derived instances (each keeps its own date).
+    case allInSeries
+    /// Instance edit: update this instance + propagate back to its template (template keeps its own date).
+    case templateToo
 }

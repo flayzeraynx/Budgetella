@@ -299,9 +299,6 @@ struct BudgiView: View {
                         }
                     }
                 Spacer()
-                Image(systemName: "mic")
-                    .font(.system(size: 16))
-                    .foregroundStyle(BrandColor.textTertiary)
             }
             .padding(.horizontal, Spacing.md)
             .padding(.vertical, 10)

@@ -17,13 +17,16 @@ import SwiftData
     var selectedCategoryId: UUID?
     var showCategoryPicker = false
     var errorMessage: String?
+    var isRecurring: Bool = false
+    var recurringInterval: RecurringInterval = .monthly
+    var recurringEndDate: Date? = nil
 
     // MARK: - AI suggestions (on-device)
     var aiSuggestions: [CategoryPrediction] = []
 
     // MARK: - Computed
 
-    var canSave: Bool { amountDecimal > 0 }
+    var canSave: Bool { amountDecimal > 0 && !note.trimmingCharacters(in: .whitespaces).isEmpty }
 
     var amountDecimal: Decimal {
         let normalized = rawInput.replacingOccurrences(of: ",", with: ".")
@@ -95,7 +98,10 @@ import SwiftData
             type: transactionType,
             amount: amountDecimal,
             note: note,
-            category: category
+            category: category,
+            isRecurring: isRecurring,
+            recurringInterval: isRecurring ? recurringInterval : nil,
+            recurringEndDate: isRecurring ? recurringEndDate : nil
         )
         modelContext.insert(tx)
         try? modelContext.save()
@@ -115,5 +121,8 @@ import SwiftData
         selectedCategoryId = nil
         aiSuggestions = []
         errorMessage = nil
+        isRecurring = false
+        recurringInterval = .monthly
+        recurringEndDate = nil
     }
 }

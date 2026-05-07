@@ -91,6 +91,13 @@ struct ContentView: View {
         }
         .preferredColorScheme(colorScheme)
         .onAppear {
+            // Fresh-install detection: Firebase Keychain survives app deletion; UserDefaults does not.
+            if !UserDefaults.standard.bool(forKey: "hasLaunchedBefore") {
+                try? Auth.auth().signOut()
+                isSignedIn = false
+                hasCompletedOnboarding = false
+                UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
+            }
             BudgetellaApp.seedCategoriesIfNeeded(in: modelContext)
             BudgetellaApp.seedSettingsIfNeeded(in: modelContext)
             BudgetellaApp.migrateEnglishCategoryNames(in: modelContext)

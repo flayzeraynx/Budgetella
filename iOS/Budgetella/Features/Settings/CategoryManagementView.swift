@@ -122,7 +122,7 @@ struct CategoryManagementView: View {
     }
 
     private func categorySection(title: LocalizedStringKey, items: [Category]) -> some View {
-        Section(title) {
+        return Section(title) {
             ForEach(items) { cat in
                 categoryRow(cat)
             }
@@ -149,13 +149,13 @@ struct CategoryManagementView: View {
 
             Spacer()
 
-            if cat.isDefault {
-                Text("Varsayılan")
+            if !cat.isDefault {
+                Text(LocalizedStringKey("Özel"))
                     .font(.brand(.caption))
-                    .foregroundStyle(BrandColor.textTertiary)
+                    .foregroundStyle(BrandColor.primary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(BrandColor.surface.opacity(0.6))
+                    .background(BrandColor.primary.opacity(0.12))
                     .clipShape(Capsule())
             }
         }

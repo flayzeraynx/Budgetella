@@ -104,7 +104,7 @@ public extension AppSettings {
     }
 
     var theme: AppTheme {
-        get { AppTheme(rawValue: themeRaw) ?? .system }
+        get { AppTheme(rawValue: themeRaw) ?? .dark }
         set { themeRaw = newValue.rawValue; updatedAt = .now }
     }
 }

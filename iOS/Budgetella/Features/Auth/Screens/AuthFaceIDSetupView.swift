@@ -115,7 +115,7 @@ struct AuthFaceIDSetupView: View {
         .onAppear { appeared = true }
     }
 
-    private func featureChip(icon: String, color: Color, title: String, subtitle: String) -> some View {
+    private func featureChip(icon: String, color: Color, title: LocalizedStringKey, subtitle: LocalizedStringKey) -> some View {
         HStack(spacing: Spacing.md) {
             Image(systemName: icon)
                 .font(.system(size: 18, weight: .semibold))
