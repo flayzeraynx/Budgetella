@@ -2,6 +2,32 @@
 
 ---
 
+## v1.0.1 (build 1) — 2026-05-08
+**TestFlight'a yüklendi (gece ~00:30) — App Store rejection fix + paywall/localization iyileştirmeleri.**
+
+### Eklenenler
+- **Dashboard:** Önceki dönemle karşılaştırma kartı (comparison chart) — `DashboardCards`, `DashboardViewModel`
+- **Paywall:** Genişletilmiş tanıtım metinleri ve feature açıklamaları
+- **Localizable.xcstrings:** Eksik TR/EN string'lerin geniş çaplı tamamlanması (Auth, Paywall, Stats, Settings dahil yüzlerce yeni anahtar)
+
+### Düzeltmeler
+- **App Store rejection fix:** Kamera ile fiş OCR akışı ve AI insights bölümünde reviewer bulgularına yönelik düzeltmeler (`CameraEntryContent`, `BudgiView`, `SubscriptionService`, `GeminiInsightService`)
+- **Transactions:** `EditTransactionSheet` kapsamlı revizyon (form akışı + validation)
+- **QuickEntry:** `ManualEntryContent` UX iyileştirmeleri ve `QuickEntryViewModel` düzeltmeleri
+- **Auth:** `AuthFaceIDLockView` ve `AuthService` stabilite düzeltmeleri; `AuthSignUpView` / `AuthWelcomeView` ufak rötuşlar
+- **Services:** `FirestoreService`, `BackupImportService`, `SubscriptionService` hata toleransı iyileştirmeleri
+- **Navigation:** `MainTabView` küçük davranış düzeltmeleri
+
+### Altyapı
+- `Info.plist`: hardcoded sürüm/build yerine `$(MARKETING_VERSION)` ve `$(CURRENT_PROJECT_VERSION)` kullanılıyor (Widget Extension dahil)
+- `project.yml`: `MARKETING_VERSION: 1.0.1`, `CURRENT_PROJECT_VERSION: 1`
+
+### Notlar
+- v1.0.0 (build 15) App Store review'da reddedildi; bu sürüm reviewer bulgularını ele alır
+- Yeni marketing version ile birlikte build numarası 1'e sıfırlandı
+
+---
+
 ## v1.0.0 (build 15) — 2026-05-06
 **App Store review'a gönderildi.**
 
