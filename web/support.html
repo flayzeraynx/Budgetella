@@ -1,277 +1,166 @@
 <!doctype html>
-<html lang="tr">
+<html lang="en">
 <head>
-<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-93JNEYMKHT"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-93JNEYMKHT');
-</script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-93JNEYMKHT');</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Destek — Budgetella</title>
-<meta name="description" content="Budgetella için yardım merkezi, sıkça sorulan sorular ve destek iletişim bilgileri.">
+<title>Support — Budgetella</title>
+<meta name="description" content="Budgetella help center. FAQs, guides, and support contact for the Budgetella personal finance app.">
 <link rel="canonical" href="https://budgetella.app/support">
+<link rel="alternate" hreflang="en" href="https://budgetella.app/support">
+<link rel="alternate" hreflang="tr" href="https://budgetella.app/support-tr">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://budgetella.app/support">
 <meta property="og:site_name" content="Budgetella">
-<meta property="og:title" content="Destek — Budgetella">
-<meta property="og:description" content="Budgetella için yardım merkezi. Soruların için support@budgetella.app adresine yaz.">
+<meta property="og:title" content="Support — Budgetella">
+<meta property="og:description" content="Help center, FAQs, and support contact for Budgetella.">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css">
 <style>
-.help-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  overflow: hidden;
-  margin-top: 60px;
-}
-@media (max-width: 800px) { .help-grid { grid-template-columns: 1fr; } }
-
-.help-card {
-  background: var(--surface);
-  padding: 32px 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  text-decoration: none;
-  color: inherit;
-  transition: background 200ms var(--ease-out);
-  cursor: pointer;
-}
-.help-card:hover { background: var(--surface-hi); }
-.help-icon {
-  width: 40px; height: 40px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, rgba(110,91,255,0.12), rgba(110,91,255,0.04));
-  border: 1px solid rgba(110,91,255,0.18);
-  display: grid; place-items: center;
-  color: var(--accent);
-}
-.help-icon svg { width: 18px; height: 18px; }
-.help-card h3 { font-size: 18px; font-weight: 500; letter-spacing: -0.01em; }
-.help-card p { font-size: 14px; line-height: 1.5; color: var(--muted); }
-.help-card .arr {
-  margin-top: auto;
-  font-size: 13px;
-  color: var(--accent);
-  font-family: var(--font-mono);
-  display: inline-flex; align-items: center; gap: 6px;
-}
-
-.support-cols {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
-  margin-top: 80px;
-}
-@media (max-width: 800px) { .support-cols { grid-template-columns: 1fr; gap: 40px; } }
-
-.help-section h3 {
-  font-size: 13px;
-  font-family: var(--font-mono);
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 18px;
-}
-.help-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
-.help-list li a {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--line);
-  font-size: 15px;
-  color: var(--ink);
-  transition: color 200ms var(--ease-out);
-}
-.help-list li a:hover { color: var(--accent); }
-.help-list li a::after {
-  content: '→';
-  color: var(--muted);
-  font-family: var(--font-mono);
-  transition: transform 200ms var(--ease-out);
-}
-.help-list li a:hover::after { transform: translateX(3px); color: var(--accent); }
-
-.contact-card {
-  background: var(--ink);
-  color: #fff;
-  border-radius: 20px;
-  padding: 40px 48px;
-  margin-top: 80px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 32px;
-}
-.contact-card h3 { color: #fff; font-size: 24px; font-weight: 500; letter-spacing: -0.015em; margin-bottom: 8px; }
-.contact-card p { color: rgba(255,255,255,0.6); font-size: 14px; line-height: 1.55; }
-@media (max-width: 700px) {
-  .contact-card { grid-template-columns: 1fr; gap: 24px; padding: 32px; }
-}
-
-/* FAQ override for support page */
-.faq-support { margin-top: 80px; }
-.faq-support .section-head { margin-bottom: 40px; }
+.support-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-top:48px}
+.support-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px;transition:box-shadow 220ms,transform 220ms;cursor:default}
+.support-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.07);transform:translateY(-2px)}
+.support-card h3{font-size:16px;font-weight:600;margin-bottom:8px}
+.support-card p{font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:16px}
+.support-card a{font-size:13px;color:var(--accent);font-family:var(--font-mono);display:inline-flex;align-items:center;gap:4px}
+.support-faq{margin-top:56px}
+.support-faq-group{margin-bottom:40px}
+.support-faq-group h3{font-size:14px;font-weight:600;font-family:var(--font-mono);color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.faq-list{display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.faq-item{border-bottom:1px solid var(--line)}
+.faq-item:last-child{border-bottom:none}
+.faq-q{width:100%;background:none;border:none;padding:18px 22px;text-align:left;font-size:15px;font-weight:500;color:var(--ink);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:inherit}
+.faq-q:hover{background:var(--surface-hi)}
+.faq-q .chevron{transition:transform 300ms;flex-shrink:0;color:var(--muted)}
+.faq-item.open .faq-q .chevron{transform:rotate(180deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height 400ms ease,padding 200ms;font-size:14px;line-height:1.7;color:var(--muted);padding:0 22px}
+.faq-item.open .faq-a{max-height:300px;padding:0 22px 18px}
+.support-cta{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:40px;text-align:center;margin-top:56px}
+.support-cta h3{font-size:20px;font-weight:600;margin-bottom:8px}
+.support-cta p{color:var(--muted);margin-bottom:24px;font-size:15px}
 </style>
 </head>
 <body>
 <div id="mount-nav"></div>
-
-<header class="page-head">
+<section style="padding:clamp(60px,7vw,96px) 0 48px;border-bottom:1px solid var(--line)">
   <div class="container">
-    <div class="eyebrow">Destek</div>
-    <h1>Sana nasıl<br>yardım edebiliriz?</h1>
-    <p class="lead">Sıkça sorulanlar, kullanım kılavuzları ve takıldığında ulaşabileceğin destek ekibi.</p>
-  </div>
-</header>
-
-<section class="section">
-  <div class="container">
-
-    <div class="help-grid">
-      <a class="help-card" href="#getting-started">
-        <div class="help-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-        </div>
-        <h3>İlk adımlar</h3>
-        <p>Hesap oluşturma, ilk işlemini ekleme, bütçe kurma — sıfırdan başla.</p>
-        <span class="arr">Göz at →</span>
-      </a>
-      <a class="help-card" href="#features">
-        <div class="help-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        </div>
-        <h3>Özellikler</h3>
-        <p>Budgi, fiş tarama, sesli giriş, hedef takibi nasıl çalışır?</p>
-        <span class="arr">Göz at →</span>
-      </a>
-      <a class="help-card" href="#account">
-        <div class="help-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a7 7 0 0114 0v1"/></svg>
-        </div>
-        <h3>Hesap &amp; Abonelik</h3>
-        <p>Şifre, ödeme, plan değişikliği, hesap silme.</p>
-        <span class="arr">Göz at →</span>
-      </a>
-      <a class="help-card" href="#privacy-sec">
-        <div class="help-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 9.5-8 10-4.5-.5-8-5-8-10V6l8-4z"/></svg>
-        </div>
-        <h3>Gizlilik &amp; Güvenlik</h3>
-        <p>Verilerin nerede tutulur, nasıl korunur, KVKK hakların.</p>
-        <span class="arr">Göz at →</span>
-      </a>
-      <a class="help-card" href="#troubleshoot">
-        <div class="help-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 015.7 5.7l-9 9-5.7 1.4 1.4-5.7 9-9z"/></svg>
-        </div>
-        <h3>Sorun giderme</h3>
-        <p>Senkronizasyon, OCR yanlış okuma, uygulama açılmıyor.</p>
-        <span class="arr">Göz at →</span>
-      </a>
-      <a class="help-card" href="#data">
-        <div class="help-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-        </div>
-        <h3>Veri &amp; Yedekleme</h3>
-        <p>İmport, export, yedekleme, başka uygulamadan geçiş.</p>
-        <span class="arr">Göz at →</span>
-      </a>
-    </div>
-
-    <div class="support-cols">
-      <div class="help-section" id="getting-started">
-        <h3>İlk adımlar</h3>
-        <ul class="help-list">
-          <li><a href="mailto:support@budgetella.app">Budgetella'ya nasıl başlarım?</a></li>
-          <li><a href="mailto:support@budgetella.app">İlk işlemimi nasıl eklerim?</a></li>
-          <li><a href="mailto:support@budgetella.app">İlk bütçemi nasıl kurarım?</a></li>
-          <li><a href="mailto:support@budgetella.app">Kategorileri nasıl özelleştiririm?</a></li>
-          <li><a href="mailto:support@budgetella.app">Hedef nasıl belirlerim?</a></li>
-        </ul>
-      </div>
-      <div class="help-section" id="features">
-        <h3>Özellikler</h3>
-        <ul class="help-list">
-          <li><a href="mailto:support@budgetella.app">Fiş taramada hangi formatlar destekleniyor?</a></li>
-          <li><a href="mailto:support@budgetella.app">Sesli giriş nasıl kullanılır?</a></li>
-          <li><a href="mailto:support@budgetella.app">Budgi harcama yorumları nasıl çalışır?</a></li>
-          <li><a href="mailto:support@budgetella.app">Bütçe limit aşımında ne olur?</a></li>
-          <li><a href="mailto:support@budgetella.app">Yedek dosyamı nasıl içe aktarırım?</a></li>
-        </ul>
-      </div>
-      <div class="help-section" id="account">
-        <h3>Hesap &amp; Abonelik</h3>
-        <ul class="help-list">
-          <li><a href="mailto:support@budgetella.app">Şifremi unuttum, ne yapayım?</a></li>
-          <li><a href="mailto:support@budgetella.app">Premium'a nasıl geçerim?</a></li>
-          <li><a href="https://apps.apple.com/account/subscriptions" target="_blank" rel="noopener">Aboneliğimi nasıl iptal ederim?</a></li>
-          <li><a href="mailto:support@budgetella.app">Satın almamı nasıl geri yüklerim?</a></li>
-          <li><a href="mailto:support@budgetella.app">Hesabımı nasıl silerim?</a></li>
-        </ul>
-      </div>
-      <div class="help-section" id="privacy-sec">
-        <h3>Gizlilik &amp; Güvenlik</h3>
-        <ul class="help-list">
-          <li><a href="/privacy">Verilerim nerede tutuluyor?</a></li>
-          <li><a href="/privacy#kvkk">KVKK haklarımı nasıl kullanırım?</a></li>
-          <li><a href="mailto:support@budgetella.app">Face ID / Touch ID nasıl açılır?</a></li>
-          <li><a href="/privacy#ai">Budgi verilerimi görebiliyor mu?</a></li>
-          <li><a href="mailto:support@budgetella.app">Verilerimi indirebilir miyim?</a></li>
-        </ul>
-      </div>
-      <div class="help-section" id="troubleshoot">
-        <h3>Sorun giderme</h3>
-        <ul class="help-list">
-          <li><a href="mailto:support@budgetella.app">Uygulama açılmıyor, ne yapayım?</a></li>
-          <li><a href="mailto:support@budgetella.app">Verilerim senkronize olmuyor</a></li>
-          <li><a href="mailto:support@budgetella.app">OCR fişteki tutarı yanlış okudu</a></li>
-          <li><a href="mailto:support@budgetella.app">Sesli giriş çalışmıyor</a></li>
-          <li><a href="mailto:support@budgetella.app">Bildirimler gelmiyor</a></li>
-        </ul>
-      </div>
-      <div class="help-section" id="data">
-        <h3>Veri &amp; Yedekleme</h3>
-        <ul class="help-list">
-          <li><a href="mailto:support@budgetella.app">Yedek nasıl alırım?</a></li>
-          <li><a href="mailto:support@budgetella.app">Yedeği yeni cihaza nasıl aktarırım?</a></li>
-          <li><a href="mailto:support@budgetella.app">Verilerimi dışa nasıl aktarırım?</a></li>
-          <li><a href="mailto:support@budgetella.app">Başka uygulamadan nasıl geçerim?</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="contact-card">
-      <div>
-        <h3>Hâlâ takıldın mı?</h3>
-        <p>Mail gönder, en kısa sürede dönelim.<br>Abonelik sorunları için App Store üzerinden iptal/yeniden aktive edebilirsin.</p>
-      </div>
-      <a href="mailto:support@budgetella.app" class="btn btn-accent btn-lg">E-posta gönder</a>
-    </div>
-
+    <div class="eyebrow">Support</div>
+    <h1>How can we help?</h1>
+    <p class="lead" style="margin-top:12px;color:var(--muted);font-size:clamp(16px,1.5vw,19px);max-width:560px">FAQs, guides, and the support team when you get stuck. · <a href="/support-tr" style="color:var(--accent);font-size:14px">Türkçe →</a></p>
   </div>
 </section>
+<div class="container" style="padding-bottom:clamp(60px,8vw,96px)">
+  <div class="support-grid">
+    <div class="support-card">
+      <h3>🚀 Getting started</h3>
+      <p>Create an account, add your first transaction, and set up a budget from scratch.</p>
+      <a href="mailto:support@budgetella.app">Ask us →</a>
+    </div>
+    <div class="support-card">
+      <h3>✨ Features</h3>
+      <p>How do Budgi, receipt scanning, voice entry, and goal tracking work?</p>
+      <a href="mailto:support@budgetella.app">Ask us →</a>
+    </div>
+    <div class="support-card">
+      <h3>💳 Account &amp; Billing</h3>
+      <p>Password, payments, plan changes, and account deletion.</p>
+      <a href="https://apps.apple.com/account/subscriptions" target="_blank" rel="noopener">Manage subscription →</a>
+    </div>
+    <div class="support-card">
+      <h3>🔒 Privacy &amp; Security</h3>
+      <p>Where your data lives, how it's protected, and your privacy rights.</p>
+      <a href="/privacy">Read Privacy Policy →</a>
+    </div>
+    <div class="support-card">
+      <h3>🔧 Troubleshooting</h3>
+      <p>Sync issues, OCR mis-reads, app not opening, notifications not working.</p>
+      <a href="mailto:support@budgetella.app">Get help →</a>
+    </div>
+    <div class="support-card">
+      <h3>💾 Data &amp; Backup</h3>
+      <p>Import, export, backup, restore, and migrating from another app.</p>
+      <a href="mailto:support@budgetella.app">Ask us →</a>
+    </div>
+  </div>
 
+  <div class="support-faq">
+    <div class="support-faq-group">
+      <h3>Getting started</h3>
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-q">How do I get started with Budgetella? <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+          <div class="faq-a">Download from the App Store, create a free account with your email or Apple/Google Sign-In, and add your first transaction. The 7-day free Premium trial starts automatically — no card required.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">How do I add my first transaction? <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+          <div class="faq-a">Tap the + button at the bottom of the screen. You can scan a receipt (AI reads it automatically), use voice entry ("coffee 4 dollars"), or enter it manually.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">How do I set up my first budget? <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+          <div class="faq-a">Go to Settings → Budgets. Set a monthly spending limit per category (e.g. $500 for Groceries). You'll get a notification when you're getting close to the limit.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="support-faq-group">
+      <h3>Features</h3>
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-q">What formats does receipt scanning support? <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+          <div class="faq-a">Any printed receipt with a visible total amount. Works with supermarket, restaurant, and utility receipts. Photographed receipts and screenshots also work.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">How does voice entry work? <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+          <div class="faq-a">Tap the mic icon and say something like "coffee 4.50" or "groceries 85 dollars". AI extracts the amount and suggests a category. You confirm and it's logged instantly.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">How does Budgi work? <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+          <div class="faq-a">Budgi is Budgetella's AI assistant. It analyzes your spending patterns and offers weekly insights — biggest expense, category trends, spending pace. It uses Google Gemini API and never stores your data beyond 30 days.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="support-faq-group">
+      <h3>Account &amp; Billing</h3>
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-q">How do I cancel my subscription? <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+          <div class="faq-a">App Store → Account → Subscriptions → Budgetella → Cancel. Cancel at least 24 hours before renewal. You keep Premium access until the current period ends.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">How do I restore my purchase? <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+          <div class="faq-a">Settings → Account → Restore Purchases. Make sure you're logged in with the same Apple ID used for the original purchase.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">How do I delete my account? <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+          <div class="faq-a">Settings → Account → Delete Account. All your data is permanently deleted within 30 days. This action is irreversible — export your data first if needed.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="support-cta">
+    <h3>Still stuck?</h3>
+    <p>Email us and we'll get back to you as soon as possible. For subscription issues, you can also manage directly via App Store.</p>
+    <a href="mailto:support@budgetella.app" class="btn btn-primary btn-lg">Send us an email</a>
+  </div>
+</div>
 <div id="mount-footer"></div>
 <script src="/assets/site.js"></script>
+<script>
+  document.querySelectorAll('.faq-q').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const item=btn.closest('.faq-item');
+      const isOpen=item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+      if(!isOpen)item.classList.add('open');
+    });
+  });
+  (function(){var btn=document.getElementById('lang-en');if(btn)btn.classList.add('active');})();
+</script>
 </body>
 </html>

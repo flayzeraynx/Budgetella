@@ -9,9 +9,9 @@
       <span>Budgetella</span>
     </a>
     <div class="nav-links">
-      <a href="/index.html#features" data-link="features">Özellikler</a>
+      <a href="/#features" data-link="features">Özellikler</a>
       <a href="/index.html#how" data-link="how">Nasıl çalışır</a>
-      <a href="/index.html#pricing" data-link="pricing">Fiyatlandırma</a>
+      <a href="/#pricing" data-link="pricing">Fiyatlandırma</a>
       <a href="/support.html" data-link="support">Destek</a>
     </div>
     <div class="nav-cta">
@@ -20,7 +20,7 @@
             <span class="lang-sep">|</span>
             <a href="/tr" class="lang-btn" id="lang-tr">TR</a>
           </div>
-      <a href="/index.html#download" class="btn btn-primary btn-lg" id="nav-cta">İndir</a>
+      <a href="/#download" class="btn btn-primary btn-lg" id="nav-cta">İndir</a>
     </div>
   </div>
 </nav>`;
@@ -44,26 +44,28 @@
         <div class="footer-col">
           <h4>Ürün</h4>
           <ul>
-            <li><a href="/index.html#features">Özellikler</a></li>
-            <li><a href="/index.html#pricing">Fiyatlandırma</a></li>
-            <li><a href="/index.html#download">İndir</a></li>
-            <li><a href="/index.html#faq">SSS</a></li>
+            <li><a href="/#features">Özellikler</a></li>
+            <li><a href="/#pricing">Fiyatlandırma</a></li>
+            <li><a href="/#download">İndir</a></li>
+            <li><a href="/#faq">SSS</a></li>
             <li><a href="/blog.html">Blog</a></li>
           </ul>
         </div>
         <div class="footer-col">
           <h4>Yasal</h4>
           <ul>
-            <li><a href="/privacy.html">Gizlilik</a></li>
-            <li><a href="/terms.html">Kullanım Şartları</a></li>
-            <li><a href="/privacy.html#kvkk">KVKK</a></li>
+            <li><a href="/privacy">Privacy Policy</a></li>
+            <li><a href="/privacy-tr">Gizlilik Politikası</a></li>
+            <li><a href="/terms">Terms of Use</a></li>
+            <li><a href="/terms-tr">Kullanım Şartları</a></li>
           </ul>
         </div>
         <div class="footer-col">
           <h4>Destek</h4>
           <ul>
-            <li><a href="/support.html">Yardım Merkezi</a></li>
-            <li><a href="mailto:support@budgetella.app">Destek</a></li>
+            <li><a href="/support">Help Center</a></li>
+            <li><a href="/support-tr">Yardım Merkezi</a></li>
+            <li><a href="mailto:support@budgetella.app">support@budgetella.app</a></li>
             <li><a href="https://apps.apple.com/account/subscriptions" target="_blank" rel="noopener">Abonelik</a></li>
           </ul>
         </div>
