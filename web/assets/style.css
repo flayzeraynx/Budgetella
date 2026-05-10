@@ -492,3 +492,26 @@ p { margin: 0; line-height: 1.6; color: var(--ink-soft); }
   pointer-events: none;
   opacity: 0.6;
 }
+
+/* ─── Footer Social Links ─────────────────────────────────── */
+.footer-social {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  transition: color 200ms var(--ease-out), border-color 200ms var(--ease-out), background 200ms var(--ease-out);
+}
+.social-link:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+  background: rgba(0,0,0,0.03);
+}
