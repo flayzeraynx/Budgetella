@@ -15,7 +15,12 @@
       <a href="/support.html" data-link="support">Destek</a>
     </div>
     <div class="nav-cta">
-      <a href="/index.html#download" class="btn btn-primary btn-lg">İndir</a>
+          <div class="lang-toggle">
+            <a href="/" class="lang-btn" id="lang-en">EN</a>
+            <span class="lang-sep">|</span>
+            <a href="/tr" class="lang-btn" id="lang-tr">TR</a>
+          </div>
+      <a href="/index.html#download" class="btn btn-primary btn-lg" id="nav-cta">İndir</a>
     </div>
   </div>
 </nav>`;
@@ -67,6 +72,7 @@
     <div class="footer-bottom">
       <span>© 2026 Budgetella</span>
       <span class="mono">v1.0 · iOS</span>
+      <span class="mono" style="display:flex;gap:8px"><a href="/" style="opacity:0.6;transition:opacity 200ms" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6">EN</a> · <a href="/tr" style="opacity:0.6;transition:opacity 200ms" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6">TR</a></span>
     </div>
   </div>
 </footer>`;

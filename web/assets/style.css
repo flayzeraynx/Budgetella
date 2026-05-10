@@ -515,3 +515,22 @@ p { margin: 0; line-height: 1.6; color: var(--ink-soft); }
   border-color: var(--ink);
   background: rgba(0,0,0,0.03);
 }
+
+/* ─── Language Toggle ────────────────────────────────────── */
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.lang-btn {
+  color: var(--muted);
+  transition: color 200ms;
+  padding: 3px 2px;
+}
+.lang-btn:hover,
+.lang-btn.active { color: var(--ink); }
+.lang-sep { color: var(--line-2); }
