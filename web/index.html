@@ -14,7 +14,10 @@
 <title>Budgetella — Paran nereye gidiyor, takip et!</title>
 <meta name="description" content="Harcamalarını takip et, bütçeni yönet, finansal hedeflerine ulaş. Fişten otomatik giriş, AI destekli kategoriler, bulut senkronizasyonu.">
 <meta name="theme-color" content="#F5F1EA">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Budgetella">
 <link rel="canonical" href="https://budgetella.app/">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
@@ -79,7 +82,72 @@
       "@type": "WebSite",
       "name": "Budgetella",
       "url": "https://budgetella.app/",
-      "inLanguage": "tr"
+      "inLanguage": "tr",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://budgetella.app/blog?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "Organization",
+      "name": "Budgetella",
+      "url": "https://budgetella.app",
+      "logo": "https://budgetella.app/favicon.svg",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "info@budgetella.app",
+        "contactType": "customer support",
+        "availableLanguage": "Turkish"
+      },
+      "sameAs": [
+        "https://apps.apple.com/us/app/budgetella/id6765690656"
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "\u00dccretsi\u0307z deneme s\u00fcres\u0307i ka\u00e7 g\u00fcn?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "7 g\u00fcn boyunca t\u00fcm Premium \u00f6zelliklerini \u00fccretsiz kullanabilirsin. Kredi kart\u0131 gerekmez. Deneme s\u00fcresi dolmadan istedi\u011fin zaman iptal edebilirsin, \u00fccret al\u0131nmaz."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Banka hesab\u0131m\u0131 ba\u011flamam gerekiyor mu?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Hay\u0131r, asla. Budgetella banka veya kart bilgisi istemez. T\u00fcm i\u015flemleri sen girersin \u2014 fi\u015ften otomatik tarama ya da manuel olarak."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Verilerimi kaybeder miyim?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Veriler Firebase \u00fczerinde bulutta saklan\u0131r. Telefon de\u011fi\u015fse de ayn\u0131 hesapla giri\u015f yap\u0131nca t\u00fcm ge\u00e7mi\u015fini g\u00f6r\u00fcrs\u00fcn. Ayr\u0131ca Ayarlar'dan JSON format\u0131nda d\u0131\u015fa aktarabilirsin."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Aboneli\u011fi nas\u0131l iptal ederim?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "App Store \u2192 Hesab\u0131m \u2192 Abonelikler \u2192 Budgetella \u2192 \u0130ptal Et. \u0130ptal i\u015flemi, mevcut d\u00f6nem bitmeden yap\u0131lmal\u0131d\u0131r. \u0130ptal sonras\u0131 d\u00f6nem sonuna kadar Premium olarak kal\u0131rs\u0131n."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Android s\u00fcr\u00fcm\u00fc var m\u0131?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "\u015eu an yaln\u0131zca iOS i\u00e7in mevcut. Android s\u00fcr\u00fcm\u00fc geli\u015ftirme a\u015famas\u0131nda. Haberdar olmak i\u00e7in info@budgetella.app adresine yazabilirsin."
+          }
+        }
+      ]
     }
   ]
 }

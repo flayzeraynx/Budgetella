@@ -14,6 +14,8 @@
 <title>Blog — Budgetella</title>
 <meta name="description" content="Bütçe yönetimi, harcama takibi ve finansal özgürlük hakkında pratik yazılar.">
 <link rel="canonical" href="https://budgetella.app/blog">
+<meta name="robots" content="index, follow">
+<meta name="keywords" content="bütçe yönetimi, harcama takibi, kişisel finans, para yönetimi, Türkiye">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://budgetella.app/blog">
 <meta property="og:site_name" content="Budgetella">
@@ -24,6 +26,7 @@
 <meta name="twitter:title" content="Blog — Budgetella">
 <meta name="twitter:description" content="Bütçe yönetimi, harcama takibi ve finansal özgürlük hakkında pratik yazılar.">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -114,6 +117,57 @@
   margin-top: 8px;
 }
 </style>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Blog",
+      "name": "Budgetella Blog",
+      "url": "https://budgetella.app/blog",
+      "description": "Bütçe yönetimi, harcama takibi ve finansal özgürlük hakkında pratik yazılar.",
+      "inLanguage": "tr",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Budgetella",
+        "url": "https://budgetella.app",
+        "logo": {"@type": "ImageObject", "url": "https://budgetella.app/favicon.svg"}
+      },
+      "blogPost": [
+        {
+          "@type": "BlogPosting",
+          "headline": "Türkiye'de Aylık Bütçe Nasıl Yapılır?",
+          "url": "https://budgetella.app/blog/butce-nasil-yapilir",
+          "datePublished": "2026-05-10",
+          "image": "https://budgetella.app/assets/og-image.png"
+        },
+        {
+          "@type": "BlogPosting",
+          "headline": "Harcamalarını Neden Takip Etmelisin?",
+          "url": "https://budgetella.app/blog/harcamalarini-neden-takip-etmelisin",
+          "datePublished": "2026-05-08",
+          "image": "https://budgetella.app/assets/og-image.png"
+        },
+        {
+          "@type": "BlogPosting",
+          "headline": "Banka Uygulaması Bütçe Takibi için Yeterli mi?",
+          "url": "https://budgetella.app/blog/banka-uygulamasi-yeterli-mi",
+          "datePublished": "2026-05-05",
+          "image": "https://budgetella.app/assets/og-image.png"
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Ana Sayfa", "item": "https://budgetella.app/"},
+        {"@type": "ListItem", "position": 2, "name": "Blog"}
+      ]
+    }
+  ]
+}
+</script>
 </head>
 <body>
 <div id="mount-nav"></div>
