@@ -146,11 +146,28 @@
   transform: perspective(1200px) rotateY(-6deg) rotateX(2deg);
   display: block;
 }
-.phone img {
+.phone-slideshow {
+  position: relative;
+  width: 100%;
+  display: block;
+}
+.phone-slide {
   display: block;
   width: 100%;
   height: auto;
   border-radius: 42px;
+  position: absolute;
+  top: 0; left: 0;
+  opacity: 0;
+  transition: opacity 0.9s ease-in-out;
+  pointer-events: none;
+}
+.phone-slide:first-child {
+  position: relative; /* anchor height */
+}
+.phone-slide.ps-active {
+  opacity: 1;
+  pointer-events: auto;
 }
 .phone-screen {
   width: 100%; height: 100%;
@@ -456,7 +473,7 @@
     border-radius: 38px;
     transform: perspective(900px) rotateY(0deg) rotateX(0deg);
   }
-  .phone img { border-radius: 30px; }
+  .phone-slide { border-radius: 30px; }
   .app-top { font-size: 10px; margin-bottom: 14px; }
   .app-balance { font-size: 22px; }
   .app-balance-delta { font-size: 10px; }
@@ -637,15 +654,16 @@
           <div class="fc-ocr-meta">Market · Otomatik kategorilendi ✓</div>
         </div>
 
-        <!-- Phone — gerçek screenshot -->
+        <!-- Phone — crossfade slideshow -->
         <div class="phone">
-          <img
-            src="/assets/screenshots/screen-stats.png"
-            alt="Budgetella — istatistik ekranı"
-            width="300"
-            loading="eager"
-            decoding="async"
-          >
+          <div class="phone-slideshow">
+            <img class="phone-slide ps-active" src="/assets/screenshots/slide-4710.png" alt="Budgetella — ana ekran" width="300" loading="eager">
+            <img class="phone-slide" src="/assets/screenshots/slide-4707.png" alt="Budgetella — istatistik" width="300" loading="lazy">
+            <img class="phone-slide" src="/assets/screenshots/slide-4709.png" alt="Budgetella — AI asistan" width="300" loading="lazy">
+            <img class="phone-slide" src="/assets/screenshots/slide-4711.png" alt="Budgetella — sesli giriş" width="300" loading="lazy">
+            <img class="phone-slide" src="/assets/screenshots/slide-4712.png" alt="Budgetella — işlem girme" width="300" loading="lazy">
+            <img class="phone-slide" src="/assets/screenshots/slide-4708.png" alt="Budgetella — işlem listesi" width="300" loading="lazy">
+          </div>
         </div>
 
         <!-- Floating: budget progress -->
@@ -1004,6 +1022,18 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
+  // Phone crossfade slideshow
+  (function () {
+    const slides = Array.from(document.querySelectorAll('.phone-slide'));
+    if (slides.length < 2) return;
+    let cur = 0;
+    setInterval(() => {
+      slides[cur].classList.remove('ps-active');
+      cur = (cur + 1) % slides.length;
+      slides[cur].classList.add('ps-active');
+    }, 3500);
+  })();
+
   // FAQ accordion
   document.querySelectorAll('.faq-q').forEach(btn => {
     btn.addEventListener('click', () => {
