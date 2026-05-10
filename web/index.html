@@ -134,13 +134,23 @@
   display: flex; justify-content: center; align-items: center;
 }
 .phone {
-  width: 300px; height: 600px;
-  background: #0A0B14; border-radius: 50px; padding: 8px;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.4) inset,
-    0 50px 100px -30px rgba(10,11,20,0.4),
-    0 30px 60px -20px rgba(110,91,255,0.2);
+  width: 300px;
+  border-radius: 50px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 8px #0A0B14,
+    0 0 0 9px rgba(255,255,255,0.07),
+    0 50px 100px -30px rgba(10,11,20,0.45),
+    0 30px 60px -20px rgba(110,91,255,0.25);
   z-index: 2;
   transform: perspective(1200px) rotateY(-6deg) rotateX(2deg);
+  display: block;
+}
+.phone img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 42px;
 }
 .phone-screen {
   width: 100%; height: 100%;
@@ -442,13 +452,11 @@
   .hero-glow-1 { width: 280px; height: 280px; top: -40px; right: -20px; opacity: 0.5; }
   .hero-glow-2 { width: 200px; height: 200px; bottom: -20px; left: -20px; opacity: 0.5; }
   .phone {
-    width: 168px; height: 336px;
-    border-radius: 38px; padding: 5px;
+    width: 168px;
+    border-radius: 38px;
     transform: perspective(900px) rotateY(0deg) rotateX(0deg);
   }
-  .phone-screen { border-radius: 33px; }
-  .phone-notch { width: 68px; height: 18px; top: 9px; border-radius: 9px; }
-  .app { padding: 36px 9px 9px; }
+  .phone img { border-radius: 30px; }
   .app-top { font-size: 10px; margin-bottom: 14px; }
   .app-balance { font-size: 22px; }
   .app-balance-delta { font-size: 10px; }
@@ -629,60 +637,15 @@
           <div class="fc-ocr-meta">Market · Otomatik kategorilendi ✓</div>
         </div>
 
-        <!-- Phone -->
+        <!-- Phone — gerçek screenshot -->
         <div class="phone">
-          <div class="phone-screen">
-            <div class="phone-notch"></div>
-            <div class="app">
-              <div class="app-top">
-                <span>Mayıs 2025</span>
-                <span>👤</span>
-              </div>
-              <div class="app-balance-label">Bu ay toplam gider</div>
-              <div class="app-balance">₺12.450<span class="small"></span></div>
-              <div class="app-balance-delta">↑ +₺890 geçen aya göre</div>
-              <div class="app-chips">
-                <span class="chip on">Tümü</span>
-                <span class="chip">Market</span>
-                <span class="chip">Faturalar</span>
-                <span class="chip">Yemek</span>
-              </div>
-              <div class="tx-list">
-                <div class="tx">
-                  <div class="tx-icon">🛒</div>
-                  <div>
-                    <div class="tx-name">Migros Market</div>
-                    <div class="tx-time">Bugün 14:22</div>
-                  </div>
-                  <div class="tx-amt out">-₺487</div>
-                </div>
-                <div class="tx">
-                  <div class="tx-icon">⛽</div>
-                  <div>
-                    <div class="tx-name">Shell Akaryakıt</div>
-                    <div class="tx-time">Dün 09:15</div>
-                  </div>
-                  <div class="tx-amt out">-₺1.240</div>
-                </div>
-                <div class="tx">
-                  <div class="tx-icon">💡</div>
-                  <div>
-                    <div class="tx-name">Elektrik Faturası</div>
-                    <div class="tx-time">28 Nis</div>
-                  </div>
-                  <div class="tx-amt out">-₺890</div>
-                </div>
-                <div class="tx">
-                  <div class="tx-icon">💰</div>
-                  <div>
-                    <div class="tx-name">Maaş</div>
-                    <div class="tx-time">1 May</div>
-                  </div>
-                  <div class="tx-amt in">+₺32.000</div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <img
+            src="/assets/screenshots/screen-stats.png"
+            alt="Budgetella — istatistik ekranı"
+            width="300"
+            loading="eager"
+            decoding="async"
+          >
         </div>
 
         <!-- Floating: budget progress -->
