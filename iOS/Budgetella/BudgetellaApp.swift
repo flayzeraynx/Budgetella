@@ -20,6 +20,15 @@ struct BudgetellaApp: App {
     let modelContainer: ModelContainer
 
     init() {
+        // First-launch language default: English for everyone, regardless of system locale.
+        // Users can switch to Turkish (or any supported language) later from Settings → Dil.
+        // Uses a dedicated key so this only fires once and doesn't fight a user's later choice.
+        if !UserDefaults.standard.bool(forKey: "defaultLanguageApplied") {
+            UserDefaults.standard.set(["en"], forKey: "AppleLanguages")
+            UserDefaults.standard.set(true, forKey: "defaultLanguageApplied")
+            UserDefaults.standard.synchronize()
+        }
+
         // Firebase — GoogleService-Info.plist'ten otomatik konfigürasyon
         FirebaseApp.configure()
 
@@ -78,22 +87,116 @@ struct BudgetellaApp: App {
                   ?? "en"
         return Locale(identifier: String(raw.prefix(2)))
     }()
+    @State private var isReloadingForLanguage = false
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .id(appReloadToken)
-                .environment(\.locale, appLocale)
-                .onReceive(NotificationCenter.default.publisher(for: .appLanguageDidChange)) { _ in
+            ZStack {
+                ContentView()
+                    .id(appReloadToken)
+                    .environment(\.locale, appLocale)
+
+                if isReloadingForLanguage {
+                    LanguageSwitchSkeletonView()
+                        .transition(.opacity)
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .appLanguageDidChange)) { _ in
+                // Pop the skeleton up first so the user sees the transition,
+                // then swap locale + force a tree rebuild via id token, then fade it out.
+                withAnimation(.easeOut(duration: 0.18)) {
+                    isReloadingForLanguage = true
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                     let raw = UserDefaults.standard.stringArray(forKey: "AppleLanguages")?.first
                               ?? Locale.current.language.languageCode?.identifier
                               ?? "en"
                     appLocale = Locale(identifier: String(raw.prefix(2)))
                     appReloadToken = UUID()
                 }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) {
+                    withAnimation(.easeIn(duration: 0.22)) {
+                        isReloadingForLanguage = false
+                    }
+                }
+            }
         }
         .modelContainer(modelContainer)
         .backgroundTask(.appRefresh("seed")) { }
+    }
+}
+
+// MARK: - Language switch skeleton
+//
+// Brief shimmer overlay shown while the SwiftUI tree rebuilds after a language change.
+// Mirrors the layout language of the app (header bar, list rows, bottom tab bar) so the
+// transition reads as "content is reloading" rather than "the app froze".
+private struct LanguageSwitchSkeletonView: View {
+    var body: some View {
+        ZStack {
+            BrandColor.background.ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                // Top bar placeholder
+                HStack {
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(BrandColor.surface)
+                        .frame(width: 120, height: 18)
+                    Spacer()
+                    Circle()
+                        .fill(BrandColor.surface)
+                        .frame(width: 32, height: 32)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 60)
+                .padding(.bottom, 24)
+
+                // Cards
+                VStack(spacing: 14) {
+                    ForEach(0..<5, id: \.self) { i in
+                        HStack(spacing: 12) {
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .fill(BrandColor.surface)
+                                .frame(width: 36, height: 36)
+                            VStack(alignment: .leading, spacing: 6) {
+                                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                    .fill(BrandColor.surface)
+                                    .frame(width: i.isMultiple(of: 2) ? 160 : 200, height: 12)
+                                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                    .fill(BrandColor.surface.opacity(0.7))
+                                    .frame(width: i.isMultiple(of: 2) ? 90 : 70, height: 10)
+                            }
+                            Spacer()
+                            RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                .fill(BrandColor.surface)
+                                .frame(width: 50, height: 12)
+                        }
+                        .padding(14)
+                        .background(BrandColor.surface.opacity(0.35))
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
+                }
+                .padding(.horizontal, 20)
+
+                Spacer()
+
+                // Bottom tab bar placeholder
+                HStack(spacing: 40) {
+                    ForEach(0..<5, id: \.self) { _ in
+                        VStack(spacing: 4) {
+                            RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                .fill(BrandColor.surface)
+                                .frame(width: 22, height: 22)
+                            RoundedRectangle(cornerRadius: 2, style: .continuous)
+                                .fill(BrandColor.surface.opacity(0.7))
+                                .frame(width: 32, height: 8)
+                        }
+                    }
+                }
+                .padding(.bottom, 36)
+            }
+        }
+        .shimmer()
     }
 }
 

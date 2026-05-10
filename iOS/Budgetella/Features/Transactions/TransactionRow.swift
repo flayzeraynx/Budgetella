@@ -12,80 +12,43 @@ struct TransactionRow: View {
     var onTap: (() -> Void)? = nil
 
     @Environment(\.hideAmounts) private var hideAmounts
-    @State private var swipeOffset: CGFloat = 0
     @State private var showDeleteConfirm = false
-    private let deleteWidth: CGFloat = 76
+    @State private var isPressed = false
 
     var body: some View {
-        ZStack(alignment: .trailing) {
-            // Delete button revealed on swipe — shows confirmation dialog,
-            // never propagates to the row's onTap handler.
-            Button {
-                // Snap back first so the row is fully visible behind the dialog
-                withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
-                    swipeOffset = 0
+        rowContent
+            .contentShape(Rectangle())
+            // Subtle press feedback so the long-press affordance feels deliberate.
+            .background(isPressed ? BrandColor.primary.opacity(0.10) : .clear)
+            .animation(isPressed ? .none : .easeOut(duration: 0.22), value: isPressed)
+            .onTapGesture { onTap?() }
+            // Long-press anywhere on the row → delete confirmation.
+            // Haptic on trigger so the user knows the gesture fired before the dialog appears.
+            .onLongPressGesture(
+                minimumDuration: 0.45,
+                maximumDistance: 18,
+                perform: {
+                    isPressed = false
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                    showDeleteConfirm = true
+                },
+                onPressingChanged: { pressing in
+                    isPressed = pressing
                 }
-                showDeleteConfirm = true
-            } label: {
-                VStack(spacing: 4) {
-                    Image(systemName: "trash.fill")
-                        .font(.system(size: 17, weight: .semibold))
-                    Text("Sil")
-                        .font(.brand(.caption))
-                }
-                .foregroundStyle(.white)
-                .frame(width: deleteWidth)
-                .frame(maxHeight: .infinity)
-                .background(BrandColor.expense)
+            )
+            .confirmationDialog(
+                LocaleHelper.string("Bu işlemi silmek istediğinizden emin misiniz?"),
+                isPresented: $showDeleteConfirm,
+                titleVisibility: .visible
+            ) {
+                Button(LocaleHelper.string("Sil"), role: .destructive) { onDelete?() }
+                Button(LocaleHelper.string("İptal"), role: .cancel) { }
+            } message: {
+                let label = transaction.note.isEmpty
+                    ? LocaleHelper.string("İsimsiz")
+                    : transaction.note
+                Text(label)
             }
-            .opacity(swipeOffset < -8 ? 1 : 0)
-
-            // Main row content — tap opens edit, swipe reveals delete.
-            // onTapGesture is scoped to rowContent only, so the delete
-            // button behind it is never accidentally triggered.
-            rowContent
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    guard swipeOffset == 0 else {
-                        // First tap on a swiped row just closes it
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { swipeOffset = 0 }
-                        return
-                    }
-                    onTap?()
-                }
-                .offset(x: swipeOffset)
-                .gesture(
-                    DragGesture(minimumDistance: 12, coordinateSpace: .local)
-                        .onChanged { value in
-                            let isHorizontal = abs(value.translation.width) > abs(value.translation.height)
-                            guard isHorizontal else { return }
-                            if value.translation.width < 0 {
-                                swipeOffset = max(value.translation.width, -deleteWidth)
-                            } else if swipeOffset < 0 {
-                                swipeOffset = min(0, swipeOffset + value.translation.width)
-                            }
-                        }
-                        .onEnded { _ in
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-                                swipeOffset = swipeOffset < -(deleteWidth * 0.5) ? -deleteWidth : 0
-                            }
-                        }
-                )
-        }
-        .clipped()
-        .confirmationDialog(
-            LocaleHelper.string("Bu işlemi silmek istediğinizden emin misiniz?"),
-            isPresented: $showDeleteConfirm,
-            titleVisibility: .visible
-        ) {
-            Button(LocaleHelper.string("Sil"), role: .destructive) { onDelete?() }
-            Button(LocaleHelper.string("İptal"), role: .cancel) { }
-        } message: {
-            let label = transaction.note.isEmpty
-                ? LocaleHelper.string("İsimsiz")
-                : transaction.note
-            Text(label)
-        }
     }
 
     private var rowContent: some View {

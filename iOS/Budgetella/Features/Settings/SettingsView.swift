@@ -110,8 +110,7 @@ struct SettingsView: View {
                                 .frame(maxWidth: .infinity, minHeight: 44)
                                 .contentShape(Rectangle())
                             }
-                            .buttonStyle(.plain)
-                            .highlightOnPress()
+                            .buttonStyle(.listRow)
                             .listRowInsets(EdgeInsets())
 
                             Button {
@@ -133,8 +132,7 @@ struct SettingsView: View {
                                 .frame(maxWidth: .infinity, minHeight: 44)
                                 .contentShape(Rectangle())
                             }
-                            .buttonStyle(.plain)
-                            .highlightOnPress()
+                            .buttonStyle(.listRow)
                             .listRowInsets(EdgeInsets())
                         }
                     }
@@ -255,8 +253,7 @@ struct SettingsView: View {
                             .frame(maxWidth: .infinity, minHeight: 44)
                             .contentShape(Rectangle())
                         }
-                        .buttonStyle(.plain)
-                        .highlightOnPress()
+                        .buttonStyle(.listRow)
                         .listRowInsets(EdgeInsets())
                         .listRowBackground(BrandColor.surface.opacity(0.4))
 
@@ -295,13 +292,11 @@ struct SettingsView: View {
                 }
                 .scrollContentBackground(.hidden)
                 .listStyle(.insetGrouped)
-                .onAppear {
-                    // Eliminate the first-tap delay that UIScrollView adds in List rows
-                    UIScrollView.appearance().delaysContentTouches = false
-                }
-                .onDisappear {
-                    UIScrollView.appearance().delaysContentTouches = true
-                }
+                // Note: we deliberately leave UIScrollView.delaysContentTouches at the
+                // system default (true). Setting it to false makes Button-backed rows
+                // eat vertical drags, so the user can't scroll the list by dragging on
+                // a row — only by dragging in the gaps between sections. The tiny
+                // first-tap delay is the right trade-off here.
             }
             .navigationTitle("Ayarlar")
             .navigationBarTitleDisplayMode(.inline)
@@ -442,8 +437,7 @@ struct SettingsView: View {
             .padding(Spacing.md)
             .glassCard(cornerRadius: Spacing.radiusMedium)
         }
-        .buttonStyle(.plain)
-        .cardHighlightOnPress(cornerRadius: Spacing.radiusMedium)
+        .buttonStyle(.card(cornerRadius: Spacing.radiusMedium))
     }
 
     // MARK: - Premium row
@@ -488,8 +482,7 @@ struct SettingsView: View {
             .padding(.horizontal, 16)
             .frame(maxWidth: .infinity, minHeight: 44)
         }
-        .buttonStyle(.plain)
-        .highlightOnPress()
+        .buttonStyle(.listRow)
         .listRowInsets(EdgeInsets())
     }
 
@@ -525,8 +518,7 @@ struct SettingsView: View {
             .frame(maxWidth: .infinity, minHeight: 44)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
-        .highlightOnPress()
+        .buttonStyle(.listRow)
         .listRowInsets(EdgeInsets())
         .disabled(disabled)
         .opacity(disabled ? 0.45 : 1)

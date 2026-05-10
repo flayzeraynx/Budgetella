@@ -92,8 +92,7 @@ struct ThemePickerSheet: View {
             .padding(Spacing.md)
             .glassCard(cornerRadius: 14)
         }
-        .buttonStyle(.plain)
-        .cardHighlightOnPress(cornerRadius: 14)
+        .buttonStyle(.card(cornerRadius: 14))
     }
 
     private var previewSection: some View {
@@ -232,8 +231,7 @@ struct LanguagePickerSheet: View {
             .padding(Spacing.md)
             .glassCard(cornerRadius: 14)
         }
-        .buttonStyle(.plain)
-        .cardHighlightOnPress(cornerRadius: 14)
+        .buttonStyle(.card(cornerRadius: 14))
     }
 }
 
@@ -355,8 +353,7 @@ struct CurrencyPickerSheet: View {
             .padding(Spacing.md)
             .glassCard(cornerRadius: 14)
         }
-        .buttonStyle(.plain)
-        .cardHighlightOnPress(cornerRadius: 14)
+        .buttonStyle(.card(cornerRadius: 14))
     }
 
     private func currencyName(_ c: AppCurrency) -> LocalizedStringKey {

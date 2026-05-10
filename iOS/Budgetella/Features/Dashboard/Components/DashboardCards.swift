@@ -535,6 +535,9 @@ struct DailyFlowChart: View {
             .chartXAxis(.hidden)
             .chartYAxis(.hidden)
             .frame(height: 72)
+            // Rasterise via Metal — the line chart's catmullRom interpolation
+            // is expensive to redraw on every page slide.
+            .drawingGroup()
         }
     }
 }
@@ -597,6 +600,7 @@ struct IncomeExpenseBarChart: View {
                 }
                 .chartYAxis(.hidden)
                 .frame(height: 140)
+                .drawingGroup()
             }
         }
         .padding(Spacing.lg)
@@ -622,8 +626,13 @@ struct AIInsightCard: View {
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @Query(sort: \Category.sortOrder) private var categories: [Category]
     @State private var pickedIndex = 0
+    // Cached compute output. Recomputed only when the @Query results change,
+    // not on every body invocation — Charts and AI rule scans were the
+    // biggest source of stutter when these tabs slid into view.
+    @State private var cachedInsights: [(tag: String, text: String, accentColor: Color)] = []
+    @State private var cacheKey: Int = 0
 
-    private var allInsights: [(tag: String, text: String, accentColor: Color)] {
+    private func computeInsights() -> [(tag: String, text: String, accentColor: Color)] {
         var result: [(tag: String, text: String, accentColor: Color)] = []
         if let cached = GeminiInsightService.cachedInsights() {
             result += cached.map { ($0.tag, $0.text, accentColorFor($0.accent)) }
@@ -634,10 +643,14 @@ struct AIInsightCard: View {
     }
 
     private var displayInsight: (tag: String, text: String, accentColor: Color) {
-        guard !allInsights.isEmpty else {
-            return ("BUDGİ · AI", "Harcama verilerin analiz edilmeye hazır. Birkaç işlem ekledikten sonra kişisel öneriler buraya gelecek.", BrandColor.primary)
+        guard !cachedInsights.isEmpty else {
+            let fallback = LocaleHelper.string(
+                "Harcama verilerin analiz edilmeye hazır. Birkaç işlem ekledikten sonra kişisel öneriler buraya gelecek.",
+                value: "Your spending data is ready to be analyzed. Personalized insights will appear here after a few transactions."
+            )
+            return ("BUDGİ · AI", fallback, BrandColor.primary)
         }
-        return allInsights[pickedIndex % allInsights.count]
+        return cachedInsights[pickedIndex % cachedInsights.count]
     }
 
     private func accentColorFor(_ key: String) -> Color {
@@ -648,6 +661,17 @@ struct AIInsightCard: View {
         case "info":    return BrandColor.info
         default:        return BrandColor.primary
         }
+    }
+
+    /// Cheap signature used to decide if the cache needs to be rebuilt.
+    /// Counts change when transactions/categories are added or removed; we
+    /// don't try to detect edits since BudgiInsightEngine aggregates totals
+    /// and edits will roll in on the next add/delete anyway.
+    private var dataSignature: Int {
+        var hasher = Hasher()
+        hasher.combine(transactions.count)
+        hasher.combine(categories.count)
+        return hasher.finalize()
     }
 
     var body: some View {
@@ -691,11 +715,22 @@ struct AIInsightCard: View {
                 .strokeBorder(BrandColor.primary.opacity(0.25), lineWidth: 1)
         )
         .onAppear {
-            let count = allInsights.count
+            refreshCacheIfNeeded()
+            let count = cachedInsights.count
             if count > 1 { pickedIndex = Int.random(in: 0..<count) }
+        }
+        .onChange(of: dataSignature) { _, _ in
+            refreshCacheIfNeeded()
         }
         .onTapGesture {
             NotificationCenter.default.post(name: .navigateToBudgiTab, object: nil)
         }
+    }
+
+    private func refreshCacheIfNeeded() {
+        let sig = dataSignature
+        guard sig != cacheKey || cachedInsights.isEmpty else { return }
+        cacheKey = sig
+        cachedInsights = computeInsights()
     }
 }

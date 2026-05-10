@@ -16,6 +16,11 @@ struct MainTabView: View {
     @State private var selectedTab: AppTab = .home
     @State private var showQuickEntry = false
     @State private var entryMode: EntryMode = .manual
+    @State private var dragOffset: CGFloat = 0
+    // Lazy tab mounting: only views that have been activated (or are adjacent
+    // to the active tab) are rendered. Avoids the cost of evaluating all four
+    // tab view-graphs eagerly at launch.
+    @State private var mountedTabs: Set<AppTab> = [.home, .list]
     @Query private var settingsArr: [AppSettings]
 
     private var hideAmounts: Bool { settingsArr.first?.hideAmounts ?? false }
@@ -30,22 +35,23 @@ struct MainTabView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            TabView(selection: $selectedTab) {
-                DashboardView()
-                    .tag(AppTab.home)
-                    .toolbar(.hidden, for: .tabBar)
-
-                TransactionsView()
-                    .tag(AppTab.list)
-                    .toolbar(.hidden, for: .tabBar)
-
-                StatsView()
-                    .tag(AppTab.stats)
-                    .toolbar(.hidden, for: .tabBar)
-
-                BudgiView()
-                    .tag(AppTab.ai)
-                    .toolbar(.hidden, for: .tabBar)
+            // Custom horizontal paging. Each tab is rendered side-by-side in a
+            // ZStack and translated by (tabIndex − selectedIndex) × screenWidth.
+            // This is built by hand rather than via `.tabViewStyle(.page)` because
+            // UIPageViewController (which `.page` wraps under the hood) crashes
+            // when child pages own NavigationStacks of their own — every screen
+            // in this app does, so .page is off the table.
+            // All four tabs stay mounted, so scroll positions, filters, and
+            // SwiftUI @State inside each NavigationStack survive tab switches.
+            GeometryReader { geo in
+                ZStack(alignment: .topLeading) {
+                    pageContainer(.home, width: geo.size.width, height: geo.size.height)
+                    pageContainer(.list, width: geo.size.width, height: geo.size.height)
+                    pageContainer(.stats, width: geo.size.width, height: geo.size.height)
+                    pageContainer(.ai, width: geo.size.width, height: geo.size.height)
+                }
+                .contentShape(Rectangle())
+                .simultaneousGesture(pageSwipeGesture(screenWidth: geo.size.width))
             }
             .padding(.bottom, 72)
 
@@ -96,33 +102,111 @@ struct MainTabView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .navigateToBudgiTab)) { _ in
-            withAnimation(.spring(response: 0.3)) { selectedTab = .ai }
+            withAnimation(.spring(response: 0.34, dampingFraction: 0.86)) { selectedTab = .ai }
         }
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 50, coordinateSpace: .local)
-                .onEnded { value in
-                    let dx = value.translation.width
-                    let dy = value.translation.height
-                    guard abs(dx) > abs(dy) * 2.5 else { return }
-                    // List tab'de nav swipe ile swipe-to-delete çakışmasını önle:
-                    // Delete yavaş/kasıtlı swipe, nav flick — velocity ile ayırt et.
-                    if selectedTab == .list {
-                        guard abs(value.velocity.width) > 600 else { return }
-                    }
-                    let tabs = AppTab.allCases
-                    if dx < 0 {
-                        if let idx = tabs.firstIndex(of: selectedTab), idx < tabs.count - 1 {
-                            withAnimation(.spring(response: 0.3)) { selectedTab = tabs[idx + 1] }
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        }
-                    } else {
-                        if let idx = tabs.firstIndex(of: selectedTab), idx > 0 {
-                            withAnimation(.spring(response: 0.3)) { selectedTab = tabs[idx - 1] }
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        }
-                    }
+        // Mount the new tab's neighbours just before the user can swipe to
+        // them. Initial mount on appear seeds {.home, .list}; from there each
+        // selection extends the set so the next swipe finds the page ready.
+        .onAppear { ensureAdjacentMounted(for: selectedTab) }
+        .onChange(of: selectedTab) { _, newTab in
+            ensureAdjacentMounted(for: newTab)
+        }
+    }
+
+    // MARK: - Page layout
+
+    @ViewBuilder
+    private func pageContainer(_ tab: AppTab, width: CGFloat, height: CGFloat) -> some View {
+        Group {
+            if mountedTabs.contains(tab) {
+                switch tab {
+                case .home:  DashboardView()
+                case .list:  TransactionsView()
+                case .stats: StatsView()
+                case .ai:    BudgiView()
                 }
-        )
+            } else {
+                // Placeholder for tabs the user hasn't reached yet. The
+                // background colour matches the rest of the app so even if the
+                // user catches a glimpse during a swipe (they shouldn't —
+                // ensureAdjacent mounts neighbours before they're visible) it
+                // looks like an empty page rather than a missing one.
+                BrandColor.background
+            }
+        }
+        .frame(width: width, height: height)
+        .offset(x: pageOffset(for: tab, width: width))
+        // Only the active page should receive taps so an off-screen page's
+        // controls (e.g. an invisible toolbar button) can't be triggered.
+        .allowsHitTesting(tab == selectedTab && dragOffset == 0)
+    }
+
+    /// Marks the active tab + its immediate neighbours as mounted. Once a tab
+    /// is mounted it stays mounted for the life of the app so navigation state
+    /// (filters, scroll position, edit sheets) survives subsequent switches.
+    private func ensureAdjacentMounted(for tab: AppTab) {
+        let tabs = AppTab.allCases
+        guard let idx = tabs.firstIndex(of: tab) else { return }
+        var next = mountedTabs
+        next.insert(tab)
+        if idx > 0 { next.insert(tabs[idx - 1]) }
+        if idx < tabs.count - 1 { next.insert(tabs[idx + 1]) }
+        if next != mountedTabs { mountedTabs = next }
+    }
+
+    private func pageOffset(for tab: AppTab, width: CGFloat) -> CGFloat {
+        let delta = CGFloat(tab.rawValue - selectedTab.rawValue)
+        return delta * width + dragOffset
+    }
+
+    // MARK: - Page swipe gesture
+
+    private func pageSwipeGesture(screenWidth: CGFloat) -> some Gesture {
+        // minimumDistance lets inner horizontal scrollviews (the category chip
+        // strip in TransactionsView, etc.) win short drags. Only swipes that
+        // clear ~24 pt and stay clearly horizontal start translating pages.
+        DragGesture(minimumDistance: 24, coordinateSpace: .local)
+            .onChanged { value in
+                let dx = value.translation.width
+                let dy = value.translation.height
+                guard abs(dx) > abs(dy) * 1.5 else { return }
+
+                // Resist past the leading/trailing edges so the user feels they
+                // can't keep dragging into nothing.
+                let atLeft  = selectedTab == AppTab.allCases.first && dx > 0
+                let atRight = selectedTab == AppTab.allCases.last  && dx < 0
+                if atLeft || atRight {
+                    dragOffset = dx * 0.25
+                } else {
+                    dragOffset = dx
+                }
+            }
+            .onEnded { value in
+                let dx = value.translation.width
+                let velocity = value.velocity.width
+                let commitThreshold = screenWidth * 0.22
+                let flickThreshold: CGFloat = 480
+
+                let goesNext = dx < -commitThreshold || velocity < -flickThreshold
+                let goesPrev = dx >  commitThreshold || velocity >  flickThreshold
+
+                let tabs = AppTab.allCases
+                let snapAnimation: Animation = .spring(response: 0.34, dampingFraction: 0.86)
+
+                if goesNext, let idx = tabs.firstIndex(of: selectedTab), idx < tabs.count - 1 {
+                    withAnimation(snapAnimation) {
+                        dragOffset = 0
+                        selectedTab = tabs[idx + 1]
+                    }
+                } else if goesPrev, let idx = tabs.firstIndex(of: selectedTab), idx > 0 {
+                    withAnimation(snapAnimation) {
+                        dragOffset = 0
+                        selectedTab = tabs[idx - 1]
+                    }
+                } else {
+                    withAnimation(snapAnimation) { dragOffset = 0 }
+                }
+            }
     }
 
     private func handleDeepLink(_ url: URL) {
@@ -298,7 +382,11 @@ struct CustomTabBar: View {
     @ViewBuilder
     private func tabItem(_ tab: AppTab, icon: String, label: LocalizedStringKey) -> some View {
         Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            // MainTabView positions pages by `(tabIndex - selectedIndex) × width`,
+            // so changing the binding inside `withAnimation` drives the same
+            // spring slide that a swipe-release uses. Keep the timing aligned
+            // with `pageSwipeGesture`'s snap animation.
+            withAnimation(.spring(response: 0.34, dampingFraction: 0.86)) {
                 selected = tab
             }
         } label: {

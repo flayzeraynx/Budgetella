@@ -150,6 +150,8 @@ struct StatsView: View {
                         .foregroundStyle(Color(hex: stat.category.colorHex))
                     }
                     .frame(width: 110, height: 110)
+                    // Donut redraws on every income/expense toggle; Metal it.
+                    .drawingGroup()
                 }
             }
 
