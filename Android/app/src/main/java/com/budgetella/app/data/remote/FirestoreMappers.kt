@@ -95,15 +95,21 @@ internal object FirestoreMappers {
     fun docToCategory(doc: Map<String, Any?>): CategoryEntity? {
         val id = doc["id"] as? String ?: return null
         val userId = doc["userId"] as? String ?: return null
+        // Derive slug first — a non-blank slug means this is a system/default category.
+        val slug = (doc["slug"] as? String)?.takeIf { it.isNotBlank() }
+        // `isDefault` may be absent in iOS-originated documents (iOS doesn't write
+        // this field to Firestore). Fall back to slug presence so that default
+        // categories always stay read-only even after a cross-device Firestore sync.
+        val isDefault = doc["isDefault"] as? Boolean ?: (slug != null)
         return CategoryEntity(
             id = id,
             userId = userId,
             name = (doc["name"] as? String) ?: "",
-            slug = (doc["slug"] as? String)?.takeIf { it.isNotBlank() },
+            slug = slug,
             typeRaw = (doc["type"] as? String) ?: TransactionType.Expense.raw,
             iconName = (doc["iconName"] as? String) ?: "tag",
             colorHex = (doc["colorHex"] as? String) ?: "#6366f1",
-            isDefault = doc["isDefault"] as? Boolean ?: false,
+            isDefault = isDefault,
             sortOrder = (doc["sortOrder"] as? Number)?.toInt() ?: 0,
             createdAt = System.currentTimeMillis(),
         )

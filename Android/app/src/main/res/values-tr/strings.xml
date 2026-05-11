@@ -111,8 +111,12 @@
     <string name="category_mgmt_add_title_expense">Yeni gider kategorisi</string>
     <string name="category_mgmt_name_placeholder">Kategori adı</string>
     <string name="settings_category_mgmt">Kategorileri yönet</string>
+    <string name="category_mgmt_custom_badge">Özel</string>
+    <string name="category_mgmt_add_sheet_title">Yeni Kategori</string>
+    <string name="category_mgmt_add_action">Ekle</string>
+    <string name="category_mgmt_section_icon">İkon</string>
+    <string name="category_mgmt_section_color">Renk</string>
     <string name="common_rename">Yeniden adlandır</string>
-    <string name="common_done">Tamam</string>
     <string name="entry_mode_manual">Manuel</string>
     <string name="entry_mode_voice">Sesli</string>
     <string name="entry_mode_camera">Kamera</string>
@@ -336,5 +340,33 @@
     <string name="common_loading">Yükleniyor…</string>
     <string name="common_retry">Tekrar dene</string>
     <string name="common_close">Kapat</string>
+
+
+    <!-- Sesli giriş -->
+    <string name="voice_entry_status_idle">SESLİ GİRİŞ</string>
+    <string name="voice_entry_status_listening">DİNLİYOR</string>
+    <string name="voice_entry_status_processing">İŞLENİYOR</string>
+    <string name="voice_entry_status_understood">ANLAŞILDI</string>
+    <string name="voice_entry_status_error">HATA</string>
+    <string name="voice_entry_preparing">Hazırlanıyor…</string>
+    <string name="voice_entry_speak">Konuşun</string>
+    <string name="voice_entry_example_prompt">"120 lira yemek" ya da "Kahve kırk beş"</string>
+    <string name="voice_entry_you_said">SEN DEDİN Kİ</string>
+    <string name="voice_entry_processing">Anlaşılıyor…</string>
+    <string name="voice_entry_ai_understood">AI ANLADI</string>
+    <string name="voice_entry_stop_hint">Durdurmak için dokun</string>
+    <string name="voice_entry_or_manual">veya manuel giriş kullan</string>
+    <string name="voice_entry_parsed_amount">Tutar</string>
+    <string name="voice_entry_parsed_note">Açıklama</string>
+    <string name="voice_entry_error_no_speech">Konuşma algılanamadı.\nTekrar dene.</string>
+    <string name="voice_entry_error_no_amount">Tutar anlaşılamadı.\nTekrar dene veya manuel giriş kullan.</string>
+
+    <!-- Kamera / fiş girişi -->
+    <string name="camera_entry_status_preview">KAMERA GİRİŞİ</string>
+    <string name="camera_entry_status_scanning">OKUNUYOR</string>
+    <string name="camera_entry_frame_hint">Fişi çerçevele</string>
+    <string name="camera_entry_frame_sub">Tutarın görünür olduğundan emin ol</string>
+    <string name="camera_entry_scanning">Tutar okunuyor…</string>
+    <string name="camera_entry_capture_hint">Fişi çekmek için dokun</string>
 
 </resources>

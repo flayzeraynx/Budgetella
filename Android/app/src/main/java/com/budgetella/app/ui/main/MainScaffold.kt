@@ -1,6 +1,5 @@
 package com.budgetella.app.ui.main
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
@@ -46,12 +45,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.budgetella.app.R
 import com.budgetella.app.core.design.BrandColor
@@ -70,7 +68,10 @@ import com.budgetella.app.ui.settings.ProfileSheet
 import com.budgetella.app.ui.settings.SettingsScreen
 import com.budgetella.app.ui.settings.ThemePickerSheet
 import com.budgetella.app.ui.stats.StatsScreen
+import com.budgetella.app.ui.quickentry.CameraEntrySheet
+import com.budgetella.app.ui.quickentry.VoiceEntrySheet
 import com.budgetella.app.ui.transactions.AddEditTransactionSheet
+import com.budgetella.app.ui.transactions.VoicePreFill
 import com.budgetella.app.ui.transactions.TransactionsScreen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -101,6 +102,18 @@ fun MainScaffold(
     // null = sheet hidden; AddEditTrigger.Add = blank add; AddEditTrigger.Edit(tx) = edit mode.
     var sheetTrigger by remember { mutableStateOf<AddEditTrigger?>(null) }
 
+    // Voice / camera pre-fill — set before opening the add sheet, cleared on dismiss.
+    var pendingVoicePreFill by remember { mutableStateOf<VoicePreFill?>(null) }
+
+    // Clear pre-fill whenever the add/edit sheet closes.
+    LaunchedEffect(sheetTrigger) {
+        if (sheetTrigger == null) pendingVoicePreFill = null
+    }
+
+    // Voice / camera sheets
+    var showVoiceSheet  by remember { mutableStateOf(false) }
+    var showCameraSheet by remember { mutableStateOf(false) }
+
     // Settings + picker sheets. Only one is non-null at a time — we dismiss
     // Settings first, wait for the animation, then open the requested sibling.
     var showSettings by remember { mutableStateOf(false) }
@@ -108,8 +121,6 @@ fun MainScaffold(
 
     // FAB blob menu — tap the (+) to expand into a 3-option row above the bar.
     var fabMenuVisible by remember { mutableStateOf(false) }
-    val context = LocalContext.current
-    val comingSoonMsg = stringResource(R.string.entry_mode_coming_soon)
 
     Box(
         modifier = Modifier
@@ -176,11 +187,11 @@ fun MainScaffold(
                 },
                 onPickVoice = {
                     fabMenuVisible = false
-                    Toast.makeText(context, comingSoonMsg, Toast.LENGTH_SHORT).show()
+                    showVoiceSheet = true
                 },
                 onPickCamera = {
                     fabMenuVisible = false
-                    Toast.makeText(context, comingSoonMsg, Toast.LENGTH_SHORT).show()
+                    showCameraSheet = true
                 },
             )
         }
@@ -196,11 +207,36 @@ fun MainScaffold(
             modifier = Modifier.align(Alignment.BottomCenter),
         )
 
+        // Voice entry sheet.
+        if (showVoiceSheet) {
+            VoiceEntrySheet(
+                onDismiss = { showVoiceSheet = false },
+                onParsed  = { amount, note ->
+                    pendingVoicePreFill = VoicePreFill(amountInput = amount, note = note)
+                    showVoiceSheet = false
+                    sheetTrigger   = AddEditTrigger.Add
+                },
+            )
+        }
+
+        // Camera / receipt entry sheet.
+        if (showCameraSheet) {
+            CameraEntrySheet(
+                onDismiss = { showCameraSheet = false },
+                onParsed  = { amount, note ->
+                    pendingVoicePreFill = VoicePreFill(amountInput = amount, note = note)
+                    showCameraSheet = false
+                    sheetTrigger    = AddEditTrigger.Add
+                },
+            )
+        }
+
         // Add/Edit sheet.
         sheetTrigger?.let { trigger ->
             AddEditTransactionSheet(
-                existing = (trigger as? AddEditTrigger.Edit)?.transaction,
-                onDismiss = { sheetTrigger = null },
+                existing     = (trigger as? AddEditTrigger.Edit)?.transaction,
+                voicePreFill = if (trigger is AddEditTrigger.Add) pendingVoicePreFill else null,
+                onDismiss    = { sheetTrigger = null },
             )
         }
 

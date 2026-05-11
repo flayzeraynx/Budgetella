@@ -114,8 +114,12 @@
     <string name="category_mgmt_add_title_expense">New expense category</string>
     <string name="category_mgmt_name_placeholder">Category name</string>
     <string name="settings_category_mgmt">Manage categories</string>
+    <string name="category_mgmt_custom_badge">Custom</string>
+    <string name="category_mgmt_add_sheet_title">New Category</string>
+    <string name="category_mgmt_add_action">Add</string>
+    <string name="category_mgmt_section_icon">Icon</string>
+    <string name="category_mgmt_section_color">Color</string>
     <string name="common_rename">Rename</string>
-    <string name="common_done">Done</string>
     <string name="entry_mode_manual">Manual</string>
     <string name="entry_mode_voice">Voice</string>
     <string name="entry_mode_camera">Camera</string>
@@ -330,6 +334,33 @@
     <string name="biometric_prompt_subtitle">Use biometrics to continue</string>
     <string name="biometric_unlock">Unlock</string>
     <string name="biometric_signout">Sign out</string>
+
+    <!-- Voice entry -->
+    <string name="voice_entry_status_idle">VOICE ENTRY</string>
+    <string name="voice_entry_status_listening">LISTENING</string>
+    <string name="voice_entry_status_processing">PROCESSING</string>
+    <string name="voice_entry_status_understood">UNDERSTOOD</string>
+    <string name="voice_entry_status_error">ERROR</string>
+    <string name="voice_entry_preparing">Getting ready…</string>
+    <string name="voice_entry_speak">Speak</string>
+    <string name="voice_entry_example_prompt">"120 lira food" or "coffee forty-five"</string>
+    <string name="voice_entry_you_said">YOU SAID</string>
+    <string name="voice_entry_processing">Processing…</string>
+    <string name="voice_entry_ai_understood">AI UNDERSTOOD</string>
+    <string name="voice_entry_stop_hint">Tap to stop</string>
+    <string name="voice_entry_or_manual">or use manual entry</string>
+    <string name="voice_entry_parsed_amount">Amount</string>
+    <string name="voice_entry_parsed_note">Note</string>
+    <string name="voice_entry_error_no_speech">No speech detected.\nTry again.</string>
+    <string name="voice_entry_error_no_amount">Couldn\'t parse amount.\nTry again or use manual entry.</string>
+
+    <!-- Camera / receipt entry -->
+    <string name="camera_entry_status_preview">CAMERA ENTRY</string>
+    <string name="camera_entry_status_scanning">READING</string>
+    <string name="camera_entry_frame_hint">Frame the receipt</string>
+    <string name="camera_entry_frame_sub">Make sure the total is visible</string>
+    <string name="camera_entry_scanning">Reading amount…</string>
+    <string name="camera_entry_capture_hint">Tap to capture receipt</string>
 
     <!-- Generic -->
     <string name="common_cancel">Cancel</string>

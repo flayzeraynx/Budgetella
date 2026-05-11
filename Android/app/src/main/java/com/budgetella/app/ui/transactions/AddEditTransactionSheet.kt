@@ -80,6 +80,8 @@ import java.util.Locale
 @Composable
 fun AddEditTransactionSheet(
     existing: TransactionEntity?,
+    /** Pre-fill from voice / camera entry. Ignored when [existing] is non-null. */
+    voicePreFill: VoicePreFill? = null,
     onDismiss: () -> Unit,
 ) {
     val vm: AddEditTransactionViewModel = hiltViewModel()
@@ -88,8 +90,10 @@ fun AddEditTransactionSheet(
 
     // Initialise (or reset) the form on each open. Stable key = the editing
     // id, so add → edit → add cycles all flow through.
+    // When voicePreFill is present, startAdd() pre-populates amount + note
+    // and runs category suggestion automatically.
     LaunchedEffect(existing?.id) {
-        if (existing == null) vm.startAdd() else vm.startEdit(existing)
+        if (existing == null) vm.startAdd(voicePreFill) else vm.startEdit(existing)
     }
     // Once the categories list is non-empty, auto-select the first one of the
     // current type when nothing is selected yet.

@@ -25,6 +25,17 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
 
+/**
+ * Voice / camera pre-fill data passed from [VoiceEntrySheet] or [CameraEntrySheet].
+ * Used by [AddEditTransactionViewModel.startAdd] to populate the form without a
+ * full reset.
+ */
+data class VoicePreFill(
+    val amountInput: String,
+    val note: String,
+    val suggestedCategoryId: String? = null,
+)
+
 /** Mutable form state for the add/edit bottom sheet. */
 data class TransactionFormState(
     val editingId: String? = null,           // null when adding
@@ -72,11 +83,25 @@ class AddEditTransactionViewModel @Inject constructor(
 
     // ── State setters ─────────────────────────────────────────────────────
 
-    /** Reset to a blank add form, pre-selecting the default expense category. */
-    fun startAdd() {
-        _form.value = TransactionFormState()
-        // First-category default is set lazily once the categories flow emits;
-        // see the consumer below in AddEditTransactionSheet.
+    /**
+     * Reset to a blank add form.
+     *
+     * When [voicePreFill] is supplied (voice / camera entry), the form is
+     * pre-populated with the parsed amount and note, and the best-matching
+     * expense category is auto-selected via keyword heuristics.
+     */
+    fun startAdd(voicePreFill: VoicePreFill? = null) {
+        val suggestedId = voicePreFill?.let {
+            it.suggestedCategoryId
+                ?: suggestCategoryForNote(it.note, categories.value)
+        }
+        _form.value = TransactionFormState(
+            amountInput = voicePreFill?.amountInput ?: "",
+            note        = voicePreFill?.note ?: "",
+            categoryId  = suggestedId,
+        )
+        // If no category suggested, the lazy default in AddEditTransactionSheet
+        // (ensureCategoryDefault) will kick in once categories load.
     }
 
     fun startEdit(transaction: TransactionEntity) {
@@ -126,6 +151,48 @@ class AddEditTransactionViewModel @Inject constructor(
         if (_form.value.categoryId != null) return
         val first = categories.value.firstOrNull { it.type == _form.value.type } ?: return
         _form.update { it.copy(categoryId = first.id) }
+    }
+
+    // ── Category suggestion ───────────────────────────────────────────────
+
+    /**
+     * Keyword-based category suggestion for voice / camera pre-fill.
+     *
+     * Scans [note] for Turkish and English keywords and returns the id of
+     * the first matching expense [CategoryEntity] from [cats]. Returns null
+     * when no keyword matches (caller falls back to [ensureCategoryDefault]).
+     */
+    fun suggestCategoryForNote(note: String, cats: List<CategoryEntity> = categories.value): String? {
+        if (note.isBlank()) return null
+        val lower = note.lowercase()
+
+        // Slug → keyword list (Turkish + common English).
+        // Listed longest-match first to avoid partial clashes.
+        val keywordMap: List<Pair<String, List<String>>> = listOf(
+            "food"           to listOf("yemek", "restoran", "kafe", "kahve", "market", "manav",
+                                       "lokanta", "pizza", "burger", "fast food", "pastane",
+                                       "çay", "içecek", "atıştırmalık"),
+            "transportation" to listOf("taksi", "uber", "dolmuş", "otobüs", "metro", "tren",
+                                       "benzin", "yakıt", "otopark", "araba", "feribot"),
+            "housing"        to listOf("kira", "aidat", "ev"),
+            "bills"          to listOf("fatura", "elektrik", "doğalgaz", "su faturası",
+                                       "internet", "telefon", "abonelik"),
+            "healthcare"     to listOf("eczane", "doktor", "hastane", "ilaç", "sağlık"),
+            "shopping"       to listOf("alışveriş", "mağaza", "giyim", "ayakkabı",
+                                       "kıyafet", "zara", "hm", "trendyol", "hepsiburada"),
+            "entertainment"  to listOf("sinema", "tiyatro", "konser", "netflix", "spotify",
+                                       "oyun", "müzik", "eğlence"),
+            "education"      to listOf("okul", "kurs", "kitap", "öğrenim", "eğitim", "ders"),
+        )
+
+        for ((slug, keywords) in keywordMap) {
+            if (keywords.any { lower.contains(it) }) {
+                return cats.firstOrNull {
+                    it.slug == slug && it.type == TransactionType.Expense
+                }?.id
+            }
+        }
+        return null
     }
 
     // ── Actions ───────────────────────────────────────────────────────────

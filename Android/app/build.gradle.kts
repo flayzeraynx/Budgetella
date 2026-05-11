@@ -22,6 +22,12 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
 
+        // Limit native libs to 64-bit ABIs only.
+        // • Eliminates the "16 KB alignment" warning from legacy armeabi-v7a / x86 .so files
+        //   (those architectures don't even support 16 KB pages — the warning is spurious).
+        // • Reduces APK size. All Android 8+ devices that matter ship 64-bit CPUs.
+        ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
+
         // Read the Gemini API key from local properties or env at build time.
         // Equivalent to the iOS Secrets.xcconfig flow.
         val geminiKey: String = providers
@@ -74,6 +80,11 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+        jniLibs {
+            // Store .so files uncompressed so the OS can map them directly
+            // at the correct 16 KB page-size boundary (Android 15+ requirement).
+            useLegacyPackaging = false
         }
     }
 }
@@ -157,6 +168,14 @@ dependencies {
 
     // Charts
     implementation(libs.vico.compose)
+
+    // CameraX — camera viewfinder + image capture for receipt scanning
+    implementation(libs.camerax.camera2)
+    implementation(libs.camerax.lifecycle)
+    implementation(libs.camerax.view)
+
+    // ML Kit Text Recognition — receipt OCR
+    implementation(libs.mlkit.text.recognition)
 
     // Test
     testImplementation(libs.junit)

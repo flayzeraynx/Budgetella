@@ -43,6 +43,12 @@ coil = "2.7.0"
 # Charts
 vico = "2.0.0-beta.3"
 
+# CameraX
+camerax = "1.4.1"
+
+# ML Kit Text Recognition (bundled — no Play Services required)
+mlkitTextRecognition = "16.0.1"
+
 # Test
 junit = "4.13.2"
 junitExt = "1.2.1"
@@ -112,6 +118,14 @@ coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coi
 
 # Charts (Vico — Compose-native, supports line/bar/donut)
 vico-compose = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
+
+# CameraX
+camerax-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
+camerax-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
+camerax-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
+
+# ML Kit Text Recognition
+mlkit-text-recognition = { group = "com.google.mlkit", name = "text-recognition", version.ref = "mlkitTextRecognition" }
 
 # Test
 junit = { group = "junit", name = "junit", version.ref = "junit" }
