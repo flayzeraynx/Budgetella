@@ -61,6 +61,7 @@ import com.budgetella.app.data.local.entity.TransactionEntity
 import com.budgetella.app.ui.budgi.BudgiScreen
 import com.budgetella.app.ui.dashboard.DashboardScreen
 import com.budgetella.app.ui.notifications.NotificationInboxScreen
+import com.budgetella.app.ui.settings.CategoryManagementSheet
 import com.budgetella.app.ui.settings.CurrencyPickerSheet
 import com.budgetella.app.ui.settings.DeleteAccountSheet
 import com.budgetella.app.ui.settings.LanguagePickerSheet
@@ -265,6 +266,13 @@ fun MainScaffold(
                             pendingSecondary = SecondarySheet.NotificationSettings
                         }
                     },
+                    onShowCategories = {
+                        showSettings = false
+                        scope.launch {
+                            delay(280)
+                            pendingSecondary = SecondarySheet.Categories
+                        }
+                    },
                 )
             }
         }
@@ -287,6 +295,8 @@ fun MainScaffold(
                     SecondarySheet.DeleteAccount -> DeleteAccountSheet(onDismiss = { pendingSecondary = null })
                     SecondarySheet.NotificationSettings ->
                         NotificationSettingsSheet(onDismiss = { pendingSecondary = null })
+                    SecondarySheet.Categories ->
+                        CategoryManagementSheet(onDismiss = { pendingSecondary = null })
                 }
             }
         }
@@ -299,7 +309,8 @@ private sealed interface AddEditTrigger {
 }
 
 private enum class SecondarySheet {
-    Theme, Language, Currency, Inbox, Profile, DeleteAccount, NotificationSettings
+    Theme, Language, Currency, Inbox, Profile, DeleteAccount,
+    NotificationSettings, Categories
 }
 
 /**

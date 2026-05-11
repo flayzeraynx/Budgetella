@@ -9,9 +9,12 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Fingerprint
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -223,19 +226,23 @@ private fun PermissionsPage() {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    // POST_NOTIFICATIONS only exists from Android 13 (TIRAMISU). Below that
-    // notifications are granted by manifest and we don't prompt.
-    var notifGranted by remember { mutableStateOf(isNotificationPermissionGranted(context)) }
-    // Track whether we've shown the system dialog already. After one denial
-    // Android silently swallows future requests, so subsequent taps need to
-    // jump the user to the app's notification settings instead.
-    var attempted by remember { mutableStateOf(false) }
+    // Three permissions, three trackers. Notifications only needs the runtime
+    // ask on Android 13+; audio and camera need it on all supported versions.
+    var notifGranted by remember { mutableStateOf(isNotifGranted(context)) }
+    var micGranted by remember { mutableStateOf(isPermissionGranted(context, Manifest.permission.RECORD_AUDIO)) }
+    var cameraGranted by remember { mutableStateOf(isPermissionGranted(context, Manifest.permission.CAMERA)) }
 
-    // Refresh the granted state when the user returns from Settings.
+    var notifAttempted by remember { mutableStateOf(false) }
+    var micAttempted by remember { mutableStateOf(false) }
+    var cameraAttempted by remember { mutableStateOf(false) }
+
+    // Refresh granted-state whenever the user comes back from Settings.
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                notifGranted = isNotificationPermissionGranted(context)
+                notifGranted = isNotifGranted(context)
+                micGranted = isPermissionGranted(context, Manifest.permission.RECORD_AUDIO)
+                cameraGranted = isPermissionGranted(context, Manifest.permission.CAMERA)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -247,38 +254,39 @@ private fun PermissionsPage() {
             contract = ActivityResultContracts.RequestPermission(),
             onResult = { granted ->
                 notifGranted = granted
-                attempted = true
+                notifAttempted = true
             },
         )
     } else null
+
+    val micLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { granted ->
+            micGranted = granted
+            micAttempted = true
+        },
+    )
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { granted ->
+            cameraGranted = granted
+            cameraAttempted = true
+        },
+    )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = Spacing.xl),
-        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Box(
-            modifier = Modifier
-                .size(96.dp)
-                .clip(CircleShape)
-                .background(BrandColor.Primary.copy(alpha = 0.15f)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = Icons.Filled.NotificationsActive,
-                contentDescription = null,
-                tint = BrandColor.Primary,
-                modifier = Modifier.size(40.dp),
-            )
-        }
-        Spacer(Modifier.height(Spacing.lg))
         Text(
             text = stringResource(R.string.onboarding_permissions_title),
             style = BrandText.title,
             color = BrandColor.textPrimary(),
             textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
         )
         Spacer(Modifier.height(Spacing.sm))
         Text(
@@ -286,89 +294,153 @@ private fun PermissionsPage() {
             style = BrandText.body,
             color = BrandColor.textSecondary(),
             textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
         )
         Spacer(Modifier.height(Spacing.xl))
 
-        if (notifGranted) {
-            // Already granted: replace the CTA with a confirmation chip.
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Filled.CheckCircle,
-                    contentDescription = null,
-                    tint = BrandColor.Income,
-                    modifier = Modifier.size(20.dp),
-                )
-                Spacer(Modifier.width(Spacing.sm))
-                Text(
-                    text = stringResource(R.string.onboarding_permissions_notifications_granted),
-                    style = BrandText.subheadline,
-                    color = BrandColor.Income,
-                )
-            }
-        } else {
-            OutlinedButton(
-                onClick = {
-                    when {
-                        Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU -> {
-                            notifGranted = true
-                        }
-                        attempted -> {
-                            // Second tap → Android won't show the dialog again
-                            // because the user already denied. Open the system
-                            // notification settings for this app.
-                            val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                                .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                            context.startActivity(intent)
-                        }
-                        else -> notifLauncher?.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    }
-                },
-                shape = RoundedCornerShape(Spacing.radiusFull),
-            ) {
-                Text(
-                    text = stringResource(
-                        if (attempted) R.string.onboarding_permissions_open_settings
-                        else R.string.onboarding_permissions_notifications_label
-                    ),
-                    style = BrandText.subheadline,
-                    color = BrandColor.Primary,
-                )
-            }
-        }
+        PermissionRow(
+            icon = Icons.Filled.NotificationsActive,
+            tint = BrandColor.Primary,
+            title = stringResource(R.string.onboarding_permission_notifications_title),
+            subtitle = stringResource(R.string.onboarding_permission_notifications_subtitle),
+            granted = notifGranted,
+            attempted = notifAttempted,
+            onAllow = {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                    notifGranted = true
+                } else {
+                    notifLauncher?.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            },
+            onOpenSettings = {
+                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                    .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                context.startActivity(intent)
+            },
+        )
 
-        Spacer(Modifier.height(Spacing.lg))
+        Spacer(Modifier.height(Spacing.md))
 
-        // Biometric hint — the actual toggle lives in Settings → Security
-        // after sign-in (since it lives on the user's AppSettings row). This
-        // is just a discoverability cue so people know it exists.
+        PermissionRow(
+            icon = Icons.Filled.Mic,
+            tint = BrandColor.Income,
+            title = stringResource(R.string.onboarding_permission_mic_title),
+            subtitle = stringResource(R.string.onboarding_permission_mic_subtitle),
+            granted = micGranted,
+            attempted = micAttempted,
+            onAllow = { micLauncher.launch(Manifest.permission.RECORD_AUDIO) },
+            onOpenSettings = { openAppDetails(context) },
+        )
+
+        Spacer(Modifier.height(Spacing.md))
+
+        PermissionRow(
+            icon = Icons.Filled.CameraAlt,
+            tint = BrandColor.Warning,
+            title = stringResource(R.string.onboarding_permission_camera_title),
+            subtitle = stringResource(R.string.onboarding_permission_camera_subtitle),
+            granted = cameraGranted,
+            attempted = cameraAttempted,
+            onAllow = { cameraLauncher.launch(Manifest.permission.CAMERA) },
+            onOpenSettings = { openAppDetails(context) },
+        )
+
+        Spacer(Modifier.height(Spacing.xl))
+
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 imageVector = Icons.Filled.Fingerprint,
                 contentDescription = null,
                 tint = BrandColor.textTertiary(),
-                modifier = Modifier.size(18.dp),
+                modifier = Modifier.size(16.dp),
             )
             Spacer(Modifier.width(Spacing.sm))
             Text(
                 text = stringResource(R.string.onboarding_permissions_biometric_hint),
                 style = BrandText.footnote,
                 color = BrandColor.textTertiary(),
-                textAlign = TextAlign.Center,
             )
         }
     }
 }
 
-/** True if POST_NOTIFICATIONS is granted, or we're on API < 33 (auto-granted). */
-private fun isNotificationPermissionGranted(context: android.content.Context): Boolean =
+@Composable
+private fun PermissionRow(
+    icon: ImageVector,
+    tint: androidx.compose.ui.graphics.Color,
+    title: String,
+    subtitle: String,
+    granted: Boolean,
+    attempted: Boolean,
+    onAllow: () -> Unit,
+    onOpenSettings: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(Spacing.radiusMedium))
+            .background(BrandColor.surface().copy(alpha = 0.4f))
+            .padding(Spacing.md),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(tint.copy(alpha = 0.18f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(imageVector = icon, contentDescription = null, tint = tint, modifier = Modifier.size(20.dp))
+        }
+        Spacer(Modifier.width(Spacing.md))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = title, style = BrandText.subheadline, color = BrandColor.textPrimary())
+            Text(text = subtitle, style = BrandText.caption, color = BrandColor.textTertiary())
+        }
+        Spacer(Modifier.width(Spacing.sm))
+        if (granted) {
+            Icon(
+                imageVector = Icons.Filled.CheckCircle,
+                contentDescription = null,
+                tint = BrandColor.Income,
+                modifier = Modifier.size(24.dp),
+            )
+        } else {
+            OutlinedButton(
+                onClick = if (attempted) onOpenSettings else onAllow,
+                shape = RoundedCornerShape(Spacing.radiusFull),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                    horizontal = Spacing.md, vertical = 6.dp,
+                ),
+            ) {
+                Text(
+                    text = stringResource(
+                        if (attempted) R.string.onboarding_permission_open_settings_short
+                        else R.string.onboarding_permission_allow
+                    ),
+                    style = BrandText.caption,
+                    color = BrandColor.Primary,
+                )
+            }
+        }
+    }
+}
+
+private fun openAppDetails(context: android.content.Context) {
+    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        .setData(android.net.Uri.fromParts("package", context.packageName, null))
+    context.startActivity(intent)
+}
+
+private fun isNotifGranted(context: android.content.Context): Boolean =
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
         true
     } else {
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.POST_NOTIFICATIONS,
-        ) == PackageManager.PERMISSION_GRANTED
+        isPermissionGranted(context, Manifest.permission.POST_NOTIFICATIONS)
     }
+
+private fun isPermissionGranted(context: android.content.Context, permission: String): Boolean =
+    ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 

@@ -21,6 +21,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.ExitToApp
@@ -172,6 +173,13 @@ fun SettingsScreen(
                     title = stringResource(R.string.settings_currency),
                     value = "${state.currency.symbol} ${state.currency.raw}",
                     onClick = onShowCurrency,
+                )
+                RowDivider()
+                NavigationRow(
+                    icon = Icons.Filled.Category,
+                    tint = BrandColor.PrimaryLight,
+                    title = stringResource(R.string.settings_category_mgmt),
+                    onClick = onShowCategories,
                 )
             }
 
