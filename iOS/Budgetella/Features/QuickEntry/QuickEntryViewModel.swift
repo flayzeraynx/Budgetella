@@ -20,6 +20,9 @@ import SwiftData
     var isRecurring: Bool = false
     var recurringInterval: RecurringInterval = .monthly
     var recurringEndDate: Date? = nil
+    /// Transaction date — defaults to "now" so quick entries land on today,
+    /// but the user can backdate via the date row on ManualEntryContent.
+    var date: Date = .now
 
     // MARK: - AI suggestions (on-device)
     var aiSuggestions: [CategoryPrediction] = []
@@ -99,6 +102,7 @@ import SwiftData
             amount: amountDecimal,
             note: note,
             category: category,
+            date: date,
             isRecurring: isRecurring,
             recurringInterval: isRecurring ? recurringInterval : nil,
             recurringEndDate: isRecurring ? recurringEndDate : nil
@@ -124,5 +128,6 @@ import SwiftData
         isRecurring = false
         recurringInterval = .monthly
         recurringEndDate = nil
+        date = .now
     }
 }

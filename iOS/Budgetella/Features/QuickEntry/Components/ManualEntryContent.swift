@@ -30,7 +30,27 @@ struct ManualEntryContent: View {
                 .padding(.horizontal, 20)
                 .padding(.top, Spacing.md)
 
-            // 2 ── Category chips
+            // 2 ── Amount display
+            amountDisplay
+                .padding(.horizontal, 20)
+                .padding(.top, Spacing.lg)
+
+            // 3 ── Description field (note)
+            descriptionField
+                .padding(.horizontal, 20)
+                .padding(.top, Spacing.md)
+
+            // 4 ── Recurring toggle + interval chips
+            recurringRow
+                .padding(.horizontal, 20)
+                .padding(.top, Spacing.sm)
+
+            // 5 ── Date row
+            dateRow
+                .padding(.horizontal, 20)
+                .padding(.top, Spacing.sm)
+
+            // 6 ── Category chips (now at the bottom — matches Android)
             categoryChipsRow
                 .padding(.top, Spacing.sm)
 
@@ -40,24 +60,7 @@ struct ManualEntryContent: View {
                     .padding(.top, Spacing.xs)
             }
 
-            // 3 ── Amount display
-            amountDisplay
-                .padding(.horizontal, 20)
-                .padding(.top, Spacing.md)
-
-            // Flexible space — expands the amount area and anchors description+numpad to bottom
             Spacer(minLength: Spacing.lg)
-
-            // 4 ── Description field
-            descriptionField
-                .padding(.horizontal, 20)
-                .padding(.top, Spacing.sm)
-
-            // 5 ── Recurring toggle + interval chips
-            recurringRow
-                .padding(.horizontal, 20)
-                .padding(.top, Spacing.xs)
-                .padding(.bottom, Spacing.lg)
         }
         .animation(.spring(response: 0.3), value: isTyping)
         .task {
@@ -297,6 +300,34 @@ struct ManualEntryContent: View {
             .frame(width: 56)
         }
         .buttonStyle(.plain)
+    }
+
+    // MARK: - Date row
+
+    private var dateRow: some View {
+        HStack(spacing: Spacing.sm) {
+            Image(systemName: "calendar")
+                .font(.system(size: 14))
+                .foregroundStyle(BrandColor.textTertiary)
+            Text("Tarih")
+                .font(.brand(.body))
+                .foregroundStyle(BrandColor.textSecondary)
+            Spacer()
+            // The compact DatePicker chip sits flush with the row; matches
+            // the date pill the Android sheet uses next to its type toggle.
+            DatePicker("", selection: $vm.date, displayedComponents: [.date])
+                .datePickerStyle(.compact)
+                .labelsHidden()
+                .tint(BrandColor.primary)
+        }
+        .padding(.horizontal, Spacing.md)
+        .padding(.vertical, Spacing.md)
+        .background(BrandColor.surface.opacity(0.4))
+        .clipShape(RoundedRectangle(cornerRadius: Spacing.radiusSmall, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: Spacing.radiusSmall, style: .continuous)
+                .strokeBorder(BrandColor.borderSubtle, lineWidth: 1)
+        )
     }
 
     // MARK: - Recurring row

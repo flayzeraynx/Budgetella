@@ -74,31 +74,31 @@ struct EditTransactionSheet: View {
                                 .padding(.top, Spacing.md)
 
                             if !isTyping {
-                                // 2 — Category chips
-                                categoryChipsRow
-                                    .padding(.top, Spacing.sm)
-
-                                // 3 — Amount display
+                                // 2 — Amount display
                                 amountDisplay
                                     .padding(.horizontal, 20)
                                     .padding(.top, Spacing.md)
                             }
 
-                            // 4 — Note field
+                            // 3 — Note field
                             noteField
                                 .padding(.horizontal, 20)
                                 .padding(.top, Spacing.sm)
 
                             if !isTyping {
-                                // 5 — Date picker row
+                                // 4 — Recurring toggle + interval chips
+                                recurringRow
+                                    .padding(.horizontal, 20)
+                                    .padding(.top, Spacing.sm)
+
+                                // 5 — Date picker row (between recurring and categories)
                                 dateRow
                                     .padding(.horizontal, 20)
                                     .padding(.top, Spacing.xs)
 
-                                // 6 — Recurring toggle + interval chips
-                                recurringRow
-                                    .padding(.horizontal, 20)
-                                    .padding(.top, Spacing.xs)
+                                // 6 — Category chips
+                                categoryChipsRow
+                                    .padding(.top, Spacing.sm)
                             }
                         }
                         .padding(.bottom, Spacing.sm)
