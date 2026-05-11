@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Default locale is English. Turkish lives in values-tr/strings.xml. -->
+
+    <string name="app_name">Budgetella</string>
+
+    <!-- Notification channels -->
+    <string name="notif_channel_default_name">Notifications</string>
+    <string name="notif_channel_default_description">Spending alerts, weekly digests, and Budgi insights.</string>
+
+    <!-- Tab bar -->
+    <string name="tab_home">Home</string>
+    <string name="tab_list">List</string>
+    <string name="tab_stats">Stats</string>
+    <string name="tab_ai">AI</string>
+
+    <!-- App states / placeholders -->
+    <string name="placeholder_home">Dashboard coming soon</string>
+    <string name="placeholder_list">Transactions list coming soon</string>
+    <string name="placeholder_stats">Stats coming soon</string>
+    <string name="placeholder_ai">Budgi will be here soon</string>
+
+    <!-- Entry FAB blob -->
+    <string name="fab_voice">Voice</string>
+    <string name="fab_manual">Manual</string>
+    <string name="fab_camera">Camera</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_welcome_title">Money, finally clear</string>
+    <string name="onboarding_welcome_subtitle">Budgetella turns scattered receipts into an actual picture of where your money goes.</string>
+    <string name="onboarding_features_title">Built for how you spend</string>
+    <string name="onboarding_features_subtitle">Add a transaction in seconds, see trends in a glance, ask Budgi for advice.</string>
+    <string name="onboarding_feature_1_title">Add anything, fast</string>
+    <string name="onboarding_feature_1_body">Voice, camera, or manual — pick whatever\'s closest.</string>
+    <string name="onboarding_feature_2_title">Live charts</string>
+    <string name="onboarding_feature_2_body">Income vs. expense by month, category breakdown, daily flow.</string>
+    <string name="onboarding_feature_3_title">Budgi · AI</string>
+    <string name="onboarding_feature_3_body">Personalised spending insights without sending your bank statements anywhere.</string>
+    <string name="onboarding_permissions_title">A couple of permissions</string>
+    <string name="onboarding_permissions_subtitle">Notifications are optional but help — weekly digests, budget alerts, anomaly pings.</string>
+    <string name="onboarding_permissions_notifications_label">Allow notifications</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_get_started">Get started</string>
+
+    <!-- Auth -->
+    <string name="auth_welcome_title">Welcome to Budgetella</string>
+    <string name="auth_welcome_subtitle">Sign in or create an account to keep your finances synced across devices.</string>
+    <string name="auth_continue_with_google">Continue with Google</string>
+    <string name="auth_continue_with_email">Continue with email</string>
+    <string name="auth_signin_title">Sign in</string>
+    <string name="auth_signup_title">Create your account</string>
+    <string name="auth_email_label">Email</string>
+    <string name="auth_password_label">Password</string>
+    <string name="auth_name_label">Name</string>
+    <string name="auth_signin_cta">Sign in</string>
+    <string name="auth_signup_cta">Create account</string>
+    <string name="auth_forgot_password_link">Forgot your password?</string>
+    <string name="auth_have_account_question">Already have an account?</string>
+    <string name="auth_no_account_question">Don\'t have an account?</string>
+    <string name="auth_have_account_action">Sign in</string>
+    <string name="auth_no_account_action">Create one</string>
+    <string name="auth_forgot_title">Reset password</string>
+    <string name="auth_forgot_body">Enter the email you signed up with and we\'ll send a reset link.</string>
+    <string name="auth_forgot_send">Send reset link</string>
+    <string name="auth_forgot_sent">Check your inbox for the reset email.</string>
+    <string name="auth_back">Back</string>
+    <string name="auth_terms_notice">By continuing you agree to our Terms and Privacy Policy.</string>
+    <string name="auth_error_invalid_credentials">Email or password is incorrect.</string>
+    <string name="auth_error_email_in_use">This email is already registered. Try signing in instead.</string>
+    <string name="auth_error_weak_password">Password is too weak — at least 8 characters, please.</string>
+    <string name="auth_error_invalid_email">That doesn\'t look like a valid email.</string>
+    <string name="auth_error_network">No internet — check your connection and try again.</string>
+    <string name="auth_error_not_configured">Google sign-in isn\'t configured for this build. Email/password still works.</string>
+    <string name="auth_error_unknown">Something went wrong. Please try again.</string>
+
+    <!-- Transactions -->
+    <string name="transactions_title">Transactions</string>
+    <string name="transactions_filter_all">All</string>
+    <string name="transactions_filter_income">Income</string>
+    <string name="transactions_filter_expense">Expense</string>
+    <string name="transactions_empty_title">No transactions yet</string>
+    <string name="transactions_empty_body">Tap the + button to add your first one</string>
+    <string name="transactions_empty_filtered_title">No results</string>
+    <string name="transactions_empty_filtered_body">Try a different filter</string>
+    <string name="transactions_delete_title">Delete this transaction?</string>
+    <string name="transactions_unnamed">Untitled</string>
+    <string name="transactions_pending">pending</string>
+
+    <!-- Add / Edit sheet -->
+    <string name="add_title">New transaction</string>
+    <string name="edit_title">Edit transaction</string>
+    <string name="add_amount_label">Amount</string>
+    <string name="add_note_label">Note</string>
+    <string name="add_category_label">Category</string>
+    <string name="add_date_label">Date</string>
+    <string name="add_save">Save</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">Dashboard</string>
+    <string name="dashboard_net_label">Net this month</string>
+    <string name="dashboard_income_label">Income</string>
+    <string name="dashboard_expense_label">Expense</string>
+    <string name="dashboard_flow_title">DAILY FLOW</string>
+    <string name="dashboard_top_categories_title">TOP CATEGORIES</string>
+    <string name="dashboard_recent_title">RECENT</string>
+    <string name="dashboard_empty_title">Nothing here yet</string>
+    <string name="dashboard_empty_body">Tap + to add your first transaction. Charts and insights appear once there\'s data.</string>
+
+    <!-- Stats -->
+    <string name="stats_title">Stats</string>
+    <string name="stats_total_expense">TOTAL EXPENSE</string>
+    <string name="stats_total_income">TOTAL INCOME</string>
+    <string name="stats_categories_title">CATEGORY BREAKDOWN</string>
+    <string name="stats_empty_title">Nothing to analyse yet</string>
+    <string name="stats_empty_body">Add a few transactions and Budgetella will start surfacing trends and breakdowns here.</string>
+    <string name="stats_change_vs_last">%1$.1f%% vs last month</string>
+
+    <!-- Budgi -->
+    <string name="budgi_title">Budgi</string>
+    <string name="budgi_subtitle">Your finance buddy</string>
+    <string name="budgi_composer_hint">Ask Budgi anything…</string>
+    <string name="budgi_send">Send</string>
+    <string name="budgi_consent_title">AI data notice</string>
+    <string name="budgi_consent_body">Budgi sends a short summary of your spending to Google\'s Gemini API. No personally identifying details are included. Read our Privacy Policy for the full picture.</string>
+    <string name="budgi_consent_accept">Accept</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_preferences">Preferences</string>
+    <string name="settings_section_security">Security</string>
+    <string name="settings_section_data">Data</string>
+    <string name="settings_section_notifications">Notifications</string>
+    <string name="settings_section_support">Support</string>
+    <string name="settings_section_account">Account</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_currency">Currency</string>
+    <string name="settings_biometric">Face / Fingerprint lock</string>
+    <string name="settings_hide_amounts">Hide amounts</string>
+    <string name="settings_export">Export backup</string>
+    <string name="settings_import">Import backup</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_notifications_inbox">Notification inbox</string>
+    <string name="settings_notifications_push">Push notifications</string>
+    <string name="settings_help">Help &amp; support</string>
+    <string name="settings_privacy">Privacy policy</string>
+    <string name="settings_terms">Terms of use</string>
+    <string name="settings_signout">Sign out</string>
+    <string name="settings_delete_account">Delete account</string>
+    <string name="settings_signout_confirm_title">Sign out?</string>
+    <string name="settings_signout_confirm_body">You can sign back in any time. Your data stays in the cloud.</string>
+    <string name="settings_delete_confirm_title">Delete your account?</string>
+    <string name="settings_delete_confirm_body">This permanently removes your account and synced data. This action cannot be undone.</string>
+    <string name="settings_premium_label">Premium</string>
+    <string name="settings_premium_subtitle_active">Active subscription</string>
+    <string name="settings_premium_subtitle_inactive">Try 7 days free</string>
+    <string name="settings_version">Version</string>
+
+    <!-- Theme picker -->
+    <string name="theme_dark">Dark</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_system">System</string>
+    <string name="theme_active">Currently active</string>
+
+    <!-- Currency picker -->
+    <string name="currency_try">Turkish Lira</string>
+    <string name="currency_usd">US Dollar</string>
+    <string name="currency_eur">Euro</string>
+    <string name="currency_gbp">British Pound</string>
+
+    <!-- Language picker -->
+    <string name="language_footer">Language switches instantly. The currency format can be set separately.</string>
+
+    <!-- Backup -->
+    <string name="backup_export_done">Backup saved.</string>
+    <string name="backup_export_failed">Couldn\'t save backup. Try again.</string>
+    <string name="backup_import_done">%1$d transactions imported, %2$d skipped.</string>
+    <string name="backup_import_failed">Couldn\'t read that backup file.</string>
+
+    <!-- Notification inbox -->
+    <string name="inbox_title">Notifications</string>
+    <string name="inbox_empty_title">All caught up</string>
+    <string name="inbox_empty_body">Budget alerts and weekly digests will show up here.</string>
+    <string name="inbox_mark_all">Mark all as read</string>
+    <string name="inbox_clear">Clear all</string>
+
+    <!-- Paywall -->
+    <string name="paywall_title">Budgetella Premium</string>
+    <string name="paywall_subtitle">Unlock advanced insights, unlimited categories, and Budgi AI.</string>
+    <string name="paywall_feature_1">Unlimited categories + custom budgets</string>
+    <string name="paywall_feature_2">Voice + receipt scan transaction entry</string>
+    <string name="paywall_feature_3">Multi-currency support</string>
+    <string name="paywall_feature_4">Premium Budgi insights powered by Gemini</string>
+    <string name="paywall_monthly">Monthly</string>
+    <string name="paywall_yearly">Yearly · save 33%%</string>
+    <string name="paywall_free_trial">7 days free, then %1$s</string>
+    <string name="paywall_cta">Start free trial</string>
+    <string name="paywall_restore">Restore purchases</string>
+    <string name="paywall_unavailable">Subscriptions aren\'t available in this build. Coming with the Play Store release.</string>
+
+    <!-- Biometric -->
+    <string name="biometric_prompt_title">Unlock Budgetella</string>
+    <string name="biometric_prompt_subtitle">Use biometrics to continue</string>
+    <string name="biometric_unlock">Unlock</string>
+    <string name="biometric_signout">Sign out</string>
+
+    <!-- Generic -->
+    <string name="common_cancel">Cancel</string>
+    <string name="common_done">Done</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_save">Save</string>
+    <string name="common_back">Back</string>
+    <string name="common_loading">Loading…</string>
+    <string name="common_retry">Retry</string>
+    <string name="common_close">Close</string>
+
+</resources>

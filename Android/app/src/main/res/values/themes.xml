@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!--
+        Splash screen theme — used during the cold-launch window before the
+        Compose tree mounts. Matches the iOS LaunchScreen storyboard:
+        deep navy background, brand-primary logo. Once MainActivity attaches
+        the Compose root, BudgetellaTheme takes over.
+    -->
+    <style name="Theme.Budgetella.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/background_dark</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.Budgetella</item>
+    </style>
+
+    <!--
+        Post-splash app theme. Compose drives all UI from here, so this only
+        needs sensible defaults for the underlying Activity window.
+    -->
+    <style name="Theme.Budgetella" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/background_dark</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+    </style>
+
+</resources>

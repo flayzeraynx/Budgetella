@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Brand tokens in XML form. These mirror BrandColor.Primary etc. and
+        exist because the Android manifest, splash screen, and notification
+        metadata can only reference @color/, not Compose Colors directly.
+        Keep in sync with /core/design/BrandColor.kt.
+    -->
+    <color name="brand_primary">#FF6E5BFF</color>
+    <color name="brand_primary_light">#FF8B6FFF</color>
+
+    <color name="background_dark">#FF0A0B14</color>
+    <color name="background_light">#FFF5F6FE</color>
+</resources>

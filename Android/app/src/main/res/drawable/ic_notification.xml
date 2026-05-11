@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Status-bar notification icon — system requires a monochrome, 24dp drawable.
+    Placeholder uses the Compose sparkles glyph silhouette; swap when the
+    brand mark in res/font is finalised.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorControlNormal">
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M12,2L13.5,8.5L20,10L13.5,11.5L12,18L10.5,11.5L4,10L10.5,8.5L12,2Z" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M18.5,15L19.5,18L22.5,19L19.5,20L18.5,23L17.5,20L14.5,19L17.5,18L18.5,15Z" />
+</vector>

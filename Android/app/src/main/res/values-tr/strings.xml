@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Budgetella</string>
+
+    <!-- Bildirim kanalları -->
+    <string name="notif_channel_default_name">Bildirimler</string>
+    <string name="notif_channel_default_description">Harcama uyarıları, haftalık özetler ve Budgi içgörüleri.</string>
+
+    <!-- Alt menü -->
+    <string name="tab_home">Ev</string>
+    <string name="tab_list">Liste</string>
+    <string name="tab_stats">İstatistik</string>
+    <string name="tab_ai">AI</string>
+
+    <!-- Geçici yer tutucular -->
+    <string name="placeholder_home">Pano yakında</string>
+    <string name="placeholder_list">İşlemler listesi yakında</string>
+    <string name="placeholder_stats">İstatistikler yakında</string>
+    <string name="placeholder_ai">Budgi birazdan burada</string>
+
+    <!-- Hızlı ekle FAB -->
+    <string name="fab_voice">Sesli</string>
+    <string name="fab_manual">Manuel</string>
+    <string name="fab_camera">Kamera</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_welcome_title">Para, nihayet net</string>
+    <string name="onboarding_welcome_subtitle">Budgetella, dağınık fişleri ve makbuzları paranın nereye gittiğine dair gerçek bir resme dönüştürür.</string>
+    <string name="onboarding_features_title">Senin harcama tarzına göre tasarlandı</string>
+    <string name="onboarding_features_subtitle">Saniyeler içinde işlem ekle, trendleri tek bakışta gör, Budgi\'ye danış.</string>
+    <string name="onboarding_feature_1_title">Hızlıca her şeyi ekle</string>
+    <string name="onboarding_feature_1_body">Sesli, kameralı ya da manuel — sana en yakın olanı seç.</string>
+    <string name="onboarding_feature_2_title">Canlı grafikler</string>
+    <string name="onboarding_feature_2_body">Aylık gelir-gider, kategori dağılımı, günlük akış.</string>
+    <string name="onboarding_feature_3_title">Budgi · AI</string>
+    <string name="onboarding_feature_3_body">Banka ekstrenizi hiçbir yere göndermeden kişisel harcama içgörüleri.</string>
+    <string name="onboarding_permissions_title">Birkaç izin</string>
+    <string name="onboarding_permissions_subtitle">Bildirimler isteğe bağlı ama yararlı — haftalık özet, bütçe uyarısı, anomali bildirimi.</string>
+    <string name="onboarding_permissions_notifications_label">Bildirimlere izin ver</string>
+    <string name="onboarding_skip">Atla</string>
+    <string name="onboarding_next">İleri</string>
+    <string name="onboarding_get_started">Başlayalım</string>
+
+    <!-- Auth -->
+    <string name="auth_welcome_title">Budgetella\'ya hoş geldin</string>
+    <string name="auth_welcome_subtitle">Cihazlar arası senkron için giriş yap ya da yeni bir hesap aç.</string>
+    <string name="auth_continue_with_google">Google ile devam et</string>
+    <string name="auth_continue_with_email">E-posta ile devam et</string>
+    <string name="auth_signin_title">Giriş yap</string>
+    <string name="auth_signup_title">Hesap oluştur</string>
+    <string name="auth_email_label">E-posta</string>
+    <string name="auth_password_label">Şifre</string>
+    <string name="auth_name_label">Ad</string>
+    <string name="auth_signin_cta">Giriş yap</string>
+    <string name="auth_signup_cta">Hesap oluştur</string>
+    <string name="auth_forgot_password_link">Şifreni mi unuttun?</string>
+    <string name="auth_have_account_question">Zaten hesabın var mı?</string>
+    <string name="auth_no_account_question">Hesabın yok mu?</string>
+    <string name="auth_have_account_action">Giriş yap</string>
+    <string name="auth_no_account_action">Oluştur</string>
+    <string name="auth_forgot_title">Şifreyi sıfırla</string>
+    <string name="auth_forgot_body">Kayıt olduğun e-postayı yaz, sana sıfırlama bağlantısı gönderelim.</string>
+    <string name="auth_forgot_send">Sıfırlama bağlantısı gönder</string>
+    <string name="auth_forgot_sent">Sıfırlama e-postası için gelen kutunu kontrol et.</string>
+    <string name="auth_back">Geri</string>
+    <string name="auth_terms_notice">Devam ederek Kullanım Koşulları ve Gizlilik Politikası\'nı kabul etmiş olursun.</string>
+    <string name="auth_error_invalid_credentials">E-posta veya şifre hatalı.</string>
+    <string name="auth_error_email_in_use">Bu e-posta zaten kayıtlı. Giriş yapmayı denesene.</string>
+    <string name="auth_error_weak_password">Şifre çok zayıf — en az 8 karakter olmalı.</string>
+    <string name="auth_error_invalid_email">Bu geçerli bir e-posta gibi görünmüyor.</string>
+    <string name="auth_error_network">İnternet yok — bağlantını kontrol et ve tekrar dene.</string>
+    <string name="auth_error_not_configured">Bu build\'de Google ile girişi yapılandırılmamış. E-posta/şifre ile devam edebilirsin.</string>
+    <string name="auth_error_unknown">Bir şeyler ters gitti. Lütfen tekrar dene.</string>
+
+    <!-- İşlemler -->
+    <string name="transactions_title">İşlemler</string>
+    <string name="transactions_filter_all">Tümü</string>
+    <string name="transactions_filter_income">Gelir</string>
+    <string name="transactions_filter_expense">Gider</string>
+    <string name="transactions_empty_title">Henüz işlem yok</string>
+    <string name="transactions_empty_body">İlk işlemini eklemek için + butonuna dokun</string>
+    <string name="transactions_empty_filtered_title">Sonuç bulunamadı</string>
+    <string name="transactions_empty_filtered_body">Farklı filtreler dene</string>
+    <string name="transactions_delete_title">Bu işlemi silmek istediğine emin misin?</string>
+    <string name="transactions_unnamed">İsimsiz</string>
+    <string name="transactions_pending">bekliyor</string>
+
+    <!-- Ekle / Düzenle bottom sheet -->
+    <string name="add_title">Yeni işlem</string>
+    <string name="edit_title">İşlemi düzenle</string>
+    <string name="add_amount_label">Tutar</string>
+    <string name="add_note_label">Not</string>
+    <string name="add_category_label">Kategori</string>
+    <string name="add_date_label">Tarih</string>
+    <string name="add_save">Kaydet</string>
+
+    <!-- Pano -->
+    <string name="dashboard_title">Pano</string>
+    <string name="dashboard_net_label">Bu ay net</string>
+    <string name="dashboard_income_label">Gelir</string>
+    <string name="dashboard_expense_label">Gider</string>
+    <string name="dashboard_flow_title">GÜNLÜK AKIŞ</string>
+    <string name="dashboard_top_categories_title">EN ÇOK</string>
+    <string name="dashboard_recent_title">SON İŞLEMLER</string>
+    <string name="dashboard_empty_title">Henüz bir şey yok</string>
+    <string name="dashboard_empty_body">İlk işlemini eklemek için + butonuna dokun. Grafikler veriyle birlikte görünecek.</string>
+
+    <!-- İstatistikler -->
+    <string name="stats_title">İstatistik</string>
+    <string name="stats_total_expense">TOPLAM GİDER</string>
+    <string name="stats_total_income">TOPLAM GELİR</string>
+    <string name="stats_categories_title">KATEGORİ DAĞILIMI</string>
+    <string name="stats_empty_title">Henüz analiz edecek bir şey yok</string>
+    <string name="stats_empty_body">Birkaç işlem ekledikten sonra Budgetella senin için trend ve dağılım kartları üretmeye başlar.</string>
+    <string name="stats_change_vs_last">geçen aya göre %%%1$.1f</string>
+
+    <!-- Budgi -->
+    <string name="budgi_title">Budgi</string>
+    <string name="budgi_subtitle">Senin finans asistanın</string>
+    <string name="budgi_composer_hint">Budgi\'ye soru sor…</string>
+    <string name="budgi_send">Gönder</string>
+    <string name="budgi_consent_title">AI veri bildirimi</string>
+    <string name="budgi_consent_body">Budgi, harcama özetini Google Gemini API\'ye gönderir. Kişisel kimlik bilgileri dahil edilmez. Detay için Gizlilik Politikası\'na bak.</string>
+    <string name="budgi_consent_accept">Kabul et</string>
+
+    <!-- Ayarlar -->
+    <string name="settings_title">Ayarlar</string>
+    <string name="settings_section_preferences">Tercihler</string>
+    <string name="settings_section_security">Güvenlik</string>
+    <string name="settings_section_data">Veriler</string>
+    <string name="settings_section_notifications">Bildirimler</string>
+    <string name="settings_section_support">Destek</string>
+    <string name="settings_section_account">Hesap</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_language">Dil</string>
+    <string name="settings_currency">Para Birimi</string>
+    <string name="settings_biometric">Yüz / Parmak izi kilidi</string>
+    <string name="settings_hide_amounts">Tutarları gizle</string>
+    <string name="settings_export">Yedeği dışa aktar</string>
+    <string name="settings_import">Yedeği içe aktar</string>
+    <string name="settings_notifications">Bildirimler</string>
+    <string name="settings_notifications_inbox">Bildirim kutusu</string>
+    <string name="settings_notifications_push">Anlık bildirimler</string>
+    <string name="settings_help">Yardım &amp; Destek</string>
+    <string name="settings_privacy">Gizlilik Politikası</string>
+    <string name="settings_terms">Kullanım Koşulları</string>
+    <string name="settings_signout">Çıkış yap</string>
+    <string name="settings_delete_account">Hesabı sil</string>
+    <string name="settings_signout_confirm_title">Çıkış yapılsın mı?</string>
+    <string name="settings_signout_confirm_body">İstediğin zaman tekrar giriş yapabilirsin. Verilerin bulutta kalır.</string>
+    <string name="settings_delete_confirm_title">Hesabını silmek istiyor musun?</string>
+    <string name="settings_delete_confirm_body">Bu işlem hesabını ve senkronize verilerini kalıcı olarak siler. Geri alınamaz.</string>
+    <string name="settings_premium_label">Premium</string>
+    <string name="settings_premium_subtitle_active">Aktif abonelik</string>
+    <string name="settings_premium_subtitle_inactive">7 gün ücretsiz dene</string>
+    <string name="settings_version">Sürüm</string>
+
+    <!-- Tema seçici -->
+    <string name="theme_dark">Karanlık</string>
+    <string name="theme_light">Açık</string>
+    <string name="theme_system">Sistem</string>
+    <string name="theme_active">Şu an aktif</string>
+
+    <!-- Para birimi seçici -->
+    <string name="currency_try">Türk Lirası</string>
+    <string name="currency_usd">ABD Doları</string>
+    <string name="currency_eur">Euro</string>
+    <string name="currency_gbp">İngiliz Sterlini</string>
+
+    <!-- Dil seçici -->
+    <string name="language_footer">Dil değişikliği anında uygulanır. Para birimi formatı ayrıca seçilebilir.</string>
+
+    <!-- Yedek -->
+    <string name="backup_export_done">Yedek kaydedildi.</string>
+    <string name="backup_export_failed">Yedek kaydedilemedi. Tekrar dene.</string>
+    <string name="backup_import_done">%1$d işlem aktarıldı, %2$d atlandı.</string>
+    <string name="backup_import_failed">Bu yedek dosyası okunamadı.</string>
+
+    <!-- Bildirim kutusu -->
+    <string name="inbox_title">Bildirimler</string>
+    <string name="inbox_empty_title">Her şey güncel</string>
+    <string name="inbox_empty_body">Bütçe uyarıları ve haftalık özetler burada görünür.</string>
+    <string name="inbox_mark_all">Hepsini okundu işaretle</string>
+    <string name="inbox_clear">Tümünü sil</string>
+
+    <!-- Paywall -->
+    <string name="paywall_title">Budgetella Premium</string>
+    <string name="paywall_subtitle">Gelişmiş içgörüler, sınırsız kategori ve Budgi AI.</string>
+    <string name="paywall_feature_1">Sınırsız kategori + özel bütçeler</string>
+    <string name="paywall_feature_2">Sesli + fiş okuma ile işlem ekleme</string>
+    <string name="paywall_feature_3">Çoklu para birimi desteği</string>
+    <string name="paywall_feature_4">Gemini destekli Premium Budgi içgörüleri</string>
+    <string name="paywall_monthly">Aylık</string>
+    <string name="paywall_yearly">Yıllık · %%33 indirim</string>
+    <string name="paywall_free_trial">7 gün ücretsiz, sonra %1$s</string>
+    <string name="paywall_cta">Ücretsiz denemeyi başlat</string>
+    <string name="paywall_restore">Satın alımları geri yükle</string>
+    <string name="paywall_unavailable">Abonelikler bu sürümde yok. Play Store yayını ile gelecek.</string>
+
+    <!-- Biyometrik -->
+    <string name="biometric_prompt_title">Budgetella\'nın kilidini aç</string>
+    <string name="biometric_prompt_subtitle">Devam etmek için biyometriği kullan</string>
+    <string name="biometric_unlock">Kilidi aç</string>
+    <string name="biometric_signout">Çıkış yap</string>
+
+    <!-- Genel -->
+    <string name="common_cancel">İptal</string>
+    <string name="common_done">Tamam</string>
+    <string name="common_delete">Sil</string>
+    <string name="common_save">Kaydet</string>
+    <string name="common_back">Geri</string>
+    <string name="common_loading">Yükleniyor…</string>
+    <string name="common_retry">Tekrar dene</string>
+    <string name="common_close">Kapat</string>
+
+</resources>
