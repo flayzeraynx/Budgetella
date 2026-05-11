@@ -3,6 +3,23 @@
 
     <string name="app_name">Budgetella</string>
 
+    <!-- Kategori varsayilan adlari — slug uzerinden render-time'da bakilir. -->
+    <string name="category_name_salary">Maaş</string>
+    <string name="category_name_freelance">Freelance</string>
+    <string name="category_name_investments">Yatırım</string>
+    <string name="category_name_gifts">Hediyeler</string>
+    <string name="category_name_productSale">Ürün Satışı</string>
+    <string name="category_name_loan">Borç Para</string>
+    <string name="category_name_food">Yiyecek</string>
+    <string name="category_name_transportation">Ulaşım</string>
+    <string name="category_name_housing">Konut</string>
+    <string name="category_name_bills">Faturalar</string>
+    <string name="category_name_healthcare">Sağlık</string>
+    <string name="category_name_shopping">Alışveriş</string>
+    <string name="category_name_entertainment">Eğlence</string>
+    <string name="category_name_education">Eğitim</string>
+    <string name="category_name_other">Diğer</string>
+
     <!-- Bildirim kanalları -->
     <string name="notif_channel_default_name">Bildirimler</string>
     <string name="notif_channel_default_description">Harcama uyarıları, haftalık özetler ve Budgi içgörüleri.</string>
@@ -38,6 +55,66 @@
     <string name="onboarding_permissions_title">Birkaç izin</string>
     <string name="onboarding_permissions_subtitle">Bildirimler isteğe bağlı ama yararlı — haftalık özet, bütçe uyarısı, anomali bildirimi.</string>
     <string name="onboarding_permissions_notifications_label">Bildirimlere izin ver</string>
+    <string name="onboarding_permissions_notifications_granted">Bildirimler etkin</string>
+    <string name="onboarding_permissions_open_settings">Bildirim ayarlarını aç</string>
+    <string name="onboarding_permissions_biometric_hint">İpucu — Yüz / parmak izi kilidi giriş sonrası Ayarlar → Güvenlik\'ten açılabilir.</string>
+    <string name="auth_show_password">Şifreyi göster</string>
+    <string name="auth_hide_password">Şifreyi gizle</string>
+    <string name="sync_initial_title">Verilerin geliyor</string>
+    <string name="sync_initial_subtitle">Diğer cihazından işlemler ve kategoriler senkron ediliyor — birazdan.</string>
+    <string name="profile_title">Profil</string>
+    <string name="profile_stat_transactions">İşlem</string>
+    <string name="profile_stat_total_saved">Toplam tasarruf</string>
+    <string name="profile_stat_streak">Gün serisi</string>
+    <string name="profile_section_this_month">BU AY</string>
+    <string name="profile_section_achievements">BAŞARIMLAR</string>
+    <string name="profile_month_income">Gelir</string>
+    <string name="profile_month_expense">Gider</string>
+    <string name="profile_month_net">Net</string>
+    <string name="profile_achievement_first">İlk İşlem</string>
+    <string name="profile_achievement_streak10">10 Gün Seri</string>
+    <string name="profile_achievement_tx50">50 İşlem</string>
+    <string name="profile_achievement_save1k">₺1K Tasarruf</string>
+    <string name="profile_achievement_tx100">100 İşlem</string>
+    <string name="profile_achievement_budget_goal">Bütçe Hedefi</string>
+
+    <!-- Notification settings sheet -->
+    <string name="notif_settings_title">Bildirimler</string>
+    <string name="notif_master_title">Tüm Bildirimler</string>
+    <string name="notif_master_subtitle">Tüm bildirimleri aç veya kapat</string>
+    <string name="notif_master_footer">Kapatıldığında hiçbir bildirim gönderilmez.</string>
+    <string name="notif_section_types">BİLDİRİM TÜRLERİ</string>
+    <string name="notif_weekly_title">Haftalık Özet</string>
+    <string name="notif_weekly_subtitle">Her Pazartesi harcama özeti</string>
+    <string name="notif_anomaly_title">Anomali Uyarıları</string>
+    <string name="notif_anomaly_subtitle">Alışılmadık harcama tespit edilince</string>
+    <string name="notif_savings_title">Tasarruf Önerileri</string>
+    <string name="notif_savings_subtitle">AI tabanlı kişisel öneriler</string>
+    <string name="notif_open_system_settings">Sistem bildirim ayarlarını aç</string>
+    <string name="entry_mode_manual">Manuel</string>
+    <string name="entry_mode_voice">Sesli</string>
+    <string name="entry_mode_camera">Kamera</string>
+    <string name="entry_mode_coming_soon">Yakında</string>
+    <string name="delete_account_title">Hesabı sil</string>
+    <string name="delete_account_irreversible_title">Bu işlem geri alınamaz</string>
+    <string name="delete_account_irreversible_body">Hesabın silinme talebini aldıktan sonra 30 gün içinde tüm veriler kalıcı olarak kaldırılır. Bu süre içinde giriş yaparak iptal edebilirsin.</string>
+    <string name="delete_account_section_data">SİLİNECEK VERİLER</string>
+    <string name="delete_account_section_danger">TEHLİKELİ BÖLGE</string>
+    <string name="delete_account_item_transactions">İşlem geçmişi</string>
+    <string name="delete_account_item_categories">Kategoriler</string>
+    <string name="delete_account_item_budgets">Bütçe &amp; hedefler</string>
+    <string name="delete_account_item_ai">AI sohbet geçmişi</string>
+    <string name="delete_account_item_cloud">Bulut yedekleri</string>
+    <string name="delete_account_item_profile">Profil bilgileri</string>
+    <string name="delete_account_backup_nudge">Silmeden önce yedek almak ister misin?</string>
+    <string name="delete_account_confirm_prompt">Onaylamak için \"sil\" yaz</string>
+    <string name="delete_account_confirm_keyword">sil</string>
+    <string name="delete_account_cta">Hesabı kalıcı olarak sil</string>
+    <string name="delete_account_cta_deleting">Siliniyor…</string>
+    <string name="delete_account_reauth_title">Kimliğini doğrula</string>
+    <string name="delete_account_reauth_body">Hesap silme güvenli bir işlemdir. Devam etmek için şifreni gir.</string>
+    <string name="delete_account_reauth_cta">Onayla ve sil</string>
+    <string name="delete_account_reauth_wrong_password">Şifre hatalı. Tekrar dene.</string>
     <string name="onboarding_skip">Atla</string>
     <string name="onboarding_next">İleri</string>
     <string name="onboarding_get_started">Başlayalım</string>
@@ -93,6 +170,11 @@
     <string name="add_note_label">Not</string>
     <string name="add_category_label">Kategori</string>
     <string name="add_date_label">Tarih</string>
+    <string name="add_recurring_label">Tekrarlayan işlem</string>
+    <string name="recurring_daily">Günlük</string>
+    <string name="recurring_weekly">Haftalık</string>
+    <string name="recurring_monthly">Aylık</string>
+    <string name="recurring_yearly">Yıllık</string>
     <string name="add_save">Kaydet</string>
 
     <!-- Pano -->
@@ -102,9 +184,28 @@
     <string name="dashboard_expense_label">Gider</string>
     <string name="dashboard_flow_title">GÜNLÜK AKIŞ</string>
     <string name="dashboard_top_categories_title">EN ÇOK</string>
+    <string name="dashboard_yearly_summary">YILLIK ÖZET</string>
+    <string name="dashboard_active_month">AKTİF AY</string>
+    <string name="dashboard_year_income_label">GELİR</string>
+    <string name="dashboard_year_expense_label">GİDER</string>
+    <string name="dashboard_legend_income">Gelir</string>
+    <string name="dashboard_legend_expense">Gider</string>
+    <string name="dashboard_six_month_title">SON 6 AY</string>
+    <string name="dashboard_net_short">Net</string>
+    <string name="dashboard_greeting_morning">Günaydın, %s ☀️</string>
+    <string name="dashboard_greeting_afternoon">İyi günler, %s 👋</string>
+    <string name="dashboard_greeting_evening">İyi akşamlar, %s 🌙</string>
+    <string name="dashboard_greeting_night">Merhaba, %s 🌙</string>
+    <string name="dashboard_greeting_label_morning">Günaydın ☀️</string>
+    <string name="dashboard_greeting_label_afternoon">İyi günler</string>
+    <string name="dashboard_greeting_label_evening">İyi akşamlar 🌙</string>
+    <string name="dashboard_greeting_label_night">Merhaba 🌙</string>
     <string name="dashboard_recent_title">SON İŞLEMLER</string>
-    <string name="dashboard_empty_title">Henüz bir şey yok</string>
-    <string name="dashboard_empty_body">İlk işlemini eklemek için + butonuna dokun. Grafikler veriyle birlikte görünecek.</string>
+    <string name="dashboard_empty_title">Para hikayeni yazmaya başlayalım</string>
+    <string name="dashboard_empty_body">Aşağıdaki + butonuna dokunup ilk girişini ekle. Geri kalanı sen ekledikçe doluyor.</string>
+    <string name="dashboard_empty_feature_charts">Günlük ve aylık grafikler</string>
+    <string name="dashboard_empty_feature_ai">Budgi\'den AI önerileri</string>
+    <string name="dashboard_empty_feature_categories">Kategori dağılımı &amp; trendler</string>
 
     <!-- İstatistikler -->
     <string name="stats_title">İstatistik</string>

@@ -101,7 +101,7 @@ fun TransactionRow(
             Row {
                 if (category != null) {
                     Text(
-                        text = category.name,
+                        text = com.budgetella.app.core.locale.displayCategoryName(category),
                         style = BrandText.caption,
                         color = BrandColor.textTertiary(),
                     )
@@ -117,7 +117,10 @@ fun TransactionRow(
 
         Column(horizontalAlignment = Alignment.End) {
             Text(
-                text = sign + formatAmount(transaction.amount, transaction.currency),
+                text = sign + com.budgetella.app.core.design.moneyText(
+                    minorUnits = transaction.amount,
+                    currency = transaction.currency,
+                ),
                 style = BrandText.subheadline,
                 color = amountColor,
                 maxLines = 1,

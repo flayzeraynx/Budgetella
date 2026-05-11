@@ -28,6 +28,10 @@ class BudgetellaApplication : Application() {
         // 1. First-launch English default — matches the iOS `defaultLanguageApplied`
         //    flag so the app boots in English everywhere on day one.
         LocaleHelper.applyDefaultLanguageIfFirstLaunch(this)
+        // 1b. Re-apply the saved locale on every cold start so it survives
+        //     even when the OS forgot it (older Android, missing locales_config,
+        //     aggressive OEM background killers wiping per-app locale state).
+        LocaleHelper.applySavedLanguage(this)
 
         // 2. Firebase configure. Until google-services.json is added (per the
         //    README), the Firebase plugin will fail to apply, so this call is

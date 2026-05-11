@@ -1,10 +1,25 @@
 package com.budgetella.app.ui.onboarding
 
 import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Fingerprint
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -205,12 +220,35 @@ private fun FeaturesPage() {
 
 @Composable
 private fun PermissionsPage() {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
     // POST_NOTIFICATIONS only exists from Android 13 (TIRAMISU). Below that
     // notifications are granted by manifest and we don't prompt.
+    var notifGranted by remember { mutableStateOf(isNotificationPermissionGranted(context)) }
+    // Track whether we've shown the system dialog already. After one denial
+    // Android silently swallows future requests, so subsequent taps need to
+    // jump the user to the app's notification settings instead.
+    var attempted by remember { mutableStateOf(false) }
+
+    // Refresh the granted state when the user returns from Settings.
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                notifGranted = isNotificationPermissionGranted(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     val notifLauncher = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission(),
-            onResult = { /* swallow — Settings can grant later */ }
+            onResult = { granted ->
+                notifGranted = granted
+                attempted = true
+            },
         )
     } else null
 
@@ -229,10 +267,10 @@ private fun PermissionsPage() {
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                imageVector = AppTab.Ai.icon,
+                imageVector = Icons.Filled.NotificationsActive,
                 contentDescription = null,
                 tint = BrandColor.Primary,
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(40.dp),
             )
         }
         Spacer(Modifier.height(Spacing.lg))
@@ -250,18 +288,87 @@ private fun PermissionsPage() {
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(Spacing.xl))
-        OutlinedButton(
-            onClick = { notifLauncher?.launch(Manifest.permission.POST_NOTIFICATIONS) },
-            shape = RoundedCornerShape(Spacing.radiusFull),
-        ) {
+
+        if (notifGranted) {
+            // Already granted: replace the CTA with a confirmation chip.
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Filled.CheckCircle,
+                    contentDescription = null,
+                    tint = BrandColor.Income,
+                    modifier = Modifier.size(20.dp),
+                )
+                Spacer(Modifier.width(Spacing.sm))
+                Text(
+                    text = stringResource(R.string.onboarding_permissions_notifications_granted),
+                    style = BrandText.subheadline,
+                    color = BrandColor.Income,
+                )
+            }
+        } else {
+            OutlinedButton(
+                onClick = {
+                    when {
+                        Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU -> {
+                            notifGranted = true
+                        }
+                        attempted -> {
+                            // Second tap → Android won't show the dialog again
+                            // because the user already denied. Open the system
+                            // notification settings for this app.
+                            val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                            context.startActivity(intent)
+                        }
+                        else -> notifLauncher?.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                },
+                shape = RoundedCornerShape(Spacing.radiusFull),
+            ) {
+                Text(
+                    text = stringResource(
+                        if (attempted) R.string.onboarding_permissions_open_settings
+                        else R.string.onboarding_permissions_notifications_label
+                    ),
+                    style = BrandText.subheadline,
+                    color = BrandColor.Primary,
+                )
+            }
+        }
+
+        Spacer(Modifier.height(Spacing.lg))
+
+        // Biometric hint — the actual toggle lives in Settings → Security
+        // after sign-in (since it lives on the user's AppSettings row). This
+        // is just a discoverability cue so people know it exists.
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Filled.Fingerprint,
+                contentDescription = null,
+                tint = BrandColor.textTertiary(),
+                modifier = Modifier.size(18.dp),
+            )
+            Spacer(Modifier.width(Spacing.sm))
             Text(
-                text = stringResource(R.string.onboarding_permissions_notifications_label),
-                style = BrandText.subheadline,
-                color = BrandColor.Primary,
+                text = stringResource(R.string.onboarding_permissions_biometric_hint),
+                style = BrandText.footnote,
+                color = BrandColor.textTertiary(),
+                textAlign = TextAlign.Center,
             )
         }
     }
 }
+
+/** True if POST_NOTIFICATIONS is granted, or we're on API < 33 (auto-granted). */
+private fun isNotificationPermissionGranted(context: android.content.Context): Boolean =
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        true
+    } else {
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS,
+        ) == PackageManager.PERMISSION_GRANTED
+    }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 

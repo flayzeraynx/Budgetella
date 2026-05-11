@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.budgetella.app.data.local.entity.CategoryEntity
 import com.budgetella.app.data.local.entity.TransactionEntity
 import com.budgetella.app.data.model.Money
+import com.budgetella.app.data.model.RecurringInterval
 import com.budgetella.app.data.model.TransactionStatus
 import com.budgetella.app.data.model.TransactionType
 import com.budgetella.app.data.prefs.UserPrefs
@@ -32,6 +33,8 @@ data class TransactionFormState(
     val categoryId: String? = null,
     val note: String = "",
     val dateMillis: Long = System.currentTimeMillis(),
+    val isRecurring: Boolean = false,
+    val recurringInterval: RecurringInterval = RecurringInterval.Monthly,
     val saving: Boolean = false,
 ) {
     val isEditing: Boolean get() = editingId != null
@@ -84,6 +87,10 @@ class AddEditTransactionViewModel @Inject constructor(
             categoryId = transaction.categoryId,
             note = transaction.note,
             dateMillis = transaction.date,
+            isRecurring = transaction.isRecurring,
+            recurringInterval = transaction.recurringIntervalRaw
+                ?.let { RecurringInterval.fromRaw(it) }
+                ?: RecurringInterval.Monthly,
         )
     }
 
@@ -110,6 +117,9 @@ class AddEditTransactionViewModel @Inject constructor(
     fun setCategory(id: String) = _form.update { it.copy(categoryId = id) }
     fun setNote(value: String) = _form.update { it.copy(note = value) }
     fun setDate(millis: Long) = _form.update { it.copy(dateMillis = millis) }
+    fun setRecurring(value: Boolean) = _form.update { it.copy(isRecurring = value) }
+    fun setRecurringInterval(value: RecurringInterval) =
+        _form.update { it.copy(recurringInterval = value) }
 
     /** Pre-select the first category of the active type if none is selected yet. */
     fun ensureCategoryDefault() {
@@ -136,7 +146,8 @@ class AddEditTransactionViewModel @Inject constructor(
                 note = f.note.trim(),
                 date = f.dateMillis,
                 statusRaw = TransactionStatus.Completed.raw,
-                isRecurring = false,
+                isRecurring = f.isRecurring,
+                recurringIntervalRaw = if (f.isRecurring) f.recurringInterval.raw else null,
                 categoryId = f.categoryId,
                 createdAt = if (f.isEditing) now else now,    // upsert preserves on conflict via REPLACE — set both for safety
                 updatedAt = now,

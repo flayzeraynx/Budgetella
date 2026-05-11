@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Per-app locale declaration. Android 13+ uses this to keep the user's
+    in-app language choice across launches; without it the locale picked via
+    AppCompatDelegate.setApplicationLocales falls back to the device language
+    on the next cold start.
+
+    Order matters: the first non-default entry is the system default for any
+    user who hasn't picked one explicitly. We force English on first run via
+    LocaleHelper.applyDefaultLanguageIfFirstLaunch, but listing both still
+    lets the Settings → Apps → Budgetella → Language picker show TR.
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en" />
+    <locale android:name="tr" />
+</locale-config>

@@ -29,6 +29,14 @@ public final class FirestoreService {
 
     private let db = Firestore.firestore()
 
+    // Active snapshot listeners — torn down on sign-out or when observing a
+    // different uid. Both collections (transactions + categories) get one
+    // listener each so edits made on Android land in SwiftData within a
+    // few hundred ms without forcing the user to relaunch.
+    private var observingUid: String?
+    private var transactionsListener: ListenerRegistration?
+    private var categoriesListener: ListenerRegistration?
+
     // MARK: - Collection Paths
 
     private func userRef(_ uid: String) -> DocumentReference {
@@ -46,8 +54,16 @@ public final class FirestoreService {
     // MARK: - Upload: Lokal → Firestore
 
     public func uploadTransaction(_ tx: Transaction) async throws {
+        // Cross-platform doc-ID convention: lowercase. Java's UUID.toString()
+        // is lowercase, Swift's UUID.uuidString is uppercase — so without
+        // normalizing one side, every iOS write would create a NEW uppercase
+        // doc while Android-written lowercase docs lingered as orphans, and
+        // iOS deletes targeted at the uppercase path missed Android-written
+        // docs entirely. Standardising on lowercase here keeps deletes
+        // round-trip-clean across platforms.
+        let docId = tx.id.uuidString.lowercased()
         let data: [String: Any] = [
-            "id":                tx.id.uuidString,
+            "id":                docId,
             "userId":            tx.userId,
             "type":              tx.type.rawValue,
             "amount":            NSDecimalNumber(decimal: tx.amount).doubleValue,
@@ -62,17 +78,34 @@ public final class FirestoreService {
             "updatedAt":         Timestamp(date: tx.updatedAt),
         ]
         try await transactionsRef(tx.userId)
-            .document(tx.id.uuidString)
+            .document(docId)
             .setData(data, merge: true)
+        // Migration: clean up the legacy uppercase variant of the doc if it
+        // exists — historical iOS writes landed at the uppercase path. The
+        // delete is best-effort and idempotent (no-op if the doc never
+        // existed).
+        let upperId = tx.id.uuidString
+        if upperId != docId {
+            try? await transactionsRef(tx.userId).document(upperId).delete()
+        }
     }
 
     public func deleteTransaction(id: UUID, userId: String) async throws {
-        try await transactionsRef(userId).document(id.uuidString).delete()
+        // Delete both case-variants of the doc path. Going forward all writes
+        // are lowercase; legacy uppercase docs (pre-v1.0.1 build 3) get
+        // cleaned up on first delete touch.
+        let lower = id.uuidString.lowercased()
+        let upper = id.uuidString
+        try? await transactionsRef(userId).document(lower).delete()
+        if upper != lower {
+            try? await transactionsRef(userId).document(upper).delete()
+        }
     }
 
     public func uploadCategory(_ cat: Category) async throws {
+        let docId = cat.id.uuidString.lowercased()
         let data: [String: Any] = [
-            "id":        cat.id.uuidString,
+            "id":        docId,
             "userId":    cat.userId,
             "name":      cat.name,
             "slug":      cat.slug ?? "",
@@ -83,8 +116,12 @@ public final class FirestoreService {
             "sortOrder": cat.sortOrder,
         ]
         try await categoriesRef(cat.userId)
-            .document(cat.id.uuidString)
+            .document(docId)
             .setData(data, merge: true)
+        let upperId = cat.id.uuidString
+        if upperId != docId {
+            try? await categoriesRef(cat.userId).document(upperId).delete()
+        }
     }
 
     // MARK: - Batch Upload (import sonrası)
@@ -179,6 +216,154 @@ public final class FirestoreService {
 
         try? modelContext.save()
         UserDefaults.standard.set(true, forKey: "categoriesSeeded")
+    }
+
+    // MARK: - Live snapshot listeners (real-time sync from another device)
+
+    /// Subscribe to transactions + categories for `userId` so edits made on
+    /// Android (or any other client) land in SwiftData immediately. Call from
+    /// MainTabView.task after fetchAndSync. Idempotent.
+    public func startObserving(userId: String, modelContext: ModelContext) {
+        guard observingUid != userId else { return }
+        stopObserving()
+        observingUid = userId
+
+        categoriesListener = categoriesRef(userId).addSnapshotListener { [weak self] snapshot, error in
+            guard let self else { return }
+            if let error {
+                print("[FirestoreService] categories listener error: \(error.localizedDescription)")
+                return
+            }
+            guard let snapshot else { return }
+            // Capture document changes off the main thread, then dispatch the
+            // tiny delta (typically 1–3 docs) to the main actor. Reading
+            // `snapshot.documentChanges` is the cheap way to avoid iterating
+            // all N rows on every listener firing — for the Ozan account
+            // that's ~2k transactions per snapshot and was triggering a
+            // detached-backing-data crash mid-render.
+            let changes = snapshot.documentChanges
+            Task { @MainActor in
+                self.applyCategoryChanges(changes, userId: userId, modelContext: modelContext)
+            }
+        }
+
+        transactionsListener = transactionsRef(userId).addSnapshotListener { [weak self] snapshot, error in
+            guard let self else { return }
+            if let error {
+                print("[FirestoreService] transactions listener error: \(error.localizedDescription)")
+                return
+            }
+            guard let snapshot else { return }
+            let changes = snapshot.documentChanges
+            Task { @MainActor in
+                self.applyTransactionChanges(changes, userId: userId, modelContext: modelContext)
+            }
+        }
+    }
+
+    public func stopObserving() {
+        transactionsListener?.remove()
+        categoriesListener?.remove()
+        transactionsListener = nil
+        categoriesListener = nil
+        observingUid = nil
+    }
+
+    /// Process only the docs that Firestore reports as added / modified /
+    /// removed since the previous snapshot. Cheap (typically 1–3 docs per
+    /// firing) and safe — we never iterate live model objects that the UI is
+    /// still rendering, which is what caused the detached-backing-data crash.
+    @MainActor
+    private func applyCategoryChanges(
+        _ changes: [DocumentChange],
+        userId: String,
+        modelContext: ModelContext,
+    ) {
+        if changes.isEmpty { return }
+        for change in changes {
+            let data = change.document.data()
+            guard let idStr = data["id"] as? String, let uuid = UUID(uuidString: idStr) else { continue }
+            switch change.type {
+            case .added, .modified:
+                if let local = fetchCategory(by: uuid, in: modelContext) {
+                    if let name = data["name"] as? String { local.name = name }
+                    if let slug = data["slug"] as? String { local.slug = slug.isEmpty ? nil : slug }
+                    if let typeRaw = data["type"] as? String, let t = TransactionType(rawValue: typeRaw) { local.type = t }
+                    if let icon = data["iconName"] as? String { local.iconName = icon }
+                    if let color = data["colorHex"] as? String { local.colorHex = color }
+                    if let isDefault = data["isDefault"] as? Bool { local.isDefault = isDefault }
+                    if let sortOrder = data["sortOrder"] as? Int { local.sortOrder = sortOrder }
+                } else if let cat = category(from: data, userId: userId) {
+                    modelContext.insert(cat)
+                }
+            case .removed:
+                if let local = fetchCategory(by: uuid, in: modelContext), local.userId == userId {
+                    modelContext.delete(local)
+                }
+            @unknown default:
+                break
+            }
+        }
+        try? modelContext.save()
+    }
+
+    @MainActor
+    private func applyTransactionChanges(
+        _ changes: [DocumentChange],
+        userId: String,
+        modelContext: ModelContext,
+    ) {
+        if changes.isEmpty { return }
+        // Build slug → Category lookup once for the batch. First-write-wins on
+        // duplicate slugs to avoid Dictionary(uniqueKeysWithValues:) traps.
+        let allCats = (try? modelContext.fetch(FetchDescriptor<Category>())) ?? []
+        var catBySlug: [String: Category] = [:]
+        for c in allCats {
+            if let s = c.slug, !s.isEmpty, catBySlug[s] == nil {
+                catBySlug[s] = c
+            }
+        }
+
+        for change in changes {
+            let data = change.document.data()
+            guard let idStr = data["id"] as? String, let uuid = UUID(uuidString: idStr) else { continue }
+            switch change.type {
+            case .added, .modified:
+                let catSlug = data["categorySlug"] as? String ?? ""
+                let resolvedCat = catBySlug[catSlug]
+                if let local = fetchTransaction(by: uuid, in: modelContext) {
+                    if let amount = data["amount"] as? Double { local.amount = Decimal(amount) }
+                    if let typeRaw = data["type"] as? String, let t = TransactionType(rawValue: typeRaw) { local.type = t }
+                    if let note = data["note"] as? String { local.note = note }
+                    if let dateTS = data["date"] as? Timestamp { local.date = dateTS.dateValue() }
+                    if let statusRaw = data["status"] as? String, let s = TransactionStatus(rawValue: statusRaw) { local.status = s }
+                    if let currency = data["currency"] as? String { local.currency = currency }
+                    local.category = resolvedCat
+                } else if let tx = transaction(from: data, userId: userId) {
+                    tx.category = resolvedCat
+                    modelContext.insert(tx)
+                }
+            case .removed:
+                if let local = fetchTransaction(by: uuid, in: modelContext), local.userId == userId {
+                    modelContext.delete(local)
+                }
+            @unknown default:
+                break
+            }
+        }
+        try? modelContext.save()
+    }
+
+    @MainActor
+    private func fetchCategory(by id: UUID, in modelContext: ModelContext) -> Category? {
+        let descriptor = FetchDescriptor<Category>(predicate: #Predicate { $0.id == id })
+        return (try? modelContext.fetch(descriptor))?.first
+    }
+
+    @MainActor
+    private func fetchTransaction(by id: UUID, in modelContext: ModelContext) -> Transaction? {
+        let descriptor = FetchDescriptor<Transaction>(predicate: #Predicate { $0.id == id })
+        return (try? modelContext.fetch(descriptor))?.first
     }
 
     // MARK: - Delete User Data (hesap sil)

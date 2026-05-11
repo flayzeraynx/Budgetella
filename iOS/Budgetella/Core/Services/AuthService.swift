@@ -51,6 +51,23 @@ public final class AuthService: NSObject {
                     UserDefaults.standard.set(user.uid, forKey: "currentUserId")
                     UserDefaults.standard.set(user.photoURL?.absoluteString ?? "", forKey: "userPhotoURL")
                     UserDefaults.standard.set(true, forKey: "isSignedIn")
+                    // Some providers (Google Sign-In via Firebase) don't populate
+                    // photoURL on the very first emission — the credential is
+                    // exchanged before the federated profile has fully merged.
+                    // Force a reload + second write so the avatar shows on the
+                    // initial sign-in rather than only after the next launch.
+                    Task {
+                        try? await user.reload()
+                        await MainActor.run {
+                            let refreshed = user.photoURL?.absoluteString ?? ""
+                            if !refreshed.isEmpty {
+                                UserDefaults.standard.set(refreshed, forKey: "userPhotoURL")
+                            }
+                            if let name = user.displayName, !name.isEmpty {
+                                UserDefaults.standard.set(name, forKey: "displayName")
+                            }
+                        }
+                    }
                 } else {
                     KeychainHelper.delete(.firebaseUid)
                     UserDefaults.standard.set("", forKey: "displayName")
@@ -172,6 +189,7 @@ public final class AuthService: NSObject {
 
     /// İşlem ve kategorileri temizler, AppSettings'i korur (webapp AuthContext pattern'i).
     public func signOut(modelContext: ModelContext) throws {
+        FirestoreService.shared.stopObserving()
         try Auth.auth().signOut()
         clearLocalData(modelContext: modelContext)
         KeychainHelper.delete(.firebaseIdToken)

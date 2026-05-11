@@ -22,11 +22,19 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
@@ -58,6 +66,14 @@ fun StatsScreen(modifier: Modifier = Modifier) {
     val vm: StatsViewModel = hiltViewModel()
     val state by vm.state.collectAsStateWithLifecycle()
 
+    // Refire the Budgi insight compute when the locale changes — mirrors the
+    // hook the Dashboard uses so the rule output swaps language without a
+    // process restart.
+    val currentLangTag = LocalContext.current.resources.configuration.locales
+        .toLanguageTags()
+        .substringBefore(',')
+    LaunchedEffect(currentLangTag) { vm.refreshLocale() }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -66,13 +82,25 @@ fun StatsScreen(modifier: Modifier = Modifier) {
             .verticalScroll(rememberScrollState())
             .padding(bottom = 120.dp),
     ) {
-        // Title
-        Text(
-            text = stringResource(R.string.stats_title),
-            style = BrandText.largeTitle,
-            color = BrandColor.textPrimary(),
-            modifier = Modifier.padding(horizontal = Spacing.xl, vertical = Spacing.lg),
-        )
+        // Title + month picker row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.xl, vertical = Spacing.lg),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(R.string.stats_title),
+                style = BrandText.largeTitle,
+                color = BrandColor.textPrimary(),
+                modifier = Modifier.weight(1f),
+            )
+            StatsMonthPicker(
+                current = state.month,
+                items = state.availableMonths,
+                onSelect = vm::selectMonth,
+            )
+        }
 
         // Income/Expense toggle
         TypeToggle(state.ui.showingType, vm::toggleType)
@@ -87,8 +115,75 @@ fun StatsScreen(modifier: Modifier = Modifier) {
         DonutWithTotal(state)
         Spacer(Modifier.height(Spacing.xl))
 
+        // Budgi rule insight — same surface as Dashboard's AIInsightCard.
+        state.featuredInsight?.let { insight ->
+            com.budgetella.app.ui.dashboard.AIInsightCard(
+                insight = insight,
+                onTap = {},
+            )
+            Spacer(Modifier.height(Spacing.lg))
+        }
+
         if (state.breakdown.isNotEmpty()) {
             BreakdownList(state)
+        }
+    }
+}
+
+@Composable
+private fun StatsMonthPicker(
+    current: java.time.YearMonth,
+    items: List<java.time.YearMonth>,
+    onSelect: (java.time.YearMonth) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val format = remember {
+        java.time.format.DateTimeFormatter.ofPattern("MMMM yyyy")
+    }
+    Box {
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(Spacing.radiusFull))
+                .background(BrandColor.background3())
+                .clickable(enabled = items.isNotEmpty()) { expanded = true }
+                .padding(horizontal = Spacing.md, vertical = Spacing.xs),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = current.format(format)
+                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
+                style = BrandText.footnote,
+                color = BrandColor.textPrimary(),
+            )
+            Spacer(Modifier.width(4.dp))
+            Icon(
+                imageVector = Icons.Filled.KeyboardArrowDown,
+                contentDescription = null,
+                tint = BrandColor.textTertiary(),
+                modifier = Modifier.size(16.dp),
+            )
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.background(BrandColor.surface()),
+        ) {
+            items.forEach { ym ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = ym.format(format)
+                                .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
+                            style = BrandText.body,
+                            color = BrandColor.textPrimary(),
+                        )
+                    },
+                    onClick = {
+                        expanded = false
+                        onSelect(ym)
+                    },
+                )
+            }
         }
     }
 }
@@ -172,7 +267,7 @@ private fun DonutWithTotal(state: StatsState) {
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                text = "₺" + "%,.2f".format(Money(state.totalMinor).toBigDecimal()),
+                text = com.budgetella.app.core.design.moneyText(state.totalMinor),
                 style = BrandText.displayHero,
                 color = if (state.ui.showingType == TransactionType.Income) BrandColor.Income else BrandColor.textPrimary(),
             )
@@ -212,6 +307,8 @@ private fun ChangePill(pct: Float, expenseGoodWhenDown: Boolean) {
 @Composable
 private fun DonutCanvas(breakdown: List<CategoryStat>, modifier: Modifier = Modifier) {
     val total = breakdown.sumOf { it.amountMinor.toDouble() }.takeIf { it > 0 } ?: 0.0
+    // Composable colour lookups must happen outside the DrawScope lambda.
+    val emptyRingColor = BrandColor.borderSubtle().copy(alpha = 0.6f)
     Canvas(modifier = modifier) {
         val strokeWidth = size.minDimension * 0.18f
         val diameter = size.minDimension - strokeWidth
@@ -224,7 +321,7 @@ private fun DonutCanvas(breakdown: List<CategoryStat>, modifier: Modifier = Modi
         if (total <= 0.0) {
             // Empty donut: a single muted ring.
             drawArc(
-                color = BrandColor.borderSubtle().copy(alpha = 0.6f).let { it },
+                color = emptyRingColor,
                 startAngle = -90f,
                 sweepAngle = 360f,
                 useCenter = false,
@@ -296,7 +393,7 @@ private fun CategoryRow(stat: CategoryStat, accent: Color) {
         )
         Spacer(Modifier.width(Spacing.sm))
         Text(
-            text = stat.category.name,
+            text = com.budgetella.app.core.locale.displayCategoryName(stat.category),
             style = BrandText.subheadline,
             color = BrandColor.textPrimary(),
             modifier = Modifier.width(110.dp),
@@ -319,7 +416,10 @@ private fun CategoryRow(stat: CategoryStat, accent: Color) {
             )
         }
         Text(
-            text = "₺" + "%,.0f".format(Money(stat.amountMinor).toBigDecimal()),
+            text = com.budgetella.app.core.design.moneyText(
+                minorUnits = stat.amountMinor,
+                decimals = 0,
+            ),
             style = BrandText.footnote,
             color = BrandColor.textSecondary(),
             textAlign = TextAlign.End,

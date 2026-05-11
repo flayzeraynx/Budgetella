@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.SettingsBrightness
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -92,7 +93,6 @@ fun LanguagePickerSheet(onDismiss: () -> Unit) {
                 selected = active == lang,
                 onClick = {
                     vm.setLanguage(lang)
-                    // Apply locale immediately — triggers Activity recreate.
                     val locale = when (lang) {
                         AppLanguage.Turkish -> LocaleHelper.Language.Turkish
                         AppLanguage.German -> LocaleHelper.Language.German
@@ -100,6 +100,13 @@ fun LanguagePickerSheet(onDismiss: () -> Unit) {
                     }
                     LocaleHelper.setLanguage(context, locale)
                     onDismiss()
+                    // Cold-launch the app under the new locale. setApplicationLocales
+                    // *does* trigger an Activity recreate on its own, but recreate
+                    // keeps Hilt ViewModels alive — Compose state / cached flows
+                    // can show the old language until the user navigates around.
+                    // Restarting the process is the cleanest way to land everyone
+                    // (notifications, splash, AppRoot, all VMs) in the new locale.
+                    restartApp(context)
                 },
             )
         }
@@ -111,6 +118,25 @@ fun LanguagePickerSheet(onDismiss: () -> Unit) {
             modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm),
         )
     }
+}
+
+/**
+ * Re-create the host Activity so Compose pulls the new locale from the
+ * refreshed Configuration. With `android:configChanges` no longer absorbing
+ * the locale change (removed from the manifest) AppCompatDelegate will also
+ * trigger this automatically on Android 13+, but we call it ourselves for
+ * older OS versions / OEMs that swallow the auto-recreate.
+ *
+ * No process kill: AlarmManager-scheduled restarts are unreliable on
+ * Oppo/MIUI background restrictions and tend to land the user on a black
+ * launcher icon instead of the app.
+ */
+private fun restartApp(context: android.content.Context) {
+    var ctx: android.content.Context? = context
+    while (ctx is android.content.ContextWrapper && ctx !is android.app.Activity) {
+        ctx = ctx.baseContext
+    }
+    (ctx as? android.app.Activity)?.recreate()
 }
 
 @Composable

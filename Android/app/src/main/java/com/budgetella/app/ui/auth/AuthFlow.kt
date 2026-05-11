@@ -29,6 +29,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -42,6 +44,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -390,6 +395,11 @@ private fun BrandTextField(
     imeAction: ImeAction,
     isPassword: Boolean = false,
 ) {
+    // Password visibility toggles per-field — survives recomposition.
+    var passwordVisible by remember { mutableStateOf(false) }
+    val showPasswordCd = stringResource(R.string.auth_show_password)
+    val hidePasswordCd = stringResource(R.string.auth_hide_password)
+
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
@@ -399,7 +409,22 @@ private fun BrandTextField(
             keyboardType = keyboardType,
             imeAction = imeAction,
         ),
-        visualTransformation = if (isPassword) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
+        visualTransformation = when {
+            !isPassword -> androidx.compose.ui.text.input.VisualTransformation.None
+            passwordVisible -> androidx.compose.ui.text.input.VisualTransformation.None
+            else -> PasswordVisualTransformation()
+        },
+        trailingIcon = if (isPassword) {
+            {
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(
+                        imageVector = if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                        contentDescription = if (passwordVisible) hidePasswordCd else showPasswordCd,
+                        tint = BrandColor.textTertiary(),
+                    )
+                }
+            }
+        } else null,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(Spacing.radiusMedium),
         colors = OutlinedTextFieldDefaults.colors(

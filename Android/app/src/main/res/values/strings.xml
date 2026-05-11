@@ -4,6 +4,25 @@
 
     <string name="app_name">Budgetella</string>
 
+    <!-- Default category names — looked up by slug at render time so the row name
+         stays localized even when the Firestore document was seeded in another
+         language (e.g. iOS users porting their data over). -->
+    <string name="category_name_salary">Salary</string>
+    <string name="category_name_freelance">Freelance</string>
+    <string name="category_name_investments">Investments</string>
+    <string name="category_name_gifts">Gifts</string>
+    <string name="category_name_productSale">Product Sale</string>
+    <string name="category_name_loan">Loan</string>
+    <string name="category_name_food">Food</string>
+    <string name="category_name_transportation">Transportation</string>
+    <string name="category_name_housing">Housing</string>
+    <string name="category_name_bills">Bills</string>
+    <string name="category_name_healthcare">Healthcare</string>
+    <string name="category_name_shopping">Shopping</string>
+    <string name="category_name_entertainment">Entertainment</string>
+    <string name="category_name_education">Education</string>
+    <string name="category_name_other">Other</string>
+
     <!-- Notification channels -->
     <string name="notif_channel_default_name">Notifications</string>
     <string name="notif_channel_default_description">Spending alerts, weekly digests, and Budgi insights.</string>
@@ -39,6 +58,66 @@
     <string name="onboarding_permissions_title">A couple of permissions</string>
     <string name="onboarding_permissions_subtitle">Notifications are optional but help — weekly digests, budget alerts, anomaly pings.</string>
     <string name="onboarding_permissions_notifications_label">Allow notifications</string>
+    <string name="onboarding_permissions_notifications_granted">Notifications enabled</string>
+    <string name="onboarding_permissions_open_settings">Open notification settings</string>
+    <string name="onboarding_permissions_biometric_hint">Tip — Face / Fingerprint unlock can be turned on in Settings → Security after sign-in.</string>
+    <string name="auth_show_password">Show password</string>
+    <string name="auth_hide_password">Hide password</string>
+    <string name="sync_initial_title">Pulling your data</string>
+    <string name="sync_initial_subtitle">Syncing transactions and categories from your other device — just a moment.</string>
+    <string name="profile_title">Profile</string>
+    <string name="profile_stat_transactions">Transactions</string>
+    <string name="profile_stat_total_saved">Total saved</string>
+    <string name="profile_stat_streak">Day streak</string>
+    <string name="profile_section_this_month">THIS MONTH</string>
+    <string name="profile_section_achievements">ACHIEVEMENTS</string>
+    <string name="profile_month_income">Income</string>
+    <string name="profile_month_expense">Expense</string>
+    <string name="profile_month_net">Net</string>
+    <string name="profile_achievement_first">First Entry</string>
+    <string name="profile_achievement_streak10">10-day Streak</string>
+    <string name="profile_achievement_tx50">50 Entries</string>
+    <string name="profile_achievement_save1k">$1K Saved</string>
+    <string name="profile_achievement_tx100">100 Entries</string>
+    <string name="profile_achievement_budget_goal">Budget Goal</string>
+
+    <!-- Notification settings sheet -->
+    <string name="notif_settings_title">Notifications</string>
+    <string name="notif_master_title">All Notifications</string>
+    <string name="notif_master_subtitle">Toggle every push on or off</string>
+    <string name="notif_master_footer">When disabled, no notifications are delivered.</string>
+    <string name="notif_section_types">NOTIFICATION TYPES</string>
+    <string name="notif_weekly_title">Weekly Digest</string>
+    <string name="notif_weekly_subtitle">Every Monday morning spend recap</string>
+    <string name="notif_anomaly_title">Anomaly Alerts</string>
+    <string name="notif_anomaly_subtitle">Heads-up when spending spikes</string>
+    <string name="notif_savings_title">Savings Suggestions</string>
+    <string name="notif_savings_subtitle">AI-driven personal tips</string>
+    <string name="notif_open_system_settings">Open system notification settings</string>
+    <string name="entry_mode_manual">Manual</string>
+    <string name="entry_mode_voice">Voice</string>
+    <string name="entry_mode_camera">Camera</string>
+    <string name="entry_mode_coming_soon">Coming soon</string>
+    <string name="delete_account_title">Delete account</string>
+    <string name="delete_account_irreversible_title">This action cannot be undone</string>
+    <string name="delete_account_irreversible_body">All your data will be permanently removed within 30 days. You can cancel by signing back in during that window.</string>
+    <string name="delete_account_section_data">DATA TO BE DELETED</string>
+    <string name="delete_account_section_danger">DANGER ZONE</string>
+    <string name="delete_account_item_transactions">Transaction history</string>
+    <string name="delete_account_item_categories">Categories</string>
+    <string name="delete_account_item_budgets">Budgets &amp; goals</string>
+    <string name="delete_account_item_ai">AI chat history</string>
+    <string name="delete_account_item_cloud">Cloud backups</string>
+    <string name="delete_account_item_profile">Profile information</string>
+    <string name="delete_account_backup_nudge">Want to download a backup first?</string>
+    <string name="delete_account_confirm_prompt">Type \"delete\" to confirm</string>
+    <string name="delete_account_confirm_keyword">delete</string>
+    <string name="delete_account_cta">Delete account permanently</string>
+    <string name="delete_account_cta_deleting">Deleting…</string>
+    <string name="delete_account_reauth_title">Verify your identity</string>
+    <string name="delete_account_reauth_body">Deleting your account is a sensitive action. Enter your password to continue.</string>
+    <string name="delete_account_reauth_cta">Confirm and delete</string>
+    <string name="delete_account_reauth_wrong_password">Wrong password. Try again.</string>
     <string name="onboarding_skip">Skip</string>
     <string name="onboarding_next">Next</string>
     <string name="onboarding_get_started">Get started</string>
@@ -94,6 +173,11 @@
     <string name="add_note_label">Note</string>
     <string name="add_category_label">Category</string>
     <string name="add_date_label">Date</string>
+    <string name="add_recurring_label">Recurring</string>
+    <string name="recurring_daily">Daily</string>
+    <string name="recurring_weekly">Weekly</string>
+    <string name="recurring_monthly">Monthly</string>
+    <string name="recurring_yearly">Yearly</string>
     <string name="add_save">Save</string>
 
     <!-- Dashboard -->
@@ -103,9 +187,29 @@
     <string name="dashboard_expense_label">Expense</string>
     <string name="dashboard_flow_title">DAILY FLOW</string>
     <string name="dashboard_top_categories_title">TOP CATEGORIES</string>
+    <string name="dashboard_yearly_summary">YEARLY SUMMARY</string>
+    <string name="dashboard_active_month">ACTIVE MONTH</string>
+    <string name="dashboard_year_income_label">INCOME</string>
+    <string name="dashboard_year_expense_label">EXPENSE</string>
+    <string name="dashboard_legend_income">Income</string>
+    <string name="dashboard_legend_expense">Expense</string>
+    <string name="dashboard_six_month_title">LAST 6 MONTHS</string>
+    <string name="dashboard_net_short">Net</string>
+    <string name="dashboard_greeting_morning">Good morning, %s ☀️</string>
+    <string name="dashboard_greeting_afternoon">Good afternoon, %s 👋</string>
+    <string name="dashboard_greeting_evening">Good evening, %s 🌙</string>
+    <string name="dashboard_greeting_night">Hi, %s 🌙</string>
+    <!-- Greeting split into label + name. Hero uses these. -->
+    <string name="dashboard_greeting_label_morning">Good morning ☀️</string>
+    <string name="dashboard_greeting_label_afternoon">Good afternoon</string>
+    <string name="dashboard_greeting_label_evening">Good evening 🌙</string>
+    <string name="dashboard_greeting_label_night">Hi 🌙</string>
     <string name="dashboard_recent_title">RECENT</string>
-    <string name="dashboard_empty_title">Nothing here yet</string>
-    <string name="dashboard_empty_body">Tap + to add your first transaction. Charts and insights appear once there\'s data.</string>
+    <string name="dashboard_empty_title">Let\'s set up your money story</string>
+    <string name="dashboard_empty_body">Tap the + button below to add your first entry. Everything else fills in as you go.</string>
+    <string name="dashboard_empty_feature_charts">Daily and monthly charts</string>
+    <string name="dashboard_empty_feature_ai">AI insights from Budgi</string>
+    <string name="dashboard_empty_feature_categories">Category breakdowns &amp; trends</string>
 
     <!-- Stats -->
     <string name="stats_title">Stats</string>

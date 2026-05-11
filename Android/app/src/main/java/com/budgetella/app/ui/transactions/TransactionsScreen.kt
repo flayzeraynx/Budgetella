@@ -106,7 +106,7 @@ fun TransactionsScreen(
                                 color = BrandColor.Primary,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = Spacing.xl, top = Spacing.md, bottom = Spacing.xs),
+                                    .padding(start = Spacing.xl, end = Spacing.xl, top = Spacing.md, bottom = Spacing.xs),
                             )
                         }
 
@@ -118,7 +118,7 @@ fun TransactionsScreen(
                                     color = BrandColor.textTertiary(),
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = Spacing.xl, top = Spacing.sm, bottom = 4.dp),
+                                        .padding(start = Spacing.xl, end = Spacing.xl, top = Spacing.sm, bottom = 4.dp),
                                 )
                             }
 

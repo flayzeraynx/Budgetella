@@ -37,6 +37,10 @@ interface TransactionDao {
     )
     suspend fun listRange(userId: String, startMillis: Long, endMillis: Long): List<TransactionEntity>
 
+    /** All rows for a user — used by the Firestore listener to reconcile deletes. */
+    @Query("SELECT * FROM transactions WHERE userId = :userId")
+    suspend fun listForUser(userId: String): List<TransactionEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(transaction: TransactionEntity)
 

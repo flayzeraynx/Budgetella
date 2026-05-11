@@ -44,5 +44,7 @@ enum class AuthError {
     NetworkUnavailable,
     UserCancelled,
     NotConfigured,
+    /** Firebase requiresRecentLogin — UI should prompt for password re-auth. */
+    RecentLoginRequired,
     Unknown,
 }

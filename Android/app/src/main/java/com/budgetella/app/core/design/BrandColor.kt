@@ -1,6 +1,5 @@
 package com.budgetella.app.core.design
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
@@ -31,41 +30,41 @@ object BrandColor {
 
     @Composable @ReadOnlyComposable
     fun background(): Color =
-        if (isSystemInDarkTheme()) Color(0xFF0A0B14) else Color(0xFFF5F6FE)
+        if (LocalIsDarkTheme.current) Color(0xFF0A0B14) else Color(0xFFF5F6FE)
 
     @Composable @ReadOnlyComposable
     fun background2(): Color =
-        if (isSystemInDarkTheme()) Color(0xFF14152A) else Color(0xFFECEEF9)
+        if (LocalIsDarkTheme.current) Color(0xFF14152A) else Color(0xFFECEEF9)
 
     @Composable @ReadOnlyComposable
     fun background3(): Color =
-        if (isSystemInDarkTheme()) Color(0xFF1A1740) else Color(0xFFE4E5F4)
+        if (LocalIsDarkTheme.current) Color(0xFF1A1740) else Color(0xFFE4E5F4)
 
     @Composable @ReadOnlyComposable
     fun surface(): Color =
-        if (isSystemInDarkTheme()) Color(0xFF11141C) else Color(0xFFFFFFFF)
+        if (LocalIsDarkTheme.current) Color(0xFF11141C) else Color(0xFFFFFFFF)
 
     @Composable @ReadOnlyComposable
     fun surfaceElevated(): Color =
-        if (isSystemInDarkTheme()) Color(0xFF1A1F2E) else Color(0xFFF0F1FA)
+        if (LocalIsDarkTheme.current) Color(0xFF1A1F2E) else Color(0xFFF0F1FA)
 
     @Composable @ReadOnlyComposable
     fun textPrimary(): Color =
-        if (isSystemInDarkTheme()) Color.White else Color(0xFF1A1B2E)
+        if (LocalIsDarkTheme.current) Color.White else Color(0xFF1A1B2E)
 
     @Composable @ReadOnlyComposable
     fun textSecondary(): Color =
-        if (isSystemInDarkTheme()) Color.White.copy(alpha = 0.72f) else Color(0xFF1A1B2E).copy(alpha = 0.72f)
+        if (LocalIsDarkTheme.current) Color.White.copy(alpha = 0.72f) else Color(0xFF1A1B2E).copy(alpha = 0.72f)
 
     @Composable @ReadOnlyComposable
     fun textTertiary(): Color =
-        if (isSystemInDarkTheme()) Color.White.copy(alpha = 0.50f) else Color(0xFF1A1B2E).copy(alpha = 0.50f)
+        if (LocalIsDarkTheme.current) Color.White.copy(alpha = 0.50f) else Color(0xFF1A1B2E).copy(alpha = 0.50f)
 
     @Composable @ReadOnlyComposable
     fun borderSubtle(): Color =
-        if (isSystemInDarkTheme()) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.08f)
+        if (LocalIsDarkTheme.current) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.08f)
 
     @Composable @ReadOnlyComposable
     fun borderMedium(): Color =
-        if (isSystemInDarkTheme()) Color.White.copy(alpha = 0.16f) else Color.Black.copy(alpha = 0.16f)
+        if (LocalIsDarkTheme.current) Color.White.copy(alpha = 0.16f) else Color.Black.copy(alpha = 0.16f)
 }

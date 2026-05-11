@@ -1,6 +1,7 @@
 package com.budgetella.app.ui.dashboard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,12 +18,21 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -42,12 +52,19 @@ import com.budgetella.app.data.model.Money
 import com.budgetella.app.ui.budgi.BudgiInsight
 import com.budgetella.app.ui.transactions.TransactionRow
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
 import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
+import com.patrykandpatrick.vico.core.common.Fill
+import com.patrykandpatrick.vico.core.common.component.LineComponent
+import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -63,15 +80,19 @@ import java.util.Locale
 fun DashboardScreen(
     onEditTransaction: (TransactionEntity) -> Unit,
     onOpenBudgi: () -> Unit = {},
+    onShowSettings: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val vm: DashboardViewModel = hiltViewModel()
     val state by vm.state.collectAsStateWithLifecycle()
 
-    if (!state.hasAnyTransactions) {
-        EmptyDashboard(modifier)
-        return
-    }
+    // The AI insight string is locale-sensitive but cached by DashboardViewModel
+    // — re-fire compute whenever the Configuration's language changes so the
+    // Budgi card swaps language without a full process restart.
+    val currentLangTag = LocalContext.current.resources.configuration.locales
+        .toLanguageTags()
+        .substringBefore(',')
+    LaunchedEffect(currentLangTag) { vm.refreshLocale() }
 
     Column(
         modifier = modifier
@@ -81,21 +102,24 @@ fun DashboardScreen(
             .verticalScroll(rememberScrollState())
             .padding(bottom = 120.dp),
     ) {
-        // Title header
-        Text(
-            text = stringResource(R.string.dashboard_title),
-            style = BrandText.largeTitle,
-            color = BrandColor.textPrimary(),
-            modifier = Modifier.padding(horizontal = Spacing.xl, vertical = Spacing.lg),
-        )
-
-        BalanceHero(state = state)
+        // Greeting + avatar — always rendered, even on the empty state, so
+        // first-launch lands on a personalised screen instead of an
+        // unwelcoming blank canvas.
+        GreetingHero(state = state, onAvatarClick = onShowSettings)
         Spacer(Modifier.height(Spacing.lg))
 
-        if (state.dailyFlow.any { it.incomeMinor + it.expenseMinor > 0 }) {
-            FlowChartCard(state = state)
-            Spacer(Modifier.height(Spacing.lg))
+        if (!state.hasAnyTransactions) {
+            EmptyDashboardCard()
+            return@Column
         }
+
+        // Combined year + month card, includes the daily-flow chart
+        DashboardMainCard(
+            state = state,
+            onSelectYear = vm::selectYear,
+            onSelectMonth = vm::selectMonth,
+        )
+        Spacer(Modifier.height(Spacing.lg))
 
         state.featuredInsight?.let { insight ->
             AIInsightCard(insight = insight, onTap = onOpenBudgi)
@@ -108,16 +132,452 @@ fun DashboardScreen(
         }
 
         RecentTransactionsCard(state = state, onEdit = onEditTransaction)
+
+        // 6-month income-vs-expense bar chart — same surface as iOS
+        // IncomeExpenseBarChart at the bottom of the dashboard.
+        if (state.sixMonthFlow.any { it.incomeMinor + it.expenseMinor > 0 }) {
+            Spacer(Modifier.height(Spacing.lg))
+            SixMonthBarChartCard(state = state)
+        }
     }
+}
+
+// ── Greeting hero ──────────────────────────────────────────────────────────
+
+@Composable
+private fun GreetingHero(
+    state: DashboardState,
+    onAvatarClick: () -> Unit,
+) {
+    val context = LocalContext.current
+    // First name only — the iOS hero is "İyi akşamlar, / Ozan 👋", we don't
+    // want surnames pushing the line off the screen.
+    val firstName = state.user?.displayName?.substringBefore(' ')?.takeIf { it.isNotBlank() }
+        ?: state.user?.email?.substringBefore('@')
+        ?: ""
+    val greetingLabel = remember {
+        val hour = java.time.LocalDateTime.now().hour
+        val resId = when (hour) {
+            in 5..11 -> R.string.dashboard_greeting_label_morning
+            in 12..17 -> R.string.dashboard_greeting_label_afternoon
+            in 18..22 -> R.string.dashboard_greeting_label_evening
+            else -> R.string.dashboard_greeting_label_night
+        }
+        context.getString(resId)
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.xl, vertical = Spacing.lg),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            // Two-line iOS-style hero: small greeting on top, bold name below.
+            Text(
+                text = greetingLabel + ",",
+                style = BrandText.subheadline,
+                color = BrandColor.textSecondary(),
+                maxLines = 1,
+            )
+            if (firstName.isNotBlank()) {
+                Text(
+                    text = "$firstName 👋",
+                    style = BrandText.largeTitle,
+                    color = BrandColor.textPrimary(),
+                    maxLines = 1,
+                )
+            }
+        }
+        AvatarSmall(
+            photoUrl = state.user?.photoURL,
+            initial = firstName.firstOrNull()?.uppercase() ?: "?",
+            onClick = onAvatarClick,
+        )
+    }
+}
+
+@Composable
+private fun AvatarSmall(photoUrl: String?, initial: String, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .height(44.dp)
+            .width(44.dp)
+            .clip(androidx.compose.foundation.shape.CircleShape)
+            .background(BrandColor.Primary.copy(alpha = 0.2f))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (!photoUrl.isNullOrBlank()) {
+            coil.compose.AsyncImage(
+                model = photoUrl,
+                contentDescription = "Settings",
+                modifier = Modifier
+                    .height(44.dp)
+                    .width(44.dp)
+                    .clip(androidx.compose.foundation.shape.CircleShape),
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+            )
+        } else {
+            // Initials fallback — looks like iOS' colored circle for email/
+            // password sign-ups that don't ship a photoURL.
+            Text(
+                text = initial,
+                style = BrandText.subheadline.copy(
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                ),
+                color = BrandColor.Primary,
+            )
+        }
+    }
+}
+
+// ── Combined year + month card (port of iOS DashboardMainCard) ─────────────
+
+@Composable
+private fun DashboardMainCard(
+    state: DashboardState,
+    onSelectYear: (Int) -> Unit,
+    onSelectMonth: (Int) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .padding(horizontal = Spacing.xl)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(Spacing.radiusMedium))
+            .background(BrandColor.surface().copy(alpha = 0.5f)),
+    ) {
+        // Year section
+        YearSection(state, onSelectYear)
+        HorizontalDivider(
+            color = BrandColor.borderSubtle(),
+            modifier = Modifier.padding(horizontal = Spacing.lg),
+        )
+        // Month section + chart
+        MonthSection(state, onSelectMonth)
+    }
+}
+
+@Composable
+private fun YearSection(state: DashboardState, onSelectYear: (Int) -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.dashboard_yearly_summary),
+                style = BrandText.caption,
+                color = BrandColor.textTertiary(),
+            )
+            Spacer(Modifier.weight(1f))
+            PickerPill(
+                label = state.year.toString(),
+                items = state.availableYears,
+                onSelect = onSelectYear,
+                itemLabel = { it.toString() },
+            )
+        }
+        Row(modifier = Modifier.fillMaxWidth()) {
+            YearStatColumn(
+                arrow = "↑",
+                label = stringResource(R.string.dashboard_year_income_label),
+                amountMinor = state.yearIncomeMinor,
+                color = BrandColor.Income,
+                modifier = Modifier.weight(1f),
+            )
+            Box(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(48.dp)
+                    .background(BrandColor.borderSubtle()),
+            )
+            YearStatColumn(
+                arrow = "↓",
+                label = stringResource(R.string.dashboard_year_expense_label),
+                amountMinor = state.yearExpenseMinor,
+                color = BrandColor.Expense,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun YearStatColumn(
+    arrow: String,
+    label: String,
+    amountMinor: Long,
+    color: Color,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.padding(horizontal = Spacing.sm),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = arrow,
+                style = BrandText.caption.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                color = color,
+            )
+            Spacer(Modifier.width(4.dp))
+            Text(
+                text = label,
+                style = BrandText.caption,
+                color = BrandColor.textTertiary(),
+            )
+        }
+        // Slightly smaller than displayHero — year totals get long fast and
+        // the iOS card already keeps these tighter than the month total.
+        Text(
+            text = com.budgetella.app.core.design.moneyText(amountMinor),
+            style = BrandText.title.copy(
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+            ),
+            color = color,
+            maxLines = 1,
+        )
+    }
+}
+
+@Composable
+private fun MonthSection(state: DashboardState, onSelectMonth: (Int) -> Unit) {
+    val monthName = state.month.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.dashboard_active_month),
+                style = BrandText.caption,
+                color = BrandColor.textTertiary(),
+            )
+            Spacer(Modifier.weight(1f))
+            PickerPill(
+                label = monthName,
+                items = state.availableMonths,
+                onSelect = onSelectMonth,
+                itemLabel = { m ->
+                    java.time.Month.of(m).getDisplayName(TextStyle.FULL, Locale.getDefault())
+                },
+            )
+        }
+        Row(modifier = Modifier.fillMaxWidth()) {
+            MonthStatColumn(
+                arrow = "↗",
+                label = stringResource(R.string.dashboard_income_label),
+                amountMinor = state.incomeMinor,
+                color = BrandColor.Income,
+                modifier = Modifier.weight(1f),
+            )
+            MonthStatColumn(
+                arrow = "↘",
+                label = stringResource(R.string.dashboard_expense_label),
+                amountMinor = state.expenseMinor,
+                color = BrandColor.Expense,
+                modifier = Modifier.weight(1f),
+            )
+        }
+        // Net row
+        val isNeg = state.netMinor < 0
+        val netColor = if (isNeg) BrandColor.Expense else BrandColor.Income
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = if (isNeg) "↓" else "↑",
+                style = BrandText.footnote.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                color = netColor,
+            )
+            Spacer(Modifier.width(4.dp))
+            Text(
+                text = stringResource(R.string.dashboard_net_short) + " " +
+                    (if (isNeg) "−" else "+") +
+                    com.budgetella.app.core.design.moneyText(
+                        kotlin.math.abs(state.netMinor),
+                    ) +
+                    " (" + monthName + ")",
+                style = BrandText.footnote,
+                color = netColor,
+            )
+        }
+        // Chart with legend
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(R.string.dashboard_flow_title) + " · " + monthName.uppercase(),
+                    style = BrandText.caption,
+                    color = BrandColor.textTertiary(),
+                )
+                Spacer(Modifier.weight(1f))
+                LegendDot(BrandColor.Income, stringResource(R.string.dashboard_legend_income))
+                Spacer(Modifier.width(Spacing.sm))
+                LegendDot(BrandColor.Expense, stringResource(R.string.dashboard_legend_expense))
+            }
+            if (state.dailyFlow.any { it.incomeMinor + it.expenseMinor > 0 }) {
+                EmbeddedFlowChart(state = state)
+            }
+        }
+    }
+}
+
+@Composable
+private fun MonthStatColumn(
+    arrow: String,
+    label: String,
+    amountMinor: Long,
+    color: Color,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = arrow,
+                style = BrandText.caption,
+                color = color,
+            )
+            Spacer(Modifier.width(4.dp))
+            Text(
+                text = label,
+                style = BrandText.caption,
+                color = BrandColor.textTertiary(),
+            )
+        }
+        Text(
+            text = com.budgetella.app.core.design.moneyText(amountMinor),
+            style = BrandText.subheadline.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
+            color = color,
+            maxLines = 1,
+        )
+    }
+}
+
+/**
+ * Year / month picker pill — tappable capsule that opens a DropdownMenu of
+ * available choices. Mirrors the iOS pill style (background3 + chevron).
+ */
+@Composable
+private fun <T> PickerPill(
+    label: String,
+    items: List<T>,
+    onSelect: (T) -> Unit,
+    itemLabel: (T) -> String,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(Spacing.radiusFull))
+                .background(BrandColor.background3())
+                .clickable(enabled = items.isNotEmpty()) { expanded = true }
+                .padding(start = Spacing.sm, end = 6.dp, top = 5.dp, bottom = 5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = label,
+                style = BrandText.caption,
+                color = BrandColor.textPrimary(),
+            )
+            Spacer(Modifier.width(2.dp))
+            Icon(
+                imageVector = Icons.Filled.KeyboardArrowDown,
+                contentDescription = null,
+                tint = BrandColor.textTertiary(),
+                modifier = Modifier.height(14.dp).width(14.dp),
+            )
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.background(BrandColor.surface()),
+        ) {
+            items.forEach { item ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = itemLabel(item),
+                            style = BrandText.body,
+                            color = BrandColor.textPrimary(),
+                        )
+                    },
+                    onClick = {
+                        expanded = false
+                        onSelect(item)
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LegendDot(color: Color, label: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .height(8.dp)
+                .width(8.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(color),
+        )
+        Spacer(Modifier.width(4.dp))
+        Text(
+            text = label,
+            style = BrandText.caption,
+            color = BrandColor.textTertiary(),
+        )
+    }
+}
+
+@Composable
+private fun EmbeddedFlowChart(state: DashboardState) {
+    // Single, stable producer for the whole composition — Vico requires the
+    // producer instance to outlive data changes; pushing new series happens
+    // via runTransaction inside the LaunchedEffect below.
+    val producer = remember { CartesianChartModelProducer() }
+    LaunchedEffect(state.dailyFlow) {
+        producer.runTransaction {
+            lineSeries {
+                series(state.dailyFlow.map { it.incomeMinor.toFloat() })
+                series(state.dailyFlow.map { it.expenseMinor.toFloat() })
+            }
+        }
+    }
+    CartesianChartHost(
+        chart = rememberCartesianChart(
+            rememberLineCartesianLayer(
+                lineProvider = LineCartesianLayer.LineProvider.series(
+                    LineCartesianLayer.rememberLine(
+                        fill = LineCartesianLayer.LineFill.single(
+                            fill = com.patrykandpatrick.vico.core.common.Fill(BrandColor.Income.toArgb()),
+                        ),
+                    ),
+                    LineCartesianLayer.rememberLine(
+                        fill = LineCartesianLayer.LineFill.single(
+                            fill = com.patrykandpatrick.vico.core.common.Fill(BrandColor.Expense.toArgb()),
+                        ),
+                    ),
+                ),
+            ),
+        ),
+        modelProducer = producer,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp),
+        zoomState = rememberVicoZoomState(zoomEnabled = false),
+    )
 }
 
 // ── Balance hero ───────────────────────────────────────────────────────────
 
 @Composable
 private fun BalanceHero(state: DashboardState) {
-    val net = Money(state.netMinor).toBigDecimal()
-    val income = Money(state.incomeMinor).toBigDecimal()
-    val expense = Money(state.expenseMinor).toBigDecimal()
     val netColor = if (state.netMinor >= 0) BrandColor.Income else BrandColor.Expense
 
     Column(
@@ -143,7 +603,7 @@ private fun BalanceHero(state: DashboardState) {
         )
         Spacer(Modifier.height(Spacing.xs))
         Text(
-            text = "₺" + "%,.2f".format(net),
+            text = com.budgetella.app.core.design.moneyText(state.netMinor),
             style = BrandText.displayHero,
             color = netColor,
         )
@@ -152,14 +612,14 @@ private fun BalanceHero(state: DashboardState) {
         Row(modifier = Modifier.fillMaxWidth()) {
             MoneyBlock(
                 label = stringResource(R.string.dashboard_income_label),
-                amount = income,
+                amountMinor = state.incomeMinor,
                 accent = BrandColor.Income,
                 modifier = Modifier.weight(1f),
             )
             Spacer(Modifier.width(Spacing.md))
             MoneyBlock(
                 label = stringResource(R.string.dashboard_expense_label),
-                amount = expense,
+                amountMinor = state.expenseMinor,
                 accent = BrandColor.Expense,
                 modifier = Modifier.weight(1f),
             )
@@ -170,7 +630,7 @@ private fun BalanceHero(state: DashboardState) {
 @Composable
 private fun MoneyBlock(
     label: String,
-    amount: java.math.BigDecimal,
+    amountMinor: Long,
     accent: Color,
     modifier: Modifier = Modifier,
 ) {
@@ -188,7 +648,7 @@ private fun MoneyBlock(
         }
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "₺" + "%,.2f".format(amount),
+            text = com.budgetella.app.core.design.moneyText(amountMinor),
             style = BrandText.subheadline,
             color = BrandColor.textPrimary(),
         )
@@ -285,13 +745,16 @@ private fun TopCategoriesCard(state: DashboardState) {
                     )
                     Spacer(Modifier.width(Spacing.sm))
                     Text(
-                        text = stat.category.name,
+                        text = com.budgetella.app.core.locale.displayCategoryName(stat.category),
                         style = BrandText.subheadline,
                         color = BrandColor.textPrimary(),
                         modifier = Modifier.weight(1f),
                     )
                     Text(
-                        text = "₺" + "%,.0f".format(Money(stat.amountMinor).toBigDecimal()),
+                        text = com.budgetella.app.core.design.moneyText(
+                            minorUnits = stat.amountMinor,
+                            decimals = 0,
+                        ),
                         style = BrandText.subheadline,
                         color = BrandColor.textSecondary(),
                     )
@@ -360,10 +823,71 @@ private fun RecentTransactionsCard(
     }
 }
 
+// ── Six-month bar chart ────────────────────────────────────────────────────
+
+@Composable
+private fun SixMonthBarChartCard(state: DashboardState) {
+    val producer = remember { CartesianChartModelProducer() }
+    LaunchedEffect(state.sixMonthFlow) {
+        producer.runTransaction {
+            columnSeries {
+                series(state.sixMonthFlow.map { it.incomeMinor.toFloat() })
+                series(state.sixMonthFlow.map { it.expenseMinor.toFloat() })
+            }
+        }
+    }
+    val incomeArgb = BrandColor.Income.toArgb()
+    val expenseArgb = BrandColor.Expense.toArgb()
+    Column(
+        modifier = Modifier
+            .padding(horizontal = Spacing.xl)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(Spacing.radiusMedium))
+            .background(BrandColor.surface().copy(alpha = 0.5f))
+            .padding(Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.dashboard_six_month_title),
+                style = BrandText.caption,
+                color = BrandColor.textTertiary(),
+            )
+            Spacer(Modifier.weight(1f))
+            LegendDot(BrandColor.Income, stringResource(R.string.dashboard_legend_income))
+            Spacer(Modifier.width(Spacing.sm))
+            LegendDot(BrandColor.Expense, stringResource(R.string.dashboard_legend_expense))
+        }
+        CartesianChartHost(
+            chart = rememberCartesianChart(
+                rememberColumnCartesianLayer(
+                    columnProvider = ColumnCartesianLayer.ColumnProvider.series(
+                        LineComponent(
+                            fill = Fill(incomeArgb),
+                            thicknessDp = 12f,
+                            shape = CorneredShape.rounded(4f),
+                        ),
+                        LineComponent(
+                            fill = Fill(expenseArgb),
+                            thicknessDp = 12f,
+                            shape = CorneredShape.rounded(4f),
+                        ),
+                    ),
+                ),
+            ),
+            modelProducer = producer,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(160.dp),
+            zoomState = rememberVicoZoomState(zoomEnabled = false),
+        )
+    }
+}
+
 // ── AI insight card ────────────────────────────────────────────────────────
 
 @Composable
-private fun AIInsightCard(insight: BudgiInsight, onTap: () -> Unit) {
+internal fun AIInsightCard(insight: BudgiInsight, onTap: () -> Unit) {
     Row(
         modifier = Modifier
             .padding(horizontal = Spacing.xl)
@@ -411,30 +935,83 @@ private fun AIInsightCard(insight: BudgiInsight, onTap: () -> Unit) {
 
 // ── Empty state ────────────────────────────────────────────────────────────
 
+/**
+ * Empty-state card surfaced inline below the Greeting hero, so the screen
+ * still feels personalised even on day one. A gradient panel with a centred
+ * sparkle emoji and instruction lines that reference the FAB.
+ */
 @Composable
-private fun EmptyDashboard(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(BrandColor.background())
-            .padding(horizontal = Spacing.xxl),
-        contentAlignment = Alignment.Center,
+private fun EmptyDashboardCard() {
+    Column(
+        modifier = Modifier
+            .padding(horizontal = Spacing.xl)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(Spacing.radiusLarge))
+            .background(
+                androidx.compose.ui.graphics.Brush.linearGradient(
+                    listOf(
+                        BrandColor.Primary.copy(alpha = 0.22f),
+                        BrandColor.PrimaryLight.copy(alpha = 0.08f),
+                    )
+                )
+            )
+            .padding(vertical = Spacing.xxl, horizontal = Spacing.xl),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = stringResource(R.string.dashboard_empty_title),
-                style = BrandText.title,
-                color = BrandColor.textPrimary(),
-                textAlign = TextAlign.Center,
-            )
-            Spacer(Modifier.height(Spacing.sm))
-            Text(
-                text = stringResource(R.string.dashboard_empty_body),
-                style = BrandText.body,
-                color = BrandColor.textTertiary(),
-                textAlign = TextAlign.Center,
-            )
-        }
+        // Big emoji "icon" — cheap brand-on-feel for the empty state without
+        // needing a custom illustration asset.
+        Text(
+            text = "✨",
+            style = BrandText.displayHero,
+        )
+        Text(
+            text = stringResource(R.string.dashboard_empty_title),
+            style = BrandText.title,
+            color = BrandColor.textPrimary(),
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            text = stringResource(R.string.dashboard_empty_body),
+            style = BrandText.body,
+            color = BrandColor.textSecondary(),
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(Spacing.sm))
+        // Three feature hints — sets expectations for what shows up once the
+        // user adds their first few entries.
+        EmptyFeatureHint(
+            emoji = "📊",
+            label = stringResource(R.string.dashboard_empty_feature_charts),
+        )
+        EmptyFeatureHint(
+            emoji = "🧠",
+            label = stringResource(R.string.dashboard_empty_feature_ai),
+        )
+        EmptyFeatureHint(
+            emoji = "🎯",
+            label = stringResource(R.string.dashboard_empty_feature_categories),
+        )
+    }
+}
+
+@Composable
+private fun EmptyFeatureHint(emoji: String, label: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(Spacing.radiusMedium))
+            .background(BrandColor.surface().copy(alpha = 0.4f))
+            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(text = emoji, style = BrandText.title)
+        Spacer(Modifier.width(Spacing.md))
+        Text(
+            text = label,
+            style = BrandText.body,
+            color = BrandColor.textPrimary(),
+        )
     }
 }
 

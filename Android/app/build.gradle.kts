@@ -32,7 +32,11 @@ android {
 
     buildTypes {
         debug {
-            applicationIdSuffix = ".debug"
+            // No applicationIdSuffix so debug builds match the Firebase-registered
+            // package name `com.budgetella.app` (single google-services.json entry).
+            // If you ever want debug + release side-by-side on the same device, add
+            // `com.budgetella.app.debug` as a second Android app in Firebase Console
+            // and re-add the suffix here.
             versionNameSuffix = "-dev"
             isMinifyEnabled = false
         }
@@ -85,6 +89,10 @@ dependencies {
     // AndroidX core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    // Provides the XML `Theme.Material3.*` parent styles used by themes.xml
+    // (Compose handles in-app theming itself, but the Activity window theme
+    // still resolves at the XML layer.)
+    implementation(libs.google.android.material)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -122,7 +130,11 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.messaging.ktx)
     implementation(libs.firebase.analytics.ktx)
-    implementation(libs.firebase.crashlytics.ktx)
+    // Crashlytics requires the `com.google.firebase.crashlytics` Gradle plugin
+    // (which injects a build ID into the APK). Deferring until we wire up the
+    // mapping-file upload flow — keep the dep commented out so the artifact
+    // is not pulled in and the app starts without a build-ID assertion.
+    // implementation(libs.firebase.crashlytics.ktx)
 
     // Google Sign-In via Credential Manager (replaces deprecated GoogleSignInClient)
     implementation(libs.androidx.credentials)

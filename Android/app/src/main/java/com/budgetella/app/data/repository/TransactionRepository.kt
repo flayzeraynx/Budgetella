@@ -59,23 +59,41 @@ class RoomTransactionRepository @Inject constructor(
         dao.upsert(transaction)
         // Push to Firestore best-effort — offline edits live in Room until the
         // next successful network call carries them up. Don't crash the UI if
-        // the network is down or rules reject the write.
+        // the network is down or rules reject the write, but DO log so the
+        // BUDGETELLA_SYNC filter shows whether the push actually landed.
+        val slug = transaction.categoryId?.let { categoryDao.findById(it)?.slug }
+        if (transaction.userId.isEmpty() || transaction.userId == LOCAL_USER_ID) {
+            android.util.Log.d(
+                "BUDGETELLA_SYNC",
+                "upsert(${transaction.id}) — skipping Firestore push (userId='${transaction.userId}')",
+            )
+            return
+        }
         runCatching {
-            val slug = transaction.categoryId?.let { categoryDao.findById(it)?.slug }
-            // Skip Firestore push for the local placeholder user — it has no Firestore doc.
-            if (transaction.userId.isNotEmpty() && transaction.userId != LOCAL_USER_ID) {
-                firestore.uploadTransaction(transaction, slug)
-            }
+            firestore.uploadTransaction(transaction, slug)
+        }.onSuccess {
+            android.util.Log.d(
+                "BUDGETELLA_SYNC",
+                "upsert(${transaction.id}) — pushed to Firestore (uid=${transaction.userId} slug=$slug amount=${transaction.amount})",
+            )
+        }.onFailure { e ->
+            android.util.Log.e(
+                "BUDGETELLA_SYNC",
+                "upsert(${transaction.id}) — Firestore push FAILED: ${e.javaClass.simpleName}: ${e.message}",
+            )
         }
     }
 
     override suspend fun delete(id: String) {
         val row = dao.findById(id)
         dao.deleteById(id)
+        if (row == null || row.userId.isEmpty() || row.userId == LOCAL_USER_ID) return
         runCatching {
-            if (row != null && row.userId.isNotEmpty() && row.userId != LOCAL_USER_ID) {
-                firestore.deleteTransaction(id, row.userId)
-            }
+            firestore.deleteTransaction(id, row.userId)
+        }.onSuccess {
+            android.util.Log.d("BUDGETELLA_SYNC", "delete($id) — Firestore delete ok")
+        }.onFailure { e ->
+            android.util.Log.e("BUDGETELLA_SYNC", "delete($id) — Firestore delete FAILED: ${e.message}")
         }
     }
 

@@ -78,6 +78,10 @@ fun SettingsScreen(
     onExport: () -> Unit = {},
     onImport: () -> Unit = {},
     onShowInbox: () -> Unit,
+    onShowProfile: () -> Unit = {},
+    onDeleteAccount: () -> Unit = {},
+    onShowNotificationSettings: () -> Unit = {},
+    onShowCategories: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val vm: SettingsViewModel = hiltViewModel()
@@ -85,7 +89,6 @@ fun SettingsScreen(
     val context = LocalContext.current
 
     var confirmSignOut by remember { mutableStateOf(false) }
-    var confirmDelete by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -108,10 +111,12 @@ fun SettingsScreen(
                 modifier = Modifier.padding(top = Spacing.sm, bottom = Spacing.xs),
             )
 
-            // Profile card
+            // Profile card — tap opens the profile sheet
             ProfileCard(
                 displayName = state.displayName,
                 email = state.email,
+                photoUrl = state.photoUrl,
+                onClick = onShowProfile,
             )
 
             // Premium row
@@ -218,12 +223,11 @@ fun SettingsScreen(
                     onClick = onShowInbox,
                 )
                 RowDivider()
-                ToggleRow(
+                NavigationRow(
                     icon = Icons.Filled.Notifications,
                     tint = BrandColor.Primary,
                     title = stringResource(R.string.settings_notifications_push),
-                    checked = state.notificationsEnabled,
-                    onChange = vm::setNotifications,
+                    onClick = onShowNotificationSettings,
                 )
             }
 
@@ -279,7 +283,7 @@ fun SettingsScreen(
                     tint = BrandColor.Expense,
                     title = stringResource(R.string.settings_delete_account),
                     destructive = true,
-                    onClick = { confirmDelete = true },
+                    onClick = onDeleteAccount,
                 )
             }
 
@@ -317,28 +321,6 @@ fun SettingsScreen(
         )
     }
 
-    if (confirmDelete) {
-        AlertDialog(
-            onDismissRequest = { confirmDelete = false },
-            title = { Text(stringResource(R.string.settings_delete_confirm_title)) },
-            text = { Text(stringResource(R.string.settings_delete_confirm_body)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    confirmDelete = false
-                    vm.deleteAccount()
-                    onDismiss()
-                }) {
-                    Text(stringResource(R.string.common_delete), color = BrandColor.Expense)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { confirmDelete = false }) {
-                    Text(stringResource(R.string.common_cancel))
-                }
-            },
-            containerColor = BrandColor.surface(),
-        )
-    }
 }
 
 // ── Building blocks ────────────────────────────────────────────────────────
@@ -472,29 +454,22 @@ private fun ToggleRow(
 }
 
 @Composable
-private fun ProfileCard(displayName: String?, email: String?) {
+private fun ProfileCard(
+    displayName: String?,
+    email: String?,
+    photoUrl: String?,
+    onClick: () -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(Spacing.radiusMedium))
             .background(BrandColor.surface().copy(alpha = 0.4f))
+            .clickable(onClick = onClick)
             .padding(Spacing.lg),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(BrandColor.Primary.copy(alpha = 0.2f)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = Icons.Filled.AccountCircle,
-                contentDescription = null,
-                tint = BrandColor.Primary,
-                modifier = Modifier.size(28.dp),
-            )
-        }
+        ProfileAvatar(photoUrl = photoUrl, size = 48.dp)
         Spacer(Modifier.width(Spacing.md))
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -509,6 +484,49 @@ private fun ProfileCard(displayName: String?, email: String?) {
                     color = BrandColor.textTertiary(),
                 )
             }
+        }
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = BrandColor.textTertiary(),
+            modifier = Modifier.size(20.dp),
+        )
+    }
+}
+
+/**
+ * Avatar — renders the user's Google / Firebase photoUrl via Coil, falling back
+ * to a tinted person glyph when no photo is available (email/password accounts
+ * or sign-ups where Google didn't return a picture URL).
+ */
+@Composable
+private fun ProfileAvatar(
+    photoUrl: String?,
+    size: androidx.compose.ui.unit.Dp,
+) {
+    Box(
+        modifier = Modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(BrandColor.Primary.copy(alpha = 0.2f)),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (!photoUrl.isNullOrBlank()) {
+            coil.compose.AsyncImage(
+                model = photoUrl,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(size)
+                    .clip(CircleShape),
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Filled.AccountCircle,
+                contentDescription = null,
+                tint = BrandColor.Primary,
+                modifier = Modifier.size((size.value * 0.6f).dp),
+            )
         }
     }
 }

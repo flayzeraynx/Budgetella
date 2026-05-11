@@ -77,6 +77,14 @@ struct MainTabView: View {
                 userId: currentUserId,
                 modelContext: modelContext
             )
+            // Real-time listener — keeps SwiftData in sync with writes coming
+            // from Android (or any other client) while the app is in the
+            // foreground. Idempotent; stops automatically on sign-out via the
+            // SignOutService cleanup path below.
+            FirestoreService.shared.startObserving(
+                userId: currentUserId,
+                modelContext: modelContext
+            )
             // Cold-launch deep-link: if a push tap fired before MainTabView was
             // mounted the NotificationCenter post fired into the void. Consume the
             // stored URL here, AFTER sync so the UI is ready. The .onReceive below

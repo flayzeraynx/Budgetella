@@ -18,6 +18,7 @@ import com.budgetella.app.data.prefs.UserPrefs
 import com.budgetella.app.data.remote.GeminiChatService
 import com.budgetella.app.data.repository.CategoryRepository
 import com.budgetella.app.data.repository.TransactionRepository
+import com.budgetella.app.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -76,8 +77,11 @@ class BudgiViewModel @Inject constructor(
     categoryRepository: CategoryRepository,
     private val chatService: GeminiChatService,
     private val budgiPrefs: BudgiPrefs,
+    private val userRepository: UserRepository,
     userPrefs: UserPrefs,
 ) : ViewModel() {
+
+    private val currentUserIdFlow = userPrefs.currentUserId
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val transactions: StateFlow<List<TransactionEntity>> = userPrefs.currentUserId
@@ -101,11 +105,25 @@ class BudgiViewModel @Inject constructor(
     val consentGiven: StateFlow<Boolean> = budgiPrefs.consentGiven
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    private var seeded = false
+    /**
+     * Language the greeting + rule-insight seed was last rendered in. Survives
+     * Activity recreates (because Hilt ViewModels do), so when the user flips
+     * Settings → Language we notice the mismatch and re-seed instead of
+     * leaving the cached welcome message in the old locale.
+     */
+    private var seededLanguage: String? = null
 
     /** Prime the conversation with greeting + rule-based insights on first open. */
-    fun seedIfNeeded(displayName: String?) {
-        if (seeded) return
+    fun seedIfNeeded(displayName: String? = null) {
+        val currentLang = LocaleHelper.currentLanguage(context).tag
+        android.util.Log.d(
+            "BUDGETELLA_LOCALE",
+            "BudgiViewModel.seedIfNeeded — currentLang='$currentLang' seededLanguage='$seededLanguage'",
+        )
+        if (seededLanguage == currentLang) {
+            android.util.Log.d("BUDGETELLA_LOCALE", "BudgiViewModel.seedIfNeeded — already seeded in '$currentLang', skip")
+            return
+        }
         viewModelScope.launch {
             // Wait for the first emission of both flows so insights run against
             // real data, not the empty `initialValue`. `.first()` triggers the
@@ -114,7 +132,17 @@ class BudgiViewModel @Inject constructor(
             val cats = categories.first()
             val language = LocaleHelper.currentLanguage(context).tag
             val isEn = language.startsWith("en")
-            val greeting = greeting(displayName, isEn)
+            // Resolve display name from cached UserEntity if the caller didn't
+            // supply one — avoids the "Good evening there 👋" placeholder.
+            val resolvedName = displayName?.takeIf { it.isNotBlank() }
+                ?: run {
+                    val uid = currentUserIdFlow.first()
+                    userRepository.observeUser(uid).first()?.let { u ->
+                        u.displayName?.takeIf { it.isNotBlank() }
+                            ?: u.email.takeIf { it.isNotBlank() }?.substringBefore('@')
+                    }
+                }
+            val greeting = greeting(resolvedName, isEn)
             val intro = if (txs.isEmpty()) {
                 if (isEn) "Add a few transactions and I'll start surfacing personalised tips here."
                 else "Birkaç işlem ekledikten sonra kişisel öneriler burada belirmeye başlar."
@@ -125,7 +153,14 @@ class BudgiViewModel @Inject constructor(
             val initial = mutableListOf(
                 BudgiMessage(role = BudgiMessage.Role.Assistant, text = "$greeting $intro")
             )
-            BudgiInsightEngine.compute(txs, cats, language).forEach { insight ->
+            BudgiInsightEngine.compute(
+                transactions = txs,
+                categories = cats,
+                language = language,
+                categoryDisplayName = { cat ->
+                    com.budgetella.app.core.locale.displayCategoryName(cat, context)
+                },
+            ).forEach { insight ->
                 initial += BudgiMessage(
                     role = BudgiMessage.Role.Assistant,
                     text = insight.text,
@@ -134,7 +169,7 @@ class BudgiViewModel @Inject constructor(
                 )
             }
             _messages.value = initial
-            seeded = true
+            seededLanguage = language
         }
     }
 
@@ -166,13 +201,16 @@ class BudgiViewModel @Inject constructor(
     // ── Helpers ────────────────────────────────────────────────────────────
 
     private fun greeting(displayName: String?, isEn: Boolean): String {
-        val name = (displayName?.substringBefore(' ').takeUnless { it.isNullOrBlank() }) ?: "there"
+        // Use first name only if we have one; otherwise drop the placeholder
+        // entirely so the line reads "Good morning ☀️" instead of "...there".
+        val first = displayName?.substringBefore(' ')?.takeUnless { it.isBlank() }
+        val name = first?.let { ", $it" } ?: ""
         val hour = java.time.LocalTime.now().hour
         return when {
-            hour in 5..11 -> if (isEn) "Good morning $name ☀️" else "Günaydın $name ☀️"
-            hour in 12..17 -> if (isEn) "Good afternoon $name 👋" else "İyi günler $name 👋"
-            hour in 18..22 -> if (isEn) "Good evening $name 🌙" else "İyi akşamlar $name 🌙"
-            else -> if (isEn) "Hi $name 🌙" else "Merhaba $name 🌙"
+            hour in 5..11 -> if (isEn) "Good morning$name ☀️" else "Günaydın$name ☀️"
+            hour in 12..17 -> if (isEn) "Good afternoon$name 👋" else "İyi günler$name 👋"
+            hour in 18..22 -> if (isEn) "Good evening$name 🌙" else "İyi akşamlar$name 🌙"
+            else -> if (isEn) "Hi$name 🌙" else "Merhaba$name 🌙"
         }
     }
 
@@ -211,5 +249,6 @@ class BudgiViewModel @Inject constructor(
         """.trimIndent()
     }
 
-    private fun money(minor: Long): String = "₺" + "%,.2f".format(Money(minor).toBigDecimal())
+    private fun money(minor: Long): String =
+        com.budgetella.app.core.design.formatMoney(minor)
 }

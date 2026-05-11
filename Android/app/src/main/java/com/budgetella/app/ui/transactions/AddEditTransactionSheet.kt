@@ -18,6 +18,9 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
@@ -27,6 +30,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -41,6 +46,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -55,6 +62,7 @@ import com.budgetella.app.core.design.Spacing
 import com.budgetella.app.data.local.entity.CategoryEntity
 import com.budgetella.app.data.local.entity.TransactionEntity
 import com.budgetella.app.data.model.CategorySlug
+import com.budgetella.app.data.model.RecurringInterval
 import com.budgetella.app.data.model.TransactionType
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -123,13 +131,35 @@ fun AddEditTransactionSheet(
                 }
             }
 
-            // Type toggle
-            TypeToggle(
-                type = form.type,
-                onChange = vm::setType,
-            )
+            // Type toggle + inline date pill on the right — matches the new
+            // header layout the user asked for. Tap the date pill to open a
+            // picker; works for both add and edit modes.
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TypeToggle(
+                    type = form.type,
+                    onChange = vm::setType,
+                )
+                Spacer(Modifier.weight(1f))
+                DatePill(
+                    dateMillis = form.dateMillis,
+                    onDateChange = vm::setDate,
+                )
+            }
 
-            // Amount
+            // Amount — auto-focused with numeric keyboard so the user can
+            // start typing immediately on open. The FocusRequester is keyed
+            // to the editing id so re-opening for a different transaction
+            // re-requests focus.
+            val focus = remember { FocusRequester() }
+            LaunchedEffect(form.editingId, form.isEditing) {
+                // Only steal focus on a fresh "add" — pre-filled edit forms
+                // shouldn't pop the keyboard since the user is here to tweak,
+                // not type from scratch.
+                if (!form.isEditing) focus.requestFocus()
+            }
             OutlinedTextField(
                 value = form.amountInput,
                 onValueChange = vm::setAmountInput,
@@ -139,7 +169,9 @@ fun AddEditTransactionSheet(
                     keyboardType = KeyboardType.Decimal,
                     imeAction = ImeAction.Next,
                 ),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focus),
                 shape = RoundedCornerShape(Spacing.radiusMedium),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = BrandColor.Primary,
@@ -149,19 +181,7 @@ fun AddEditTransactionSheet(
                 ),
             )
 
-            // Category picker
-            Text(
-                text = stringResource(R.string.add_category_label),
-                style = BrandText.caption,
-                color = BrandColor.textTertiary(),
-            )
-            CategoryGrid(
-                categories = categories.filter { it.type == form.type },
-                selectedId = form.categoryId,
-                onSelect = vm::setCategory,
-            )
-
-            // Note
+            // Note — moved directly under Amount per user request.
             OutlinedTextField(
                 value = form.note,
                 onValueChange = vm::setNote,
@@ -177,10 +197,24 @@ fun AddEditTransactionSheet(
                 ),
             )
 
-            // Date
-            DateField(
-                dateMillis = form.dateMillis,
-                onDateChange = vm::setDate,
+            // Recurring toggle + interval chips — port of iOS recurringRow.
+            RecurringRow(
+                isRecurring = form.isRecurring,
+                interval = form.recurringInterval,
+                onToggle = vm::setRecurring,
+                onIntervalChange = vm::setRecurringInterval,
+            )
+
+            // Category picker
+            Text(
+                text = stringResource(R.string.add_category_label),
+                style = BrandText.caption,
+                color = BrandColor.textTertiary(),
+            )
+            CategoryGrid(
+                categories = categories.filter { it.type == form.type },
+                selectedId = form.categoryId,
+                onSelect = vm::setCategory,
             )
 
             // Save / Delete
@@ -299,7 +333,7 @@ private fun CategoryGrid(
                     )
                 }
                 Text(
-                    text = cat.name,
+                    text = com.budgetella.app.core.locale.displayCategoryName(cat),
                     style = BrandText.caption,
                     color = if (isSelected) BrandColor.textPrimary() else BrandColor.textTertiary(),
                     maxLines = 1,
@@ -309,33 +343,35 @@ private fun CategoryGrid(
     }
 }
 
+/**
+ * Compact date pill sitting next to the type toggle in the header. Tap to
+ * open the system DatePicker dialog. Replaces the bigger labelled DateField
+ * the sheet used to render in its own row.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DateField(dateMillis: Long, onDateChange: (Long) -> Unit) {
+private fun DatePill(dateMillis: Long, onDateChange: (Long) -> Unit) {
     var showPicker by remember { mutableStateOf(false) }
-
-    Column {
-        Text(
-            text = stringResource(R.string.add_date_label),
-            style = BrandText.caption,
-            color = BrandColor.textTertiary(),
+    Row(
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(BrandColor.surface().copy(alpha = 0.5f))
+            .clickable { showPicker = true }
+            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.CalendarToday,
+            contentDescription = null,
+            tint = BrandColor.textSecondary(),
+            modifier = Modifier.size(14.dp),
         )
-        Spacer(Modifier.height(4.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(Spacing.radiusMedium))
-                .background(BrandColor.surface().copy(alpha = 0.5f))
-                .clickable { showPicker = true }
-                .padding(horizontal = Spacing.md, vertical = Spacing.md),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = formatDateFull(dateMillis),
-                style = BrandText.body,
-                color = BrandColor.textPrimary(),
-            )
-        }
+        Spacer(Modifier.size(6.dp))
+        Text(
+            text = formatDateShort(dateMillis),
+            style = BrandText.footnote,
+            color = BrandColor.textPrimary(),
+        )
     }
 
     if (showPicker) {
@@ -358,6 +394,99 @@ private fun DateField(dateMillis: Long, onDateChange: (Long) -> Unit) {
         }
     }
 }
+
+@Composable
+private fun RecurringRow(
+    isRecurring: Boolean,
+    interval: RecurringInterval,
+    onToggle: (Boolean) -> Unit,
+    onIntervalChange: (RecurringInterval) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(Spacing.radiusMedium))
+                .background(BrandColor.surface().copy(alpha = 0.4f))
+                .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Repeat,
+                contentDescription = null,
+                tint = BrandColor.textTertiary(),
+                modifier = Modifier.size(16.dp),
+            )
+            Spacer(Modifier.size(Spacing.sm))
+            Text(
+                text = stringResource(R.string.add_recurring_label),
+                style = BrandText.body,
+                color = BrandColor.textSecondary(),
+                modifier = Modifier.weight(1f),
+            )
+            Switch(
+                checked = isRecurring,
+                onCheckedChange = onToggle,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = Color.White,
+                    checkedTrackColor = BrandColor.Primary,
+                    uncheckedThumbColor = Color.White,
+                    uncheckedTrackColor = BrandColor.borderMedium(),
+                ),
+            )
+        }
+        if (isRecurring) {
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                RecurringInterval.entries.forEach { entry ->
+                    IntervalChip(
+                        label = stringResource(intervalLabelRes(entry)),
+                        selected = entry == interval,
+                        onClick = { onIntervalChange(entry) },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun IntervalChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .clip(CircleShape)
+            .background(
+                if (selected) BrandColor.Primary
+                else BrandColor.surface().copy(alpha = 0.5f)
+            )
+            .clickable(onClick = onClick)
+            .padding(vertical = Spacing.sm),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = label,
+            style = BrandText.footnote,
+            color = if (selected) Color.White else BrandColor.textTertiary(),
+        )
+    }
+}
+
+private fun intervalLabelRes(interval: RecurringInterval): Int = when (interval) {
+    RecurringInterval.Daily -> R.string.recurring_daily
+    RecurringInterval.Weekly -> R.string.recurring_weekly
+    RecurringInterval.Monthly -> R.string.recurring_monthly
+    RecurringInterval.Yearly -> R.string.recurring_yearly
+}
+
+private fun formatDateShort(epochMillis: Long): String =
+    DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault())
+        .withZone(ZoneId.systemDefault())
+        .format(Instant.ofEpochMilli(epochMillis))
 
 private fun formatDateFull(epochMillis: Long): String =
     DateTimeFormatter.ofPattern("EEE, d MMM yyyy", Locale.getDefault())

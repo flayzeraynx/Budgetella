@@ -6,11 +6,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+
+/**
+ * Whether the *current composition* is using the dark colour scheme. Wired by
+ * [BudgetellaTheme] from the user's `AppSettings.theme` preference instead of
+ * the device-wide dark mode setting — so flipping Settings → Theme → Dark
+ * actually takes effect regardless of whether the phone itself is in dark mode.
+ */
+val LocalIsDarkTheme = staticCompositionLocalOf { true }
 
 /**
  * Material3 theme wired to the brand tokens. Use as the outermost composable
@@ -32,10 +42,10 @@ fun BudgetellaTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            // Transparent status / nav bars so glass-card backgrounds extend
-            // edge-to-edge — same look as iOS.
-            window.statusBarColor = Color.Transparent.toArgb()
-            window.navigationBarColor = Color.Transparent.toArgb()
+            // MainActivity.enableEdgeToEdge() already drew under the system
+            // bars; here we only need to flip the icon tint (light vs dark)
+            // when the user switches the in-app theme. `statusBarColor` and
+            // `navigationBarColor` setters are deprecated in API 35.
             WindowCompat.getInsetsController(window, view).apply {
                 isAppearanceLightStatusBars = !darkTheme
                 isAppearanceLightNavigationBars = !darkTheme
@@ -46,8 +56,14 @@ fun BudgetellaTheme(
     MaterialTheme(
         colorScheme = colors,
         typography = BudgetellaTypography,
-        content = content
-    )
+    ) {
+        // Expose the resolved isDark flag to brand colour tokens so they stop
+        // falling through to `isSystemInDarkTheme()` (which reflects the device,
+        // not the user's in-app preference).
+        CompositionLocalProvider(LocalIsDarkTheme provides darkTheme) {
+            content()
+        }
+    }
 }
 
 // ── Material3 color schemes derived from brand tokens ──────────────────────

@@ -3,6 +3,7 @@ package com.budgetella.app.ui.budgi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -65,7 +66,12 @@ fun BudgiScreen(modifier: Modifier = Modifier) {
     var showConsent by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
 
-    LaunchedEffect(Unit) { vm.seedIfNeeded(displayName = null) }
+    // Re-seed whenever the locale changes — Activity recreate fires this
+     // composable afresh, and the Configuration's language tag triggers a
+     // re-fire so the welcome message + rule insights swap to the new locale.
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val currentLangTag = context.resources.configuration.locales.toLanguageTags().substringBefore(',')
+    LaunchedEffect(currentLangTag) { vm.seedIfNeeded(displayName = null) }
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size - 1)
     }
@@ -266,6 +272,11 @@ private fun Composer(
                 .weight(1f)
                 .clip(RoundedCornerShape(50))
                 .background(BrandColor.surface().copy(alpha = 0.5f))
+                .border(
+                    width = 1.dp,
+                    color = BrandColor.borderMedium(),
+                    shape = RoundedCornerShape(50),
+                )
                 .padding(horizontal = Spacing.md, vertical = 10.dp),
         ) {
             if (text.isEmpty()) {

@@ -43,6 +43,10 @@ object BudgiInsightEngine {
         transactions: List<TransactionEntity>,
         categories: List<CategoryEntity>,
         language: String = "en",
+        // Resolver so the rule output uses the localized category name (the
+        // CategoryEntity.name field is whatever was seeded at sign-up — often
+        // Turkish for users porting from iOS).
+        categoryDisplayName: (CategoryEntity) -> String = { it.name },
     ): List<BudgiInsight> {
         val zone = ZoneId.systemDefault()
         val month = YearMonth.now(zone)
@@ -58,7 +62,7 @@ object BudgiInsightEngine {
         val results = mutableListOf<BudgiInsight>()
 
         savings(current, isEn)?.let(results::add)
-        topCategory(current, categories, isEn)?.let(results::add)
+        topCategory(current, categories, isEn, categoryDisplayName)?.let(results::add)
         monthOverMonth(current, previous, isEn)?.let(results::add)
         biggestExpense(current, isEn)?.let(results::add)
         dailyAverage(current, zone, isEn)?.let(results::add)
@@ -98,25 +102,27 @@ object BudgiInsightEngine {
         current: List<TransactionEntity>,
         categories: List<CategoryEntity>,
         isEn: Boolean,
+        categoryDisplayName: (CategoryEntity) -> String,
     ): BudgiInsight? {
         val expenses = current.filter { it.type == TransactionType.Expense && it.categoryId != null }
         if (expenses.isEmpty()) return null
         val byCategory = expenses.groupBy { it.categoryId!! }.mapValues { it.value.sumOf { tx -> tx.amount } }
         val (topId, topAmount) = byCategory.maxByOrNull { it.value } ?: return null
         val cat = categories.firstOrNull { it.id == topId } ?: return null
+        val name = categoryDisplayName(cat)
         val total = expenses.sumOf { it.amount }
         val pct = if (total > 0) (topAmount.toDouble() / total * 100).toInt() else 0
         return BudgiInsight(
             tag = if (isEn) "TOP CATEGORY" else "EN YÜKSEK KATEGORİ",
             accent = BudgiInsight.Accent.Primary,
             text = if (isEn)
-                "${cat.name} is the top expense this month: ${money(topAmount)} ($pct% of total spending)."
+                "$name is the top expense this month: ${money(topAmount)} ($pct% of total spending)."
             else
-                "${cat.name} bu ayın en büyük gider kalemi: ${money(topAmount)} (toplam giderlerin %$pct'i).",
+                "$name bu ayın en büyük gider kalemi: ${money(topAmount)} (toplam giderlerin %$pct'i).",
             redactedText = if (isEn)
-                "${cat.name} is the top expense ($pct%)."
+                "$name is the top expense ($pct%)."
             else
-                "${cat.name} bu ayın en büyük gider kalemi (%$pct).",
+                "$name bu ayın en büyük gider kalemi (%$pct).",
         )
     }
 
@@ -188,5 +194,5 @@ object BudgiInsightEngine {
     }
 
     private fun money(minor: Long): String =
-        "₺" + "%,.2f".format(Money(minor).toBigDecimal())
+        com.budgetella.app.core.design.formatMoney(minor)
 }

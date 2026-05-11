@@ -7,9 +7,11 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -19,7 +21,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.budgetella.app.R
 import com.budgetella.app.core.design.BrandColor
+import com.budgetella.app.core.design.BudgetellaTheme
+import com.budgetella.app.core.design.LocalCurrency
+import com.budgetella.app.core.design.LocalHideAmounts
 import com.budgetella.app.data.backup.BackupService
+import com.budgetella.app.data.model.AppTheme
 import com.budgetella.app.data.prefs.UserPrefs
 import com.budgetella.app.ui.auth.AuthFlow
 import com.budgetella.app.ui.biometric.BiometricLockScreen
@@ -28,6 +34,7 @@ import com.budgetella.app.ui.onboarding.OnboardingFlow
 import com.budgetella.app.ui.settings.rememberBackupExportLauncher
 import com.budgetella.app.ui.settings.rememberBackupImportLauncher
 import com.budgetella.app.ui.splash.SplashScreen
+import com.budgetella.app.ui.splash.SyncingInitialScreen
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -41,6 +48,15 @@ import dagger.hilt.components.SingletonComponent
 fun AppRoot() {
     val viewModel: AppRootViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
+    val theme by viewModel.theme.collectAsState()
+    val hideAmounts by viewModel.hideAmounts.collectAsState()
+    val currency by viewModel.currency.collectAsState()
+    val systemDark = isSystemInDarkTheme()
+    val isDark = when (theme) {
+        AppTheme.Dark -> true
+        AppTheme.Light -> false
+        AppTheme.System -> systemDark
+    }
 
     // Hilt entry-point hop — pulls BackupService + UserPrefs out of the
     // SingletonComponent so the backup launchers (which must be @Composable)
@@ -76,6 +92,15 @@ fun AppRoot() {
         }
     )
 
+    // Re-wrap the brand theme inside AppRoot so the colour scheme tracks the
+    // user's preference (Dark/Light/System) rather than the device default
+    // set by MainActivity's bootstrap call. Then expose hideAmounts via
+    // CompositionLocal so any Text that renders currency can mask itself.
+    BudgetellaTheme(darkTheme = isDark) {
+    CompositionLocalProvider(
+        LocalHideAmounts provides hideAmounts,
+        LocalCurrency provides currency,
+    ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -92,6 +117,7 @@ fun AppRoot() {
                 AppRootState.Splash -> SplashScreen()
                 AppRootState.Onboarding -> OnboardingFlow(onFinished = viewModel::onOnboardingFinished)
                 AppRootState.Auth -> AuthFlow()
+                AppRootState.SyncingInitial -> SyncingInitialScreen()
                 AppRootState.BiometricLock -> BiometricLockScreen(
                     onUnlocked = viewModel::onBiometricUnlocked,
                     onSignOut = viewModel::onBiometricSignOut,
@@ -102,6 +128,8 @@ fun AppRoot() {
                 )
             }
         }
+    }
+    }
     }
 }
 

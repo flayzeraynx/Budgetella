@@ -107,6 +107,7 @@ class AuthViewModel @Inject constructor(
         AuthError.NetworkUnavailable -> R.string.auth_error_network
         AuthError.NotConfigured      -> R.string.auth_error_not_configured
         AuthError.UserCancelled      -> R.string.auth_error_unknown      // silent — UI ignores anyway
+        AuthError.RecentLoginRequired -> R.string.auth_error_unknown     // only surfaced by delete-account flow, never the sign-in screen
         AuthError.Unknown            -> R.string.auth_error_unknown
     }
 }
