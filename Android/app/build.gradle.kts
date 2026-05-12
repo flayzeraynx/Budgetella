@@ -16,8 +16,8 @@ android {
         applicationId = "com.budgetella.app"
         minSdk = 26          // Android 8.0 — Compose-friendly + adaptive icons + biometric
         targetSdk = 35
-        versionCode = 2      // Matches iOS build number for parity
-        versionName = "1.0.1"
+        versionCode = 3      // 1.0.2 — Play Billing added (parity with iOS StoreKit 2)
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
@@ -176,6 +176,9 @@ dependencies {
 
     // ML Kit Text Recognition — receipt OCR
     implementation(libs.mlkit.text.recognition)
+
+    // Google Play Billing — premium subscriptions + lifetime IAP (iOS StoreKit 2 parity)
+    implementation(libs.play.billing.ktx)
 
     // Test
     testImplementation(libs.junit)
