@@ -1,5 +1,7 @@
 package com.budgetella.app.data.repository
 
+import android.app.Activity
+import com.android.billingclient.api.ProductDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
@@ -8,48 +10,64 @@ import javax.inject.Singleton
 /**
  * Subscription / premium-entitlement boundary.
  *
- * Stub for v1 — Play Billing isn't wired yet. The interface exists so call
- * sites (PaywallScreen, feature-gated insights, settings "Manage subscription")
- * can compile against a stable shape, and we can swap in a Play Billing-backed
- * impl behind a single Hilt binding when M8.1 lands.
+ * Mirrors the iOS `SubscriptionService` API surface (StoreKit 2). The
+ * production implementation is [com.budgetella.app.data.billing.PlayBillingSubscriptionRepository];
+ * [StubSubscriptionRepository] is kept around for Compose previews and unit
+ * tests that don't want to spin up a real `BillingClient`.
  *
  * Contract:
  *  - [observeIsPremium] is the single source of truth for "should I unlock
- *    premium features?". V1 always returns false.
- *  - [startPurchase] is the entry point the paywall CTA will call once
- *    BillingClient is integrated. Today it surfaces NotImplementedError so the
- *    UI can show a friendly "coming soon" message.
- *  - [restorePurchases] is a no-op stub — Play handles entitlement restoration
- *    automatically once BillingClient is set up, so this is here only for the
- *    "Restore purchases" affordance on the paywall.
+ *    premium features?". Reads from Firestore `users/{uid}` so iOS and Android
+ *    converge on the same entitlement state regardless of which platform paid.
+ *  - [observeProducts] streams localized [ProductDetails] objects from Play.
+ *    The paywall reads `formattedPrice` off these — never hard-code prices.
+ *  - [startPurchase] launches the Play Billing flow for [productId]. The
+ *    caller must pass the current `Activity`; Play requires an activity ref
+ *    for the purchase sheet.
+ *  - [restorePurchases] re-queries Play for prior purchases (subscriptions
+ *    + non-consumables) and forces a Firestore reconcile.
  */
 interface SubscriptionRepository {
 
-    /** True once the user has an active premium entitlement. */
+    /** True once the user has an active premium entitlement (Firestore-backed). */
     fun observeIsPremium(uid: String): Flow<Boolean>
 
-    /** Launch the Play Billing flow for [productId]. Stubbed to failure today. */
-    suspend fun startPurchase(productId: String): Result<Unit>
+    /** Stream of cached [ProductDetails] for every paywall product. */
+    fun observeProducts(): Flow<List<ProductDetails>>
 
-    /** Query Play Billing for prior purchases. Stubbed to no-op success. */
+    /**
+     * Launch the Play Billing flow for [productId].
+     *
+     * @param offerToken Required for subscriptions (`subscriptionOfferDetails.offerToken`).
+     *   `null` is valid for one-time (INAPP) products like `premium_lifetime`.
+     */
+    suspend fun startPurchase(
+        activity: Activity,
+        productId: String,
+        offerToken: String? = null,
+    ): Result<Unit>
+
+    /** Re-query Play for prior purchases and reconcile entitlement. */
     suspend fun restorePurchases(): Result<Unit>
 }
 
 /**
- * V1 stub — every call resolves to "not premium / not implemented".
- *
- * TODO(M8.1): replace with PlayBillingSubscriptionRepository using
- * com.android.billingclient:billing-ktx. Wire entitlement state via
- * BillingClient.queryPurchasesAsync and persist server-side via a
- * Cloud Function so iOS and Android share the same source of truth.
+ * Test / preview fallback — every call resolves to "not premium / not implemented".
+ * Production code wires [com.budgetella.app.data.billing.PlayBillingSubscriptionRepository]
+ * via [com.budgetella.app.di.SubscriptionModule].
  */
 @Singleton
 class StubSubscriptionRepository @Inject constructor() : SubscriptionRepository {
 
     override fun observeIsPremium(uid: String): Flow<Boolean> = flowOf(false)
 
-    override suspend fun startPurchase(productId: String): Result<Unit> =
-        Result.failure(NotImplementedError("Play Billing not wired yet — paywall stub."))
+    override fun observeProducts(): Flow<List<ProductDetails>> = flowOf(emptyList())
+
+    override suspend fun startPurchase(
+        activity: Activity,
+        productId: String,
+        offerToken: String?,
+    ): Result<Unit> = Result.failure(NotImplementedError("Stub repository — wire PlayBillingSubscriptionRepository."))
 
     override suspend fun restorePurchases(): Result<Unit> = Result.success(Unit)
 }
