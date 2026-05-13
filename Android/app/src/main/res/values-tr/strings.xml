@@ -320,10 +320,23 @@
     <string name="paywall_feature_4">Gemini destekli Premium Budgi içgörüleri</string>
     <string name="paywall_monthly">Aylık</string>
     <string name="paywall_yearly">Yıllık · %%33 indirim</string>
+    <string name="paywall_monthly_title">Aylık Plan</string>
+    <string name="paywall_yearly_title">Yıllık Plan</string>
+    <string name="paywall_lifetime_title">Ömür Boyu</string>
+    <string name="paywall_lifetime_subtitle">Bir kez öde, sonsuza kadar kullan</string>
+    <string name="paywall_lifetime_badge">Tek seferlik</string>
+    <string name="paywall_save_badge">%%33 indirim</string>
+    <string name="paywall_per_month">/ay</string>
+    <string name="paywall_per_year">/yıl</string>
     <string name="paywall_free_trial">7 gün ücretsiz, sonra %1$s</string>
+    <string name="paywall_free_trial_generic">7 gün ücretsiz, sonra otomatik yenilenir</string>
+    <string name="paywall_lifetime_finePrint">Tek seferlik ödeme. Abonelik yok, yenileme yok.</string>
     <string name="paywall_cta">Ücretsiz denemeyi başlat</string>
+    <string name="paywall_cta_trial">7 Gün Ücretsiz Dene</string>
+    <string name="paywall_cta_buy_now">Hemen Satın Al</string>
     <string name="paywall_restore">Satın alımları geri yükle</string>
     <string name="paywall_unavailable">Abonelikler bu sürümde yok. Play Store yayını ile gelecek.</string>
+    <string name="paywall_error_title">Satın Alma Hatası</string>
 
     <!-- Biyometrik -->
     <string name="biometric_prompt_title">Budgetella\'nın kilidini aç</string>
@@ -333,6 +346,7 @@
 
     <!-- Genel -->
     <string name="common_cancel">İptal</string>
+    <string name="common_ok">Tamam</string>
     <string name="common_done">Tamam</string>
     <string name="common_delete">Sil</string>
     <string name="common_save">Kaydet</string>

@@ -324,10 +324,23 @@
     <string name="paywall_feature_4">Premium Budgi insights powered by Gemini</string>
     <string name="paywall_monthly">Monthly</string>
     <string name="paywall_yearly">Yearly · save 33%%</string>
+    <string name="paywall_monthly_title">Monthly Plan</string>
+    <string name="paywall_yearly_title">Yearly Plan</string>
+    <string name="paywall_lifetime_title">Lifetime</string>
+    <string name="paywall_lifetime_subtitle">Pay once, unlock forever</string>
+    <string name="paywall_lifetime_badge">One-time</string>
+    <string name="paywall_save_badge">33%% off</string>
+    <string name="paywall_per_month">/mo</string>
+    <string name="paywall_per_year">/yr</string>
     <string name="paywall_free_trial">7 days free, then %1$s</string>
+    <string name="paywall_free_trial_generic">7 days free, then auto-renews</string>
+    <string name="paywall_lifetime_finePrint">One-time payment. No subscription, no renewal.</string>
     <string name="paywall_cta">Start free trial</string>
+    <string name="paywall_cta_trial">Start 7-Day Free Trial</string>
+    <string name="paywall_cta_buy_now">Buy Now</string>
     <string name="paywall_restore">Restore purchases</string>
     <string name="paywall_unavailable">Subscriptions aren\'t available in this build. Coming with the Play Store release.</string>
+    <string name="paywall_error_title">Purchase Error</string>
 
     <!-- Biometric -->
     <string name="biometric_prompt_title">Unlock Budgetella</string>
@@ -364,6 +377,7 @@
 
     <!-- Generic -->
     <string name="common_cancel">Cancel</string>
+    <string name="common_ok">OK</string>
     <string name="common_done">Done</string>
     <string name="common_delete">Delete</string>
     <string name="common_save">Save</string>

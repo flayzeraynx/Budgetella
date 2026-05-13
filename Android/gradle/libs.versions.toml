@@ -49,6 +49,9 @@ camerax = "1.4.1"
 # ML Kit Text Recognition (bundled — no Play Services required)
 mlkitTextRecognition = "16.0.1"
 
+# Google Play Billing (StoreKit 2 parity on Android)
+playBilling = "7.1.1"
+
 # Test
 junit = "4.13.2"
 junitExt = "1.2.1"
@@ -126,6 +129,10 @@ camerax-view = { group = "androidx.camera", name = "camera-view", version.ref = 
 
 # ML Kit Text Recognition
 mlkit-text-recognition = { group = "com.google.mlkit", name = "text-recognition", version.ref = "mlkitTextRecognition" }
+
+# Play Billing — billing-ktx pulls billing + Kotlin coroutine extensions
+play-billing = { group = "com.android.billingclient", name = "billing", version.ref = "playBilling" }
+play-billing-ktx = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "playBilling" }
 
 # Test
 junit = { group = "junit", name = "junit", version.ref = "junit" }

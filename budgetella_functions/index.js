@@ -14,6 +14,10 @@ require('dotenv').config();
 // Initialize Stripe with API key
 const stripe = require("stripe")(functions.config().stripe.secret_key);
 
+// Google Play Billing handlers — mounted at the bottom of this file so they
+// share `admin.initializeApp()` from above.
+const playBilling = require("./play-billing");
+
 // Configure CORS to allow requests from your Firebase hosting domain
 const cors = require("cors")({
   origin: true, // Allow requests from any origin during development
@@ -793,3 +797,7 @@ exports.sendFeedback = functions.https.onRequest((req, res) => {
         });
   });
 });
+
+// ── Google Play Billing exports (Android paywall) ──────────────────────────
+exports.playRtdnHandler = playBilling.playRtdnHandler;
+exports.verifyPlayPurchase = playBilling.verifyPlayPurchase;
