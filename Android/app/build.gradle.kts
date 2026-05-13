@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -11,6 +13,26 @@ plugins {
 android {
     namespace = "com.budgetella.app"
     compileSdk = 35
+
+    // Release signing — reads credentials from `keystore.properties` at the repo root.
+    // That file is gitignored; CI populates it from secrets at build time.
+    // On a fresh clone without keystore.properties the block is skipped, so debug
+    // builds still work without any signing setup.
+    val keystorePropsFile = rootProject.file("keystore.properties")
+    val keystoreProps = Properties().apply {
+        if (keystorePropsFile.exists()) load(keystorePropsFile.inputStream())
+    }
+
+    signingConfigs {
+        create("release") {
+            if (keystorePropsFile.exists()) {
+                storeFile = rootProject.file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
 
     defaultConfig {
         applicationId = "com.budgetella.app"
@@ -47,14 +69,17 @@ android {
             isMinifyEnabled = false
         }
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Signing config lives in ~/.gradle/gradle.properties or CI env.
-            // Left unsigned here so the project opens cleanly on a fresh clone.
+            // Signing credentials are loaded from `keystore.properties` at the repo
+            // root (see the signingConfigs block above). On a fresh clone without
+            // that file, the release config is empty — `bundleRelease` will fail
+            // with a clear "no signing config" error, which is the desired guard.
         }
     }
 
