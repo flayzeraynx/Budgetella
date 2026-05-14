@@ -38,8 +38,8 @@ android {
         applicationId = "com.budgetella.app"
         minSdk = 26          // Android 8.0 — Compose-friendly + adaptive icons + biometric
         targetSdk = 35
-        versionCode = 3      // 1.0.2 — Play Billing added (parity with iOS StoreKit 2)
-        versionName = "1.0.2"
+        versionCode = 4      // 1.0.3 — Google Sign-In SHA-1 fix (new OAuth clients)
+        versionName = "1.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
