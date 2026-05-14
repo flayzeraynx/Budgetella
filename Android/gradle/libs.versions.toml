@@ -52,6 +52,11 @@ mlkitTextRecognition = "16.0.1"
 # Google Play Billing (StoreKit 2 parity on Android)
 playBilling = "7.1.1"
 
+# Firebase Crashlytics + Performance Monitoring Gradle plugins. Library coords
+# come from the Firebase BOM so no library version is pinned for them.
+firebaseCrashlyticsGradle = "3.0.2"
+firebasePerfGradle = "1.4.2"
+
 # Test
 junit = "4.13.2"
 junitExt = "1.2.1"
@@ -99,6 +104,7 @@ firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-fires
 firebase-messaging-ktx = { group = "com.google.firebase", name = "firebase-messaging-ktx" }
 firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
 firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
+firebase-perf-ktx = { group = "com.google.firebase", name = "firebase-perf-ktx" }
 
 # Google Sign-In (Credential Manager API)
 androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
@@ -148,4 +154,6 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsGradle" }
+firebase-perf = { id = "com.google.firebase.firebase-perf", version.ref = "firebasePerfGradle" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }

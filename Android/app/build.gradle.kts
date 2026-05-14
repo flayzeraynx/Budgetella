@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
+    alias(libs.plugins.firebase.perf)
 }
 
 android {
@@ -38,8 +40,8 @@ android {
         applicationId = "com.budgetella.app"
         minSdk = 26          // Android 8.0 — Compose-friendly + adaptive icons + biometric
         targetSdk = 35
-        versionCode = 4      // 1.0.3 — Google Sign-In SHA-1 fix (new OAuth clients)
-        versionName = "1.0.3"
+        versionCode = 5      // 1.0.4 — Crashlytics + Performance Monitoring added
+        versionName = "1.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
@@ -166,11 +168,13 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.messaging.ktx)
     implementation(libs.firebase.analytics.ktx)
-    // Crashlytics requires the `com.google.firebase.crashlytics` Gradle plugin
-    // (which injects a build ID into the APK). Deferring until we wire up the
-    // mapping-file upload flow — keep the dep commented out so the artifact
-    // is not pulled in and the app starts without a build-ID assertion.
-    // implementation(libs.firebase.crashlytics.ktx)
+    // Crashlytics + Performance Monitoring — both require their Gradle
+    // plugins above so the build injects a build-ID and Perf bytecode
+    // instrumentation. Auto-collection is gated to release builds in
+    // BudgetellaApplication.onCreate so debug runs don't pollute the
+    // production dashboards.
+    implementation(libs.firebase.crashlytics.ktx)
+    implementation(libs.firebase.perf.ktx)
 
     // Google Sign-In via Credential Manager (replaces deprecated GoogleSignInClient)
     implementation(libs.androidx.credentials)
