@@ -7,6 +7,8 @@ import androidx.core.content.getSystemService
 import com.budgetella.app.core.locale.LocaleHelper
 import com.budgetella.app.data.seed.DataInitializer
 import com.google.firebase.FirebaseApp
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.perf.FirebasePerformance
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
@@ -37,6 +39,19 @@ class BudgetellaApplication : Application() {
         //    README), the Firebase plugin will fail to apply, so this call is
         //    wrapped to keep IDE preview / unit tests usable.
         runCatching { FirebaseApp.initializeApp(this) }
+
+        // 2a. Crashlytics + Performance Monitoring — both default to ON, but
+        //     we explicitly disable collection in debug builds so dev work
+        //     never pollutes the production dashboards. Wrapped in runCatching
+        //     for the IDE-preview / unit-test path where FirebaseApp may not
+        //     be initialised.
+        runCatching {
+            val collectInProduction = BuildConfig.DEBUG.not()
+            FirebaseCrashlytics.getInstance()
+                .isCrashlyticsCollectionEnabled = collectInProduction
+            FirebasePerformance.getInstance()
+                .isPerformanceCollectionEnabled = collectInProduction
+        }
 
         // 3. Default notification channel for FCM. iOS uses UNNotificationCategory
         //    for the equivalent; here it's a single low-importance channel that
