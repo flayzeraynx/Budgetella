@@ -10,4 +10,6 @@ plugins {
     // Kotlin DSL access. Writing `libs.plugins.google-services` makes Kotlin
     // parse the minus sign and try `BigDecimal.minus(...)` — hence the sync error.
     alias(libs.plugins.google.services) apply false
+    alias(libs.plugins.firebase.crashlytics) apply false
+    alias(libs.plugins.firebase.perf) apply false
 }
