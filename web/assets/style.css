@@ -247,7 +247,7 @@ select:focus-visible {
   font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--brand-accent);
 }
 .eyebrow::before {
   content: '';
@@ -365,7 +365,7 @@ p { margin: 0; line-height: 1.6; color: var(--text-secondary); }
   color: var(--ink-soft);
   transition: color 200ms var(--ease-out);
 }
-.footer-col a:hover { color: var(--accent); }
+.footer-col a:hover { color: var(--brand-accent); }
 
 .footer-bottom {
   display: flex;
@@ -478,8 +478,8 @@ p { margin: 0; line-height: 1.6; color: var(--text-secondary); }
 }
 .prose li { margin: 8px 0; }
 .prose strong { color: var(--ink); font-weight: 600; }
-.prose a { color: var(--accent); border-bottom: 1px solid rgba(110,91,255,0.3); }
-.prose a:hover { border-bottom-color: var(--accent); }
+.prose a { color: var(--brand-accent); border-bottom: 1px solid rgba(110,91,255,0.4); }
+.prose a:hover { color: #A78BFA; border-bottom-color: var(--brand-accent); }
 .prose hr { border: none; border-top: 1px solid var(--line); margin: 48px 0; }
 .prose blockquote {
   margin: 24px 0;
