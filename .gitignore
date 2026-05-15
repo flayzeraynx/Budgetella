@@ -62,3 +62,6 @@ GoogleService-Info.plist
 .idea/
 *.swp
 *.swo
+
+# Claude Code worktrees
+.claude/
