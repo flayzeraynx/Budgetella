@@ -80,6 +80,13 @@
 .article-cta{background:linear-gradient(135deg,#F5F1EA 0%,#EDE8DF 100%);border:1px solid var(--line);border-radius:16px;padding:40px;text-align:center;margin-top:56px}
 .article-cta h3{font-size:22px;font-weight:600;letter-spacing:-.02em;margin-bottom:12px}
 .article-cta p{color:var(--muted);margin-bottom:24px}
+.related{margin-top:64px;padding-top:40px;border-top:1px solid var(--line)}
+.related h2{font-size:clamp(18px,2.2vw,22px);font-weight:600;letter-spacing:-.02em;margin-bottom:24px}
+.related-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.related-card{display:block;padding:20px;border:1px solid var(--line);border-radius:12px;text-decoration:none;color:inherit;background:var(--surface);transition:transform 200ms var(--ease-out),box-shadow 200ms var(--ease-out)}
+.related-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.06)}
+.related-tag{font-family:var(--font-mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;display:block}
+.related-title{font-size:15px;font-weight:600;line-height:1.4;color:var(--ink)}
 </style>
 </head>
 <body>
@@ -179,6 +186,20 @@
     <p>7-day free trial. No card required. Log your first transaction in 30 seconds.</p>
     <a href="https://apps.apple.com/us/app/budgetella/id6765690656" target="_blank" rel="noopener" class="btn btn-primary btn-lg">Download on the App Store</a>
   </div>
+
+  <section class="related">
+    <h2>Related posts</h2>
+    <div class="related-grid">
+      <a href="/blog/how-to-budget-monthly" class="related-card">
+        <span class="related-tag">Guide</span>
+        <div class="related-title">How to build a monthly budget — step by step</div>
+      </a>
+      <a href="/blog/bank-app-vs-budget-app" class="related-card">
+        <span class="related-tag">Comparison</span>
+        <div class="related-title">Is your bank app enough for budgeting?</div>
+      </a>
+    </div>
+  </section>
 
 </article>
 

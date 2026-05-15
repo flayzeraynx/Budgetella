@@ -76,6 +76,7 @@
       <a href="${t.feat_href}"  data-link="features">${t.features}</a>
       <a href="${t.how_href}"   data-link="how">${t.how}</a>
       <a href="${t.price_href}" data-link="pricing">${t.pricing}</a>
+      <a href="${t.blog_href}" data-link="blog">${t.blog_link}</a>
       <a href="${t.support_href}" data-link="support">${t.support}</a>
     </div>
     <div class="nav-cta">
