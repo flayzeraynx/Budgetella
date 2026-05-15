@@ -1,23 +1,38 @@
 /* Budgetella · Marketing site — shared CSS */
 
 :root {
-  /* Palette */
-  --bg: #F5F1EA;
-  --bg-deep: #EBE5DA;
-  --surface: #FFFFFF;
-  --surface-hi: #FBF8F2;
-  --ink: #0A0B14;
-  --ink-soft: #2A2520;
-  --muted: #6B6358;
-  --muted-2: #948A7C;
-  --line: rgba(10,11,20,0.08);
-  --line-2: rgba(10,11,20,0.14);
-  --accent: #6E5BFF;
-  --accent-hi: #8B6FFF;
+  /* ─── App-aligned dark palette (Budgetella native iOS) ─────────── */
+  --bg-primary: #0A0B14;
+  --bg-surface: #14152A;
+  --bg-elevated: #1a1b30;
+  --brand-primary: #6E5BFF;
+  --brand-accent: #886FFF;
+  --income: #18F2A5;
+  --expense: #F43F5E;
+  --text-primary: #FFFFFF;
+  --text-secondary: rgba(255,255,255,0.72);
+  --text-muted: rgba(255,255,255,0.45);
+  --border-subtle: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.14);
+  --accent-rgb: 110, 91, 255;
+
+  /* ─── Legacy variable aliases (mapped to dark tokens) ──────────── */
+  --bg: var(--bg-primary);
+  --bg-deep: #06070F;
+  --surface: var(--bg-surface);
+  --surface-hi: var(--bg-elevated);
+  --ink: var(--text-primary);
+  --ink-soft: var(--text-secondary);
+  --muted: var(--text-muted);
+  --muted-2: rgba(255,255,255,0.35);
+  --line: var(--border-subtle);
+  --line-2: var(--border-strong);
+  --accent: var(--brand-primary);
+  --accent-hi: var(--brand-accent);
   --accent-deep: #5B47E0;
-  --success: #06B585;
-  --danger: #E03060;
-  --gold: #B8860B;
+  --success: var(--income);
+  --danger: var(--expense);
+  --gold: #E0B84A;
 
   /* Spacing */
   --maxw: 1240px;
@@ -31,6 +46,17 @@
   /* Easing */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  color-scheme: dark;
+}
+
+/* ─── Glass card utility (app parity) ────────────────────────────── */
+.glass-card {
+  background: rgba(20, 21, 42, 0.6);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
 }
 
 * { box-sizing: border-box; }
