@@ -57,7 +57,7 @@
   background: linear-gradient(135deg, rgba(110,91,255,0.12), rgba(110,91,255,0.04));
   border: 1px solid rgba(110,91,255,0.18);
   display: grid; place-items: center;
-  color: var(--accent);
+  color: var(--brand-accent);
 }
 .help-icon svg { width: 18px; height: 18px; }
 .help-card h3 { font-size: 18px; font-weight: 500; letter-spacing: -0.01em; }
@@ -65,7 +65,7 @@
 .help-card .arr {
   margin-top: auto;
   font-size: 13px;
-  color: var(--accent);
+  color: var(--brand-accent);
   font-family: var(--font-mono);
   display: inline-flex; align-items: center; gap: 6px;
 }
@@ -104,18 +104,21 @@
   color: var(--ink);
   transition: color 200ms var(--ease-out);
 }
-.help-list li a:hover { color: var(--accent); }
+.help-list li a:hover { color: var(--brand-accent); }
 .help-list li a::after {
   content: '→';
   color: var(--muted);
   font-family: var(--font-mono);
   transition: transform 200ms var(--ease-out);
 }
-.help-list li a:hover::after { transform: translateX(3px); color: var(--accent); }
+.help-list li a:hover::after { transform: translateX(3px); color: var(--brand-accent); }
 
 .contact-card {
-  background: var(--ink);
-  color: #fff;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(110,91,255,0.22), transparent 60%),
+    linear-gradient(180deg, #14152A 0%, #06070F 100%);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
   border-radius: 20px;
   padding: 40px 48px;
   margin-top: 80px;
