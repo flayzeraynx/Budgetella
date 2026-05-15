@@ -114,8 +114,11 @@
 .help-list li a:hover::after { transform: translateX(3px); color: var(--accent); }
 
 .contact-card {
-  background: var(--ink);
-  color: #fff;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(110,91,255,0.22), transparent 60%),
+    linear-gradient(180deg, #14152A 0%, #06070F 100%);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
   border-radius: 20px;
   padding: 40px 48px;
   margin-top: 80px;
