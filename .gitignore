@@ -68,3 +68,4 @@ GoogleService-Info.plist
 
 # Claude Code worktrees
 .claude/
+**/.DS_Store
