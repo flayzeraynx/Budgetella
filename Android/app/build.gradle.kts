@@ -40,8 +40,8 @@ android {
         applicationId = "com.budgetella.app"
         minSdk = 26          // Android 8.0 — Compose-friendly + adaptive icons + biometric
         targetSdk = 35
-        versionCode = 5      // 1.0.4 — Crashlytics + Performance Monitoring added
-        versionName = "1.0.4"
+        versionCode = 6      // 1.1.0 — testers feedback: walkthrough + rate + share
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
@@ -208,6 +208,9 @@ dependencies {
 
     // Google Play Billing — premium subscriptions + lifetime IAP (iOS StoreKit 2 parity)
     implementation(libs.play.billing.ktx)
+
+    // In-App Review (Rate Budgetella from Settings — v1.1.0 testers feedback)
+    implementation(libs.play.review.ktx)
 
     // Test
     testImplementation(libs.junit)

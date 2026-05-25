@@ -383,4 +383,22 @@
     <string name="camera_entry_scanning">Tutar okunuyor…</string>
     <string name="camera_entry_capture_hint">Fişi çekmek için dokun</string>
 
+    <!-- v1.1.0 — Walkthrough (post-auth) -->
+    <string name="walkthrough_skip">Atla</string>
+    <string name="walkthrough_next">İleri</string>
+    <string name="walkthrough_get_started">Hadi Başlayalım</string>
+    <string name="walkthrough_add_title">İşlem Ekle</string>
+    <string name="walkthrough_add_body">Sağ alttaki + tuşu ile saniyeler içinde gelir veya gider ekle. Ses ve fiş tarama ile daha da hızlı.</string>
+    <string name="walkthrough_summary_title">Aylık Özet</string>
+    <string name="walkthrough_summary_body">Nereye ne kadar harcadığını gör. Aylık karşılaştırma ve trend grafiklerle alışkanlıklarını keşfet.</string>
+    <string name="walkthrough_goal_title">Bütçe Hedefi</string>
+    <string name="walkthrough_goal_body">Kategorilere bütçe belirle, hedeflerini takip et. Tasarrufunu artır, harcamalarını kontrol altına al.</string>
+
+    <!-- v1.1.0 — Ayarlar → Topluluk -->
+    <string name="settings_section_community">Topluluk</string>
+    <string name="settings_rate">Budgetella\'yı Değerlendir</string>
+    <string name="settings_share">Arkadaşlarınla Paylaş</string>
+    <string name="settings_share_message">Bütçemi Budgetella ile takip ediyorum. Sen de dene: https://budgetella.app</string>
+    <string name="settings_share_chooser">Budgetella\'yı Paylaş</string>
+
 </resources>

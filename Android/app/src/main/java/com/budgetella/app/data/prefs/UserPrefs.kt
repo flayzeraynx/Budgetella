@@ -32,17 +32,25 @@ class UserPrefs @Inject constructor(
 
     private object Keys {
         val HasCompletedOnboarding: Preferences.Key<Boolean> = booleanPreferencesKey("hasCompletedOnboarding")
+        val HasSeenWalkthrough: Preferences.Key<Boolean> = booleanPreferencesKey("hasSeenWalkthrough")
         val CurrentUserId: Preferences.Key<String> = stringPreferencesKey("currentUserId")
     }
 
     val hasCompletedOnboarding: Flow<Boolean> =
         context.userPrefsDataStore.data.map { it[Keys.HasCompletedOnboarding] ?: false }
 
+    val hasSeenWalkthrough: Flow<Boolean> =
+        context.userPrefsDataStore.data.map { it[Keys.HasSeenWalkthrough] ?: false }
+
     val currentUserId: Flow<String> =
         context.userPrefsDataStore.data.map { it[Keys.CurrentUserId] ?: DataInitializer.LOCAL_USER_ID }
 
     suspend fun markOnboardingComplete() {
         context.userPrefsDataStore.edit { it[Keys.HasCompletedOnboarding] = true }
+    }
+
+    suspend fun markWalkthroughSeen() {
+        context.userPrefsDataStore.edit { it[Keys.HasSeenWalkthrough] = true }
     }
 
     suspend fun setCurrentUserId(uid: String) {
