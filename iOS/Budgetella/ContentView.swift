@@ -14,6 +14,7 @@ enum AppState {
     case splash
     case onboarding
     case auth
+    case walkthrough
     case biometricLock
     case main
 }
@@ -24,6 +25,7 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Query private var settingsArr: [AppSettings]
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @AppStorage("hasSeenWalkthrough") private var hasSeenWalkthrough = false
     @AppStorage("isSignedIn") private var isSignedIn = false
     @State private var appState: AppState = .splash
 
@@ -51,7 +53,13 @@ struct ContentView: View {
                         // Firebase Auth SDK persists tokens in Keychain — check directly
                         if Auth.auth().currentUser != nil {
                             isSignedIn = true
-                            appState = biometricLockEnabled ? .biometricLock : .main
+                            if biometricLockEnabled {
+                                appState = .biometricLock
+                            } else if !hasSeenWalkthrough {
+                                appState = .walkthrough
+                            } else {
+                                appState = .main
+                            }
                         } else {
                             appState = .auth
                         }
@@ -67,6 +75,13 @@ struct ContentView: View {
 
             case .auth:
                 AuthView {
+                    withAnimation(.easeInOut(duration: 0.4)) {
+                        appState = hasSeenWalkthrough ? .main : .walkthrough
+                    }
+                }
+
+            case .walkthrough:
+                WalkthroughView {
                     withAnimation(.easeInOut(duration: 0.4)) {
                         appState = .main
                     }
@@ -120,7 +135,13 @@ struct ContentView: View {
                 // until they click the verification link — keep them in the auth flow.
                 if Auth.auth().currentUser?.isEmailVerified == true {
                     withAnimation(.easeInOut(duration: 0.4)) {
-                        appState = biometricLockEnabled ? .biometricLock : .main
+                        if biometricLockEnabled {
+                            appState = .biometricLock
+                        } else if !hasSeenWalkthrough {
+                            appState = .walkthrough
+                        } else {
+                            appState = .main
+                        }
                     }
                 }
             }
