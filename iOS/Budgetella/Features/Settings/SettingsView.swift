@@ -6,6 +6,7 @@
 import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
+import StoreKit
 
 struct SettingsView: View {
 
@@ -233,6 +234,19 @@ struct SettingsView: View {
                             if let url = URL(string: "https://budgetella.app/terms") {
                                 UIApplication.shared.open(url)
                             }
+                        }
+                    }
+                    .listRowBackground(BrandColor.surface.opacity(0.4))
+
+                    // Community — v1.1.0 testers feedback
+                    Section("Topluluk") {
+                        settingsRow(icon: "star.fill", iconColor: BrandColor.warning,
+                                    title: "Budgetella'yı Değerlendir", value: nil) {
+                            requestAppReview()
+                        }
+                        settingsRow(icon: "square.and.arrow.up", iconColor: BrandColor.primary,
+                                    title: "Arkadaşlarınla Paylaş", value: nil) {
+                            shareApp()
                         }
                     }
                     .listRowBackground(BrandColor.surface.opacity(0.4))
@@ -557,5 +571,23 @@ struct SettingsView: View {
 
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+    }
+
+    // MARK: - Rate & Share (v1.1.0)
+
+    private func requestAppReview() {
+        guard let scene = UIApplication.shared.connectedScenes
+                .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene else { return }
+        AppStore.requestReview(in: scene)
+    }
+
+    private func shareApp() {
+        let message = String(localized: "Bütçemi Budgetella ile takip ediyorum. Sen de dene: https://budgetella.app")
+        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let rootVC = scene.keyWindow?.rootViewController else { return }
+        var topVC = rootVC
+        while let presented = topVC.presentedViewController { topVC = presented }
+        let shareVC = UIActivityViewController(activityItems: [message], applicationActivities: nil)
+        topVC.present(shareVC, animated: true)
     }
 }

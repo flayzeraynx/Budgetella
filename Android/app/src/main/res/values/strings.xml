@@ -386,4 +386,22 @@
     <string name="common_retry">Retry</string>
     <string name="common_close">Close</string>
 
+    <!-- v1.1.0 — Walkthrough (post-auth) -->
+    <string name="walkthrough_skip">Skip</string>
+    <string name="walkthrough_next">Next</string>
+    <string name="walkthrough_get_started">Let\'s Get Started</string>
+    <string name="walkthrough_add_title">Add Transaction</string>
+    <string name="walkthrough_add_body">Tap the + button at the bottom right to add income or expenses in seconds. Even faster with voice and receipt scanning.</string>
+    <string name="walkthrough_summary_title">Monthly Summary</string>
+    <string name="walkthrough_summary_body">See where your money goes. Discover your habits with monthly comparisons and trend charts.</string>
+    <string name="walkthrough_goal_title">Budget Goal</string>
+    <string name="walkthrough_goal_body">Set budgets by category and track your goals. Grow your savings, take control of your spending.</string>
+
+    <!-- v1.1.0 — Settings → Community -->
+    <string name="settings_section_community">Community</string>
+    <string name="settings_rate">Rate Budgetella</string>
+    <string name="settings_share">Share with Friends</string>
+    <string name="settings_share_message">I track my budget with Budgetella. Try it out: https://budgetella.app</string>
+    <string name="settings_share_chooser">Share Budgetella</string>
+
 </resources>

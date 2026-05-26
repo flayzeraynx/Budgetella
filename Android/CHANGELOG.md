@@ -1,5 +1,26 @@
 # Budgetella Android — Changelog
 
+## 1.1.0 (build 6) — 2026-05-26 · Testers community feedback
+
+**TR-only TestFlight equivalent: closed/internal testing.**
+
+### Added
+- **Walkthrough (post-auth):** 3-page feature tour — "Add Transaction / Monthly Summary / Budget Goal", `HorizontalPager` + dots + skip (SpinDeck pattern). Gated by `UserPrefs.hasSeenWalkthrough` (DataStore). Routed via new `AppRootState.Walkthrough`.
+- **Lottie Compose** (`com.airbnb.android:lottie-compose:6.6.0`): each page tries `assets/walkthrough_{add,summary,goal}.json` first, falls back to a Material icon hero when assets aren't bundled yet. Drop the JSON in `app/src/main/assets/` and animations activate automatically.
+- **Settings → Community:** "Rate Budgetella" (Play In-App Review via `ReviewManagerFactory.requestReviewFlow`, fallback to Play Store listing) and "Share with Friends" (`Intent.ACTION_SEND` + chooser). Manual-only, no auto popup.
+- `play-review-ktx:2.0.2` dependency.
+
+### Changed
+- **Onboarding 3→2 step:** Welcome / Permissions. The old Features step was removed; its content lives in the post-auth Walkthrough now.
+- Dead `FeaturesPage()` / `FeatureRow()` composables removed.
+
+### Infrastructure
+- `versionCode = 6`, `versionName = "1.1.0"`
+- TR + EN strings parity for all new keys (Walkthrough + Settings Community).
+- `docs/aso-copy-{tr,en}.md`: v1.1.0 App Store + Play Console copy.
+
+---
+
 ## 1.0.2 (build 3) — Play Billing release
 
 **Premium subscriptions go live.**

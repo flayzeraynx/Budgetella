@@ -35,6 +35,7 @@ import com.budgetella.app.ui.settings.rememberBackupExportLauncher
 import com.budgetella.app.ui.settings.rememberBackupImportLauncher
 import com.budgetella.app.ui.splash.SplashScreen
 import com.budgetella.app.ui.splash.SyncingInitialScreen
+import com.budgetella.app.ui.walkthrough.WalkthroughScreen
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -121,6 +122,9 @@ fun AppRoot() {
                 AppRootState.BiometricLock -> BiometricLockScreen(
                     onUnlocked = viewModel::onBiometricUnlocked,
                     onSignOut = viewModel::onBiometricSignOut,
+                )
+                AppRootState.Walkthrough -> WalkthroughScreen(
+                    onFinish = viewModel::onWalkthroughFinished,
                 )
                 AppRootState.Main -> MainScaffold(
                     onExportBackup = onExport,

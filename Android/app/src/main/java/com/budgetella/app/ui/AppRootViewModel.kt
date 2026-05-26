@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /** Coarse-grained app-shell state — drives [AppRoot]. */
-enum class AppRootState { Splash, Onboarding, Auth, SyncingInitial, BiometricLock, Main }
+enum class AppRootState { Splash, Onboarding, Auth, SyncingInitial, BiometricLock, Walkthrough, Main }
 
 @HiltViewModel
 class AppRootViewModel @Inject constructor(
@@ -58,10 +58,12 @@ class AppRootViewModel @Inject constructor(
                         appSettingsRepository.observe(auth.uid),
                         biometricCleared,
                         authRepository.isInitialSyncInProgress,
-                    ) { settings, cleared, syncing ->
+                        userPrefs.hasSeenWalkthrough,
+                    ) { settings, cleared, syncing, walkthroughSeen ->
                         when {
                             syncing -> AppRootState.SyncingInitial
                             settings.biometricLockEnabled && !cleared -> AppRootState.BiometricLock
+                            !walkthroughSeen -> AppRootState.Walkthrough
                             else -> AppRootState.Main
                         }
                     }
@@ -111,6 +113,10 @@ class AppRootViewModel @Inject constructor(
 
     fun onOnboardingFinished() {
         viewModelScope.launch { userPrefs.markOnboardingComplete() }
+    }
+
+    fun onWalkthroughFinished() {
+        viewModelScope.launch { userPrefs.markWalkthroughSeen() }
     }
 
     /** Called by [BiometricLockScreen] after a successful authentication. */

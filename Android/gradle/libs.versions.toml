@@ -52,6 +52,12 @@ mlkitTextRecognition = "16.0.1"
 # Google Play Billing (StoreKit 2 parity on Android)
 playBilling = "7.1.1"
 
+# Google Play In-App Review (Rate from Settings, v1.1.0)
+playReview = "2.0.2"
+
+# Lottie animations (Walkthrough Lottie carousel, v1.1.0)
+lottie = "6.6.0"
+
 # Firebase Crashlytics + Performance Monitoring Gradle plugins. Library coords
 # come from the Firebase BOM so no library version is pinned for them.
 firebaseCrashlyticsGradle = "3.0.2"
@@ -139,6 +145,10 @@ mlkit-text-recognition = { group = "com.google.mlkit", name = "text-recognition"
 # Play Billing — billing-ktx pulls billing + Kotlin coroutine extensions
 play-billing = { group = "com.android.billingclient", name = "billing", version.ref = "playBilling" }
 play-billing-ktx = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "playBilling" }
+play-review-ktx = { group = "com.google.android.play", name = "review-ktx", version.ref = "playReview" }
+
+# Lottie Compose — animated walkthrough placeholders
+lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie" }
 
 # Test
 junit = { group = "junit", name = "junit", version.ref = "junit" }

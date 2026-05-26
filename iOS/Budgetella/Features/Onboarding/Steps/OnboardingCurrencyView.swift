@@ -20,7 +20,7 @@ struct OnboardingCurrencyView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            stepHeader(current: 3, total: 4, onSkip: vm.skip)
+            stepHeader(current: 2, total: 3, onSkip: vm.skip)
                 .padding(.horizontal, 28)
                 .padding(.top, 16)
 

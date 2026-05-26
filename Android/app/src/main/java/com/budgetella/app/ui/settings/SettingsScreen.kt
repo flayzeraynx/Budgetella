@@ -1,5 +1,6 @@
 package com.budgetella.app.ui.settings
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -32,7 +33,9 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Paid
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
@@ -62,6 +65,7 @@ import com.budgetella.app.R
 import com.budgetella.app.core.design.BrandColor
 import com.budgetella.app.core.design.BrandText
 import com.budgetella.app.core.design.Spacing
+import com.google.android.play.core.review.ReviewManagerFactory
 
 /**
  * Settings — port of iOS SettingsView.
@@ -270,6 +274,52 @@ fun SettingsScreen(
                     onClick = {
                         runCatching {
                             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://budgetella.app/terms")))
+                        }
+                    },
+                )
+            }
+
+            // Community — v1.1.0 testers feedback
+            SectionHeader(stringResource(R.string.settings_section_community))
+            val shareMessage = stringResource(R.string.settings_share_message)
+            val shareChooser = stringResource(R.string.settings_share_chooser)
+            SettingsGroup {
+                NavigationRow(
+                    icon = Icons.Filled.StarRate,
+                    tint = BrandColor.Warning,
+                    title = stringResource(R.string.settings_rate),
+                    onClick = {
+                        val activity = context as? Activity ?: return@NavigationRow
+                        val manager = ReviewManagerFactory.create(context)
+                        manager.requestReviewFlow().addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                manager.launchReviewFlow(activity, task.result)
+                            } else {
+                                // Fallback — open Play Store listing if in-app flow can't show.
+                                runCatching {
+                                    context.startActivity(
+                                        Intent(
+                                            Intent.ACTION_VIEW,
+                                            Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}")
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    },
+                )
+                RowDivider()
+                NavigationRow(
+                    icon = Icons.Filled.Share,
+                    tint = BrandColor.Primary,
+                    title = stringResource(R.string.settings_share),
+                    onClick = {
+                        val send = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, shareMessage)
+                        }
+                        runCatching {
+                            context.startActivity(Intent.createChooser(send, shareChooser))
                         }
                     },
                 )

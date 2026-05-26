@@ -69,3 +69,4 @@ GoogleService-Info.plist
 # Claude Code worktrees
 .claude/
 **/.DS_Store
+Android/.kotlin/

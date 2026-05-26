@@ -2,6 +2,25 @@
 
 ---
 
+## v1.1.0 (build 1) — 2026-05-26
+**Testers community feedback release — TestFlight.**
+
+### Eklenenler
+- **Walkthrough (post-auth):** 3 sayfalık özellik turu — "İşlem Ekle / Aylık Özet / Bütçe Hedefi", SpinDeck pattern (TabView pager + dots + skip). Bir kez gösterilir, `hasSeenWalkthrough` AppStorage flag'i ile gated.
+- **Lottie SPM** (airbnb/lottie-spm 4.5.0): Walkthrough sayfaları önce `walkthrough_{add,summary,goal}.json` yüklemeye çalışır, yoksa SF Symbol fallback. JSON drop-in için Resources/Lottie/ klasörü hazır.
+- **Settings → Topluluk:** "Budgetella'yı Değerlendir" (`AppStore.requestReview` via SKStoreReviewController, iOS 16+) ve "Arkadaşlarınla Paylaş" (`UIActivityViewController` + pre-filled mesaj). Otomatik popup yok, sadece manuel.
+
+### Değişiklikler
+- **Onboarding 4→3 step:** Welcome / Currency / Permissions. Eski "Features" step kaldırıldı; içerik post-auth Walkthrough'a taşındı.
+- `OnboardingFeaturesView.swift` silindi (artık referans yok).
+
+### Altyapı
+- `project.yml`: `MARKETING_VERSION: 1.1.0`, `CURRENT_PROJECT_VERSION: 1`
+- `Localizable.xcstrings`: Walkthrough + Settings community TR/EN string'leri
+- `docs/aso-copy-{tr,en}.md`: v1.1.0 App Store + Play Console copy
+
+---
+
 ## v1.0.1 (build 1) — 2026-05-08
 **TestFlight'a yüklendi (gece ~00:30) — App Store rejection fix + paywall/localization iyileştirmeleri.**
 

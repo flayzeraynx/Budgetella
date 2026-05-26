@@ -2,8 +2,8 @@
 //  OnboardingView.swift
 //  Budgetella
 //
-//  4-adım onboarding container. TabView yerine manuel step geçişi —
-//  tasarımdaki slide animasyonu için .transition(.asymmetric) kullanılıyor.
+//  3-adım onboarding container. Tasarım: Welcome → Currency → Permissions.
+//  v1.1.0: Features step kaldırıldı; özellik turu post-auth WalkthroughView'a taşındı.
 //
 
 import SwiftUI
@@ -42,18 +42,12 @@ struct OnboardingView: View {
                         removal: .move(edge: .leading)
                     ))
                 case 1:
-                    OnboardingFeaturesView(vm: vm)
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .trailing),
-                            removal: .move(edge: .leading)
-                        ))
-                case 2:
                     OnboardingCurrencyView(vm: vm)
                         .transition(.asymmetric(
                             insertion: .move(edge: .trailing),
                             removal: .move(edge: .leading)
                         ))
-                case 3:
+                case 2:
                     OnboardingPermissionsView(vm: vm) {
                         vm.complete(modelContext: modelContext, userId: "local")
                         onComplete()
