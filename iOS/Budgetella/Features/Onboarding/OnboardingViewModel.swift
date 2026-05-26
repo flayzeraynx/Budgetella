@@ -13,14 +13,14 @@ import UserNotifications
 @Observable
 final class OnboardingViewModel {
 
-    var currentStep: Int = 0          // 0=welcome, 1=features, 2=currency, 3=permissions
+    var currentStep: Int = 0          // 0=welcome, 1=currency, 2=permissions
     var selectedCurrency: AppCurrency = .tryLira
     var microphoneEnabled = false
     var cameraEnabled = false
     var notificationsEnabled = false
     var isCompleting = false
 
-    let totalSteps = 4
+    let totalSteps = 3
 
     // MARK: - Navigation
 

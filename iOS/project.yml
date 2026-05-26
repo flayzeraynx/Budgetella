@@ -7,6 +7,9 @@ packages:
   GoogleSignIn:
     url: https://github.com/google/GoogleSignIn-iOS
     from: "8.0.0"
+  Lottie:
+    url: https://github.com/airbnb/lottie-spm
+    from: "4.5.0"
 
 options:
   bundleIdPrefix: com.ozankilic
@@ -38,6 +41,8 @@ targets:
     info:
       path: Budgetella/Info.plist
       properties:
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         CFBundleDisplayName: Budgetella
         GIDClientID: "523687846942-uqecfl8c1qhih6thai55uubuqkqsba0n.apps.googleusercontent.com"
         CFBundleURLTypes:
@@ -90,6 +95,8 @@ targets:
         product: FirebaseMessaging
       - package: GoogleSignIn
         product: GoogleSignIn
+      - package: Lottie
+        product: Lottie
       - target: BudgetellaWidgetExtension
         embed: true
 
@@ -103,6 +110,8 @@ targets:
     info:
       path: BudgetellaWidgetExtension/Info.plist
       properties:
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         CFBundleDisplayName: "Budgetella Widget"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension

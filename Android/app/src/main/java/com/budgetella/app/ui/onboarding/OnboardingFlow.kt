@@ -68,17 +68,16 @@ import com.budgetella.app.R
 import com.budgetella.app.core.design.BrandColor
 import com.budgetella.app.core.design.BrandText
 import com.budgetella.app.core.design.Spacing
-import com.budgetella.app.ui.main.AppTab
 import kotlinx.coroutines.launch
 
 /**
- * Three-screen onboarding carousel — Welcome → Features → Permissions.
- * Mirrors the iOS OnboardingView count and intent; the iOS Currency screen
- * lives in Settings on Android (we already force English on first launch).
+ * Two-screen onboarding carousel — Welcome → Permissions.
+ * v1.1.0: Features step removed; özellik turu post-auth WalkthroughScreen'a
+ * taşındı. Currency Settings'te (Android'de onboarding default İngilizce).
  */
 @Composable
 fun OnboardingFlow(onFinished: () -> Unit) {
-    val pages = remember { listOf(OnboardingPage.Welcome, OnboardingPage.Features, OnboardingPage.Permissions) }
+    val pages = remember { listOf(OnboardingPage.Welcome, OnboardingPage.Permissions) }
     val pagerState = rememberPagerState(pageCount = { pages.size })
     val scope = rememberCoroutineScope()
     val currentPage by remember { derivedStateOf { pagerState.currentPage } }
@@ -125,7 +124,6 @@ fun OnboardingFlow(onFinished: () -> Unit) {
             ) { index ->
                 when (pages[index]) {
                     OnboardingPage.Welcome -> WelcomePage()
-                    OnboardingPage.Features -> FeaturesPage()
                     OnboardingPage.Permissions -> PermissionsPage()
                 }
             }
@@ -175,50 +173,6 @@ private fun WelcomePage() = OnboardingPageScaffold(
     title = stringResource(R.string.onboarding_welcome_title),
     subtitle = stringResource(R.string.onboarding_welcome_subtitle),
 )
-
-@Composable
-private fun FeaturesPage() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = Spacing.xl),
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = stringResource(R.string.onboarding_features_title),
-            style = BrandText.title,
-            color = BrandColor.textPrimary(),
-        )
-        Spacer(Modifier.height(Spacing.sm))
-        Text(
-            text = stringResource(R.string.onboarding_features_subtitle),
-            style = BrandText.body,
-            color = BrandColor.textSecondary(),
-        )
-        Spacer(Modifier.height(Spacing.xl))
-
-        FeatureRow(
-            icon = AppTab.Home.icon,
-            accent = BrandColor.Primary,
-            title = stringResource(R.string.onboarding_feature_1_title),
-            body = stringResource(R.string.onboarding_feature_1_body),
-        )
-        Spacer(Modifier.height(Spacing.md))
-        FeatureRow(
-            icon = AppTab.Stats.icon,
-            accent = BrandColor.Income,
-            title = stringResource(R.string.onboarding_feature_2_title),
-            body = stringResource(R.string.onboarding_feature_2_body),
-        )
-        Spacer(Modifier.height(Spacing.md))
-        FeatureRow(
-            icon = AppTab.Ai.icon,
-            accent = BrandColor.PrimaryLight,
-            title = stringResource(R.string.onboarding_feature_3_title),
-            body = stringResource(R.string.onboarding_feature_3_body),
-        )
-    }
-}
 
 @Composable
 private fun PermissionsPage() {
@@ -479,40 +433,6 @@ private fun OnboardingPageScaffold(
 }
 
 @Composable
-private fun FeatureRow(
-    icon: ImageVector,
-    accent: Color,
-    title: String,
-    body: String,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Top,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(Spacing.radiusSmall))
-                .background(accent.copy(alpha = 0.15f)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = accent,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-        Spacer(Modifier.width(Spacing.md))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, style = BrandText.subheadline, color = BrandColor.textPrimary())
-            Spacer(Modifier.height(2.dp))
-            Text(text = body, style = BrandText.footnote, color = BrandColor.textTertiary())
-        }
-    }
-}
-
-@Composable
 private fun PagerDots(count: Int, current: Int) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         repeat(count) { i ->
@@ -531,4 +451,4 @@ private fun PagerDots(count: Int, current: Int) {
     }
 }
 
-private enum class OnboardingPage { Welcome, Features, Permissions }
+private enum class OnboardingPage { Welcome, Permissions }

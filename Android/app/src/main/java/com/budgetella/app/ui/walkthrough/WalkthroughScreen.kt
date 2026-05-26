@@ -22,6 +22,12 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Adjust
 import androidx.compose.material.icons.filled.PieChart
 import androidx.compose.material3.Button
+import androidx.compose.runtime.getValue
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -47,12 +53,14 @@ import kotlinx.coroutines.launch
  * v1.1.0 — post-auth feature tutorial. Shown once after first sign-in,
  * before MainScaffold. SpinDeck OnboardingScreen referans alındı.
  *
- * TODO(v1.1.x): Replace Material icon hero with Lottie animation
- * (com.airbnb.android:lottie-compose), 3 JSON assets under res/raw/.
+ * Lottie dep eklendi; her sayfa önce assets/walkthrough_*.json yüklemeye
+ * çalışır, asset yoksa Material Icon fallback'ine düşer. JSON dosyaları
+ * app/src/main/assets/ altına atılınca otomatik aktive olur.
  */
 private data class WalkthroughPage(
     val icon: ImageVector,
     val iconColor: Color,
+    val lottieAsset: String,
     val titleRes: Int,
     val bodyRes: Int,
 )
@@ -63,18 +71,21 @@ fun WalkthroughScreen(onFinish: () -> Unit) {
         WalkthroughPage(
             icon = Icons.Filled.AddCircle,
             iconColor = BrandColor.Primary,
+            lottieAsset = "walkthrough_add.json",
             titleRes = R.string.walkthrough_add_title,
             bodyRes = R.string.walkthrough_add_body,
         ),
         WalkthroughPage(
             icon = Icons.Filled.PieChart,
             iconColor = BrandColor.Income,
+            lottieAsset = "walkthrough_summary.json",
             titleRes = R.string.walkthrough_summary_title,
             bodyRes = R.string.walkthrough_summary_body,
         ),
         WalkthroughPage(
             icon = Icons.Filled.Adjust,
             iconColor = BrandColor.Warning,
+            lottieAsset = "walkthrough_goal.json",
             titleRes = R.string.walkthrough_goal_title,
             bodyRes = R.string.walkthrough_goal_body,
         ),
@@ -166,21 +177,7 @@ private fun PageContent(page: WalkthroughPage) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        // TODO(v1.1.x): replace with LottieComposition + LottieAnimation.
-        Box(
-            modifier = Modifier
-                .size(180.dp)
-                .clip(CircleShape)
-                .background(page.iconColor.copy(alpha = 0.14f)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = page.icon,
-                contentDescription = null,
-                tint = page.iconColor,
-                modifier = Modifier.size(80.dp),
-            )
-        }
+        Hero(page = page)
         Spacer(Modifier.height(Spacing.xl))
         Text(
             text = stringResource(page.titleRes),
@@ -196,6 +193,42 @@ private fun PageContent(page: WalkthroughPage) {
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = Spacing.md),
         )
+    }
+}
+
+@Composable
+private fun Hero(page: WalkthroughPage) {
+    // Try the Lottie JSON first; if the asset isn't bundled yet, composition
+    // stays null and we render the Material Icon fallback.
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.Asset(page.lottieAsset),
+    )
+    val progress by animateLottieCompositionAsState(
+        composition = composition,
+        iterations = LottieConstants.IterateForever,
+    )
+
+    if (composition != null) {
+        LottieAnimation(
+            composition = composition,
+            progress = { progress },
+            modifier = Modifier.size(220.dp),
+        )
+    } else {
+        Box(
+            modifier = Modifier
+                .size(180.dp)
+                .clip(CircleShape)
+                .background(page.iconColor.copy(alpha = 0.14f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = page.icon,
+                contentDescription = null,
+                tint = page.iconColor,
+                modifier = Modifier.size(80.dp),
+            )
+        }
     }
 }
 

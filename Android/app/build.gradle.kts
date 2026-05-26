@@ -212,6 +212,9 @@ dependencies {
     // In-App Review (Rate Budgetella from Settings — v1.1.0 testers feedback)
     implementation(libs.play.review.ktx)
 
+    // Lottie Compose — walkthrough carousel animations (v1.1.0)
+    implementation(libs.lottie.compose)
+
     // Test
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit.ext)

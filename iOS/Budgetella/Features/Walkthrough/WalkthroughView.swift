@@ -5,14 +5,17 @@
 //  v1.1.0 — post-auth feature tutorial. Shown once after first sign-in,
 //  before the main tab. SpinDeck OnboardingView referans alındı.
 //
-//  TODO(v1.1.x): Replace SF Symbol hero with Lottie animation
-//  (3 JSON files: walkthrough_add, walkthrough_summary, walkthrough_goal).
+//  Lottie SPM dep eklendi; her sayfa önce `walkthrough_*.json` yüklemeye
+//  çalışır, bundle'da yoksa SF Symbol fallback'ine düşer. JSON dosyaları
+//  Budgetella/Resources/Lottie/ altına atılınca otomatik aktive olur.
 //
 
 import SwiftUI
+import Lottie
 
 struct WalkthroughPage: Identifiable {
     let id = UUID()
+    let lottieName: String
     let symbol: String
     let symbolColor: Color
     let title: LocalizedStringKey
@@ -29,18 +32,21 @@ struct WalkthroughView: View {
     private var pages: [WalkthroughPage] {
         [
             WalkthroughPage(
+                lottieName: "walkthrough_add",
                 symbol: "plus.circle.fill",
                 symbolColor: BrandColor.primary,
                 title: "İşlem Ekle",
                 body: "Sağ alttaki + tuşu ile saniyeler içinde gelir veya gider ekle. Ses ve fiş tarama ile daha da hızlı."
             ),
             WalkthroughPage(
+                lottieName: "walkthrough_summary",
                 symbol: "chart.pie.fill",
                 symbolColor: BrandColor.income,
                 title: "Aylık Özet",
                 body: "Nereye ne kadar harcadığını gör. Aylık karşılaştırma ve trend grafiklerle alışkanlıklarını keşfet."
             ),
             WalkthroughPage(
+                lottieName: "walkthrough_goal",
                 symbol: "target",
                 symbolColor: BrandColor.warning,
                 title: "Bütçe Hedefi",
@@ -103,19 +109,7 @@ struct WalkthroughView: View {
     private func pageView(_ page: WalkthroughPage) -> some View {
         VStack(spacing: 26) {
             Spacer()
-            // TODO(v1.1.x): replace ZStack hero with LottieView for animated illustration.
-            ZStack {
-                Circle()
-                    .fill(page.symbolColor.opacity(0.14))
-                    .frame(width: 180, height: 180)
-                Circle()
-                    .strokeBorder(page.symbolColor.opacity(0.35), lineWidth: 1)
-                    .frame(width: 180, height: 180)
-                Image(systemName: page.symbol)
-                    .font(.system(size: 76, weight: .regular))
-                    .foregroundStyle(page.symbolColor)
-                    .symbolEffect(.bounce, value: index)
-            }
+            heroView(page)
             VStack(spacing: 12) {
                 Text(page.title)
                     .font(.brand(.title))
@@ -129,6 +123,30 @@ struct WalkthroughView: View {
             Spacer()
         }
         .padding(.top, 8)
+    }
+
+    @ViewBuilder
+    private func heroView(_ page: WalkthroughPage) -> some View {
+        if let animation = LottieAnimation.named(page.lottieName) {
+            LottieView(animation: animation)
+                .playing(loopMode: .loop)
+                .resizable()
+                .frame(width: 220, height: 220)
+        } else {
+            // Fallback — bundle'da Lottie JSON yoksa SF Symbol göster.
+            ZStack {
+                Circle()
+                    .fill(page.symbolColor.opacity(0.14))
+                    .frame(width: 180, height: 180)
+                Circle()
+                    .strokeBorder(page.symbolColor.opacity(0.35), lineWidth: 1)
+                    .frame(width: 180, height: 180)
+                Image(systemName: page.symbol)
+                    .font(.system(size: 76, weight: .regular))
+                    .foregroundStyle(page.symbolColor)
+                    .symbolEffect(.bounce, value: index)
+            }
+        }
     }
 
     private var pageDots: some View {

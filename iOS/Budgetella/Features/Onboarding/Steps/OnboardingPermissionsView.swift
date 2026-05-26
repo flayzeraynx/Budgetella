@@ -16,7 +16,7 @@ struct OnboardingPermissionsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            stepHeader(current: 4, total: 4, onSkip: onComplete)
+            stepHeader(current: 3, total: 3, onSkip: onComplete)
                 .padding(.horizontal, 28)
                 .padding(.top, 16)
 
