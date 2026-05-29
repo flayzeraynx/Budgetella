@@ -2,6 +2,7 @@ package com.budgetella.app.ui.settings
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -54,8 +55,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -357,14 +360,49 @@ fun SettingsScreen(
                 )
             }
 
-            // Version footer
+            // About — app identity + version/build live together here.
+            SectionHeader(stringResource(R.string.settings_section_about))
+            SettingsGroup {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = Spacing.lg, horizontal = Spacing.md),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+                ) {
+                    Image(
+                        painter = painterResource(R.mipmap.ic_launcher_foreground),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(RoundedCornerShape(Spacing.radiusMedium)),
+                    )
+                    Text(
+                        text = stringResource(R.string.app_name),
+                        style = BrandText.title,
+                        color = BrandColor.textPrimary(),
+                    )
+                    Text(
+                        text = "${stringResource(R.string.settings_version)} ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+                        style = BrandText.footnote,
+                        color = BrandColor.textTertiary(),
+                    )
+                    Text(
+                        text = stringResource(R.string.about_tagline),
+                        style = BrandText.footnote,
+                        color = BrandColor.textSecondary(),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = Spacing.xs),
+                    )
+                    Text(
+                        text = stringResource(R.string.about_copyright),
+                        style = BrandText.caption,
+                        color = BrandColor.textTertiary(),
+                        modifier = Modifier.padding(top = Spacing.xs),
+                    )
+                }
+            }
             Spacer(Modifier.height(Spacing.md))
-            Text(
-                text = "${stringResource(R.string.settings_version)} ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
-                style = BrandText.footnote,
-                color = BrandColor.textTertiary(),
-                modifier = Modifier.fillMaxWidth().padding(Spacing.md),
-            )
         }
     }
 

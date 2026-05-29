@@ -282,6 +282,9 @@
     <string name="settings_premium_subtitle_active">Aktif abonelik</string>
     <string name="settings_premium_subtitle_inactive">7 gün ücretsiz dene</string>
     <string name="settings_version">Sürüm</string>
+    <string name="settings_section_about">Hakkında</string>
+    <string name="about_tagline">Kişisel finans, zarif ve sade.</string>
+    <string name="about_copyright">© 2026 Ozan Kılıç</string>
 
     <!-- Tema seçici -->
     <string name="theme_dark">Karanlık</string>

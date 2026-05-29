@@ -287,22 +287,33 @@ struct SettingsView: View {
                         .listRowBackground(BrandColor.surface.opacity(0.4))
                     }
 
-                    // App version
+                    // About — app identity + version/build live together here.
                     Section {
-                        HStack {
-                            Spacer()
-                            VStack(spacing: 2) {
-                                Text("Budgetella")
-                                    .font(.brand(.caption))
-                                    .foregroundStyle(BrandColor.textTertiary)
-                                Text("v\(appVersion)")
-                                    .font(.brand(.caption))
-                                    .foregroundStyle(BrandColor.textTertiary.opacity(0.6))
-                            }
-                            Spacer()
+                        VStack(spacing: 6) {
+                            BudgetellaLogoView(size: 56)
+                                .padding(.bottom, 2)
+                            Text("Budgetella")
+                                .font(.brand(.headline))
+                                .foregroundStyle(BrandColor.textPrimary)
+                            Text("Version \(appVersion) (\(buildNumber))")
+                                .font(.brand(.caption))
+                                .foregroundStyle(BrandColor.textTertiary)
+                            Text("Personal finance, beautifully simple.")
+                                .font(.brand(.caption))
+                                .foregroundStyle(BrandColor.textSecondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.top, 2)
+                            Text("© 2026 Ozan Kılıç")
+                                .font(.brand(.caption2))
+                                .foregroundStyle(BrandColor.textTertiary.opacity(0.7))
+                                .padding(.top, 2)
                         }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                    } header: {
+                        Text("About")
                     }
-                    .listRowBackground(Color.clear)
+                    .listRowBackground(BrandColor.surface.opacity(0.4))
                 }
                 .scrollContentBackground(.hidden)
                 .listStyle(.insetGrouped)
@@ -571,6 +582,10 @@ struct SettingsView: View {
 
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+    }
+
+    private var buildNumber: String {
+        Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
     }
 
     // MARK: - Rate & Share (v1.1.0)
