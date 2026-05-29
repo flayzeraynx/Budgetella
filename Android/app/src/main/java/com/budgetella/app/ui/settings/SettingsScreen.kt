@@ -1,6 +1,5 @@
 package com.budgetella.app.ui.settings
 
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -67,7 +66,6 @@ import com.budgetella.app.core.design.BrandColor
 import com.budgetella.app.core.design.BrandText
 import com.budgetella.app.core.design.ScreenTitleBar
 import com.budgetella.app.core.design.Spacing
-import com.google.android.play.core.review.ReviewManagerFactory
 
 /**
  * Settings — port of iOS SettingsView.
@@ -297,21 +295,27 @@ fun SettingsScreen(
                     tint = BrandColor.Warning,
                     title = stringResource(R.string.settings_rate),
                     onClick = {
-                        val activity = context as? Activity ?: return@NavigationRow
-                        val manager = ReviewManagerFactory.create(context)
-                        manager.requestReviewFlow().addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                manager.launchReviewFlow(activity, task.result)
-                            } else {
-                                // Fallback — open Play Store listing if in-app flow can't show.
-                                runCatching {
-                                    context.startActivity(
-                                        Intent(
-                                            Intent.ACTION_VIEW,
-                                            Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}")
-                                        )
+                        // Open the Play Store listing directly. The in-app review
+                        // API (ReviewManager) was dropped: it silently no-ops on
+                        // emulators / sideloaded builds and is quota-limited even
+                        // in production, so the button appeared to "do nothing".
+                        // A direct listing deep link always lands somewhere the
+                        // user can rate. market:// opens the Play Store app;
+                        // falls back to the browser if it isn't installed.
+                        val pkg = context.packageName
+                        runCatching {
+                            context.startActivity(
+                                Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$pkg"))
+                                    .setPackage("com.android.vending")
+                            )
+                        }.onFailure {
+                            runCatching {
+                                context.startActivity(
+                                    Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse("https://play.google.com/store/apps/details?id=$pkg")
                                     )
-                                }
+                                )
                             }
                         }
                     },
