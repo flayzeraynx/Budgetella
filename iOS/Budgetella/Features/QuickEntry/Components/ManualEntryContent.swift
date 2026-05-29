@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import UIKit
 
 struct ManualEntryContent: View {
 
@@ -64,15 +65,24 @@ struct ManualEntryContent: View {
         }
         .animation(.spring(response: 0.3), value: isTyping)
         .task {
+            EntryPerf.mark("ManualEntryContent.task start (before 300ms sleep)")
             // Brief wait for the sheet's present animation to settle, then focus
             // the amount field. The real first-open lag was the main-thread
             // Firestore sync (now yields between batches) — not this delay.
             try? await Task.sleep(nanoseconds: 300_000_000)
+            EntryPerf.mark("ManualEntryContent.task → set amountFocused=true (focus requested)")
             amountFocused = true
         }
         .onAppear {
+            EntryPerf.mark("ManualEntryContent.onAppear")
             let decimal = Locale.current.decimalSeparator ?? "."
             amountText = vm.rawInput.replacingOccurrences(of: ",", with: decimal)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+            EntryPerf.mark("⌨️ keyboardWillShow")
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidShowNotification)) { _ in
+            EntryPerf.mark("⌨️ keyboardDidShow — keyboard fully visible")
         }
         .onChange(of: amountText) { _, newVal in
             let decimal = Locale.current.decimalSeparator ?? "."

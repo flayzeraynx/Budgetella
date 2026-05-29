@@ -68,6 +68,7 @@ struct MainTabView: View {
             }
 
             CustomTabBar(selected: $selectedTab, onModeSelect: { mode in
+                EntryPerf.begin("FAB tap → showQuickEntry (\(mode))")
                 entryMode = mode
                 showQuickEntry = true
             })
@@ -208,6 +209,17 @@ struct MainTabView: View {
             }
             .onEnded { value in
                 let dx = value.translation.width
+                let dy = value.translation.height
+                let snapAnimation: Animation = .spring(response: 0.34, dampingFraction: 0.86)
+
+                // Settings open, or a vertical-dominant drag (scrolling the page's
+                // list/chart) must NEVER switch tabs — otherwise an up/down scroll
+                // on the dashboard flicks over to the List tab.
+                guard !showSettings, abs(dx) > abs(dy) * 1.5 else {
+                    withAnimation(snapAnimation) { dragOffset = 0 }
+                    return
+                }
+
                 let velocity = value.velocity.width
                 let commitThreshold = screenWidth * 0.22
                 let flickThreshold: CGFloat = 480
@@ -216,7 +228,6 @@ struct MainTabView: View {
                 let goesPrev = dx >  commitThreshold || velocity >  flickThreshold
 
                 let tabs = AppTab.allCases
-                let snapAnimation: Animation = .spring(response: 0.34, dampingFraction: 0.86)
 
                 if goesNext, let idx = tabs.firstIndex(of: selectedTab), idx < tabs.count - 1 {
                     withAnimation(snapAnimation) {
