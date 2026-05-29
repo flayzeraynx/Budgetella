@@ -62,8 +62,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.budgetella.app.BuildConfig
 import com.budgetella.app.R
+import com.budgetella.app.data.model.AppLanguage
 import com.budgetella.app.core.design.BrandColor
 import com.budgetella.app.core.design.BrandText
+import com.budgetella.app.core.design.ScreenTitleBar
 import com.budgetella.app.core.design.Spacing
 import com.google.android.play.core.review.ReviewManagerFactory
 
@@ -77,6 +79,7 @@ import com.google.android.play.core.review.ReviewManagerFactory
 @Composable
 fun SettingsScreen(
     onDismiss: () -> Unit,
+    onClose: (() -> Unit)? = null,
     onShowTheme: () -> Unit,
     onShowLanguage: () -> Unit,
     onShowCurrency: () -> Unit,
@@ -95,6 +98,12 @@ fun SettingsScreen(
 
     var confirmSignOut by remember { mutableStateOf(false) }
 
+    // Legal links follow the in-app language so Turkish users land on the TR
+    // pages (budgetella.app/*-tr) instead of the English originals.
+    val isTurkish = state.language == AppLanguage.Turkish
+    val privacyUrl = if (isTurkish) "https://budgetella.app/privacy-tr" else "https://budgetella.app/privacy"
+    val termsUrl = if (isTurkish) "https://budgetella.app/terms-tr" else "https://budgetella.app/terms"
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -108,11 +117,10 @@ fun SettingsScreen(
                 .padding(top = Spacing.md, bottom = Spacing.xxl),
             verticalArrangement = Arrangement.spacedBy(Spacing.lg),
         ) {
-            // Title
-            Text(
-                text = stringResource(R.string.settings_title),
-                style = BrandText.largeTitle,
-                color = BrandColor.textPrimary(),
+            // Title + close (✕ sits at the far right, where the avatar was)
+            ScreenTitleBar(
+                title = stringResource(R.string.settings_title),
+                onClose = onClose,
                 modifier = Modifier.padding(top = Spacing.sm, bottom = Spacing.xs),
             )
 
@@ -262,7 +270,7 @@ fun SettingsScreen(
                     title = stringResource(R.string.settings_privacy),
                     onClick = {
                         runCatching {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://budgetella.app/privacy")))
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(privacyUrl)))
                         }
                     },
                 )
@@ -273,7 +281,7 @@ fun SettingsScreen(
                     title = stringResource(R.string.settings_terms),
                     onClick = {
                         runCatching {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://budgetella.app/terms")))
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(termsUrl)))
                         }
                     },
                 )

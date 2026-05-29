@@ -35,6 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.budgetella.app.R
 import com.budgetella.app.core.design.BrandColor
 import com.budgetella.app.core.design.BrandText
+import com.budgetella.app.core.design.ScreenTitleBar
 import com.budgetella.app.core.design.Spacing
 import com.budgetella.app.core.locale.LocaleHelper
 import com.budgetella.app.data.model.AppCurrency
@@ -51,12 +52,12 @@ import com.budgetella.app.data.model.AppTheme
  */
 
 @Composable
-fun ThemePickerSheet(onDismiss: () -> Unit) {
+fun ThemePickerSheet(onDismiss: () -> Unit, onBack: (() -> Unit)? = null) {
     val vm: SettingsViewModel = hiltViewModel()
     val state by vm.state.collectAsStateWithLifecycle()
     val active = state.theme
 
-    PickerColumn(title = stringResource(R.string.settings_theme)) {
+    PickerColumn(title = stringResource(R.string.settings_theme), onBack = onBack) {
         PickerRow(
             icon = Icons.Filled.Brightness4,
             label = stringResource(R.string.theme_dark),
@@ -79,13 +80,13 @@ fun ThemePickerSheet(onDismiss: () -> Unit) {
 }
 
 @Composable
-fun LanguagePickerSheet(onDismiss: () -> Unit) {
+fun LanguagePickerSheet(onDismiss: () -> Unit, onBack: (() -> Unit)? = null) {
     val vm: SettingsViewModel = hiltViewModel()
     val state by vm.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val active = state.language
 
-    PickerColumn(title = stringResource(R.string.settings_language)) {
+    PickerColumn(title = stringResource(R.string.settings_language), onBack = onBack) {
         AppLanguage.v1Cases.forEach { lang ->
             PickerRow(
                 emoji = lang.flagEmoji,
@@ -140,12 +141,12 @@ private fun restartApp(context: android.content.Context) {
 }
 
 @Composable
-fun CurrencyPickerSheet(onDismiss: () -> Unit) {
+fun CurrencyPickerSheet(onDismiss: () -> Unit, onBack: (() -> Unit)? = null) {
     val vm: SettingsViewModel = hiltViewModel()
     val state by vm.state.collectAsStateWithLifecycle()
     val active = state.currency
 
-    PickerColumn(title = stringResource(R.string.settings_currency)) {
+    PickerColumn(title = stringResource(R.string.settings_currency), onBack = onBack) {
         listOf(
             AppCurrency.Try to R.string.currency_try,
             AppCurrency.Usd to R.string.currency_usd,
@@ -165,7 +166,11 @@ fun CurrencyPickerSheet(onDismiss: () -> Unit) {
 // ── Building blocks ────────────────────────────────────────────────────────
 
 @Composable
-private fun PickerColumn(title: String, content: @Composable () -> Unit) {
+private fun PickerColumn(
+    title: String,
+    onBack: (() -> Unit)? = null,
+    content: @Composable () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -173,10 +178,9 @@ private fun PickerColumn(title: String, content: @Composable () -> Unit) {
             .padding(horizontal = Spacing.lg, vertical = Spacing.md),
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
-        Text(
-            text = title,
-            style = BrandText.title,
-            color = BrandColor.textPrimary(),
+        ScreenTitleBar(
+            title = title,
+            onBack = onBack,
             modifier = Modifier.padding(bottom = Spacing.xs),
         )
         Column(

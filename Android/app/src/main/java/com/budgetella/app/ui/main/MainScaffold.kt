@@ -154,58 +154,46 @@ fun MainScaffold(
         // closes settings (see BottomTabBar.onSelect). A private back-stack
         // pushes sub-pages in place instead of the old close-then-reopen modals.
         if (inSettings) {
+            // Pop one sub-page, or exit settings entirely at the root.
             val popOrExit = {
                 settingsStack =
                     if (settingsStack.size > 1) settingsStack.dropLast(1) else emptyList()
             }
             val pop = { settingsStack = settingsStack.dropLast(1) }
+            val close = { settingsStack = emptyList() }
             BackHandler(onBack = popOrExit)
-            Column(
+            // Each page renders its own header (back ← left of title for
+            // sub-pages, close ✕ right of title for the root) via ScreenTitleBar.
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(bottom = 72.dp)
                     .background(BrandColor.background())
                     .statusBarsPadding(),
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    IconButton(onClick = popOrExit) {
-                        Icon(
-                            imageVector = if (settingsStack.size > 1) Icons.AutoMirrored.Filled.ArrowBack
-                                          else Icons.Filled.Close,
-                            contentDescription = stringResource(R.string.common_back),
-                            tint = BrandColor.textPrimary(),
-                        )
-                    }
-                }
-                Box(modifier = Modifier.fillMaxSize()) {
-                    when (settingsStack.last()) {
-                        SettingsRoute.Root -> SettingsScreen(
-                            onDismiss = { settingsStack = emptyList() },
-                            onShowTheme = { settingsStack = settingsStack + SettingsRoute.Theme },
-                            onShowLanguage = { settingsStack = settingsStack + SettingsRoute.Language },
-                            onShowCurrency = { settingsStack = settingsStack + SettingsRoute.Currency },
-                            onExport = onExportBackup,
-                            onImport = onImportBackup,
-                            onShowInbox = { settingsStack = settingsStack + SettingsRoute.Inbox },
-                            onShowProfile = { settingsStack = settingsStack + SettingsRoute.Profile },
-                            onDeleteAccount = { settingsStack = settingsStack + SettingsRoute.DeleteAccount },
-                            onShowNotificationSettings = { settingsStack = settingsStack + SettingsRoute.NotificationSettings },
-                            onShowCategories = { settingsStack = settingsStack + SettingsRoute.Categories },
-                        )
-                        SettingsRoute.Theme -> ThemePickerSheet(onDismiss = pop)
-                        SettingsRoute.Language -> LanguagePickerSheet(onDismiss = pop)
-                        SettingsRoute.Currency -> CurrencyPickerSheet(onDismiss = pop)
-                        SettingsRoute.Inbox -> NotificationInboxScreen(onDismiss = pop)
-                        SettingsRoute.Profile -> ProfileSheet(onDismiss = pop)
-                        SettingsRoute.DeleteAccount -> DeleteAccountSheet(onDismiss = pop)
-                        SettingsRoute.NotificationSettings -> NotificationSettingsSheet(onDismiss = pop)
-                        SettingsRoute.Categories -> CategoryManagementSheet(onDismiss = pop)
-                    }
+                when (settingsStack.last()) {
+                    SettingsRoute.Root -> SettingsScreen(
+                        onDismiss = close,
+                        onClose = close,
+                        onShowTheme = { settingsStack = settingsStack + SettingsRoute.Theme },
+                        onShowLanguage = { settingsStack = settingsStack + SettingsRoute.Language },
+                        onShowCurrency = { settingsStack = settingsStack + SettingsRoute.Currency },
+                        onExport = onExportBackup,
+                        onImport = onImportBackup,
+                        onShowInbox = { settingsStack = settingsStack + SettingsRoute.Inbox },
+                        onShowProfile = { settingsStack = settingsStack + SettingsRoute.Profile },
+                        onDeleteAccount = { settingsStack = settingsStack + SettingsRoute.DeleteAccount },
+                        onShowNotificationSettings = { settingsStack = settingsStack + SettingsRoute.NotificationSettings },
+                        onShowCategories = { settingsStack = settingsStack + SettingsRoute.Categories },
+                    )
+                    SettingsRoute.Theme -> ThemePickerSheet(onDismiss = pop, onBack = pop)
+                    SettingsRoute.Language -> LanguagePickerSheet(onDismiss = pop, onBack = pop)
+                    SettingsRoute.Currency -> CurrencyPickerSheet(onDismiss = pop, onBack = pop)
+                    SettingsRoute.Inbox -> NotificationInboxScreen(onDismiss = pop, onBack = pop)
+                    SettingsRoute.Profile -> ProfileSheet(onDismiss = pop, onBack = pop)
+                    SettingsRoute.DeleteAccount -> DeleteAccountSheet(onDismiss = pop, onBack = pop)
+                    SettingsRoute.NotificationSettings -> NotificationSettingsSheet(onDismiss = pop, onBack = pop)
+                    SettingsRoute.Categories -> CategoryManagementSheet(onDismiss = pop, onBack = pop)
                 }
             }
         }

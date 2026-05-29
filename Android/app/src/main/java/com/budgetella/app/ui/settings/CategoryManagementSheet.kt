@@ -68,6 +68,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.budgetella.app.R
 import com.budgetella.app.core.design.BrandColor
+import com.budgetella.app.core.design.ScreenTitleBar
 import com.budgetella.app.core.design.BrandText
 import com.budgetella.app.core.design.Spacing
 import com.budgetella.app.data.local.entity.CategoryEntity
@@ -129,6 +130,7 @@ private fun parseColor(hex: String?): Color? =
 @Composable
 fun CategoryManagementSheet(
     onDismiss: () -> Unit,
+    onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val vm: CategoryManagementViewModel = hiltViewModel()
@@ -153,18 +155,11 @@ fun CategoryManagementSheet(
                 .padding(top = Spacing.md, bottom = Spacing.xxl),
             verticalArrangement = Arrangement.spacedBy(Spacing.lg),
         ) {
-            // Title + close
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = stringResource(R.string.category_mgmt_title),
-                    style = BrandText.largeTitle,
-                    color = BrandColor.textPrimary(),
-                    modifier = Modifier.weight(1f),
-                )
-                TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.common_done), color = BrandColor.Primary)
-                }
-            }
+            // Title + back (the back chevron replaces the old "Done" action)
+            ScreenTitleBar(
+                title = stringResource(R.string.category_mgmt_title),
+                onBack = onBack,
+            )
 
             CategorySection(
                 titleRes  = R.string.category_mgmt_section_income,

@@ -43,6 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.budgetella.app.R
 import com.budgetella.app.core.design.BrandColor
+import com.budgetella.app.core.design.ScreenTitleBar
 import com.budgetella.app.core.design.BrandText
 import com.budgetella.app.core.design.Spacing
 import com.budgetella.app.data.local.entity.NotificationKind
@@ -60,6 +61,7 @@ import java.time.temporal.ChronoUnit
 @Composable
 fun NotificationInboxScreen(
     onDismiss: () -> Unit,
+    onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val vm: NotificationInboxViewModel = hiltViewModel()
@@ -71,28 +73,23 @@ fun NotificationInboxScreen(
             .background(BrandColor.background())
     ) {
         // Top bar
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Spacing.lg, vertical = Spacing.md),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(R.string.inbox_title),
-                style = BrandText.title,
-                color = BrandColor.textPrimary(),
-                modifier = Modifier.weight(1f),
-            )
-            if (state.hasUnread) {
-                TextButton(onClick = vm::markAllRead) {
-                    Text(
-                        text = stringResource(R.string.inbox_mark_all),
-                        style = BrandText.footnote,
-                        color = BrandColor.Primary,
-                    )
+        ScreenTitleBar(
+            title = stringResource(R.string.inbox_title),
+            onBack = onBack,
+            titleStyle = BrandText.title,
+            modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.md),
+            trailing = {
+                if (state.hasUnread) {
+                    TextButton(onClick = vm::markAllRead) {
+                        Text(
+                            text = stringResource(R.string.inbox_mark_all),
+                            style = BrandText.footnote,
+                            color = BrandColor.Primary,
+                        )
+                    }
                 }
-            }
-        }
+            },
+        )
 
         if (state.isEmpty) {
             EmptyInbox(modifier = Modifier.weight(1f))
