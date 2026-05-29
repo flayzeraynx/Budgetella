@@ -342,7 +342,9 @@
     <string name="biometric_prompt_title">Budgetella\'nın kilidini aç</string>
     <string name="biometric_prompt_subtitle">Devam etmek için biyometriği kullan</string>
     <string name="biometric_unlock">Kilidi aç</string>
+    <string name="biometric_continue">Devam et</string>
     <string name="biometric_signout">Çıkış yap</string>
+    <string name="biometric_unavailable">Bu cihazda biyometrik kilit ayarlı değil. Devam edebilirsin — etkinleştirmek için sistem Ayarları\'ndan parmak izi, yüz ya da ekran kilidi ekle.</string>
 
     <!-- Genel -->
     <string name="common_cancel">İptal</string>
@@ -374,6 +376,11 @@
     <string name="voice_entry_parsed_note">Açıklama</string>
     <string name="voice_entry_error_no_speech">Konuşma algılanamadı.\nTekrar dene.</string>
     <string name="voice_entry_error_no_amount">Tutar anlaşılamadı.\nTekrar dene veya manuel giriş kullan.</string>
+    <string name="voice_entry_error_busy">Tanıyıcı meşgul. Tekrar dene.</string>
+    <string name="voice_entry_error_server">Sunucu hatası. Tekrar dene.</string>
+    <string name="voice_entry_error_no_permission">Mikrofon izni verilmedi.\nAyarlar &gt; Budgetella &gt; Mikrofon</string>
+    <string name="voice_entry_error_audio">Ses kaydı hatası.</string>
+    <string name="voice_entry_error_network">İnternet bağlantısı gerekli.</string>
 
     <!-- Kamera / fiş girişi -->
     <string name="camera_entry_status_preview">KAMERA GİRİŞİ</string>
@@ -382,6 +389,11 @@
     <string name="camera_entry_frame_sub">Tutarın görünür olduğundan emin ol</string>
     <string name="camera_entry_scanning">Tutar okunuyor…</string>
     <string name="camera_entry_capture_hint">Fişi çekmek için dokun</string>
+    <string name="camera_entry_error_capture">Görüntü alınamadı. Tekrar dene.</string>
+    <string name="camera_entry_error_unreadable">Tutarı okuyamadım.\nTutarı daha net görecek şekilde tekrar çek.</string>
+    <string name="camera_entry_error_ocr">Metin okunamadı. Tekrar dene.</string>
+    <string name="camera_entry_error_start">Kamera başlatılamadı.</string>
+    <string name="camera_entry_no_permission">Kamera izni gerekli.\nAyarlar &gt; Budgetella &gt; Kamera</string>
 
     <!-- v1.1.0 — Walkthrough (post-auth) -->
     <string name="walkthrough_skip">Atla</string>

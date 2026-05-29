@@ -1,5 +1,7 @@
 package com.budgetella.app.ui.biometric
 
+import android.os.Build
+import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt
@@ -26,7 +28,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -70,6 +75,28 @@ fun BiometricLockScreen(
 
     val title = stringResource(R.string.biometric_prompt_title)
     val subtitle = stringResource(R.string.biometric_prompt_subtitle)
+    val unavailableMsg = stringResource(R.string.biometric_unavailable)
+
+    // Device-credential (PIN/pattern) fallback can only be *combined* with a
+    // biometric class from API 30 (R); below that BiometricPrompt rejects the
+    // pairing and authenticate() fails silently. Drop to STRONG-only there.
+    val allowedAuthenticators = remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) BIOMETRIC_STRONG or DEVICE_CREDENTIAL
+        else BIOMETRIC_STRONG
+    }
+
+    // Can this device actually satisfy the lock *right now*? On an emulator (or
+    // a phone with no fingerprint/PIN enrolled) this is NONE_ENROLLED/NO_HARDWARE
+    // — in which case we must not brick the user behind a prompt that can never
+    // succeed. They're already Firebase-authenticated; the biometric gate is a
+    // local convenience lock, so we let them continue.
+    val lockEnforceable = remember(activity, allowedAuthenticators) {
+        activity != null &&
+            BiometricManager.from(activity).canAuthenticate(allowedAuthenticators) ==
+            BiometricManager.BIOMETRIC_SUCCESS
+    }
+
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val prompt = remember(activity) {
         activity?.let {
@@ -82,22 +109,38 @@ fun BiometricLockScreen(
                     ) {
                         onUnlocked()
                     }
-                    // Intentionally ignore onAuthenticationFailed / onAuthenticationError:
-                    // the user can retry via the Unlock button, and we never
-                    // want a transient failure to sign them out.
+
+                    override fun onAuthenticationError(
+                        errorCode: Int,
+                        errString: CharSequence,
+                    ) {
+                        // User-driven dismissals are silent — the user can retry
+                        // via the Unlock button. Everything else (no hardware,
+                        // nothing enrolled, lockout) gets surfaced so the screen
+                        // is never a dead end.
+                        errorMessage = when (errorCode) {
+                            BiometricPrompt.ERROR_USER_CANCELED,
+                            BiometricPrompt.ERROR_NEGATIVE_BUTTON,
+                            BiometricPrompt.ERROR_CANCELED -> null
+                            BiometricPrompt.ERROR_NO_BIOMETRICS,
+                            BiometricPrompt.ERROR_HW_NOT_PRESENT,
+                            BiometricPrompt.ERROR_HW_UNAVAILABLE,
+                            BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL -> unavailableMsg
+                            else -> errString.toString()
+                        }
+                    }
+                    // onAuthenticationFailed (single non-fatal mismatch) stays
+                    // ignored — the system prompt handles retry feedback itself.
                 },
             )
         }
     }
 
-    val promptInfo = remember(title, subtitle) {
+    val promptInfo = remember(title, subtitle, allowedAuthenticators) {
         BiometricPrompt.PromptInfo.Builder()
             .setTitle(title)
             .setSubtitle(subtitle)
-            // STRONG biometric (Class 3) — required for cryptographic unlock
-            // later. DEVICE_CREDENTIAL fallback covers devices without a
-            // registered biometric so the user isn't bricked out.
-            .setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
+            .setAllowedAuthenticators(allowedAuthenticators)
             .build()
     }
 
@@ -105,10 +148,11 @@ fun BiometricLockScreen(
         { prompt?.authenticate(promptInfo) }
     }
 
-    // Auto-launch once on first composition — matches iOS, which kicks off
-    // LAContext.evaluatePolicy in .onAppear.
-    LaunchedEffect(Unit) {
-        authenticate()
+    // Auto-launch once on first composition when the lock is actually
+    // enforceable — matches iOS kicking off LAContext.evaluatePolicy in
+    // .onAppear. When it isn't, show the explanation up front instead.
+    LaunchedEffect(lockEnforceable) {
+        if (lockEnforceable) authenticate() else errorMessage = unavailableMsg
     }
 
     Box(
@@ -163,8 +207,21 @@ fun BiometricLockScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                errorMessage?.let { msg ->
+                    Text(
+                        text = msg,
+                        style = BrandText.footnote,
+                        color = BrandColor.textSecondary(),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Spacer(modifier = Modifier.height(Spacing.md))
+                }
                 Button(
-                    onClick = authenticate,
+                    // When the lock can be enforced this re-launches the system
+                    // prompt; when it can't (no enrolled biometric/credential)
+                    // it becomes a plain "Continue" so the user is never stuck.
+                    onClick = if (lockEnforceable) authenticate else onUnlocked,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
@@ -174,14 +231,19 @@ fun BiometricLockScreen(
                         contentColor = Color.White,
                     ),
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Fingerprint,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                    )
-                    Spacer(modifier = Modifier.size(Spacing.sm))
+                    if (lockEnforceable) {
+                        Icon(
+                            imageVector = Icons.Filled.Fingerprint,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                        )
+                        Spacer(modifier = Modifier.size(Spacing.sm))
+                    }
                     Text(
-                        text = stringResource(R.string.biometric_unlock),
+                        text = stringResource(
+                            if (lockEnforceable) R.string.biometric_unlock
+                            else R.string.biometric_continue
+                        ),
                         style = BrandText.subheadline,
                     )
                 }

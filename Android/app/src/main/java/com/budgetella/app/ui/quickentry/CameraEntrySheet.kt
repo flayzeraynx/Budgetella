@@ -58,11 +58,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.budgetella.app.R
 import com.budgetella.app.core.design.BrandColor
 import com.budgetella.app.core.design.BrandText
 import com.budgetella.app.core.design.Spacing
@@ -109,6 +111,13 @@ fun CameraEntrySheet(
     val sheetState     = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var phase by remember { mutableStateOf<CameraPhase>(CameraPhase.Preview) }
+
+    // Strings resolved up here so the non-composable callbacks below (capture
+    // callback, CameraX factory) can use them — stringResource is @Composable-only.
+    val msgCaptureFail = stringResource(R.string.camera_entry_error_capture)
+    val msgUnreadable  = stringResource(R.string.camera_entry_error_unreadable)
+    val msgOcrError    = stringResource(R.string.camera_entry_error_ocr)
+    val msgCameraStart = stringResource(R.string.camera_entry_error_start)
 
     // ── Permission ────────────────────────────────────────────────────────────
     var permGranted by remember {
@@ -162,7 +171,7 @@ fun CameraEntrySheet(
                 override fun onCaptureSuccess(imageProxy: ImageProxy) {
                     val mediaImage = imageProxy.image
                     if (mediaImage == null) {
-                        phase = CameraPhase.Error("Görüntü alınamadı. Tekrar dene.")
+                        phase = CameraPhase.Error(msgCaptureFail)
                         imageProxy.close()
                         return
                     }
@@ -178,19 +187,17 @@ fun CameraEntrySheet(
                                 phase = CameraPhase.Scanned(result)
                                 onParsed(result.rawAmount, result.note)
                             } else {
-                                phase = CameraPhase.Error(
-                                    "Tutarı okuyamadım.\nTutarı daha net görecek şekilde tekrar çek."
-                                )
+                                phase = CameraPhase.Error(msgUnreadable)
                             }
                         }
                         .addOnFailureListener {
                             imageProxy.close()
-                            phase = CameraPhase.Error("OCR hatası: ${it.message}")
+                            phase = CameraPhase.Error(msgOcrError)
                         }
                 }
 
                 override fun onError(exception: ImageCaptureException) {
-                    phase = CameraPhase.Error("Fotoğraf çekilemedi: ${exception.message}")
+                    phase = CameraPhase.Error(msgCaptureFail)
                 }
             }
         )
@@ -229,7 +236,7 @@ fun CameraEntrySheet(
                                         imageCapture,
                                     )
                                 } catch (_: Exception) {
-                                    phase = CameraPhase.Error("Kamera başlatılamadı.")
+                                    phase = CameraPhase.Error(msgCameraStart)
                                 }
                             },
                             ContextCompat.getMainExecutor(ctx),
@@ -265,7 +272,7 @@ fun CameraEntrySheet(
                             .clickable { onDismiss() },
                         contentAlignment = Alignment.Center,
                     ) {
-                        Icon(Icons.Filled.Close, "Kapat", tint = Color.White, modifier = Modifier.size(15.dp))
+                        Icon(Icons.Filled.Close, stringResource(R.string.common_close), tint = Color.White, modifier = Modifier.size(15.dp))
                     }
                     CameraStatusPill(phase = phase, modifier = Modifier.align(Alignment.Center))
                 }
@@ -289,14 +296,14 @@ fun CameraEntrySheet(
                                 // Instruction overlay on the viewfinder
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Text(
-                                        "Fişi çerçevele",
+                                        stringResource(R.string.camera_entry_frame_hint),
                                         style     = BrandText.largeTitle,
                                         color     = Color.White,
                                         textAlign = TextAlign.Center,
                                     )
                                     Spacer(Modifier.height(Spacing.sm))
                                     Text(
-                                        "Tutarın görünür olduğundan emin ol",
+                                        stringResource(R.string.camera_entry_frame_sub),
                                         style     = BrandText.footnote,
                                         color     = Color.White.copy(alpha = 0.6f),
                                         textAlign = TextAlign.Center,
@@ -308,7 +315,7 @@ fun CameraEntrySheet(
                                 verticalArrangement = Arrangement.spacedBy(Spacing.md),
                             ) {
                                 CircularProgressIndicator(color = Color.White, modifier = Modifier.size(32.dp), strokeWidth = 2.dp)
-                                Text("Tutar okunuyor…", style = BrandText.body, color = Color.White.copy(alpha = 0.5f))
+                                Text(stringResource(R.string.camera_entry_scanning), style = BrandText.body, color = Color.White.copy(alpha = 0.5f))
                             }
                             is CameraPhase.Scanned -> VoiceParsedCard(result = p.result)
                             is CameraPhase.Error -> Column(
@@ -324,7 +331,7 @@ fun CameraEntrySheet(
                             ) {
                                 Icon(Icons.Filled.NoPhotography, null, tint = Color.White.copy(alpha = 0.3f), modifier = Modifier.size(40.dp))
                                 Text(
-                                    "Kamera izni gerekli.\nAyarlar > Budgetella > Kamera",
+                                    stringResource(R.string.camera_entry_no_permission),
                                     style     = BrandText.body,
                                     color     = Color.White.copy(alpha = 0.6f),
                                     textAlign = TextAlign.Center,
@@ -345,11 +352,11 @@ fun CameraEntrySheet(
                     when (phase) {
                         CameraPhase.Preview -> {
                             CaptureButton(onClick = ::captureAndScan)
-                            Text("Fişi çekmek için dokun", style = BrandText.caption, color = Color.White.copy(alpha = 0.4f))
+                            Text(stringResource(R.string.camera_entry_capture_hint), style = BrandText.caption, color = Color.White.copy(alpha = 0.4f))
                         }
                         is CameraPhase.Error -> {
                             RetryCapButton { phase = CameraPhase.Preview }
-                            Text("Tekrar dene", style = BrandText.caption, color = Color.White.copy(alpha = 0.35f))
+                            Text(stringResource(R.string.common_retry), style = BrandText.caption, color = Color.White.copy(alpha = 0.35f))
                         }
                         else -> Spacer(Modifier.height(80.dp))
                     }
@@ -376,19 +383,19 @@ private fun CameraStatusPill(phase: CameraPhase, modifier: Modifier = Modifier) 
         when (phase) {
             CameraPhase.Preview -> {
                 Icon(Icons.Filled.CameraAlt, null, tint = Color.White.copy(alpha = 0.7f), modifier = Modifier.size(11.dp))
-                Text("KAMERA GİRİŞİ", style = BrandText.caption.copy(letterSpacing = 1.sp), color = Color.White.copy(alpha = 0.7f))
+                Text(stringResource(R.string.camera_entry_status_preview), style = BrandText.caption.copy(letterSpacing = 1.sp), color = Color.White.copy(alpha = 0.7f))
             }
             CameraPhase.Scanning -> {
                 CircularProgressIndicator(color = Color.White, modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
-                Text("OKUNUYOR", style = BrandText.caption.copy(letterSpacing = 1.sp), color = Color.White)
+                Text(stringResource(R.string.camera_entry_status_scanning), style = BrandText.caption.copy(letterSpacing = 1.sp), color = Color.White)
             }
             is CameraPhase.Scanned -> {
                 Icon(Icons.Filled.CheckCircle, null, tint = GreenOkC, modifier = Modifier.size(11.dp))
-                Text("ANLAŞILDI", style = BrandText.caption.copy(letterSpacing = 1.sp), color = Color.White)
+                Text(stringResource(R.string.voice_entry_status_understood), style = BrandText.caption.copy(letterSpacing = 1.sp), color = Color.White)
             }
             is CameraPhase.Error, CameraPhase.NoPerm -> {
                 Icon(Icons.Filled.Warning, null, tint = BrandColor.Warning, modifier = Modifier.size(11.dp))
-                Text("HATA", style = BrandText.caption.copy(letterSpacing = 1.sp), color = Color.White)
+                Text(stringResource(R.string.voice_entry_status_error), style = BrandText.caption.copy(letterSpacing = 1.sp), color = Color.White)
             }
         }
     }
@@ -411,7 +418,7 @@ private fun CaptureButton(onClick: () -> Unit) {
                 .background(Color.White),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(Icons.Filled.CameraAlt, "Çek", tint = DarkBgC, modifier = Modifier.size(26.dp))
+            Icon(Icons.Filled.CameraAlt, stringResource(R.string.camera_entry_capture_hint), tint = DarkBgC, modifier = Modifier.size(26.dp))
         }
     }
 }
@@ -426,6 +433,6 @@ private fun RetryCapButton(onClick: () -> Unit) {
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(Icons.Filled.CameraAlt, "Tekrar dene", tint = Color.White, modifier = Modifier.size(26.dp))
+        Icon(Icons.Filled.CameraAlt, stringResource(R.string.common_retry), tint = Color.White, modifier = Modifier.size(26.dp))
     }
 }

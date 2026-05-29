@@ -1,5 +1,6 @@
 package com.budgetella.app.ui.main
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
@@ -24,7 +25,9 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.Icons
@@ -32,8 +35,6 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -73,7 +74,6 @@ import com.budgetella.app.ui.quickentry.VoiceEntrySheet
 import com.budgetella.app.ui.transactions.AddEditTransactionSheet
 import com.budgetella.app.ui.transactions.VoicePreFill
 import com.budgetella.app.ui.transactions.TransactionsScreen
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -114,10 +114,12 @@ fun MainScaffold(
     var showVoiceSheet  by remember { mutableStateOf(false) }
     var showCameraSheet by remember { mutableStateOf(false) }
 
-    // Settings + picker sheets. Only one is non-null at a time — we dismiss
-    // Settings first, wait for the animation, then open the requested sibling.
-    var showSettings by remember { mutableStateOf(false) }
-    var pendingSecondary by remember { mutableStateOf<SecondarySheet?>(null) }
+    // Settings is a full screen rendered over the pager — the bottom bar stays
+    // visible and tappable. Its own back-stack drives sub-pages so picking a
+    // theme/currency/etc. pushes in-place instead of closing + reopening.
+    // Empty stack = settings closed; the last element is the visible page.
+    var settingsStack by remember { mutableStateOf<List<SettingsRoute>>(emptyList()) }
+    val inSettings = settingsStack.isNotEmpty()
 
     // FAB blob menu — tap the (+) to expand into a 3-option row above the bar.
     var fabMenuVisible by remember { mutableStateOf(false) }
@@ -139,7 +141,7 @@ fun MainScaffold(
                 AppTab.Home -> DashboardScreen(
                     onEditTransaction = { sheetTrigger = AddEditTrigger.Edit(it) },
                     onOpenBudgi = { scope.launch { pagerState.animateScrollToPage(AppTab.Ai.ordinal) } },
-                    onShowSettings = { showSettings = true },
+                    onShowSettings = { settingsStack = listOf(SettingsRoute.Root) },
                 )
                 AppTab.List -> TransactionsScreen(onEdit = { sheetTrigger = AddEditTrigger.Edit(it) })
                 AppTab.Stats -> StatsScreen()
@@ -147,8 +149,66 @@ fun MainScaffold(
             }
         }
 
-        // Settings is opened from the Dashboard avatar (Home tab) — no
-        // floating gear icon needed any more.
+        // ── Settings — full screen over the pager. Rendered before the bottom
+        // bar so the bar stays drawn on top and fully tappable; tapping any tab
+        // closes settings (see BottomTabBar.onSelect). A private back-stack
+        // pushes sub-pages in place instead of the old close-then-reopen modals.
+        if (inSettings) {
+            val popOrExit = {
+                settingsStack =
+                    if (settingsStack.size > 1) settingsStack.dropLast(1) else emptyList()
+            }
+            val pop = { settingsStack = settingsStack.dropLast(1) }
+            BackHandler(onBack = popOrExit)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 72.dp)
+                    .background(BrandColor.background())
+                    .statusBarsPadding(),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    IconButton(onClick = popOrExit) {
+                        Icon(
+                            imageVector = if (settingsStack.size > 1) Icons.AutoMirrored.Filled.ArrowBack
+                                          else Icons.Filled.Close,
+                            contentDescription = stringResource(R.string.common_back),
+                            tint = BrandColor.textPrimary(),
+                        )
+                    }
+                }
+                Box(modifier = Modifier.fillMaxSize()) {
+                    when (settingsStack.last()) {
+                        SettingsRoute.Root -> SettingsScreen(
+                            onDismiss = { settingsStack = emptyList() },
+                            onShowTheme = { settingsStack = settingsStack + SettingsRoute.Theme },
+                            onShowLanguage = { settingsStack = settingsStack + SettingsRoute.Language },
+                            onShowCurrency = { settingsStack = settingsStack + SettingsRoute.Currency },
+                            onExport = onExportBackup,
+                            onImport = onImportBackup,
+                            onShowInbox = { settingsStack = settingsStack + SettingsRoute.Inbox },
+                            onShowProfile = { settingsStack = settingsStack + SettingsRoute.Profile },
+                            onDeleteAccount = { settingsStack = settingsStack + SettingsRoute.DeleteAccount },
+                            onShowNotificationSettings = { settingsStack = settingsStack + SettingsRoute.NotificationSettings },
+                            onShowCategories = { settingsStack = settingsStack + SettingsRoute.Categories },
+                        )
+                        SettingsRoute.Theme -> ThemePickerSheet(onDismiss = pop)
+                        SettingsRoute.Language -> LanguagePickerSheet(onDismiss = pop)
+                        SettingsRoute.Currency -> CurrencyPickerSheet(onDismiss = pop)
+                        SettingsRoute.Inbox -> NotificationInboxScreen(onDismiss = pop)
+                        SettingsRoute.Profile -> ProfileSheet(onDismiss = pop)
+                        SettingsRoute.DeleteAccount -> DeleteAccountSheet(onDismiss = pop)
+                        SettingsRoute.NotificationSettings -> NotificationSettingsSheet(onDismiss = pop)
+                        SettingsRoute.Categories -> CategoryManagementSheet(onDismiss = pop)
+                    }
+                }
+            }
+        }
 
         // Scrim swallows taps when the FAB menu is open — tap anywhere outside
         // the blob to close. Rendered before the tab bar so the bar stays on top.
@@ -201,6 +261,7 @@ fun MainScaffold(
             selected = selectedTab,
             onSelect = { tab ->
                 fabMenuVisible = false
+                settingsStack = emptyList() // leaving via a tab closes settings
                 scope.launch { pagerState.animateScrollToPage(tab.ordinal) }
             },
             onFabClick = { fabMenuVisible = !fabMenuVisible },
@@ -240,102 +301,6 @@ fun MainScaffold(
             )
         }
 
-        // Settings sheet (top-level).
-        if (showSettings) {
-            val settingsSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-            ModalBottomSheet(
-                onDismissRequest = { showSettings = false },
-                sheetState = settingsSheetState,
-                containerColor = BrandColor.background(),
-                dragHandle = null,
-            ) {
-                SettingsScreen(
-                    onDismiss = { showSettings = false },
-                    onShowTheme = {
-                        showSettings = false
-                        scope.launch {
-                            delay(280)
-                            pendingSecondary = SecondarySheet.Theme
-                        }
-                    },
-                    onShowLanguage = {
-                        showSettings = false
-                        scope.launch {
-                            delay(280)
-                            pendingSecondary = SecondarySheet.Language
-                        }
-                    },
-                    onShowCurrency = {
-                        showSettings = false
-                        scope.launch {
-                            delay(280)
-                            pendingSecondary = SecondarySheet.Currency
-                        }
-                    },
-                    onExport = onExportBackup,
-                    onImport = onImportBackup,
-                    onShowInbox = {
-                        showSettings = false
-                        scope.launch {
-                            delay(280)
-                            pendingSecondary = SecondarySheet.Inbox
-                        }
-                    },
-                    onShowProfile = {
-                        showSettings = false
-                        scope.launch {
-                            delay(280)
-                            pendingSecondary = SecondarySheet.Profile
-                        }
-                    },
-                    onDeleteAccount = {
-                        showSettings = false
-                        scope.launch {
-                            delay(280)
-                            pendingSecondary = SecondarySheet.DeleteAccount
-                        }
-                    },
-                    onShowNotificationSettings = {
-                        showSettings = false
-                        scope.launch {
-                            delay(280)
-                            pendingSecondary = SecondarySheet.NotificationSettings
-                        }
-                    },
-                    onShowCategories = {
-                        showSettings = false
-                        scope.launch {
-                            delay(280)
-                            pendingSecondary = SecondarySheet.Categories
-                        }
-                    },
-                )
-            }
-        }
-
-        // Secondary sheets — one at a time.
-        pendingSecondary?.let { sheet ->
-            val state = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-            ModalBottomSheet(
-                onDismissRequest = { pendingSecondary = null },
-                sheetState = state,
-                containerColor = BrandColor.background(),
-                dragHandle = null,
-            ) {
-                when (sheet) {
-                    SecondarySheet.Theme -> ThemePickerSheet(onDismiss = { pendingSecondary = null })
-                    SecondarySheet.Language -> LanguagePickerSheet(onDismiss = { pendingSecondary = null })
-                    SecondarySheet.Currency -> CurrencyPickerSheet(onDismiss = { pendingSecondary = null })
-                    SecondarySheet.Inbox -> NotificationInboxScreen(onDismiss = { pendingSecondary = null })
-                    SecondarySheet.Profile -> ProfileSheet(onDismiss = { pendingSecondary = null })
-                    SecondarySheet.DeleteAccount -> DeleteAccountSheet(onDismiss = { pendingSecondary = null })
-                    SecondarySheet.NotificationSettings ->
-                        NotificationSettingsSheet(onDismiss = { pendingSecondary = null })
-                    SecondarySheet.Categories ->
-                        CategoryManagementSheet(onDismiss = { pendingSecondary = null })
-                }
-            }
-        }
     }
 }
 
@@ -344,8 +309,8 @@ private sealed interface AddEditTrigger {
     data class Edit(val transaction: TransactionEntity) : AddEditTrigger
 }
 
-private enum class SecondarySheet {
-    Theme, Language, Currency, Inbox, Profile, DeleteAccount,
+private enum class SettingsRoute {
+    Root, Theme, Language, Currency, Inbox, Profile, DeleteAccount,
     NotificationSettings, Categories
 }
 

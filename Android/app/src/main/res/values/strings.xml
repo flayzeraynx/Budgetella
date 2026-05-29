@@ -346,7 +346,9 @@
     <string name="biometric_prompt_title">Unlock Budgetella</string>
     <string name="biometric_prompt_subtitle">Use biometrics to continue</string>
     <string name="biometric_unlock">Unlock</string>
+    <string name="biometric_continue">Continue</string>
     <string name="biometric_signout">Sign out</string>
+    <string name="biometric_unavailable">Biometric unlock isn\'t set up on this device. You can continue — add a fingerprint, face, or screen lock in system Settings to enable it.</string>
 
     <!-- Voice entry -->
     <string name="voice_entry_status_idle">VOICE ENTRY</string>
@@ -366,6 +368,11 @@
     <string name="voice_entry_parsed_note">Note</string>
     <string name="voice_entry_error_no_speech">No speech detected.\nTry again.</string>
     <string name="voice_entry_error_no_amount">Couldn\'t parse amount.\nTry again or use manual entry.</string>
+    <string name="voice_entry_error_busy">Recognizer busy. Try again.</string>
+    <string name="voice_entry_error_server">Server error. Try again.</string>
+    <string name="voice_entry_error_no_permission">Microphone permission denied.\nSettings &gt; Budgetella &gt; Microphone</string>
+    <string name="voice_entry_error_audio">Audio recording error.</string>
+    <string name="voice_entry_error_network">Internet connection required.</string>
 
     <!-- Camera / receipt entry -->
     <string name="camera_entry_status_preview">CAMERA ENTRY</string>
@@ -374,6 +381,11 @@
     <string name="camera_entry_frame_sub">Make sure the total is visible</string>
     <string name="camera_entry_scanning">Reading amount…</string>
     <string name="camera_entry_capture_hint">Tap to capture receipt</string>
+    <string name="camera_entry_error_capture">Couldn\'t capture image. Try again.</string>
+    <string name="camera_entry_error_unreadable">Couldn\'t read the amount.\nRetake with the total clearly visible.</string>
+    <string name="camera_entry_error_ocr">Couldn\'t read text. Try again.</string>
+    <string name="camera_entry_error_start">Couldn\'t start the camera.</string>
+    <string name="camera_entry_no_permission">Camera permission required.\nSettings &gt; Budgetella &gt; Camera</string>
 
     <!-- Generic -->
     <string name="common_cancel">Cancel</string>

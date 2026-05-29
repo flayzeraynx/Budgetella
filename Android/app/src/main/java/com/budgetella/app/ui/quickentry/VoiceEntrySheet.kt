@@ -54,10 +54,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.budgetella.app.R
 import com.budgetella.app.core.design.BrandColor
 import com.budgetella.app.core.design.BrandText
 import com.budgetella.app.core.design.Spacing
@@ -100,6 +102,12 @@ fun VoiceEntrySheet(
     val sheetState  = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var phase by remember { mutableStateOf<VoicePhase>(VoicePhase.Idle) }
 
+    // Strings resolved here so the non-composable callbacks / helper below can
+    // use them (stringResource is only callable in a @Composable scope).
+    val msgNoPermission = stringResource(R.string.voice_entry_error_no_permission)
+    val msgNoSpeech     = stringResource(R.string.voice_entry_error_no_speech)
+    val msgNoAmount     = stringResource(R.string.voice_entry_error_no_amount)
+
     // ── Recogniser ────────────────────────────────────────────────────────────
     val recognizer = remember { VoiceRecognitionState(context) }
     DisposableEffect(Unit) { onDispose { recognizer.cancel() } }
@@ -119,9 +127,7 @@ fun VoiceEntrySheet(
             recognizer.start()
             phase = VoicePhase.Listening
         } else {
-            phase = VoicePhase.Error(
-                "Mikrofon izni verilmedi.\nAyarlar > Budgetella > Mikrofon"
-            )
+            phase = VoicePhase.Error(msgNoPermission)
         }
     }
 
@@ -140,10 +146,12 @@ fun VoiceEntrySheet(
     LaunchedEffect(recognizer.isFinal) {
         if (recognizer.isFinal && phase is VoicePhase.Parsing) {
             doParseAndNavigate(
-                transcript = recognizer.transcript,
-                errorMsg   = recognizer.error,
-                setPhase   = { phase = it },
-                onParsed   = onParsed,
+                transcript  = recognizer.transcript,
+                errorMsg    = recognizer.error,
+                noSpeechMsg = msgNoSpeech,
+                noAmountMsg = msgNoAmount,
+                setPhase    = { phase = it },
+                onParsed    = onParsed,
             )
         }
     }
@@ -154,10 +162,12 @@ fun VoiceEntrySheet(
             delay(3_000)
             if (phase is VoicePhase.Parsing) {
                 doParseAndNavigate(
-                    transcript = recognizer.transcript,
-                    errorMsg   = null,
-                    setPhase   = { phase = it },
-                    onParsed   = onParsed,
+                    transcript  = recognizer.transcript,
+                    errorMsg    = null,
+                    noSpeechMsg = msgNoSpeech,
+                    noAmountMsg = msgNoAmount,
+                    setPhase    = { phase = it },
+                    onParsed    = onParsed,
                 )
             }
         }
@@ -215,7 +225,7 @@ fun VoiceEntrySheet(
                     ) {
                         Icon(
                             imageVector     = Icons.Filled.Close,
-                            contentDescription = "Kapat",
+                            contentDescription = stringResource(R.string.common_close),
                             tint            = Color.White,
                             modifier        = Modifier.size(15.dp),
                         )
@@ -240,7 +250,7 @@ fun VoiceEntrySheet(
                     ) { p ->
                         when (p) {
                             VoicePhase.Idle -> Text(
-                                text      = "Hazırlanıyor…",
+                                text      = stringResource(R.string.voice_entry_preparing),
                                 style     = BrandText.title,
                                 color     = Color.White.copy(alpha = 0.35f),
                                 textAlign = TextAlign.Center,
@@ -250,14 +260,14 @@ fun VoiceEntrySheet(
                                 if (recognizer.transcript.isEmpty()) {
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                         Text(
-                                            text      = "Konuşun",
+                                            text      = stringResource(R.string.voice_entry_speak),
                                             style     = BrandText.largeTitle,
                                             color     = Color.White,
                                             textAlign = TextAlign.Center,
                                         )
                                         Spacer(Modifier.height(Spacing.md))
                                         Text(
-                                            text      = "Örnek: \"120 lira yemek\" ya da \"Kahve kırk beş\"",
+                                            text      = stringResource(R.string.voice_entry_example_prompt),
                                             style     = BrandText.footnote,
                                             color     = Color.White.copy(alpha = 0.4f),
                                             textAlign = TextAlign.Center,
@@ -266,7 +276,7 @@ fun VoiceEntrySheet(
                                 } else {
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                         Text(
-                                            text  = "SEN DEDİN Kİ",
+                                            text  = stringResource(R.string.voice_entry_you_said),
                                             style = BrandText.caption.copy(letterSpacing = 1.2.sp),
                                             color = AccentPurple,
                                         )
@@ -292,7 +302,7 @@ fun VoiceEntrySheet(
                                     strokeWidth = 2.dp,
                                 )
                                 Text(
-                                    text  = "Anlaşılıyor…",
+                                    text  = stringResource(R.string.voice_entry_processing),
                                     style = BrandText.body,
                                     color = Color.White.copy(alpha = 0.5f),
                                 )
@@ -351,7 +361,7 @@ fun VoiceEntrySheet(
                                 recognizer.stopListening()
                             }
                             Text(
-                                text  = "Durdurmak için dokun",
+                                text  = stringResource(R.string.voice_entry_stop_hint),
                                 style = BrandText.caption,
                                 color = Color.White.copy(alpha = 0.35f),
                             )
@@ -363,7 +373,7 @@ fun VoiceEntrySheet(
                                 phase = VoicePhase.Listening
                             }
                             Text(
-                                text  = "veya manuel giriş kullan",
+                                text  = stringResource(R.string.voice_entry_or_manual),
                                 style = BrandText.caption,
                                 color = Color.White.copy(alpha = 0.35f),
                             )
@@ -384,12 +394,14 @@ fun VoiceEntrySheet(
 private fun doParseAndNavigate(
     transcript: String,
     errorMsg: String?,
+    noSpeechMsg: String,
+    noAmountMsg: String,
     setPhase: (VoicePhase) -> Unit,
     onParsed: (amount: String, note: String) -> Unit,
 ) {
     val trimmed = transcript.trim()
     if (trimmed.isEmpty()) {
-        setPhase(VoicePhase.Error(errorMsg ?: "Konuşma algılanamadı.\nTekrar dene."))
+        setPhase(VoicePhase.Error(errorMsg ?: noSpeechMsg))
         return
     }
     val result = VoiceParser.parse(trimmed)
@@ -397,7 +409,7 @@ private fun doParseAndNavigate(
         setPhase(VoicePhase.Parsed(result))
         onParsed(result.rawAmount, result.note)
     } else {
-        setPhase(VoicePhase.Error("Tutar anlaşılamadı.\nTekrar dene veya manuel giriş kullan."))
+        setPhase(VoicePhase.Error(noAmountMsg))
     }
 }
 
@@ -416,23 +428,23 @@ private fun StatusPill(phase: VoicePhase, modifier: Modifier = Modifier) {
         when (phase) {
             VoicePhase.Idle -> {
                 Icon(Icons.Filled.Mic, null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(11.dp))
-                Text("SESLİ GİRİŞ", style = BrandText.caption.copy(letterSpacing = 1.sp), color = Color.White.copy(alpha = 0.5f))
+                Text(stringResource(R.string.voice_entry_status_idle), style = BrandText.caption.copy(letterSpacing = 1.sp), color = Color.White.copy(alpha = 0.5f))
             }
             VoicePhase.Listening -> {
                 Box(Modifier.size(7.dp).clip(CircleShape).background(RedStop))
-                Text("DİNLİYOR", style = BrandText.caption.copy(letterSpacing = 1.sp), color = Color.White)
+                Text(stringResource(R.string.voice_entry_status_listening), style = BrandText.caption.copy(letterSpacing = 1.sp), color = Color.White)
             }
             VoicePhase.Parsing -> {
                 CircularProgressIndicator(color = Color.White, modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
-                Text("İŞLENİYOR", style = BrandText.caption.copy(letterSpacing = 1.sp), color = Color.White)
+                Text(stringResource(R.string.voice_entry_status_processing), style = BrandText.caption.copy(letterSpacing = 1.sp), color = Color.White)
             }
             is VoicePhase.Parsed -> {
                 Icon(Icons.Filled.CheckCircle, null, tint = GreenOk, modifier = Modifier.size(11.dp))
-                Text("ANLAŞILDI", style = BrandText.caption.copy(letterSpacing = 1.sp), color = Color.White)
+                Text(stringResource(R.string.voice_entry_status_understood), style = BrandText.caption.copy(letterSpacing = 1.sp), color = Color.White)
             }
             is VoicePhase.Error -> {
                 Icon(Icons.Filled.Warning, null, tint = BrandColor.Warning, modifier = Modifier.size(11.dp))
-                Text("HATA", style = BrandText.caption.copy(letterSpacing = 1.sp), color = Color.White)
+                Text(stringResource(R.string.voice_entry_status_error), style = BrandText.caption.copy(letterSpacing = 1.sp), color = Color.White)
             }
         }
     }
@@ -479,7 +491,7 @@ fun VoiceParsedCard(result: VoiceParser.ParseResult) {
         ) {
             Icon(Icons.Filled.Star, null, tint = AccentPurple, modifier = Modifier.size(13.dp))
             Text(
-                text  = "AI ANLADI",
+                text  = stringResource(R.string.voice_entry_ai_understood),
                 style = BrandText.caption.copy(letterSpacing = 1.sp),
                 color = AccentPurple,
             )
@@ -493,8 +505,8 @@ fun VoiceParsedCard(result: VoiceParser.ParseResult) {
                 .padding(Spacing.md),
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            ParsedRow("Tutar", "₺${result.rawAmount}")
-            if (result.note.isNotEmpty()) ParsedRow("Açıklama", result.note)
+            ParsedRow(stringResource(R.string.voice_entry_parsed_amount), "₺${result.rawAmount}")
+            if (result.note.isNotEmpty()) ParsedRow(stringResource(R.string.voice_entry_parsed_note), result.note)
         }
     }
 }
@@ -538,7 +550,7 @@ private fun VoiceRetryButton(onClick: () -> Unit) {
     ) {
         Icon(
             imageVector        = Icons.Filled.Mic,
-            contentDescription = "Tekrar Dene",
+            contentDescription = stringResource(R.string.common_retry),
             tint               = Color.White,
             modifier           = Modifier.size(26.dp),
         )
