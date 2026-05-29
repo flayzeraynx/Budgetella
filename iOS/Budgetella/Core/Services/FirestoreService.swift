@@ -189,7 +189,13 @@ public final class FirestoreService {
 
         // Firestore'da veri var → lokal veriyi temizle ve Firestore'dan indir
         let localTxsToDelete = (try? modelContext.fetch(FetchDescriptor<Transaction>())) ?? []
-        localTxsToDelete.forEach { modelContext.delete($0) }
+        for (i, tx) in localTxsToDelete.enumerated() {
+            modelContext.delete(tx)
+            // Yield every batch so the main thread can service touches / the
+            // keyboard while a large initial sync runs — otherwise the FAB
+            // freezes and the manual-entry keyboard can take seconds to appear.
+            if i % 200 == 199 { await Task.yield() }
+        }
         try? modelContext.save()
         let localCatsToDelete = (try? modelContext.fetch(FetchDescriptor<Category>())) ?? []
         localCatsToDelete.forEach { modelContext.delete($0) }
@@ -206,12 +212,15 @@ public final class FirestoreService {
         }
 
         // Transaksiyonları ekle, kategori ilişkisini slug üzerinden kur
-        for doc in txDocs.documents {
+        for (i, doc) in txDocs.documents.enumerated() {
             if let tx = transaction(from: doc.data(), userId: userId) {
                 let catSlug = doc.data()["categorySlug"] as? String ?? ""
                 tx.category = categoryBySlug[catSlug]
                 modelContext.insert(tx)
             }
+            // Same as the delete loop above: breathe every batch so a large
+            // first-launch import doesn't lock the UI / delay the keyboard.
+            if i % 200 == 199 { await Task.yield() }
         }
 
         try? modelContext.save()

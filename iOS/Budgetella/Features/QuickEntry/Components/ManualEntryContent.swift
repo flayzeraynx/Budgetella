@@ -64,7 +64,10 @@ struct ManualEntryContent: View {
         }
         .animation(.spring(response: 0.3), value: isTyping)
         .task {
-            try? await Task.sleep(nanoseconds: 500_000_000)
+            // Brief wait for the sheet's present animation to settle, then focus
+            // the amount field. The real first-open lag was the main-thread
+            // Firestore sync (now yields between batches) — not this delay.
+            try? await Task.sleep(nanoseconds: 300_000_000)
             amountFocused = true
         }
         .onAppear {
@@ -247,6 +250,11 @@ struct ManualEntryContent: View {
             RoundedRectangle(cornerRadius: radius, style: .continuous)
                 .strokeBorder(noteFieldFocused ? BrandColor.primary.opacity(0.5) : BrandColor.borderSubtle, lineWidth: 1)
         )
+        // Whole row is the tap target — previously only the (tiny, empty)
+        // TextField line was hittable, so users had to tap exactly on the
+        // placeholder text to focus the note.
+        .contentShape(Rectangle())
+        .onTapGesture { noteFieldFocused = true }
         .onChange(of: vm.note) { _, _ in vm.updateSuggestions() }
         .onChange(of: noteFieldFocused) { _, v in isTyping = v }
     }
