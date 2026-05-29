@@ -61,6 +61,7 @@ actor SyncEngine {
     /// Initial full pull: upsert everything, skip rows whose `updatedAt` is
     /// unchanged (no write), and delete local rows missing from the server.
     func reconcile(userId: String, cats: [CatDTO], txs: [TxDTO]) {
+        EntryPerf.event("reconcile EXECUTING — main=\(Thread.isMainThread), cats=\(cats.count) txs=\(txs.count)")
         // One bulk fetch each → O(1) dictionary lookups (no per-doc queries).
         let localCats = (try? modelContext.fetch(FetchDescriptor<Category>())) ?? []
         let localTxs = (try? modelContext.fetch(FetchDescriptor<Transaction>())) ?? []
@@ -99,8 +100,12 @@ actor SyncEngine {
             remoteTxIds.insert(dto.id)
             let cat = catBySlug[dto.categorySlug]
             if let local = txById[dto.id] {
-                if let ru = dto.updatedAt, abs(local.updatedAt.timeIntervalSince(ru)) < 0.001 {
-                    if local.category !== cat { local.category = cat }   // only if link differs
+                // Content comparison (NOT updatedAt) so rows written by older
+                // builds — whose updatedAt was never aligned — still skip when
+                // their content is identical. No write → no merge churn on the
+                // main context → no first-launch freeze.
+                if matches(dto, local) {
+                    // identical → leave untouched
                 } else {
                     apply(dto, to: local)
                     local.category = cat
@@ -165,8 +170,8 @@ actor SyncEngine {
             case .upsert(let dto):
                 let cat = catBySlug[dto.categorySlug]
                 if let row = local(dto.id) {
-                    if let ru = dto.updatedAt, abs(row.updatedAt.timeIntervalSince(ru)) < 0.001 {
-                        if row.category !== cat { row.category = cat }
+                    if matches(dto, row) {
+                        // identical content → skip (no write)
                     } else {
                         apply(dto, to: row)
                         row.category = cat
@@ -194,6 +199,22 @@ actor SyncEngine {
     }
 
     // MARK: - Build / apply
+
+    /// True when a local transaction already equals the remote doc — lets us
+    /// skip the write so no no-op change propagates to the main context.
+    private func matches(_ d: TxDTO, _ t: Transaction) -> Bool {
+        guard
+            t.type.rawValue == d.type,
+            t.note == d.note,
+            t.currency == d.currency,
+            t.status.rawValue == d.status,
+            (t.category?.slug ?? "") == d.categorySlug,
+            abs(t.date.timeIntervalSince(d.date)) < 1.0
+        else { return false }
+        // amount round-trips through Double in Firestore → compare with epsilon.
+        let localAmt = NSDecimalNumber(decimal: t.amount).doubleValue
+        return abs(localAmt - d.amount) < 0.001
+    }
 
     private func build(_ d: CatDTO) -> Category {
         Category(
