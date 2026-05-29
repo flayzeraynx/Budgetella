@@ -2,25 +2,25 @@
 //  SyncEngine.swift
 //  Budgetella
 //
-//  Background SwiftData merge engine. Runs ALL Firestore→SwiftData writes on a
-//  private ModelContext bound to a background executor (@ModelActor), so the
-//  main thread is never blocked — the keyboard, FAB and scrolling stay snappy
-//  even during a large first-launch sync.
+//  Background SwiftData merge. Runs ALL Firestore→SwiftData writes on a private
+//  ModelContext created INSIDE a detached background Task — guaranteeing the
+//  main thread is never blocked (the @ModelActor approach ran on the caller's
+//  thread, i.e. main, so it didn't actually offload).
 //
 //  FirestoreService parses Firestore documents into the Sendable DTOs below
-//  (it owns the FirebaseFirestore import); this engine only ever touches
-//  Sendable value types + its own @Model objects, satisfying Swift 6 isolation.
+//  (it owns the FirebaseFirestore import); this engine only touches Sendable
+//  value types + @Model objects local to its background context.
 //
 //  Source of truth is Firestore; local SwiftData is a rebuildable cache.
-//  reconcile() deletes LOCAL rows the server no longer has — it never pushes
-//  deletes back to Firestore, so a bug here can only drop the local cache
+//  reconcile() deletes only LOCAL rows the server no longer has — it never
+//  pushes deletes to Firestore, so a bug here can drop only the local cache
 //  (recoverable by re-sync), never the cloud copy.
 //
 
 import Foundation
 import SwiftData
 
-// MARK: - Sendable DTOs (safe to cross actor boundaries)
+// MARK: - Sendable DTOs (safe to cross the Task boundary)
 
 struct CatDTO: Sendable {
     let id: UUID
@@ -53,156 +53,146 @@ enum SyncChange<T: Sendable>: Sendable {
     case remove(UUID)
 }
 
-// MARK: - Background merge actor
+// MARK: - Background merge
 
-@ModelActor
-actor SyncEngine {
+enum SyncEngine {
 
-    /// Initial full pull: upsert everything, skip rows whose `updatedAt` is
-    /// unchanged (no write), and delete local rows missing from the server.
-    func reconcile(userId: String, cats: [CatDTO], txs: [TxDTO]) {
-        EntryPerf.event("reconcile EXECUTING — main=\(Thread.isMainThread), cats=\(cats.count) txs=\(txs.count)")
-        // One bulk fetch each → O(1) dictionary lookups (no per-doc queries).
-        let localCats = (try? modelContext.fetch(FetchDescriptor<Category>())) ?? []
-        let localTxs = (try? modelContext.fetch(FetchDescriptor<Transaction>())) ?? []
+    /// Initial full pull. Upsert + content-skip (no write when unchanged) +
+    /// delete-reconcile. Runs entirely on a background thread.
+    static func reconcile(container: ModelContainer, userId: String, cats: [CatDTO], txs: [TxDTO]) async {
+        await Task.detached(priority: .utility) {
+            EntryPerf.event("reconcile EXECUTING — main=\(Self.isMainThread()), cats=\(cats.count) txs=\(txs.count)")
+            let ctx = ModelContext(container)
 
-        // Privacy guard — purge any rows belonging to a different account
-        // (e.g. token expiry / account switch without a clean sign-out).
-        for c in localCats where c.userId != userId { modelContext.delete(c) }
-        for t in localTxs where t.userId != userId { modelContext.delete(t) }
+            let localCats = (try? ctx.fetch(FetchDescriptor<Category>())) ?? []
+            let localTxs = (try? ctx.fetch(FetchDescriptor<Transaction>())) ?? []
 
-        var catById: [UUID: Category] = [:]
-        for c in localCats where c.userId == userId { catById[c.id] = c }
-        var txById: [UUID: Transaction] = [:]
-        for t in localTxs where t.userId == userId { txById[t.id] = t }
+            // Privacy guard — drop rows from other accounts.
+            for c in localCats where c.userId != userId { ctx.delete(c) }
+            for t in localTxs where t.userId != userId { ctx.delete(t) }
 
-        // Categories — upsert + slug map.
-        var catBySlug: [String: Category] = [:]
-        var remoteCatIds = Set<UUID>()
-        for dto in cats {
-            remoteCatIds.insert(dto.id)
-            let resolved: Category
-            if let local = catById[dto.id] {
-                apply(dto, to: local)
-                resolved = local
-            } else {
-                let made = build(dto)
-                modelContext.insert(made)
-                catById[dto.id] = made
-                resolved = made
-            }
-            if let slug = resolved.slug, !slug.isEmpty { catBySlug[slug] = resolved }
-        }
+            var catById: [UUID: Category] = [:]
+            for c in localCats where c.userId == userId { catById[c.id] = c }
+            var txById: [UUID: Transaction] = [:]
+            for t in localTxs where t.userId == userId { txById[t.id] = t }
 
-        // Transactions — upsert, skipping unchanged rows.
-        var remoteTxIds = Set<UUID>()
-        for dto in txs {
-            remoteTxIds.insert(dto.id)
-            let cat = catBySlug[dto.categorySlug]
-            if let local = txById[dto.id] {
-                // Content comparison (NOT updatedAt) so rows written by older
-                // builds — whose updatedAt was never aligned — still skip when
-                // their content is identical. No write → no merge churn on the
-                // main context → no first-launch freeze.
-                if matches(dto, local) {
-                    // identical → leave untouched
+            // Categories — upsert + slug map.
+            var catBySlug: [String: Category] = [:]
+            var remoteCatIds = Set<UUID>()
+            for dto in cats {
+                remoteCatIds.insert(dto.id)
+                let resolved: Category
+                if let local = catById[dto.id] {
+                    Self.apply(dto, to: local)
+                    resolved = local
                 } else {
-                    apply(dto, to: local)
-                    local.category = cat
+                    let made = Self.build(dto)
+                    ctx.insert(made)
+                    catById[dto.id] = made
+                    resolved = made
                 }
-            } else {
-                let made = build(dto)
-                made.category = cat
-                modelContext.insert(made)
+                if let slug = resolved.slug, !slug.isEmpty { catBySlug[slug] = resolved }
             }
-        }
 
-        // Reconcile deletes (server is source of truth) — local cache only.
-        for c in localCats where c.userId == userId && !remoteCatIds.contains(c.id) {
-            modelContext.delete(c)
-        }
-        for t in localTxs where t.userId == userId && !remoteTxIds.contains(t.id) {
-            modelContext.delete(t)
-        }
+            // Transactions — upsert, content-skip unchanged rows.
+            var remoteTxIds = Set<UUID>()
+            for dto in txs {
+                remoteTxIds.insert(dto.id)
+                if let local = txById[dto.id] {
+                    if !Self.matches(dto, local) {
+                        Self.apply(dto, to: local)
+                        local.category = catBySlug[dto.categorySlug]
+                    }
+                } else {
+                    let made = Self.build(dto)
+                    made.category = catBySlug[dto.categorySlug]
+                    ctx.insert(made)
+                }
+            }
 
-        try? modelContext.save()
+            // Reconcile deletes (local cache only).
+            for c in localCats where c.userId == userId && !remoteCatIds.contains(c.id) { ctx.delete(c) }
+            for t in localTxs where t.userId == userId && !remoteTxIds.contains(t.id) { ctx.delete(t) }
+
+            try? ctx.save()
+        }.value
     }
 
     /// Live category deltas from the snapshot listener.
-    func applyCategoryChanges(_ changes: [SyncChange<CatDTO>]) {
+    static func applyCategoryChanges(container: ModelContainer, _ changes: [SyncChange<CatDTO>]) async {
         guard !changes.isEmpty else { return }
-        for change in changes {
-            switch change {
-            case .upsert(let dto):
-                if let local = fetchCategory(dto.id) {
-                    apply(dto, to: local)
-                } else {
-                    modelContext.insert(build(dto))
+        await Task.detached(priority: .utility) {
+            let ctx = ModelContext(container)
+            for change in changes {
+                switch change {
+                case .upsert(let dto):
+                    if let local = Self.fetchCategory(dto.id, ctx) { Self.apply(dto, to: local) }
+                    else { ctx.insert(Self.build(dto)) }
+                case .remove(let id):
+                    if let local = Self.fetchCategory(id, ctx) { ctx.delete(local) }
                 }
-            case .remove(let id):
-                if let local = fetchCategory(id) { modelContext.delete(local) }
             }
-        }
-        try? modelContext.save()
+            try? ctx.save()
+        }.value
     }
 
     /// Live transaction deltas from the snapshot listener.
-    func applyTransactionChanges(_ changes: [SyncChange<TxDTO>]) {
+    static func applyTransactionChanges(container: ModelContainer, _ changes: [SyncChange<TxDTO>]) async {
         guard !changes.isEmpty else { return }
+        await Task.detached(priority: .utility) {
+            let ctx = ModelContext(container)
 
-        // slug → Category for relinking (first-write-wins on duplicate slugs).
-        let allCats = (try? modelContext.fetch(FetchDescriptor<Category>())) ?? []
-        var catBySlug: [String: Category] = [:]
-        for c in allCats where c.slug?.isEmpty == false {
-            if let s = c.slug, catBySlug[s] == nil { catBySlug[s] = c }
-        }
-
-        // Large batch (first snapshot) → bulk id-map; small live edits → per-id.
-        let useMap = changes.count > 30
-        var txById: [UUID: Transaction] = [:]
-        if useMap {
-            for t in (try? modelContext.fetch(FetchDescriptor<Transaction>())) ?? [] { txById[t.id] = t }
-        }
-        func local(_ id: UUID) -> Transaction? { useMap ? txById[id] : fetchTransaction(id) }
-
-        for change in changes {
-            switch change {
-            case .upsert(let dto):
-                let cat = catBySlug[dto.categorySlug]
-                if let row = local(dto.id) {
-                    if matches(dto, row) {
-                        // identical content → skip (no write)
-                    } else {
-                        apply(dto, to: row)
-                        row.category = cat
-                    }
-                } else {
-                    let made = build(dto)
-                    made.category = cat
-                    modelContext.insert(made)
-                    if useMap { txById[dto.id] = made }
-                }
-            case .remove(let id):
-                if let row = local(id) { modelContext.delete(row) }
+            let allCats = (try? ctx.fetch(FetchDescriptor<Category>())) ?? []
+            var catBySlug: [String: Category] = [:]
+            for c in allCats where c.slug?.isEmpty == false {
+                if let s = c.slug, catBySlug[s] == nil { catBySlug[s] = c }
             }
-        }
-        try? modelContext.save()
+
+            let useMap = changes.count > 30
+            var txById: [UUID: Transaction] = [:]
+            if useMap {
+                for t in (try? ctx.fetch(FetchDescriptor<Transaction>())) ?? [] { txById[t.id] = t }
+            }
+
+            for change in changes {
+                switch change {
+                case .upsert(let dto):
+                    let row = useMap ? txById[dto.id] : Self.fetchTransaction(dto.id, ctx)
+                    if let row {
+                        if !Self.matches(dto, row) {
+                            Self.apply(dto, to: row)
+                            row.category = catBySlug[dto.categorySlug]
+                        }
+                    } else {
+                        let made = Self.build(dto)
+                        made.category = catBySlug[dto.categorySlug]
+                        ctx.insert(made)
+                        if useMap { txById[dto.id] = made }
+                    }
+                case .remove(let id):
+                    let row = useMap ? txById[id] : Self.fetchTransaction(id, ctx)
+                    if let row { ctx.delete(row) }
+                }
+            }
+            try? ctx.save()
+        }.value
     }
 
-    // MARK: - Lookups
+    // MARK: - Helpers (pure / context-scoped)
 
-    private func fetchCategory(_ id: UUID) -> Category? {
-        (try? modelContext.fetch(FetchDescriptor<Category>(predicate: #Predicate { $0.id == id })))?.first
+    /// Synchronous wrapper — `Thread.isMainThread` is unavailable directly in
+    /// async contexts. Temporary, for the off-main verification probe.
+    private static func isMainThread() -> Bool { Thread.isMainThread }
+
+    private static func fetchCategory(_ id: UUID, _ ctx: ModelContext) -> Category? {
+        (try? ctx.fetch(FetchDescriptor<Category>(predicate: #Predicate { $0.id == id })))?.first
     }
-    private func fetchTransaction(_ id: UUID) -> Transaction? {
-        (try? modelContext.fetch(FetchDescriptor<Transaction>(predicate: #Predicate { $0.id == id })))?.first
+    private static func fetchTransaction(_ id: UUID, _ ctx: ModelContext) -> Transaction? {
+        (try? ctx.fetch(FetchDescriptor<Transaction>(predicate: #Predicate { $0.id == id })))?.first
     }
 
-    // MARK: - Build / apply
-
-    /// True when a local transaction already equals the remote doc — lets us
-    /// skip the write so no no-op change propagates to the main context.
-    private func matches(_ d: TxDTO, _ t: Transaction) -> Bool {
+    /// True when a local transaction already equals the remote doc — skip write.
+    private static func matches(_ d: TxDTO, _ t: Transaction) -> Bool {
         guard
             t.type.rawValue == d.type,
             t.note == d.note,
@@ -211,12 +201,11 @@ actor SyncEngine {
             (t.category?.slug ?? "") == d.categorySlug,
             abs(t.date.timeIntervalSince(d.date)) < 1.0
         else { return false }
-        // amount round-trips through Double in Firestore → compare with epsilon.
         let localAmt = NSDecimalNumber(decimal: t.amount).doubleValue
         return abs(localAmt - d.amount) < 0.001
     }
 
-    private func build(_ d: CatDTO) -> Category {
+    private static func build(_ d: CatDTO) -> Category {
         Category(
             id: d.id, userId: d.userId, name: d.name, slug: d.slug,
             type: TransactionType(rawValue: d.type) ?? .expense,
@@ -224,7 +213,7 @@ actor SyncEngine {
             isDefault: d.isDefault, sortOrder: d.sortOrder
         )
     }
-    private func apply(_ d: CatDTO, to c: Category) {
+    private static func apply(_ d: CatDTO, to c: Category) {
         c.name = d.name
         c.slug = d.slug
         if let t = TransactionType(rawValue: d.type) { c.type = t }
@@ -233,7 +222,7 @@ actor SyncEngine {
         c.isDefault = d.isDefault
         c.sortOrder = d.sortOrder
     }
-    private func build(_ d: TxDTO) -> Transaction {
+    private static func build(_ d: TxDTO) -> Transaction {
         let t = Transaction(
             id: d.id, userId: d.userId,
             type: TransactionType(rawValue: d.type) ?? .expense,
@@ -244,7 +233,7 @@ actor SyncEngine {
         if let c = d.createdAt { t.createdAt = c }
         return t
     }
-    private func apply(_ d: TxDTO, to t: Transaction) {
+    private static func apply(_ d: TxDTO, to t: Transaction) {
         if let ty = TransactionType(rawValue: d.type) { t.type = ty }
         t.amount = Decimal(d.amount)
         t.currency = d.currency

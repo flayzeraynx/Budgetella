@@ -29,16 +29,6 @@ public final class FirestoreService {
 
     private let db = Firestore.firestore()
 
-    // Background SwiftData merge engine — created lazily from the container.
-    // ALL Firestore→SwiftData writes run on its private background context so
-    // the main thread never blocks (keyboard/scroll stay snappy during sync).
-    private var _syncEngine: SyncEngine?
-    private func engine(for ctx: ModelContext) -> SyncEngine {
-        if let existing = _syncEngine { return existing }
-        let made = SyncEngine(modelContainer: ctx.container)
-        _syncEngine = made
-        return made
-    }
 
     // Active snapshot listeners — torn down on sign-out or when observing a
     // different uid. Both collections (transactions + categories) get one
@@ -192,7 +182,7 @@ public final class FirestoreService {
         // parse → Sendable DTO, sonra background ModelContext'te upsert+reconcile.
         let catDTOs = catDocs.documents.compactMap { catDTO(from: $0.data(), userId: userId) }
         let txDTOs  = txDocs.documents.compactMap { txDTO(from: $0.data(), userId: userId) }
-        await engine(for: modelContext).reconcile(userId: userId, cats: catDTOs, txs: txDTOs)
+        await SyncEngine.reconcile(container: modelContext.container, userId: userId, cats: catDTOs, txs: txDTOs)
         EntryPerf.event("fetchAndSync END — cats=\(catDocs.documents.count) txs=\(txDocs.documents.count) in \(Int((CFAbsoluteTimeGetCurrent() - syncStart) * 1000)) ms")
         UserDefaults.standard.set(true, forKey: "categoriesSeeded")
     }
@@ -206,7 +196,7 @@ public final class FirestoreService {
         guard observingUid != userId else { return }
         stopObserving()
         observingUid = userId
-        let eng = engine(for: modelContext)
+        let container = modelContext.container
 
         categoriesListener = categoriesRef(userId).addSnapshotListener { [weak self] snapshot, error in
             guard let self else { return }
@@ -226,7 +216,7 @@ public final class FirestoreService {
                 @unknown default: return nil
                 }
             }
-            Task { await eng.applyCategoryChanges(deltas) }
+            Task { await SyncEngine.applyCategoryChanges(container: container, deltas) }
         }
 
         transactionsListener = transactionsRef(userId).addSnapshotListener { [weak self] snapshot, error in
@@ -248,7 +238,7 @@ public final class FirestoreService {
             }
             let count = deltas.count
             Task {
-                await eng.applyTransactionChanges(deltas)
+                await SyncEngine.applyTransactionChanges(container: container, deltas)
                 EntryPerf.event("listener TX apply — \(count) changes in \(Int((CFAbsoluteTimeGetCurrent() - applyStart) * 1000)) ms (bg)")
             }
         }
