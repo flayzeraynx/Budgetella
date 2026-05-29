@@ -95,9 +95,13 @@ class FirestoreService @Inject constructor(
             return
         }
 
-        // Returning user — replace local for this uid.
-        transactionDao.deleteAllForUser(userId)
-        categoryDao.deleteAllForUser(userId)
+        // Returning user — UPSERT + RECONCILE (no wipe). Room's REPLACE updates
+        // existing rows in place; we then prune the local rows the server no
+        // longer has. This removes the per-launch delete-all + reinsert churn
+        // (and the empty→full flicker the dashboard showed every launch).
+        // The categoryId FK is ON DELETE SET NULL, so replacing a category never
+        // cascade-deletes a transaction — and transactions are re-linked right
+        // below, so the slug→category relationship is preserved.
         categoryDao.upsertAll(remoteCategories)
 
         val transactionsSnapshot = transactionsCol(userId).get().await()
@@ -111,6 +115,19 @@ class FirestoreService @Inject constructor(
         if (remoteTransactions.isNotEmpty()) {
             transactionDao.upsertAll(remoteTransactions)
         }
+
+        // Reconcile deletes — remove local rows that are gone from Firestore.
+        // (Mirrors the snapshot listener's prune, but covers deletes that
+        // happened while the app was closed.)
+        val remoteTxIds = remoteTransactions.map { it.id }.toSet()
+        transactionDao.listForUser(userId)
+            .filter { it.id !in remoteTxIds }
+            .forEach { transactionDao.deleteById(it.id) }
+
+        val remoteCatIds = remoteCategories.map { it.id }.toSet()
+        categoryDao.listByUser(userId)
+            .filter { it.id !in remoteCatIds }
+            .forEach { categoryDao.deleteById(it.id) }
     }
 
     // ── Live snapshot listeners ───────────────────────────────────────────

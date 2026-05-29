@@ -187,39 +187,67 @@ public final class FirestoreService {
             return
         }
 
-        // Firestore'da veri var → lokal veriyi temizle ve Firestore'dan indir
-        let localTxsToDelete = (try? modelContext.fetch(FetchDescriptor<Transaction>())) ?? []
-        for (i, tx) in localTxsToDelete.enumerated() {
-            modelContext.delete(tx)
-            // Yield every batch so the main thread can service touches / the
-            // keyboard while a large initial sync runs — otherwise the FAB
-            // freezes and the manual-entry keyboard can take seconds to appear.
-            if i % 200 == 199 { await Task.yield() }
-        }
-        try? modelContext.save()
-        let localCatsToDelete = (try? modelContext.fetch(FetchDescriptor<Category>())) ?? []
-        localCatsToDelete.forEach { modelContext.delete($0) }
+        // Firestore'da veri var → local'i UPSERT + RECONCILE et (wipe YOK).
+        // Yalnız yeni/değişen kayıtlar yazılır (updatedAt aynıysa atlanır →
+        // her açılışta binlerce satırı yeniden yazma churn'ü ortadan kalkar);
+        // remote'ta olmayan local kayıtlar silinir. Kategoriler YERİNDE
+        // güncellenir, böylece mevcut işlemlerin kategori ilişkileri kopmaz.
 
-        // Kategorileri ekle + slug → Category map oluştur
+        // ── Categories: upsert (az satır → her zaman uygula) + slug haritası
+        var remoteCatIds = Set<UUID>()
         var categoryBySlug: [String: Category] = [:]
         for doc in catDocs.documents {
-            if let cat = category(from: doc.data(), userId: userId) {
-                modelContext.insert(cat)
-                if let slug = cat.slug, !slug.isEmpty {
-                    categoryBySlug[slug] = cat
-                }
+            let data = doc.data()
+            guard let idStr = data["id"] as? String, let uuid = UUID(uuidString: idStr) else { continue }
+            remoteCatIds.insert(uuid)
+            let resolved: Category?
+            if let local = fetchCategory(by: uuid, in: modelContext) {
+                applyCategoryFields(data, to: local)
+                resolved = local
+            } else if let inserted = category(from: data, userId: userId) {
+                modelContext.insert(inserted)
+                resolved = inserted
+            } else {
+                resolved = nil
             }
+            if let resolved, let slug = resolved.slug, !slug.isEmpty { categoryBySlug[slug] = resolved }
         }
 
-        // Transaksiyonları ekle, kategori ilişkisini slug üzerinden kur
+        // ── Transactions: upsert; updatedAt değişmeyen satırları atla
+        var remoteTxIds = Set<UUID>()
         for (i, doc) in txDocs.documents.enumerated() {
-            if let tx = transaction(from: doc.data(), userId: userId) {
-                let catSlug = doc.data()["categorySlug"] as? String ?? ""
-                tx.category = categoryBySlug[catSlug]
-                modelContext.insert(tx)
+            let data = doc.data()
+            if let idStr = data["id"] as? String, let uuid = UUID(uuidString: idStr) {
+                remoteTxIds.insert(uuid)
+                let resolvedCat = categoryBySlug[data["categorySlug"] as? String ?? ""]
+                if let local = fetchTransaction(by: uuid, in: modelContext) {
+                    let remoteUpdated = (data["updatedAt"] as? Timestamp)?.dateValue()
+                    let unchanged = remoteUpdated.map { abs(local.updatedAt.timeIntervalSince($0)) < 0.001 } ?? false
+                    if !unchanged {
+                        applyTransactionFields(data, to: local)
+                        local.category = resolvedCat
+                    }
+                    // değişmemiş → dokunma; kategori referansı zaten geçerli
+                } else if let tx = transaction(from: data, userId: userId) {
+                    if let ts = data["updatedAt"] as? Timestamp { tx.updatedAt = ts.dateValue() }
+                    if let ts = data["createdAt"] as? Timestamp { tx.createdAt = ts.dateValue() }
+                    tx.category = resolvedCat
+                    modelContext.insert(tx)
+                }
             }
-            // Same as the delete loop above: breathe every batch so a large
-            // first-launch import doesn't lock the UI / delay the keyboard.
+            if i % 200 == 199 { await Task.yield() }
+        }
+
+        // ── Reconcile: sunucuda olmayan local kayıtları sil
+        let localCats = (try? modelContext.fetch(FetchDescriptor<Category>())) ?? []
+        for cat in localCats where cat.userId == userId && !remoteCatIds.contains(cat.id) {
+            modelContext.delete(cat)
+        }
+        let localTxs = (try? modelContext.fetch(FetchDescriptor<Transaction>())) ?? []
+        for (i, tx) in localTxs.enumerated() {
+            if tx.userId == userId && !remoteTxIds.contains(tx.id) {
+                modelContext.delete(tx)
+            }
             if i % 200 == 199 { await Task.yield() }
         }
 
@@ -295,13 +323,7 @@ public final class FirestoreService {
             switch change.type {
             case .added, .modified:
                 if let local = fetchCategory(by: uuid, in: modelContext) {
-                    if let name = data["name"] as? String { local.name = name }
-                    if let slug = data["slug"] as? String { local.slug = slug.isEmpty ? nil : slug }
-                    if let typeRaw = data["type"] as? String, let t = TransactionType(rawValue: typeRaw) { local.type = t }
-                    if let icon = data["iconName"] as? String { local.iconName = icon }
-                    if let color = data["colorHex"] as? String { local.colorHex = color }
-                    if let isDefault = data["isDefault"] as? Bool { local.isDefault = isDefault }
-                    if let sortOrder = data["sortOrder"] as? Int { local.sortOrder = sortOrder }
+                    applyCategoryFields(data, to: local)
                 } else if let cat = category(from: data, userId: userId) {
                     modelContext.insert(cat)
                 }
@@ -341,12 +363,7 @@ public final class FirestoreService {
                 let catSlug = data["categorySlug"] as? String ?? ""
                 let resolvedCat = catBySlug[catSlug]
                 if let local = fetchTransaction(by: uuid, in: modelContext) {
-                    if let amount = data["amount"] as? Double { local.amount = Decimal(amount) }
-                    if let typeRaw = data["type"] as? String, let t = TransactionType(rawValue: typeRaw) { local.type = t }
-                    if let note = data["note"] as? String { local.note = note }
-                    if let dateTS = data["date"] as? Timestamp { local.date = dateTS.dateValue() }
-                    if let statusRaw = data["status"] as? String, let s = TransactionStatus(rawValue: statusRaw) { local.status = s }
-                    if let currency = data["currency"] as? String { local.currency = currency }
+                    applyTransactionFields(data, to: local)
                     local.category = resolvedCat
                 } else if let tx = transaction(from: data, userId: userId) {
                     tx.category = resolvedCat
@@ -373,6 +390,30 @@ public final class FirestoreService {
     private func fetchTransaction(by id: UUID, in modelContext: ModelContext) -> Transaction? {
         let descriptor = FetchDescriptor<Transaction>(predicate: #Predicate { $0.id == id })
         return (try? modelContext.fetch(descriptor))?.first
+    }
+
+    // Shared field-appliers — single source of truth for the upsert path used
+    // by both fetchAndSync (initial reconcile) and the live snapshot listeners.
+    private func applyCategoryFields(_ data: [String: Any], to local: Category) {
+        if let name = data["name"] as? String { local.name = name }
+        if let slug = data["slug"] as? String { local.slug = slug.isEmpty ? nil : slug }
+        if let typeRaw = data["type"] as? String, let t = TransactionType(rawValue: typeRaw) { local.type = t }
+        if let icon = data["iconName"] as? String { local.iconName = icon }
+        if let color = data["colorHex"] as? String { local.colorHex = color }
+        if let isDefault = data["isDefault"] as? Bool { local.isDefault = isDefault }
+        if let sortOrder = data["sortOrder"] as? Int { local.sortOrder = sortOrder }
+    }
+
+    private func applyTransactionFields(_ data: [String: Any], to local: Transaction) {
+        if let amount = data["amount"] as? Double { local.amount = Decimal(amount) }
+        if let typeRaw = data["type"] as? String, let t = TransactionType(rawValue: typeRaw) { local.type = t }
+        if let note = data["note"] as? String { local.note = note }
+        if let dateTS = data["date"] as? Timestamp { local.date = dateTS.dateValue() }
+        if let statusRaw = data["status"] as? String, let s = TransactionStatus(rawValue: statusRaw) { local.status = s }
+        if let currency = data["currency"] as? String { local.currency = currency }
+        // Keep local.updatedAt aligned with the server so the next launch's
+        // upsert can skip this row when nothing changed.
+        if let ts = data["updatedAt"] as? Timestamp { local.updatedAt = ts.dateValue() }
     }
 
     // MARK: - Delete User Data (hesap sil)
