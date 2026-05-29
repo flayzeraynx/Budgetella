@@ -8,7 +8,16 @@ import SwiftData
 import UniformTypeIdentifiers
 import StoreKit
 
+/// In-stack settings sub-pages, pushed via a single navigationDestination(item:).
+private enum SettingsRoute: Hashable {
+    case profile, subscription, theme, language, currency
+}
+
 struct SettingsView: View {
+
+    /// Called when the user taps the close (✕). Settings is rendered as a page
+    /// inside MainTabView (not a sheet), so dismissal is owned by the parent.
+    var onClose: () -> Void = {}
 
     @Environment(\.dismiss) private var dismiss
     @Query private var settingsArr: [AppSettings]
@@ -21,12 +30,10 @@ struct SettingsView: View {
     @State private var authService = AuthService()
     @State private var subscriptionService = SubscriptionService()
 
-    @State private var showProfile = false
-    @State private var showSubscription = false
+    // Single source of truth for in-stack sub-page navigation (one reliable
+    // navigationDestination(item:) instead of several isPresented bindings).
+    @State private var settingsRoute: SettingsRoute?
     @State private var showPaywall = false
-    @State private var showThemePicker = false
-    @State private var showLanguagePicker = false
-    @State private var showCurrencyPicker = false
     @State private var showSignOutConfirm = false
     @State private var showImportPicker = false
     @State private var showImportResult = false
@@ -71,21 +78,21 @@ struct SettingsView: View {
                             iconColor: BrandColor.primary,
                             title: "Tema",
                             value: themeLabel(settings?.theme ?? .system)
-                        ) { showThemePicker = true }
+                        ) { settingsRoute = .theme }
 
                         settingsRow(
                             icon: "globe",
                             iconColor: BrandColor.info,
                             title: "Dil",
                             value: settings?.language.displayName ?? AppLanguage.english.displayName
-                        ) { showLanguagePicker = true }
+                        ) { settingsRoute = .language }
 
                         settingsRow(
                             icon: "dollarsign.circle",
                             iconColor: BrandColor.income,
                             title: "Para Birimi",
                             value: "\(settings?.currency.symbol ?? "₺") \(settings?.currency.rawValue ?? "TRY")"
-                        ) { showCurrencyPicker = true }
+                        ) { settingsRoute = .currency }
                     }
                     .listRowBackground(BrandColor.surface.opacity(0.4))
 
@@ -307,6 +314,10 @@ struct SettingsView: View {
                                 .font(.brand(.caption2))
                                 .foregroundStyle(BrandColor.textTertiary.opacity(0.7))
                                 .padding(.top, 2)
+                            Link("ozankilic.com", destination: URL(string: "https://ozankilic.com")!)
+                                .font(.brand(.caption))
+                                .foregroundStyle(BrandColor.primary)
+                                .padding(.top, 4)
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
@@ -328,7 +339,7 @@ struct SettingsView: View {
             .toolbarBackground(BrandColor.background, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button { dismiss() } label: {
+                    Button { onClose() } label: {
                         Image(systemName: "xmark")
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(BrandColor.textSecondary)
@@ -338,24 +349,22 @@ struct SettingsView: View {
                     }
                 }
             }
-            // Sheets
-            .sheet(isPresented: $showProfile) {
-                ProfileView(authService: authService)
-            }
-            .sheet(isPresented: $showSubscription) {
-                SubscriptionView(subscriptionService: subscriptionService)
+            // Sub-pages push in-place within this NavigationStack so they get
+            // a native back arrow (left of the title) and the bottom tab bar
+            // stays visible — full parity with Android. One destination(item:)
+            // is more reliable than several isPresented bindings. Paywall stays
+            // a modal cover because it's a purchase flow, not a settings page.
+            .navigationDestination(item: $settingsRoute) { route in
+                switch route {
+                case .profile:      ProfileView(authService: authService)
+                case .subscription: SubscriptionView(subscriptionService: subscriptionService)
+                case .theme:        ThemePickerSheet(settings: settings)
+                case .language:     LanguagePickerSheet(settings: settings)
+                case .currency:     CurrencyPickerSheet(settings: settings)
+                }
             }
             .fullScreenCover(isPresented: $showPaywall) {
                 PaywallView()
-            }
-            .sheet(isPresented: $showThemePicker) {
-                ThemePickerSheet(settings: settings)
-            }
-            .sheet(isPresented: $showLanguagePicker) {
-                LanguagePickerSheet(settings: settings)
-            }
-            .sheet(isPresented: $showCurrencyPicker) {
-                CurrencyPickerSheet(settings: settings)
             }
         }
         .preferredColorScheme(preferredScheme)
@@ -424,7 +433,7 @@ struct SettingsView: View {
     }
 
     private var profileCard: some View {
-        Button { showProfile = true } label: {
+        Button { settingsRoute = .profile } label: {
             HStack(spacing: Spacing.md) {
                 // Avatar
                 Group {
@@ -470,7 +479,7 @@ struct SettingsView: View {
     private var premiumRow: some View {
         Button {
             if subscriptionService.isPremium {
-                showSubscription = true
+                settingsRoute = .subscription
             } else {
                 showPaywall = true
             }

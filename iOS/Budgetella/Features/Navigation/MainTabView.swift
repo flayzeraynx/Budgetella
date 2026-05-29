@@ -17,6 +17,9 @@ struct MainTabView: View {
     @State private var showQuickEntry = false
     @State private var entryMode: EntryMode = .manual
     @State private var dragOffset: CGFloat = 0
+    // Settings is a full page rendered over the pages (the tab bar stays
+    // visible + tappable underneath the top bar) — parity with Android.
+    @State private var showSettings = false
     // Lazy tab mounting: only views that have been activated (or are adjacent
     // to the active tab) are rendered. Avoids the cost of evaluating all four
     // tab view-graphs eagerly at launch.
@@ -54,6 +57,15 @@ struct MainTabView: View {
                 .simultaneousGesture(pageSwipeGesture(screenWidth: geo.size.width))
             }
             .padding(.bottom, 72)
+
+            if showSettings {
+                SettingsView(onClose: {
+                    withAnimation(.spring(response: 0.34, dampingFraction: 0.86)) { showSettings = false }
+                })
+                .padding(.bottom, 72)
+                .transition(.move(edge: .trailing).combined(with: .opacity))
+                .zIndex(2)
+            }
 
             CustomTabBar(selected: $selectedTab, onModeSelect: { mode in
                 entryMode = mode
@@ -117,6 +129,8 @@ struct MainTabView: View {
         // selection extends the set so the next swipe finds the page ready.
         .onAppear { ensureAdjacentMounted(for: selectedTab) }
         .onChange(of: selectedTab) { _, newTab in
+            // Selecting any tab leaves Settings (parity with Android).
+            if showSettings { withAnimation(.easeInOut(duration: 0.2)) { showSettings = false } }
             ensureAdjacentMounted(for: newTab)
         }
     }
@@ -128,7 +142,9 @@ struct MainTabView: View {
         Group {
             if mountedTabs.contains(tab) {
                 switch tab {
-                case .home:  DashboardView()
+                case .home:  DashboardView(onShowSettings: {
+                    withAnimation(.spring(response: 0.34, dampingFraction: 0.86)) { showSettings = true }
+                })
                 case .list:  TransactionsView()
                 case .stats: StatsView()
                 case .ai:    BudgiView()
@@ -175,6 +191,7 @@ struct MainTabView: View {
         // clear ~24 pt and stay clearly horizontal start translating pages.
         DragGesture(minimumDistance: 24, coordinateSpace: .local)
             .onChanged { value in
+                guard !showSettings else { return }   // settings page owns the gestures
                 let dx = value.translation.width
                 let dy = value.translation.height
                 guard abs(dx) > abs(dy) * 1.5 else { return }

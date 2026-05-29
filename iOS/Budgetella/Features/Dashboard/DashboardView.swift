@@ -8,6 +8,9 @@ import SwiftData
 
 struct DashboardView: View {
 
+    /// Opens Settings as a full page in MainTabView (tab bar stays visible).
+    var onShowSettings: () -> Void = {}
+
     @Query(sort: \Transaction.date, order: .reverse)
     private var transactions: [Transaction]
 
@@ -18,7 +21,6 @@ struct DashboardView: View {
     @AppStorage("userPhotoURL") private var userPhotoURL = ""
     @AppStorage("currentUserId") private var currentUserId = ""
     @State private var vm = DashboardViewModel()
-    @State private var showSettings = false
     @State private var showNotifications = false
     @Environment(\.hideAmounts) private var hideAmounts
     @Environment(FirestoreService.self) private var firestoreService
@@ -97,9 +99,6 @@ struct DashboardView: View {
             }
             .scrollIndicators(.hidden)
         }
-        .sheet(isPresented: $showSettings) {
-            SettingsView()
-        }
         .sheet(isPresented: $showNotifications) {
             NotificationsInboxView()
         }
@@ -172,7 +171,7 @@ struct DashboardView: View {
     // MARK: - Avatar
 
     private var avatarBadge: some View {
-        Button { showSettings = true } label: {
+        Button { onShowSettings() } label: {
             Group {
                 if let url = URL(string: userPhotoURL), !userPhotoURL.isEmpty {
                     AsyncImage(url: url) { phase in

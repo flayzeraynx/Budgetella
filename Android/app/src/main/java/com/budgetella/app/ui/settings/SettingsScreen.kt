@@ -400,6 +400,20 @@ fun SettingsScreen(
                         color = BrandColor.textTertiary(),
                         modifier = Modifier.padding(top = Spacing.xs),
                     )
+                    Text(
+                        text = "ozankilic.com",
+                        style = BrandText.caption,
+                        color = BrandColor.Primary,
+                        modifier = Modifier
+                            .padding(top = Spacing.xs)
+                            .clickable {
+                                runCatching {
+                                    context.startActivity(
+                                        Intent(Intent.ACTION_VIEW, Uri.parse("https://ozankilic.com"))
+                                    )
+                                }
+                            },
+                    )
                 }
             }
             Spacer(Modifier.height(Spacing.md))

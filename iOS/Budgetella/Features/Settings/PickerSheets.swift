@@ -15,8 +15,7 @@ struct ThemePickerSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationStack {
-            ZStack {
+        ZStack {
                 BrandColor.background.ignoresSafeArea()
 
                 ScrollView {
@@ -40,18 +39,8 @@ struct ThemePickerSheet: View {
             }
             .navigationTitle("Tema")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Tamam") { dismiss() }
-                        .font(.brand(.subheadline).bold())
-                        .foregroundStyle(BrandColor.primary)
-                }
-            }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-        }
-        .presentationDetents([.medium, .large])
-        .presentationDragIndicator(.visible)
     }
 
     private func themeRow(_ theme: AppTheme, icon: String, isCurrentlyActive: Bool) -> some View {
@@ -148,8 +137,7 @@ struct LanguagePickerSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationStack {
-            ZStack {
+        ZStack {
                 BrandColor.background.ignoresSafeArea()
 
                 ScrollView {
@@ -173,18 +161,8 @@ struct LanguagePickerSheet: View {
             }
             .navigationTitle("Dil")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Tamam") { dismiss() }
-                        .font(.brand(.subheadline).bold())
-                        .foregroundStyle(BrandColor.primary)
-                }
-            }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-        }
-        .presentationDetents([.medium])
-        .presentationDragIndicator(.visible)
     }
 
     private func applyLanguage(_ lang: AppLanguage) {
@@ -243,8 +221,8 @@ struct CurrencyPickerSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var search = ""
 
-    /// V1: TRY + USD only. EUR/GBP unlock with V2 multi-currency.
-    private let v1Currencies: [AppCurrency] = [.tryLira, .usd]
+    /// Full currency set — kept in sync with onboarding (TRY/USD/EUR/GBP).
+    private let v1Currencies: [AppCurrency] = [.tryLira, .usd, .eur, .gbp]
 
     private var filteredCurrencies: [AppCurrency] {
         guard !search.isEmpty else { return v1Currencies }
@@ -266,8 +244,7 @@ struct CurrencyPickerSheet: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
+        ZStack {
                 BrandColor.background.ignoresSafeArea()
 
                 VStack(spacing: 0) {
@@ -301,18 +278,8 @@ struct CurrencyPickerSheet: View {
             }
             .navigationTitle("Para Birimi")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Tamam") { dismiss() }
-                        .font(.brand(.subheadline).bold())
-                        .foregroundStyle(BrandColor.primary)
-                }
-            }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-        }
-        .presentationDetents([.medium, .large])
-        .presentationDragIndicator(.visible)
     }
 
     private func currencyRow(_ currency: AppCurrency) -> some View {
