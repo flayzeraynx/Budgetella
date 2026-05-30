@@ -39,7 +39,12 @@ struct DashboardView: View {
     }
 
     var body: some View {
-        ZStack(alignment: .top) {
+        // Compute every figure ONCE per body pass (single pass over the txs)
+        // instead of re-filtering the full list ~8× with thousands of Calendar
+        // calls — that was the real source of the launch stall / slow keyboard.
+        let agg = vm.aggregates(from: myTransactions)
+        let topCats = topCategories(from: agg)
+        return ZStack(alignment: .top) {
             BrandColor.background.ignoresSafeArea()
 
             // Fixed gradient — always covers status bar, does not scroll
@@ -64,12 +69,12 @@ struct DashboardView: View {
                     DashboardMainCard(
                         year: vm.selectedYear,
                         month: vm.selectedMonth,
-                        yearIncome: vm.yearlyIncome(from: myTransactions),
-                        yearExpense: vm.yearlyExpense(from: myTransactions),
-                        monthIncome: vm.monthlyIncome(from: myTransactions),
-                        monthExpense: vm.monthlyExpense(from: myTransactions),
-                        dailyData: vm.dailyFlowData(from: myTransactions),
-                        availableYears: vm.availableYears(from: myTransactions),
+                        yearIncome: agg.yearIncome,
+                        yearExpense: agg.yearExpense,
+                        monthIncome: agg.monthIncome,
+                        monthExpense: agg.monthExpense,
+                        dailyData: agg.dailyData,
+                        availableYears: agg.availableYears,
                         onYearChange: { vm.selectedYear = $0 },
                         onMonthChange: { vm.selectedMonth = $0 }
                     )
@@ -84,14 +89,14 @@ struct DashboardView: View {
                         .padding(.bottom, Spacing.lg)
 
                     // ── Top categories
-                    if !topExpenseCategories.isEmpty {
-                        categorySection
+                    if !topCats.isEmpty {
+                        categorySection(topCats)
                             .padding(.horizontal, 20)
                             .padding(.bottom, Spacing.lg)
                     }
 
                     // ── Income vs Expense bar chart
-                    IncomeExpenseBarChart(data: vm.sixMonthFlowData(from: myTransactions))
+                    IncomeExpenseBarChart(data: agg.sixMonthData)
                         .padding(.horizontal, 20)
 
                     Spacer(minLength: 100)
@@ -211,26 +216,18 @@ struct DashboardView: View {
 
     // MARK: - Category section
 
-    private var topExpenseCategories: [(Category, Decimal)] {
-        let monthly = myTransactions.filter {
-            $0.type == .expense &&
-            Calendar.current.component(.year,  from: $0.date) == vm.selectedYear &&
-            Calendar.current.component(.month, from: $0.date) == vm.selectedMonth
-        }
-        var totals: [UUID: Decimal] = [:]
-        for tx in monthly {
-            guard let cat = tx.category else { continue }
-            totals[cat.id, default: 0] += tx.amount
-        }
-        return myCategories
-            .filter { totals[$0.id] != nil }
-            .map { ($0, totals[$0.id]!) }
+    /// Top-5 expense categories for the selected month — built from the
+    /// single-pass aggregate's per-category totals (no extra full scan).
+    private func topCategories(from agg: DashboardAggregates) -> [(Category, Decimal)] {
+        myCategories
+            .filter { agg.monthExpenseByCat[$0.id] != nil }
+            .map { ($0, agg.monthExpenseByCat[$0.id]!) }
             .sorted { $0.1 > $1.1 }
             .prefix(5)
             .map { $0 }
     }
 
-    private var categorySection: some View {
+    private func categorySection(_ topCats: [(Category, Decimal)]) -> some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             Text("KATEGORİLER")
                 .font(.brand(.caption))
@@ -239,7 +236,7 @@ struct DashboardView: View {
                 .padding(.horizontal, 4)
 
             VStack(spacing: Spacing.xs) {
-                ForEach(topExpenseCategories, id: \.0.id) { cat, amount in
+                ForEach(topCats, id: \.0.id) { cat, amount in
                     categoryRow(cat: cat, amount: amount)
                 }
             }

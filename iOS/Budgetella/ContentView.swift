@@ -191,6 +191,10 @@ private struct KeyboardPrewarmView: UIViewRepresentable {
     func makeUIView(context: Context) -> UITextField {
         let field = UITextField(frame: .zero)
         field.isHidden = true
+        // Manual entry's amount field is a .decimalPad — warm THAT layout, not
+        // the default alphabetic one, otherwise the decimal pad still pays a
+        // cold start the first time the user taps +.
+        field.keyboardType = .decimalPad
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             field.becomeFirstResponder()
             field.resignFirstResponder()

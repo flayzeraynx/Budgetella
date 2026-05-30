@@ -20,8 +20,6 @@ struct ManualEntryContent: View {
     private var currencySymbol: String { settingsArr.first?.currency.symbol ?? "₺" }
 
     @FocusState private var noteFieldFocused: Bool
-    @FocusState private var amountFocused: Bool
-    @State private var amountText: String = ""
 
     var body: some View {
         VStack(spacing: 0) {
@@ -61,54 +59,57 @@ struct ManualEntryContent: View {
                     .padding(.top, Spacing.xs)
             }
 
-            Spacer(minLength: Spacing.lg)
+            // Custom numeric pad — drives the amount directly via the VM. No
+            // system keyboard means no multi-second decimal-pad cold start on
+            // device (and no keyboard-avoidance layout shuffle): the pad is on
+            // screen the instant the sheet opens.
+            numpad
+                .padding(.horizontal, 20)
+                .padding(.top, Spacing.sm)
+
+            Spacer(minLength: Spacing.md)
         }
         .animation(.spring(response: 0.3), value: isTyping)
-        .task {
-            EntryPerf.mark("ManualEntryContent.task start (before 300ms sleep)")
-            // Brief wait for the sheet's present animation to settle, then focus
-            // the amount field. The real first-open lag was the main-thread
-            // Firestore sync (now yields between batches) — not this delay.
-            try? await Task.sleep(nanoseconds: 300_000_000)
-            EntryPerf.mark("ManualEntryContent.task → set amountFocused=true (focus requested)")
-            amountFocused = true
-        }
-        .onAppear {
-            EntryPerf.mark("ManualEntryContent.onAppear")
-            let decimal = Locale.current.decimalSeparator ?? "."
-            amountText = vm.rawInput.replacingOccurrences(of: ",", with: decimal)
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
-            EntryPerf.mark("⌨️ keyboardWillShow")
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidShowNotification)) { _ in
-            EntryPerf.mark("⌨️ keyboardDidShow — keyboard fully visible")
-        }
-        .onChange(of: amountText) { _, newVal in
-            let decimal = Locale.current.decimalSeparator ?? "."
-            let normalized = newVal
-                .replacingOccurrences(of: decimal, with: ",")
-                .replacingOccurrences(of: ".", with: ",")
-            let filtered = String(normalized.filter { $0.isNumber || $0 == "," })
-            let parts = filtered.components(separatedBy: ",")
-            var result: String
-            if parts.count >= 2 {
-                result = parts[0] + "," + String(parts[1].prefix(2))
-            } else {
-                result = filtered
+    }
+
+    // MARK: - Numeric keypad
+
+    private var numpad: some View {
+        let rows: [[String]] = [["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"], [",", "0", "⌫"]]
+        return VStack(spacing: Spacing.sm) {
+            ForEach(rows, id: \.self) { row in
+                HStack(spacing: Spacing.sm) {
+                    ForEach(row, id: \.self) { key in numKey(key) }
+                }
             }
-            guard result.filter({ $0.isNumber }).count <= 10 else {
-                let decimal2 = Locale.current.decimalSeparator ?? "."
-                amountText = vm.rawInput.replacingOccurrences(of: ",", with: decimal2)
-                return
+        }
+    }
+
+    private func numKey(_ key: String) -> some View {
+        Button {
+            switch key {
+            case ",":  vm.appendDecimal()
+            case "⌫":  vm.backspace()
+            default:   vm.appendDigit(key)
             }
-            if vm.rawInput != result { vm.rawInput = result }
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        } label: {
+            Group {
+                if key == "⌫" {
+                    Image(systemName: "delete.left")
+                        .font(.system(size: 22, weight: .medium))
+                } else {
+                    Text(key)
+                        .font(.brand(.title))
+                }
+            }
+            .foregroundStyle(BrandColor.textPrimary)
+            .frame(maxWidth: .infinity)
+            .frame(height: 54)
+            .background(BrandColor.surface.opacity(0.4))
+            .clipShape(RoundedRectangle(cornerRadius: Spacing.radiusSmall, style: .continuous))
         }
-        .onChange(of: vm.rawInput) { _, newVal in
-            let decimal = Locale.current.decimalSeparator ?? "."
-            let synced = newVal.replacingOccurrences(of: ",", with: decimal)
-            if amountText != synced { amountText = synced }
-        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Mode selector pills
@@ -205,18 +206,11 @@ struct ManualEntryContent: View {
                     }
                 }
             }
-            // Hidden text field captures numeric keyboard input
-            TextField("", text: $amountText)
-                .keyboardType(.decimalPad)
-                .focused($amountFocused)
-                .opacity(0.001)
-                .allowsHitTesting(false)
         }
+        // Tapping the amount area just dismisses the note keyboard (if open) —
+        // the numeric pad below is always live, so there's nothing to focus.
         .contentShape(Rectangle())
-        .onTapGesture {
-            noteFieldFocused = false
-            amountFocused = true
-        }
+        .onTapGesture { noteFieldFocused = false }
     }
 
     private var amountColor: Color {

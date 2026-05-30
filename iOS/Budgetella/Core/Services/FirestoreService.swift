@@ -180,8 +180,10 @@ public final class FirestoreService {
         // Firestore'da veri var → merge'i ARKA PLAN aktöründe yap. Main thread
         // hiç bloke olmaz (ilk açılışta bile klavye/scroll akıcı). Önce ucuz
         // parse → Sendable DTO, sonra background ModelContext'te upsert+reconcile.
+        let parseStart = CFAbsoluteTimeGetCurrent()
         let catDTOs = catDocs.documents.compactMap { catDTO(from: $0.data(), userId: userId) }
         let txDTOs  = txDocs.documents.compactMap { txDTO(from: $0.data(), userId: userId) }
+        EntryPerf.event("parse done (MAIN) — \(catDTOs.count + txDTOs.count) dtos in \(Int((CFAbsoluteTimeGetCurrent() - parseStart) * 1000)) ms")
         await SyncEngine.reconcile(container: modelContext.container, userId: userId, cats: catDTOs, txs: txDTOs)
         EntryPerf.event("fetchAndSync END — cats=\(catDocs.documents.count) txs=\(txDocs.documents.count) in \(Int((CFAbsoluteTimeGetCurrent() - syncStart) * 1000)) ms")
         UserDefaults.standard.set(true, forKey: "categoriesSeeded")

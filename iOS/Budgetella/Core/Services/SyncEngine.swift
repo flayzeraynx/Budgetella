@@ -65,7 +65,12 @@ enum SyncEngine {
             let ctx = ModelContext(container)
 
             let localCats = (try? ctx.fetch(FetchDescriptor<Category>())) ?? []
-            let localTxs = (try? ctx.fetch(FetchDescriptor<Transaction>())) ?? []
+            // Prefetch the category relationship so matches()'s `t.category?.slug`
+            // doesn't fault once-per-row (2000+ tiny SQLite reads → seconds of
+            // store contention that stalled the main context's @Query).
+            var txFD = FetchDescriptor<Transaction>()
+            txFD.relationshipKeyPathsForPrefetching = [\.category]
+            let localTxs = (try? ctx.fetch(txFD)) ?? []
 
             // Privacy guard — drop rows from other accounts.
             for c in localCats where c.userId != userId { ctx.delete(c) }
@@ -79,16 +84,18 @@ enum SyncEngine {
             // Categories — upsert + slug map.
             var catBySlug: [String: Category] = [:]
             var remoteCatIds = Set<UUID>()
+            var nCatWrite = 0
             for dto in cats {
                 remoteCatIds.insert(dto.id)
                 let resolved: Category
                 if let local = catById[dto.id] {
-                    Self.apply(dto, to: local)
+                    if !Self.matchesCat(dto, local) { Self.apply(dto, to: local); nCatWrite += 1 }
                     resolved = local
                 } else {
                     let made = Self.build(dto)
                     ctx.insert(made)
                     catById[dto.id] = made
+                    nCatWrite += 1
                     resolved = made
                 }
                 if let slug = resolved.slug, !slug.isEmpty { catBySlug[slug] = resolved }
@@ -96,19 +103,30 @@ enum SyncEngine {
 
             // Transactions — upsert, content-skip unchanged rows.
             var remoteTxIds = Set<UUID>()
+            var nSkip = 0, nWrite = 0, nInsert = 0
+            var loggedMismatch = false
             for dto in txs {
                 remoteTxIds.insert(dto.id)
                 if let local = txById[dto.id] {
-                    if !Self.matches(dto, local) {
+                    if Self.matches(dto, local) {
+                        nSkip += 1
+                    } else {
+                        if !loggedMismatch {
+                            loggedMismatch = true
+                            EntryPerf.event("first tx mismatch — \(Self.mismatchReason(dto, local))")
+                        }
                         Self.apply(dto, to: local)
                         local.category = catBySlug[dto.categorySlug]
+                        nWrite += 1
                     }
                 } else {
                     let made = Self.build(dto)
                     made.category = catBySlug[dto.categorySlug]
                     ctx.insert(made)
+                    nInsert += 1
                 }
             }
+            EntryPerf.event("reconcile result — skip=\(nSkip) write=\(nWrite) insert=\(nInsert) catWrite=\(nCatWrite)")
 
             // Reconcile deletes (local cache only).
             for c in localCats where c.userId == userId && !remoteCatIds.contains(c.id) { ctx.delete(c) }
@@ -126,8 +144,9 @@ enum SyncEngine {
             for change in changes {
                 switch change {
                 case .upsert(let dto):
-                    if let local = Self.fetchCategory(dto.id, ctx) { Self.apply(dto, to: local) }
-                    else { ctx.insert(Self.build(dto)) }
+                    if let local = Self.fetchCategory(dto.id, ctx) {
+                        if !Self.matchesCat(dto, local) { Self.apply(dto, to: local) }
+                    } else { ctx.insert(Self.build(dto)) }
                 case .remove(let id):
                     if let local = Self.fetchCategory(id, ctx) { ctx.delete(local) }
                 }
@@ -203,6 +222,29 @@ enum SyncEngine {
         else { return false }
         let localAmt = NSDecimalNumber(decimal: t.amount).doubleValue
         return abs(localAmt - d.amount) < 0.001
+    }
+
+    /// Debug — which field made matches() fail (first offender). Temporary.
+    private static func mismatchReason(_ d: TxDTO, _ t: Transaction) -> String {
+        if t.type.rawValue != d.type { return "type '\(t.type.rawValue)'!='\(d.type)'" }
+        if t.note != d.note { return "note '\(t.note)'!='\(d.note)'" }
+        if t.currency != d.currency { return "currency '\(t.currency)'!='\(d.currency)'" }
+        if t.status.rawValue != d.status { return "status '\(t.status.rawValue)'!='\(d.status)'" }
+        if (t.category?.slug ?? "") != d.categorySlug { return "catSlug '\(t.category?.slug ?? "nil")'!='\(d.categorySlug)'" }
+        if abs(t.date.timeIntervalSince(d.date)) >= 1.0 { return "date Δ\(Int(t.date.timeIntervalSince(d.date)))s" }
+        let la = NSDecimalNumber(decimal: t.amount).doubleValue
+        if abs(la - d.amount) >= 0.001 { return "amount \(la)!=\(d.amount)" }
+        return "?? (matches should be true)"
+    }
+
+    private static func matchesCat(_ d: CatDTO, _ c: Category) -> Bool {
+        c.name == d.name
+        && (c.slug ?? "") == (d.slug ?? "")
+        && c.type.rawValue == d.type
+        && c.iconName == d.iconName
+        && c.colorHex == d.colorHex
+        && c.isDefault == d.isDefault
+        && c.sortOrder == d.sortOrder
     }
 
     private static func build(_ d: CatDTO) -> Category {
