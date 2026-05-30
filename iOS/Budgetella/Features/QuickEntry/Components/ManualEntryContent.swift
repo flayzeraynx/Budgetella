@@ -33,11 +33,14 @@ struct ManualEntryContent: View {
             let on = Int(secs / 0.55) % 2 == 0
             RoundedRectangle(cornerRadius: 1.5)
                 .fill(amountColor)
-                .frame(width: 2.5, height: 34)
+                .frame(width: 2.5, height: 40)
                 .opacity(amountFocused && on ? 1 : 0)
                 .animation(.easeInOut(duration: 0.12), value: on)
         }
-        .frame(width: 2.5, height: 34)
+        .frame(width: 2.5, height: 40)
+        // Sit the caret on the number's baseline (bottom edge ~ baseline)
+        // instead of letting the HStack center it, which floated it high.
+        .alignmentGuide(.firstTextBaseline) { dims in dims[.bottom] - 4 }
     }
 
     var body: some View {
