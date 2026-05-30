@@ -244,6 +244,9 @@
         }
       }
     },
+    "© 2026 Ozan Kılıç" : {
+
+    },
     "+ butonuyla ilk işlemini ekle" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -431,6 +434,9 @@
           }
         }
       }
+    },
+    "About" : {
+
     },
     "AÇIK" : {
       "extractionState" : "stale",
@@ -4359,6 +4365,9 @@
         }
       }
     },
+    "Personal finance, beautifully simple." : {
+
+    },
     "Plan" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5864,6 +5873,7 @@
       }
     },
     "v%@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5936,6 +5946,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Your data is safe"
+          }
+        }
+      }
+    },
+    "Version %@ (%@)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Version %1$@ (%2$@)"
           }
         }
       }

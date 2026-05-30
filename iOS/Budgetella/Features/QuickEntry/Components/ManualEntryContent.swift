@@ -7,7 +7,6 @@
 
 import SwiftUI
 import SwiftData
-import UIKit
 
 struct ManualEntryContent: View {
 
@@ -20,6 +19,26 @@ struct ManualEntryContent: View {
     private var currencySymbol: String { settingsArr.first?.currency.symbol ?? "₺" }
 
     @FocusState private var noteFieldFocused: Bool
+    @FocusState private var amountFocused: Bool
+    @State private var amountText: String = ""
+
+    /// Blinking caret next to the amount. The real text field is invisible
+    /// (it only feeds the system decimal pad), so without this the user can't
+    /// tell the amount is the active input — the note field gets a border, the
+    /// amount needs its own focus cue. Time-driven so it always blinks when
+    /// focused, with no state to fall out of sync.
+    private var caret: some View {
+        TimelineView(.periodic(from: .now, by: 0.55)) { context in
+            let secs = context.date.timeIntervalSinceReferenceDate
+            let on = Int(secs / 0.55) % 2 == 0
+            RoundedRectangle(cornerRadius: 1.5)
+                .fill(amountColor)
+                .frame(width: 2.5, height: 34)
+                .opacity(amountFocused && on ? 1 : 0)
+                .animation(.easeInOut(duration: 0.12), value: on)
+        }
+        .frame(width: 2.5, height: 34)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -59,57 +78,43 @@ struct ManualEntryContent: View {
                     .padding(.top, Spacing.xs)
             }
 
-            // Custom numeric pad — drives the amount directly via the VM. No
-            // system keyboard means no multi-second decimal-pad cold start on
-            // device (and no keyboard-avoidance layout shuffle): the pad is on
-            // screen the instant the sheet opens.
-            numpad
-                .padding(.horizontal, 20)
-                .padding(.top, Spacing.sm)
-
-            Spacer(minLength: Spacing.md)
+            Spacer(minLength: Spacing.lg)
         }
         .animation(.spring(response: 0.3), value: isTyping)
-    }
-
-    // MARK: - Numeric keypad
-
-    private var numpad: some View {
-        let rows: [[String]] = [["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"], [",", "0", "⌫"]]
-        return VStack(spacing: Spacing.sm) {
-            ForEach(rows, id: \.self) { row in
-                HStack(spacing: Spacing.sm) {
-                    ForEach(row, id: \.self) { key in numKey(key) }
-                }
-            }
+        .task {
+            // Small settle so focus doesn't fight the sheet's present animation.
+            try? await Task.sleep(nanoseconds: 250_000_000)
+            amountFocused = true
         }
-    }
-
-    private func numKey(_ key: String) -> some View {
-        Button {
-            switch key {
-            case ",":  vm.appendDecimal()
-            case "⌫":  vm.backspace()
-            default:   vm.appendDigit(key)
-            }
-            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-        } label: {
-            Group {
-                if key == "⌫" {
-                    Image(systemName: "delete.left")
-                        .font(.system(size: 22, weight: .medium))
-                } else {
-                    Text(key)
-                        .font(.brand(.title))
-                }
-            }
-            .foregroundStyle(BrandColor.textPrimary)
-            .frame(maxWidth: .infinity)
-            .frame(height: 54)
-            .background(BrandColor.surface.opacity(0.4))
-            .clipShape(RoundedRectangle(cornerRadius: Spacing.radiusSmall, style: .continuous))
+        .onAppear {
+            let decimal = Locale.current.decimalSeparator ?? "."
+            amountText = vm.rawInput.replacingOccurrences(of: ",", with: decimal)
         }
-        .buttonStyle(.plain)
+        .onChange(of: amountText) { _, newVal in
+            let decimal = Locale.current.decimalSeparator ?? "."
+            let normalized = newVal
+                .replacingOccurrences(of: decimal, with: ",")
+                .replacingOccurrences(of: ".", with: ",")
+            let filtered = String(normalized.filter { $0.isNumber || $0 == "," })
+            let parts = filtered.components(separatedBy: ",")
+            var result: String
+            if parts.count >= 2 {
+                result = parts[0] + "," + String(parts[1].prefix(2))
+            } else {
+                result = filtered
+            }
+            guard result.filter({ $0.isNumber }).count <= 10 else {
+                let decimal2 = Locale.current.decimalSeparator ?? "."
+                amountText = vm.rawInput.replacingOccurrences(of: ",", with: decimal2)
+                return
+            }
+            if vm.rawInput != result { vm.rawInput = result }
+        }
+        .onChange(of: vm.rawInput) { _, newVal in
+            let decimal = Locale.current.decimalSeparator ?? "."
+            let synced = newVal.replacingOccurrences(of: ",", with: decimal)
+            if amountText != synced { amountText = synced }
+        }
     }
 
     // MARK: - Mode selector pills
@@ -204,13 +209,24 @@ struct ManualEntryContent: View {
                             .font(.brand(.title))
                             .foregroundStyle(amountColor.opacity(0.7))
                     }
+                    // Blinking caret — the real text field is invisible, so this
+                    // makes it obvious the amount is the active input (the note
+                    // field gets a border highlight; the amount needs this cue).
+                    caret
                 }
             }
+            // Hidden text field captures the system decimal-pad input.
+            TextField("", text: $amountText)
+                .keyboardType(.decimalPad)
+                .focused($amountFocused)
+                .opacity(0.001)
+                .allowsHitTesting(false)
         }
-        // Tapping the amount area just dismisses the note keyboard (if open) —
-        // the numeric pad below is always live, so there's nothing to focus.
         .contentShape(Rectangle())
-        .onTapGesture { noteFieldFocused = false }
+        .onTapGesture {
+            noteFieldFocused = false
+            amountFocused = true
+        }
     }
 
     private var amountColor: Color {

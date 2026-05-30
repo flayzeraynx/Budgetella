@@ -189,15 +189,20 @@ struct ContentView: View {
 
 private struct KeyboardPrewarmView: UIViewRepresentable {
     func makeUIView(context: Context) -> UITextField {
-        let field = UITextField(frame: .zero)
-        field.isHidden = true
-        // Manual entry's amount field is a .decimalPad — warm THAT layout, not
-        // the default alphabetic one, otherwise the decimal pad still pays a
-        // cold start the first time the user taps +.
+        // NOTE: must NOT be `isHidden` — a hidden view cannot become first
+        // responder, so the old prewarm never actually loaded the keyboard.
+        // alpha 0 keeps it invisible while still focusable.
+        let field = UITextField(frame: CGRect(x: -10, y: -10, width: 1, height: 1))
+        field.alpha = 0
+        // Manual entry's amount field is a .decimalPad — warm THAT layout.
         field.keyboardType = .decimalPad
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             field.becomeFirstResponder()
-            field.resignFirstResponder()
+            // Give the keyboard subsystem a beat to actually load before we
+            // hand focus back, so the first real tap is warm.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                field.resignFirstResponder()
+            }
         }
         return field
     }
