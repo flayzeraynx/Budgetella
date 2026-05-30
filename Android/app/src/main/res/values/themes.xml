@@ -19,8 +19,15 @@
     -->
     <style name="Theme.Budgetella" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
         <item name="android:windowBackground">@color/background_dark</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <!--
+            Edge-to-edge is driven entirely by MainActivity.enableEdgeToEdge()
+            (transparent bars on API 35, auto scrim on older). The
+            statusBarColor / navigationBarColor theme attributes were removed:
+            they are deprecated on API 35 and tripped the Play pre-launch
+            "deprecated edge-to-edge API" + "may not display edge-to-edge"
+            warnings. Bar icon contrast is set at runtime in Theme.kt via
+            WindowCompat, so it follows the in-app light/dark theme.
+        -->
         <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
     </style>
 
