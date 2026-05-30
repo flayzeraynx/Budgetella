@@ -16,11 +16,13 @@ import com.budgetella.app.ui.budgi.BudgiInsight
 import com.budgetella.app.ui.budgi.BudgiInsightEngine
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import java.time.Instant
 import java.time.LocalDate
@@ -151,7 +153,12 @@ class DashboardViewModel @Inject constructor(
         // localeNonce (values[5]) is consumed for invalidation only — compute
         // reads LocaleHelper.currentLanguage(context) directly.
         compute(txs, cats, year, monthValue).copy(user = u)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardState())
+    }
+        // Aggregation re-scans the full transaction list several times on every
+        // data change / month switch — cheap per row, but keep it off Main so a
+        // large history never janks the UI thread.
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardState())
 
     // ── Pure compute (testable, no Dispatchers) ─────────────────────────────
 

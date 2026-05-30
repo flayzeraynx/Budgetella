@@ -15,12 +15,14 @@ import com.budgetella.app.ui.budgi.BudgiInsightEngine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import java.time.Instant
@@ -102,7 +104,10 @@ class StatsViewModel @Inject constructor(
         val ui = values[2] as StatsUiState
         val month = values[3] as YearMonth
         compute(txs, cats, ui, month)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StatsState())
+    }
+        // Keep the aggregation off Main — same reasoning as DashboardViewModel.
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StatsState())
 
     fun toggleType(type: TransactionType) {
         _ui.update { it.copy(showingType = type) }
