@@ -338,7 +338,7 @@ enum GeminiReceiptParser {
         let apiKey = Bundle.main.infoDictionary?["GEMINI_API_KEY"] as? String ?? ""
         guard !apiKey.isEmpty else { throw OCRError.missingAPIKey }
 
-        let urlString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=\(apiKey)"
+        let urlString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=\(apiKey)"
         guard let url = URL(string: urlString) else { throw OCRError.invalidURL }
 
         let prompt = """

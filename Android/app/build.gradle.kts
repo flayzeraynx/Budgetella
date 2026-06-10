@@ -40,8 +40,8 @@ android {
         applicationId = "com.budgetella.app"
         minSdk = 26          // Android 8.0 — Compose-friendly + adaptive icons + biometric
         targetSdk = 35
-        versionCode = 6      // 1.1.0 — testers feedback: walkthrough + rate + share
-        versionName = "1.1.0"
+        versionCode = 7      // 1.1.1 — Gemini model fix (gemini-2.0-flash deprecated → 2.5-flash)
+        versionName = "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
