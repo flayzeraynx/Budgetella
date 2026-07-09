@@ -1,0 +1,19 @@
+<!-- @dsCard group="Logo" viewport="700x200" name="Logo don'ts" subtitle="Never recolor, remove the dot, or use the wallet favicon as the mark" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body{margin:0;background:var(--bg);font-family:var(--font-brand);color:var(--text-primary);padding:24px;display:flex;gap:20px;align-items:flex-start}
+  .item{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+  .mark{width:72px;height:72px;border-radius:16px;position:relative;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:700;color:#fff}
+  .x{color:var(--expense);font-size:12px;font-weight:600}
+  .dot{position:absolute;top:8px;right:8px;width:11px;height:11px;border-radius:50%}
+</style></head>
+<body>
+  <div class="item"><div class="mark" style="background:linear-gradient(135deg,#FB7185,#F59E0B)">B<span class="dot" style="background:#10F2A5"></span></div><div class="x">✕ Recolor the gradient</div></div>
+  <div class="item"><div class="mark" style="background:linear-gradient(135deg,#9585FF,#6E5BFF)">B</div><div class="x">✕ Remove the mint dot</div></div>
+  <div class="item"><div class="mark" style="background:linear-gradient(135deg,#9585FF,#6E5BFF);font-family:Georgia,serif;font-style:italic">B<span class="dot" style="background:#10F2A5"></span></div><div class="x">✕ Redraw "B" in another font</div></div>
+  <div class="item"><div class="mark" style="background:var(--surface-elevated);border:var(--glass-border)"><i data-lucide="wallet" style="width:34px;height:34px;color:#fff"></i></div><div class="x">✕ Use the wallet favicon</div></div>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body></html>

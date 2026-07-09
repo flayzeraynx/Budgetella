@@ -1,0 +1,17 @@
+<!-- @dsCard group="Logo" viewport="700x180" name="On backgrounds" subtitle="Full-color mark holds on dark, light, and accent — never on clashing color" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body{margin:0;background:var(--bg);font-family:var(--font-brand);color:var(--text-primary);padding:24px;display:flex;gap:16px}
+  .tile{flex:1;height:128px;border-radius:var(--radius-medium);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border:var(--glass-border)}
+  img{border-radius:22%}
+  .l{font-size:11px;font-weight:600}
+  .ok{color:var(--income)}.no{color:var(--expense)}
+</style></head>
+<body>
+  <div class="tile" style="background:#0A0B14"><img src="../assets/AppIcon-1024.png" width="56" height="56"><span class="l ok">✓ Dark</span></div>
+  <div class="tile" style="background:#F5F6FE"><img src="../assets/AppIcon-1024.png" width="56" height="56"><span class="l ok" style="color:#0E7C90">✓ Light</span></div>
+  <div class="tile" style="background:#241C60"><img src="../assets/AppIcon-1024.png" width="56" height="56"><span class="l ok">✓ Deep accent</span></div>
+  <div class="tile" style="background:linear-gradient(135deg,#6E5BFF,#8B6FFF)"><img src="../assets/AppIcon-1024.png" width="56" height="56"><span class="l no" style="color:#fff">✕ On brand violet</span></div>
+</body></html>

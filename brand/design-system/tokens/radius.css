@@ -1,0 +1,17 @@
+/* ============================================================
+   Budgetella — RADIUS TOKENS
+   Source: iOS DesignSystem/Spacing.swift (corner radius scale).
+   5 steps: small / medium / large / sheet / full.
+   ============================================================ */
+
+:root {
+  --radius-small: 8px;    /* chips, small controls */
+  --radius-row: 14px;     /* buttons, list rows */
+  --radius-medium: 16px;  /* standard card */
+  --radius-large: 24px;   /* large cards / hero panels */
+  --radius-sheet: 28px;   /* bottom sheet / paywall modal */
+  --radius-full: 999px;   /* pills, avatars, FAB */
+
+  /* Logo geometry (BudgetellaLogoView.swift): radius = size * 0.22 */
+  --logo-radius-ratio: 0.22;
+}

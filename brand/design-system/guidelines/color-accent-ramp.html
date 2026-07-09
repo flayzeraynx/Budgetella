@@ -1,0 +1,27 @@
+<!-- @dsCard group="Colors" viewport="700x160" name="Accent ramp" subtitle="Violet 50→900 · 400/500/600 are real code values, rest derived" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body{margin:0;background:var(--bg);font-family:var(--font-brand);color:var(--text-primary);padding:24px}
+  .ramp{display:flex;border-radius:var(--radius-medium);overflow:hidden;border:var(--glass-border)}
+  .step{flex:1;height:84px;display:flex;flex-direction:column;justify-content:flex-end;padding:8px;box-sizing:border-box}
+  .k{font-size:11px;font-weight:700}
+  .h{font-family:var(--font-mono);font-size:9px;opacity:.85}
+  .lbl{margin-top:12px;font-size:12px;color:var(--text-tertiary)}
+</style></head>
+<body>
+  <div class="ramp">
+    <div class="step" style="background:#F1EEFF;color:#241C60"><span class="k">50</span><span class="h">F1EEFF</span></div>
+    <div class="step" style="background:#E4DEFF;color:#241C60"><span class="k">100</span><span class="h">E4DEFF</span></div>
+    <div class="step" style="background:#C9BEFF;color:#241C60"><span class="k">200</span><span class="h">C9BEFF</span></div>
+    <div class="step" style="background:#AD9BFF;color:#241C60"><span class="k">300</span><span class="h">AD9BFF</span></div>
+    <div class="step" style="background:#8B6FFF;color:#fff"><span class="k">400</span><span class="h">8B6FFF</span></div>
+    <div class="step" style="background:#6E5BFF;color:#fff"><span class="k">500</span><span class="h">6E5BFF</span></div>
+    <div class="step" style="background:#5B47E0;color:#fff"><span class="k">600</span><span class="h">5B47E0</span></div>
+    <div class="step" style="background:#4A39C0;color:#fff"><span class="k">700</span><span class="h">4A39C0</span></div>
+    <div class="step" style="background:#372B90;color:#fff"><span class="k">800</span><span class="h">372B90</span></div>
+    <div class="step" style="background:#241C60;color:#fff"><span class="k">900</span><span class="h">241C60</span></div>
+  </div>
+  <div class="lbl">500 = primary · 400 = primaryLight · 600 = web accentDeep (real). 50–300 / 700–900 derived.</div>
+</body></html>

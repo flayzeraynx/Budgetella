@@ -1,0 +1,14 @@
+<!-- @dsCard group="Spacing" viewport="700x150" name="Layout constraints" subtitle="maxContent 480 · maxForm 360 · minTouch 44" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body{margin:0;background:var(--bg);font-family:var(--font-brand);color:var(--text-primary);padding:24px;display:flex;flex-direction:column;gap:10px}
+  .bar{height:22px;border-radius:6px;display:flex;align-items:center;padding:0 10px;font-family:var(--font-mono);font-size:11px;color:#fff;white-space:nowrap}
+</style></head>
+<body>
+  <div class="bar" style="width:480px;max-width:100%;background:var(--accent-primary)">maxContent — 480px</div>
+  <div class="bar" style="width:360px;max-width:100%;background:var(--accent-primary-light)">maxForm — 360px</div>
+  <div class="bar" style="width:44px;background:var(--income);color:#04240f;padding:0;justify-content:center">44</div>
+  <div style="font-size:12px;color:var(--text-tertiary)">minTouchTarget 44px — fixed in code</div>
+</body></html>

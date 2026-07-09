@@ -1,0 +1,42 @@
+/* ============================================================
+   Budgetella — TYPOGRAPHY TOKENS
+   Source: iOS DesignSystem/Typography.swift (BrandFont enum).
+   Sizes are the code's point values (1pt ≈ 1px here). Amounts use the
+   mono family + tabular figures (monospacedDigit() in code).
+   ============================================================ */
+
+:root {
+  /* Families */
+  --font-brand: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  --font-web:   'Geist', -apple-system, system-ui, sans-serif;
+  --font-mono:  'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Weights */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ---- Scale (size / weight / letter-spacing) from BrandFont ---- */
+  --type-display-size: 56px;         --type-display-weight: 700;   --type-display-tracking: 6px;
+  --type-hero-size: 38px;            --type-hero-weight: 700;      --type-hero-tracking: 0;      /* tabular amount hero */
+  --type-large-title-size: 36px;     --type-large-title-weight: 700; --type-large-title-tracking: 4px;
+  --type-title-size: 28px;           --type-title-weight: 600;     --type-title-tracking: 2px;
+  --type-headline-size: 20px;        --type-headline-weight: 600;  --type-headline-tracking: 0;
+  --type-subheadline-size: 17px;     --type-subheadline-weight: 600; --type-subheadline-tracking: 2px;
+  --type-body-size: 16px;            --type-body-weight: 400;      --type-body-tracking: 2px;
+  --type-callout-size: 15px;         --type-callout-weight: 400;   --type-callout-tracking: 2px;
+  --type-footnote-size: 13px;        --type-footnote-weight: 400;  --type-footnote-tracking: 0;
+  --type-caption-size: 12px;         --type-caption-weight: 500;   --type-caption-tracking: 0;
+  --type-caption2-size: 11px;        --type-caption2-weight: 600;  --type-caption2-tracking: 0.5px;  /* uppercase eyebrow */
+
+  --line-tight: 1.05;    /* @kind other */
+  --line-snug: 1.2;      /* @kind other */
+  --line-normal: 1.4;    /* @kind other */
+}
+
+/* Tabular / monospaced digits for currency amounts */
+.bdg-tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}

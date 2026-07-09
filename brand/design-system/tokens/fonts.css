@@ -1,0 +1,6 @@
+/* Budgetella webfonts
+   App canonical family: Inter (intended in code; SF Pro is the current runtime fallback).
+   Web marketing family: Geist + Geist Mono (numerals).
+   NOTE: The source repo did not ship .ttf binaries, so these load from Google Fonts.
+   Swap to self-hosted @font-face if you need offline/pinned versions. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');

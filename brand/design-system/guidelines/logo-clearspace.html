@@ -1,0 +1,27 @@
+<!-- @dsCard group="Logo" viewport="700x200" name="Clear space & min size" subtitle="Keep clear space = the mint-dot diameter · never below 24px / 20pt" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body{margin:0;background:var(--bg);font-family:var(--font-brand);color:var(--text-primary);padding:28px;display:flex;align-items:center;gap:56px}
+  .clear{position:relative;padding:22px;border:1px dashed var(--border-medium);border-radius:16px}
+  .clear img{display:block;border-radius:22%}
+  .tag{position:absolute;font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)}
+  .sizes{display:flex;align-items:flex-end;gap:22px}
+  .col{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .col img{border-radius:22%}
+  .col span{font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)}
+  .note{max-width:150px;font-size:12px;color:var(--text-tertiary);line-height:1.5}
+</style></head>
+<body>
+  <div class="clear">
+    <img src="../assets/AppIcon-1024.png" width="88" height="88">
+    <span class="tag" style="top:6px;left:50%;transform:translateX(-50%)">clear = dot ⌀</span>
+  </div>
+  <div class="sizes">
+    <div class="col"><img src="../assets/AppIcon-1024.png" width="64" height="64"><span>64</span></div>
+    <div class="col"><img src="../assets/AppIcon-1024.png" width="44" height="44"><span>44</span></div>
+    <div class="col"><img src="../assets/AppIcon-1024.png" width="24" height="24"><span>24 min</span></div>
+  </div>
+  <div class="note">Minimum on-screen size 24px (≈20pt). Below that the dot and the "B" counters break up — use the favicon-scale asset instead.</div>
+</body></html>

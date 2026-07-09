@@ -1,0 +1,22 @@
+<!-- @dsCard group="Brand" viewport="700x180" name="Motion — press feedback" subtitle="Instant ON, smooth OFF (0.22s ease-out) · scale 0.97" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body{margin:0;background:var(--bg);font-family:var(--font-brand);color:var(--text-primary);padding:24px;display:flex;align-items:center;gap:28px}
+  .demo{width:200px;height:96px;border-radius:var(--radius-medium);background:var(--surface-elevated);border:var(--glass-border);
+    display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-secondary);cursor:pointer;
+    transition:transform var(--dur-release) var(--ease-out), background var(--dur-release) var(--ease-out)}
+  .demo:active{transform:scale(.97);background:#232838;transition:none}
+  .specs{font-size:13px;color:var(--text-secondary);line-height:1.9}
+  .specs b{color:var(--text-primary);font-weight:600}
+</style></head>
+<body>
+  <div class="demo">Press me</div>
+  <div class="specs">
+    <div><b>ON</b> — highlight applies instantly (0s)</div>
+    <div><b>OFF</b> — eases out over 0.22s</div>
+    <div><b>Card</b> — spring, scale 0.97 + white-14% wash</div>
+    <div><b>Row</b> — brand-violet 15% tint</div>
+  </div>
+</body></html>

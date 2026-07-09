@@ -1,0 +1,43 @@
+<!-- @dsCard group="Type" viewport="700x300" name="Font families" subtitle="Inter (product) · Geist (web) · Geist Mono (numerals)" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body{margin:0;background:var(--bg);font-family:var(--font-brand);color:var(--text-primary);padding:26px;display:flex;flex-direction:column;gap:22px}
+  .fam{display:flex;gap:24px;align-items:baseline}
+  .name{width:150px;flex-shrink:0}
+  .name .t{font-size:15px;font-weight:700}
+  .name .r{font-size:12px;color:var(--text-tertiary);margin-top:2px;line-height:1.4}
+  .spec{font-size:34px;font-weight:700;letter-spacing:.5px}
+  .wts{display:flex;gap:18px;flex-wrap:wrap;margin-top:6px}
+  .wts span{font-size:15px;color:var(--text-secondary)}
+  hr{border:none;border-top:var(--glass-border);margin:0}
+</style></head>
+<body>
+  <div class="fam">
+    <div class="name"><div class="t">Inter</div><div class="r">Product (iOS / Android). Intended in code; SF Pro is the current runtime fallback.</div></div>
+    <div>
+      <div class="spec" style="font-family:'Inter',sans-serif">Money, finally under control.</div>
+      <div class="wts" style="font-family:'Inter',sans-serif">
+        <span style="font-weight:400">Regular 400</span><span style="font-weight:500">Medium 500</span><span style="font-weight:600">Semibold 600</span><span style="font-weight:700">Bold 700</span>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="fam">
+    <div class="name"><div class="t">Geist</div><div class="r">Marketing web (budgetella.app).</div></div>
+    <div>
+      <div class="spec" style="font-family:'Geist',sans-serif">Track. Budget. Reach.</div>
+      <div class="wts" style="font-family:'Geist',sans-serif">
+        <span style="font-weight:400">Regular</span><span style="font-weight:600">Semibold</span><span style="font-weight:700">Bold</span>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="fam">
+    <div class="name"><div class="t">Geist Mono</div><div class="r">Currency amounts — tabular figures so numbers don't jitter.</div></div>
+    <div>
+      <div class="spec bdg-tabular" style="font-family:'Geist Mono',monospace">₺245.847 · +12.000 · −73.000</div>
+    </div>
+  </div>
+</body></html>

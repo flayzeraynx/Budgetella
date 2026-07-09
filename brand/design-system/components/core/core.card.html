@@ -1,0 +1,67 @@
+<!-- @dsCard group="Components" viewport="700x520" name="Core" subtitle="GlassCard · Button · Amount · CategoryIcon · ListRow · SegmentedControl · Chip" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/lucide@latest"></script>
+<script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  body{margin:0;background:radial-gradient(120% 90% at 100% 0%, #1A1740 0%, #0A0B14 55%);
+    font-family:var(--font-brand);color:var(--text-primary);padding:24px}
+  .grid{display:flex;flex-direction:column;gap:22px;max-width:640px}
+  .row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .lbl{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:10px}
+  .panel{background:var(--surface);border:var(--glass-border);border-radius:var(--radius-medium);padding:8px 12px}
+</style></head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { GlassCard, Button, Amount, CategoryIcon, ListRow, SegmentedControl, Chip } = window.BudgetellaDesignSystem_962d64;
+    function Section({label, children}){ return (<div><div className="lbl">{label}</div>{children}</div>); }
+    function Demo(){
+      const [seg,setSeg]=React.useState('expense');
+      const [chip,setChip]=React.useState('all');
+      return (<div className="grid">
+        <Section label="Buttons">
+          <div className="row">
+            <Button>Save</Button>
+            <Button variant="secondary">Maybe later</Button>
+            <Button variant="ghost">Cancel</Button>
+            <Button size="sm">Small</Button>
+            <Button disabled>Disabled</Button>
+          </div>
+        </Section>
+        <Section label="Amount (tabular)">
+          <div className="row">
+            <Amount value="245.847" sign="income" showSign />
+            <Amount value="73.000" sign="expense" size="title" showSign />
+            <Amount value="500" currency="$" sign="neutral" size="body" />
+          </div>
+        </Section>
+        <Section label="Segmented · Chips">
+          <div className="row">
+            <SegmentedControl options={[{value:'expense',label:'Expense'},{value:'income',label:'Income'}]} value={seg} onChange={setSeg} tone={seg} />
+            <Chip active={chip==='all'} onClick={()=>setChip('all')}>All</Chip>
+            <Chip dotColor="#10F2A5">Freelance</Chip>
+            <Chip dotColor="#FB7185">Entertainment</Chip>
+          </div>
+        </Section>
+        <Section label="Category icons">
+          <div className="row">
+            {['shopping','transportation','bills','food','housing','income'].map(c=>(<CategoryIcon key={c} category={c} />))}
+          </div>
+        </Section>
+        <Section label="List rows (in a GlassCard)">
+          <GlassCard padding="6px 8px">
+            <ListRow category="shopping" title="Migros" subtitle="Shopping · 14:30" amount="1.240" sign="expense" onClick={()=>{}} />
+            <ListRow category="income" title="Freelance" subtitle="6 May" amount="12.000" sign="income" onClick={()=>{}} />
+          </GlassCard>
+        </Section>
+      </div>);
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(<Demo/>);
+    setTimeout(()=>window.lucide&&lucide.createIcons(),200);
+  </script>
+</body></html>

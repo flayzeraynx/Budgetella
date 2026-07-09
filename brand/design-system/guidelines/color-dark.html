@@ -1,0 +1,19 @@
+<!-- @dsCard group="Colors" viewport="700x170" name="Dark surfaces" subtitle="Layered navy — bg → surface → elevated (default theme)" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body{margin:0;background:var(--bg);font-family:var(--font-brand);color:var(--text-primary);padding:20px;display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .sw{border-radius:var(--radius-small);border:var(--glass-border);overflow:hidden}
+  .chip{height:56px}
+  .meta{padding:8px 10px;background:var(--surface)}
+  .n{font-size:12px;font-weight:600}
+  .h{font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary);margin-top:2px}
+</style></head>
+<body>
+  <div class="sw"><div class="chip" style="background:#0A0B14"></div><div class="meta"><div class="n">bg</div><div class="h">#0A0B14</div></div></div>
+  <div class="sw"><div class="chip" style="background:#14152A"></div><div class="meta"><div class="n">bg-2</div><div class="h">#14152A</div></div></div>
+  <div class="sw"><div class="chip" style="background:#1A1740"></div><div class="meta"><div class="n">bg-3</div><div class="h">#1A1740</div></div></div>
+  <div class="sw"><div class="chip" style="background:#11141C"></div><div class="meta"><div class="n">surface</div><div class="h">#11141C</div></div></div>
+  <div class="sw"><div class="chip" style="background:#1A1F2E"></div><div class="meta"><div class="n">elevated</div><div class="h">#1A1F2E</div></div></div>
+</body></html>

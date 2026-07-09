@@ -1,0 +1,20 @@
+<!-- @dsCard group="Brand" viewport="700x170" name="Category icons" subtitle="Lucide glyph in a circular tinted badge (per-category color)" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body{margin:0;background:var(--bg);font-family:var(--font-brand);color:var(--text-secondary);padding:24px;
+    display:grid;grid-template-columns:repeat(6,1fr);gap:16px;text-align:center}
+  .cell{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:12px}
+  .badge{width:48px;height:48px;border-radius:999px;display:flex;align-items:center;justify-content:center}
+</style></head>
+<body>
+  <div class="cell"><div class="badge" style="background:color-mix(in srgb,#8B6FFF 18%,transparent);color:#8B6FFF"><i data-lucide="shopping-bag"></i></div>Shopping</div>
+  <div class="cell"><div class="badge" style="background:color-mix(in srgb,#06B6D4 18%,transparent);color:#06B6D4"><i data-lucide="car"></i></div>Transport</div>
+  <div class="cell"><div class="badge" style="background:color-mix(in srgb,#FB7185 18%,transparent);color:#FB7185"><i data-lucide="file-text"></i></div>Bills</div>
+  <div class="cell"><div class="badge" style="background:color-mix(in srgb,#F59E0B 18%,transparent);color:#F59E0B"><i data-lucide="utensils"></i></div>Food</div>
+  <div class="cell"><div class="badge" style="background:color-mix(in srgb,#8B6FFF 18%,transparent);color:#8B6FFF"><i data-lucide="home"></i></div>Housing</div>
+  <div class="cell"><div class="badge" style="background:color-mix(in srgb,#10F2A5 18%,transparent);color:#10F2A5"><i data-lucide="trending-up"></i></div>Income</div>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons({attrs:{width:22,height:22}});</script>
+</body></html>

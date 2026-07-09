@@ -1,0 +1,107 @@
+/* ============================================================
+   Budgetella — COLOR TOKENS
+   Source of truth: iOS DesignSystem/Colors.swift + Android core/design.
+   App (iOS/Android) values are CANONICAL. Web marketing site uses a few
+   slightly different values — preserved separately under the --web-* group.
+   Dark is the default theme (:root). Light overrides live under
+   [data-theme="light"] / .theme-light.
+   ============================================================ */
+
+:root {
+  /* ---- Accent (mode-independent) ---- */
+  --accent-primary: #6E5BFF;
+  --accent-primary-light: #8B6FFF;
+  --accent-logo-top: #9585FF;       /* logo gradient top-leading */
+
+  /* Accent tint/shade ramp. 400/500/600 are the real code values
+     (primaryLight / primary / web accentDeep); the rest are derived
+     (oklch-harmonious) — flagged in the readme. Use 500 as the default. */
+  --accent-50:  #F1EEFF;
+  --accent-100: #E4DEFF;
+  --accent-200: #C9BEFF;
+  --accent-300: #AD9BFF;
+  --accent-400: #8B6FFF;   /* = primaryLight (real) */
+  --accent-500: #6E5BFF;   /* = primary (real) */
+  --accent-600: #5B47E0;   /* = web accentDeep (real) */
+  --accent-700: #4A39C0;
+  --accent-800: #372B90;
+  --accent-900: #241C60;
+
+  /* ---- Secondary (supporting) accent ----
+     Info cyan doubles as the secondary UI accent for non-financial
+     highlights (links, selected chips, focus) so violet stays reserved
+     for primary actions and money-positive contexts. */
+  --accent-secondary: #06B6D4;
+  --accent-secondary-light: #38D6EE;
+  --accent-secondary-deep: #0E7C90;
+
+  /* ---- Semantic financial (identical in both themes) ---- */
+  --income: #10F2A5;                /* mint — income / positive / "success" */
+  --expense: #FB7185;               /* coral-red — expense / error */
+  --warning: #F59E0B;
+  --info: #06B6D4;
+
+  /* ============ DARK (default) ============ */
+  --bg: #0A0B14;
+  --bg-2: #14152A;
+  --bg-3: #1A1740;
+  --surface: #11141C;
+  --surface-elevated: #1A1F2E;
+
+  --text-primary: #FFFFFF;
+  --text-secondary: rgba(255, 255, 255, 0.72);
+  --text-tertiary: rgba(255, 255, 255, 0.50);
+
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-medium: rgba(255, 255, 255, 0.16);
+
+  /* Interaction washes (from press-feedback code) */
+  --wash-press: rgba(255, 255, 255, 0.14);   /* card press white wash */
+  --wash-tint: rgba(110, 91, 255, 0.15);     /* list-row brand tint */
+
+  /* Glass fill — CSS stand-in for iOS .ultraThinMaterial */
+  --glass-fill: rgba(26, 31, 46, 0.55);
+  --glass-blur: 24px;
+
+  color-scheme: dark;
+}
+
+/* ============ LIGHT ============ */
+[data-theme="light"],
+.theme-light {
+  --bg: #F5F6FE;
+  --bg-2: #ECEEF9;
+  --bg-3: #E4E5F4;
+  --surface: #FFFFFF;
+  --surface-elevated: #F0F1FA;
+
+  --text-primary: #1A1B2E;
+  --text-secondary: rgba(26, 27, 46, 0.72);
+  --text-tertiary: rgba(26, 27, 46, 0.50);
+
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-medium: rgba(0, 0, 0, 0.16);
+
+  --wash-press: rgba(0, 0, 0, 0.06);
+  --wash-tint: rgba(110, 91, 255, 0.12);
+
+  --glass-fill: rgba(255, 255, 255, 0.6);
+
+  color-scheme: light;
+}
+
+/* ============ WEB (marketing budgetella.app) ============
+   Documented divergences from the app palette. Prefer the app tokens above
+   for product UI; use these only when recreating the marketing site. */
+:root {
+  --web-bg-deep: #06070F;
+  --web-bg-primary: #0A0B14;
+  --web-bg-surface: #14152A;
+  --web-bg-elevated: #1A1B30;
+  --web-brand: #6E5BFF;
+  --web-accent: #886FFF;     /* app: #8B6FFF */
+  --web-accent-deep: #5B47E0;
+  --web-income: #18F2A5;     /* app: #10F2A5 */
+  --web-expense: #F43F5E;    /* app: #FB7185 */
+  --web-gold: #E0B84A;
+}

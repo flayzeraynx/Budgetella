@@ -1,0 +1,24 @@
+/* ============================================================
+   Budgetella — EFFECTS: glass, elevation, motion
+   Source: iOS GlassCardModifier + press-feedback animations.
+   ============================================================ */
+
+:root {
+  /* Glass card: .ultraThinMaterial fill + 1px subtle border */
+  --glass-border: 1px solid var(--border-subtle);
+
+  /* Elevation (soft, low-contrast on dark navy) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.45);
+  --shadow-accent: 0 8px 28px rgba(110, 91, 255, 0.35);   /* glowing primary button / FAB */
+
+  /* Motion — "Instant ON, smooth OFF"
+     Press: highlight applies instantly; release eases out over 0.22s. */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);   /* @kind other */
+  --dur-instant: 0s;         /* @kind other */
+  --dur-release: 0.22s;      /* @kind other */
+  /* Card press spring: response 0.3, damping 0.7 → approx cubic below */
+  --spring: cubic-bezier(0.34, 1.4, 0.64, 1);   /* @kind other */
+  --press-scale: 0.97;       /* @kind other */
+}

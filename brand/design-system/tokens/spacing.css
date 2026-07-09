@@ -1,0 +1,19 @@
+/* ============================================================
+   Budgetella — SPACING TOKENS
+   Source: iOS DesignSystem/Spacing.swift. 4pt base grid.
+   ============================================================ */
+
+:root {
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-xxl: 32px;
+  --space-xxxl: 48px;
+
+  /* Layout constraints */
+  --max-content: 480px;   /* maxContentWidth */
+  --max-form: 360px;      /* maxFormWidth */
+  --min-touch: 44px;      /* minTouchTarget (fixed in code) */
+}

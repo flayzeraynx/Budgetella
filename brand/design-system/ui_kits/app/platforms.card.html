@@ -1,0 +1,56 @@
+<!-- @dsCard group="Platforms" viewport="900x600" name="iOS vs Android" subtitle="1:1 feature parity — platform-native chrome, shared tokens & components" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/lucide@latest"></script>
+<script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  html,body{margin:0}
+  body{background:radial-gradient(130% 90% at 20% 0%, #1A1740 0%, #06070F 60%);
+    font-family:var(--font-brand);padding:28px;box-sizing:border-box}
+  .eyebrow{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text-tertiary)}
+  .wrap{display:flex;gap:56px;align-items:flex-start;justify-content:center}
+  .col{display:flex;flex-direction:column;align-items:center;gap:14px}
+  .plat{color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .plat span{color:rgba(255,255,255,.5);font-weight:500;font-size:12px}
+  ::-webkit-scrollbar{width:0;height:0}
+</style></head>
+<body>
+  <div id="root"></div>
+  <script src="data.js"></script>
+  <script type="text/babel" src="PhoneFrame.jsx"></script>
+  <script type="text/babel" src="AndroidFrame.jsx"></script>
+  <script type="text/babel" src="TabBar.jsx"></script>
+  <script type="text/babel" src="DashboardScreen.jsx"></script>
+  <script type="text/babel">
+    function App(){
+      React.useEffect(()=>{ const t=setTimeout(()=>window.lucide&&lucide.createIcons(),120); return ()=>clearTimeout(t); });
+      return (
+        <div className="wrap">
+          <div className="col">
+            <div className="plat"><i data-lucide="apple" style={{width:16,height:16}}></i> iOS <span>SwiftUI</span></div>
+            <div style={{transform:'scale(.72)',transformOrigin:'top center',marginBottom:-224}}>
+              <PhoneFrame theme="dark">
+                <div style={{flex:1,position:'relative',overflow:'hidden'}}><DashboardScreen/></div>
+                <TabBar active="dashboard" onNav={()=>{}}/>
+              </PhoneFrame>
+            </div>
+          </div>
+          <div className="col">
+            <div className="plat"><i data-lucide="smartphone" style={{width:16,height:16}}></i> Android <span>Compose · Material</span></div>
+            <div style={{transform:'scale(.72)',transformOrigin:'top center',marginBottom:-224}}>
+              <AndroidFrame theme="dark">
+                <div style={{flex:1,position:'relative',overflow:'hidden'}}><DashboardScreen/></div>
+                <MaterialTabBar active="dashboard" onNav={()=>{}}/>
+              </AndroidFrame>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body></html>

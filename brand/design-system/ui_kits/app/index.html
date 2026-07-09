@@ -1,0 +1,72 @@
+<!-- @dsCard group="App" viewport="900x620" name="App — interactive" subtitle="Dashboard · Transactions · QuickEntry · Stats · AI · Paywall (dark + light)" -->
+<!-- @startingPoint section="App" subtitle="Budgetella iOS app — full click-through" viewport="900x800" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Budgetella — App UI Kit</title>
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/lucide@latest"></script>
+<script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(130% 90% at 20% 0%, #1A1740 0%, #06070F 60%);
+    font-family:var(--font-brand);display:flex;align-items:center;justify-content:center;gap:40px;padding:40px;box-sizing:border-box}
+  .eyebrow{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text-tertiary)}
+  .toolbar{position:fixed;top:20px;left:20px;display:flex;gap:8px;z-index:100}
+  .tbtn{padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);
+    color:#fff;font-family:var(--font-brand);font-size:13px;font-weight:600;cursor:pointer}
+  .tbtn.on{background:#6E5BFF;border-color:transparent}
+  ::-webkit-scrollbar{width:0;height:0}
+</style></head>
+<body>
+  <div class="toolbar" id="toolbar"></div>
+  <div id="root"></div>
+  <script src="data.js"></script>
+  <script type="text/babel" src="PhoneFrame.jsx"></script>
+  <script type="text/babel" src="AndroidFrame.jsx"></script>
+  <script type="text/babel" src="TabBar.jsx"></script>
+  <script type="text/babel" src="DashboardScreen.jsx"></script>
+  <script type="text/babel" src="TransactionsScreen.jsx"></script>
+  <script type="text/babel" src="QuickEntryScreen.jsx"></script>
+  <script type="text/babel" src="StatsScreen.jsx"></script>
+  <script type="text/babel" src="AiScreen.jsx"></script>
+  <script type="text/babel" src="PaywallScreen.jsx"></script>
+  <script type="text/babel">
+    const root=ReactDOM.createRoot(document.getElementById('root'));
+    function Root(){
+      const [theme,setTheme]=React.useState('dark');
+      const [platform,setPlatform]=React.useState('ios');
+      const [tab,setTab]=React.useState('dashboard');
+      const [paywall,setPaywall]=React.useState(false);
+      React.useEffect(()=>{ const t=setTimeout(()=>window.lucide&&lucide.createIcons(),80); return ()=>clearTimeout(t); });
+      const screens={
+        dashboard:<DashboardScreen/>, transactions:<TransactionsScreen/>,
+        quickentry:<QuickEntryScreen/>, stats:<StatsScreen/>, ai:<AiScreen/>,
+      };
+      // render toolbar buttons
+      React.useEffect(()=>{
+        const tb=document.getElementById('toolbar');
+        tb.innerHTML='';
+        const mk=(label,active,on)=>{const b=document.createElement('button');b.className='tbtn'+(active?' on':'');b.textContent=label;b.onclick=on;tb.appendChild(b);};
+        mk('iOS',platform==='ios',()=>setPlatform('ios'));
+        mk('Android',platform==='android',()=>setPlatform('android'));
+        mk('Dark',theme==='dark',()=>setTheme('dark'));
+        mk('Light',theme==='light',()=>setTheme('light'));
+        mk('Paywall',paywall,()=>setPaywall(p=>!p));
+      },[theme,platform,paywall]);
+      const Frame = platform==='android' ? AndroidFrame : PhoneFrame;
+      const Tabs = platform==='android' ? MaterialTabBar : TabBar;
+      return (
+        <Frame theme={theme}>
+          <div style={{flex:1,position:'relative',overflow:'hidden'}}>
+            {paywall ? <PaywallScreen onClose={()=>setPaywall(false)}/> : screens[tab]}
+          </div>
+          {!paywall && <Tabs active={tab} onNav={setTab}/>}
+        </Frame>
+      );
+    }
+    root.render(<Root/>);
+  </script>
+</body></html>
