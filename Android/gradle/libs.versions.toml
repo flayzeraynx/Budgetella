@@ -50,7 +50,7 @@ camerax = "1.4.1"
 mlkitTextRecognition = "16.0.1"
 
 # Google Play Billing (StoreKit 2 parity on Android)
-playBilling = "7.1.1"
+playBilling = "8.0.0"
 
 # Google Play In-App Review (Rate from Settings, v1.1.0)
 playReview = "2.0.2"

@@ -14,7 +14,7 @@ plugins {
 
 android {
     namespace = "com.budgetella.app"
-    compileSdk = 35
+    compileSdk = 36
 
     // Release signing — reads credentials from `keystore.properties` at the repo root.
     // That file is gitignored; CI populates it from secrets at build time.
@@ -39,9 +39,9 @@ android {
     defaultConfig {
         applicationId = "com.budgetella.app"
         minSdk = 26          // Android 8.0 — Compose-friendly + adaptive icons + biometric
-        targetSdk = 35
-        versionCode = 6      // 1.1.0 — testers feedback: walkthrough + rate + share
-        versionName = "1.1.0"
+        targetSdk = 36       // Android 16 — Play target-API requirement
+        versionCode = 8      // 1.1.2 — Play compliance: target API 36 + Billing 8
+        versionName = "1.1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
