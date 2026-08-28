@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
     <!--
         Splash screen theme — used during the cold-launch window before the
@@ -19,9 +19,14 @@
     -->
     <style name="Theme.Budgetella" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
         <item name="android:windowBackground">@color/background_dark</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+        <!--
+            No android:statusBarColor / navigationBarColor / windowLightStatusBar here.
+            Those are deprecated and ignored from API 35 (Android 15) on, and Play
+            flags them as "deprecated APIs for edge-to-edge". MainActivity calls
+            enableEdgeToEdge(), which sets transparent (scrimmed below API 29)
+            system bars at runtime on every API level, and BudgetellaTheme drives
+            the bar icon tint via WindowInsetsControllerCompat.
+        -->
     </style>
 
 </resources>
