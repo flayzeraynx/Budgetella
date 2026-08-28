@@ -40,8 +40,8 @@ android {
         applicationId = "com.budgetella.app"
         minSdk = 26          // Android 8.0 — Compose-friendly + adaptive icons + biometric
         targetSdk = 36       // Android 16 — Play target-API requirement
-        versionCode = 8      // 1.1.2 — Play compliance: target API 36 + Billing 8
-        versionName = "1.1.2"
+        versionCode = 9      // 1.1.3 — Play compliance: target API 36 + Billing 8
+        versionName = "1.1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
