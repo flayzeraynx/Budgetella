@@ -1,7 +1,7 @@
 [versions]
-agp = "8.7.3"
-kotlin = "2.0.21"
-ksp = "2.0.21-1.0.27"
+agp = "8.13.2"
+kotlin = "2.3.21"
+ksp = "2.3.11"
 
 # AndroidX
 coreKtx = "1.15.0"
@@ -15,14 +15,14 @@ appcompat = "1.7.0"
 material = "1.12.0"
 
 # Compose
-composeBom = "2024.12.01"
+composeBom = "2026.06.01"
 
 # Hilt
-hilt = "2.52"
+hilt = "2.58"
 hiltNavigationCompose = "1.2.0"
 
 # Room
-room = "2.6.1"
+room = "2.8.4"
 
 # Firebase
 firebaseBom = "33.7.0"
@@ -50,7 +50,7 @@ camerax = "1.4.1"
 mlkitTextRecognition = "16.0.1"
 
 # Google Play Billing (StoreKit 2 parity on Android)
-playBilling = "8.0.0"
+playBilling = "9.1.0"
 
 # Google Play In-App Review (Rate from Settings, v1.1.0)
 playReview = "2.0.2"
