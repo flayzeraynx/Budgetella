@@ -1,14 +1,28 @@
 {
-  "functions": {
-    "source": "budgetella_functions",
-    "predeploy": [],
-    "ignore": [
-      "node_modules",
-      ".git",
-      "firebase-debug.log",
-      "firebase-debug.*.log"
-    ]
-  },
+  "functions": [
+    {
+      "source": "budgetella_functions",
+      "predeploy": [],
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ],
+      "codebase": "default"
+    },
+    {
+      "source": "user-cleanup-functions",
+      "codebase": "user-cleanup",
+      "predeploy": [],
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ]
+    }
+  ],
   "hosting": {
     "public": "web",
     "ignore": [
