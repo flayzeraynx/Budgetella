@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.budgetella.app.R
 import com.budgetella.app.core.design.BrandColor
+import com.budgetella.app.core.design.ScreenTitleBar
 import com.budgetella.app.core.design.BrandText
 import com.budgetella.app.core.design.Spacing
 import com.budgetella.app.data.auth.AuthError
@@ -73,6 +74,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun DeleteAccountSheet(
     onDismiss: () -> Unit,
+    onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val vm: DeleteAccountViewModel = hiltViewModel()
@@ -114,10 +116,9 @@ fun DeleteAccountSheet(
                 .padding(top = Spacing.md, bottom = Spacing.xxl),
             verticalArrangement = Arrangement.spacedBy(Spacing.lg),
         ) {
-            Text(
-                text = stringResource(R.string.delete_account_title),
-                style = BrandText.largeTitle,
-                color = BrandColor.textPrimary(),
+            ScreenTitleBar(
+                title = stringResource(R.string.delete_account_title),
+                onBack = onBack,
             )
 
             // 1. Warning card

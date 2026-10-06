@@ -155,16 +155,18 @@ private fun GreetingHero(
     val firstName = state.user?.displayName?.substringBefore(' ')?.takeIf { it.isNotBlank() }
         ?: state.user?.email?.substringBefore('@')
         ?: ""
-    val greetingLabel = remember {
-        val hour = java.time.LocalDateTime.now().hour
-        val resId = when (hour) {
+    // Only the hour is cached — the label must be resolved via stringResource so
+    // it re-reads the right locale when the app language changes (the old
+    // `remember { context.getString(...) }` froze the English string).
+    val greetingHour = remember { java.time.LocalDateTime.now().hour }
+    val greetingLabel = stringResource(
+        when (greetingHour) {
             in 5..11 -> R.string.dashboard_greeting_label_morning
             in 12..17 -> R.string.dashboard_greeting_label_afternoon
             in 18..22 -> R.string.dashboard_greeting_label_evening
             else -> R.string.dashboard_greeting_label_night
         }
-        context.getString(resId)
-    }
+    )
     Row(
         modifier = Modifier
             .fillMaxWidth()

@@ -7,6 +7,7 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import androidx.compose.runtime.Stable
+import com.budgetella.app.R
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -126,19 +127,19 @@ class VoiceRecognitionState(private val context: Context) {
 
         override fun onError(errorCode: Int) {
             audioLevel = 0f
-            // Map to human-readable Turkish messages. null = soft error (silence /
-            // no-match) — finalise with whatever partial text we already have.
-            val msg = when (errorCode) {
-                SpeechRecognizer.ERROR_AUDIO                  -> "Ses kaydı hatası."
-                SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS ->
-                    "Mikrofon izni verilmedi.\nAyarlar > Budgetella > Mikrofon"
-                SpeechRecognizer.ERROR_RECOGNIZER_BUSY        -> "Tanıyıcı meşgul. Tekrar dene."
-                SpeechRecognizer.ERROR_SERVER                 -> "Sunucu hatası. Tekrar dene."
+            // Map to a localised message. null = soft error (silence / no-match)
+            // — finalise with whatever partial text we already have.
+            val msgRes = when (errorCode) {
+                SpeechRecognizer.ERROR_AUDIO                    -> R.string.voice_entry_error_audio
+                SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> R.string.voice_entry_error_no_permission
+                SpeechRecognizer.ERROR_RECOGNIZER_BUSY          -> R.string.voice_entry_error_busy
+                SpeechRecognizer.ERROR_SERVER                   -> R.string.voice_entry_error_server
                 SpeechRecognizer.ERROR_NETWORK,
-                SpeechRecognizer.ERROR_NETWORK_TIMEOUT        -> "İnternet bağlantısı gerekli."
+                SpeechRecognizer.ERROR_NETWORK_TIMEOUT          -> R.string.voice_entry_error_network
                 // ERROR_NO_MATCH / ERROR_SPEECH_TIMEOUT → treat as silent finalisers
-                else                                          -> null
+                else                                            -> null
             }
+            val msg = msgRes?.let { context.getString(it) }
             if (!isFinal) {
                 if (msg != null) error = msg
                 isFinal = true     // triggers the parse LaunchedEffect in VoiceEntrySheet

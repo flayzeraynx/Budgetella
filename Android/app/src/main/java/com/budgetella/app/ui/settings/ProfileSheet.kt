@@ -40,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.budgetella.app.R
 import com.budgetella.app.core.design.BrandColor
+import com.budgetella.app.core.design.ScreenTitleBar
 import com.budgetella.app.core.design.BrandText
 import com.budgetella.app.core.design.Spacing
 import com.budgetella.app.core.design.moneyText
@@ -54,6 +55,7 @@ import com.budgetella.app.core.design.moneyText
 @Composable
 fun ProfileSheet(
     onDismiss: () -> Unit,
+    onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val vm: ProfileViewModel = hiltViewModel()
@@ -73,11 +75,9 @@ fun ProfileSheet(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(Spacing.lg),
         ) {
-            Text(
-                text = stringResource(R.string.profile_title),
-                style = BrandText.largeTitle,
-                color = BrandColor.textPrimary(),
-                modifier = Modifier.fillMaxWidth(),
+            ScreenTitleBar(
+                title = stringResource(R.string.profile_title),
+                onBack = onBack,
             )
 
             // Avatar + name + email

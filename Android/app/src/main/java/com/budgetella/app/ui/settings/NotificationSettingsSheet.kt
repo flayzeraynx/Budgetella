@@ -42,6 +42,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.budgetella.app.R
 import com.budgetella.app.core.design.BrandColor
+import com.budgetella.app.core.design.ScreenTitleBar
 import com.budgetella.app.core.design.BrandText
 import com.budgetella.app.core.design.Spacing
 
@@ -52,6 +53,7 @@ import com.budgetella.app.core.design.Spacing
 @Composable
 fun NotificationSettingsSheet(
     onDismiss: () -> Unit,
+    onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val vm: NotificationSettingsViewModel = hiltViewModel()
@@ -71,10 +73,9 @@ fun NotificationSettingsSheet(
                 .padding(top = Spacing.md, bottom = Spacing.xxl),
             verticalArrangement = Arrangement.spacedBy(Spacing.lg),
         ) {
-            Text(
-                text = stringResource(R.string.notif_settings_title),
-                style = BrandText.largeTitle,
-                color = BrandColor.textPrimary(),
+            ScreenTitleBar(
+                title = stringResource(R.string.notif_settings_title),
+                onBack = onBack,
             )
 
             // Master toggle

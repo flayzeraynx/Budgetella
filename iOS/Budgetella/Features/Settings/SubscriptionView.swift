@@ -16,11 +16,10 @@ struct SubscriptionView: View {
     @State private var restoreError: String?
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                BrandColor.background.ignoresSafeArea()
+        ZStack {
+            BrandColor.background.ignoresSafeArea()
 
-                ScrollView {
+            ScrollView {
                     VStack(spacing: Spacing.xl) {
 
                         // Status card
@@ -75,16 +74,7 @@ struct SubscriptionView: View {
             }
             .navigationTitle("Aboneliğim")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Kapat") { dismiss() }
-                        .foregroundStyle(BrandColor.primary)
-                }
-            }
             .toolbarBackground(BrandColor.background, for: .navigationBar)
-        }
-        .presentationDetents([.large])
-        .presentationDragIndicator(.visible)
     }
 
     // MARK: - Status card

@@ -76,11 +76,10 @@ struct ProfileView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                BrandColor.background.ignoresSafeArea()
+        ZStack {
+            BrandColor.background.ignoresSafeArea()
 
-                ScrollView(showsIndicators: false) {
+            ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
                         // ── Gradient header
                         headerSection
@@ -114,22 +113,10 @@ struct ProfileView: View {
             .navigationTitle("Profil")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(BrandColor.background, for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(BrandColor.textSecondary)
-                    }
-                }
-            }
             .sheet(isPresented: $showChangePassword) {
                 ChangePasswordView(authService: authService)
             }
-        }
-        .task { await subscriptionService.setup(userId: currentUserId) }
+            .task { await subscriptionService.setup(userId: currentUserId) }
     }
 
     // MARK: - Header section

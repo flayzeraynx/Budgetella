@@ -1,8 +1,8 @@
 package com.budgetella.app.ui.settings
 
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -55,17 +55,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.budgetella.app.BuildConfig
 import com.budgetella.app.R
+import com.budgetella.app.data.model.AppLanguage
 import com.budgetella.app.core.design.BrandColor
 import com.budgetella.app.core.design.BrandText
+import com.budgetella.app.core.design.ScreenTitleBar
 import com.budgetella.app.core.design.Spacing
-import com.google.android.play.core.review.ReviewManagerFactory
 
 /**
  * Settings — port of iOS SettingsView.
@@ -77,6 +80,7 @@ import com.google.android.play.core.review.ReviewManagerFactory
 @Composable
 fun SettingsScreen(
     onDismiss: () -> Unit,
+    onClose: (() -> Unit)? = null,
     onShowTheme: () -> Unit,
     onShowLanguage: () -> Unit,
     onShowCurrency: () -> Unit,
@@ -95,6 +99,12 @@ fun SettingsScreen(
 
     var confirmSignOut by remember { mutableStateOf(false) }
 
+    // Legal links follow the in-app language so Turkish users land on the TR
+    // pages (budgetella.app/*-tr) instead of the English originals.
+    val isTurkish = state.language == AppLanguage.Turkish
+    val privacyUrl = if (isTurkish) "https://budgetella.app/privacy-tr" else "https://budgetella.app/privacy"
+    val termsUrl = if (isTurkish) "https://budgetella.app/terms-tr" else "https://budgetella.app/terms"
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -108,11 +118,10 @@ fun SettingsScreen(
                 .padding(top = Spacing.md, bottom = Spacing.xxl),
             verticalArrangement = Arrangement.spacedBy(Spacing.lg),
         ) {
-            // Title
-            Text(
-                text = stringResource(R.string.settings_title),
-                style = BrandText.largeTitle,
-                color = BrandColor.textPrimary(),
+            // Title + close (✕ sits at the far right, where the avatar was)
+            ScreenTitleBar(
+                title = stringResource(R.string.settings_title),
+                onClose = onClose,
                 modifier = Modifier.padding(top = Spacing.sm, bottom = Spacing.xs),
             )
 
@@ -262,7 +271,7 @@ fun SettingsScreen(
                     title = stringResource(R.string.settings_privacy),
                     onClick = {
                         runCatching {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://budgetella.app/privacy")))
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(privacyUrl)))
                         }
                     },
                 )
@@ -273,7 +282,7 @@ fun SettingsScreen(
                     title = stringResource(R.string.settings_terms),
                     onClick = {
                         runCatching {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://budgetella.app/terms")))
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(termsUrl)))
                         }
                     },
                 )
@@ -289,21 +298,27 @@ fun SettingsScreen(
                     tint = BrandColor.Warning,
                     title = stringResource(R.string.settings_rate),
                     onClick = {
-                        val activity = context as? Activity ?: return@NavigationRow
-                        val manager = ReviewManagerFactory.create(context)
-                        manager.requestReviewFlow().addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                manager.launchReviewFlow(activity, task.result)
-                            } else {
-                                // Fallback — open Play Store listing if in-app flow can't show.
-                                runCatching {
-                                    context.startActivity(
-                                        Intent(
-                                            Intent.ACTION_VIEW,
-                                            Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}")
-                                        )
+                        // Open the Play Store listing directly. The in-app review
+                        // API (ReviewManager) was dropped: it silently no-ops on
+                        // emulators / sideloaded builds and is quota-limited even
+                        // in production, so the button appeared to "do nothing".
+                        // A direct listing deep link always lands somewhere the
+                        // user can rate. market:// opens the Play Store app;
+                        // falls back to the browser if it isn't installed.
+                        val pkg = context.packageName
+                        runCatching {
+                            context.startActivity(
+                                Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$pkg"))
+                                    .setPackage("com.android.vending")
+                            )
+                        }.onFailure {
+                            runCatching {
+                                context.startActivity(
+                                    Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse("https://play.google.com/store/apps/details?id=$pkg")
                                     )
-                                }
+                                )
                             }
                         }
                     },
@@ -345,14 +360,63 @@ fun SettingsScreen(
                 )
             }
 
-            // Version footer
+            // About — app identity + version/build live together here.
+            SectionHeader(stringResource(R.string.settings_section_about))
+            SettingsGroup {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = Spacing.lg, horizontal = Spacing.md),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+                ) {
+                    Image(
+                        painter = painterResource(R.mipmap.ic_launcher_foreground),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(RoundedCornerShape(Spacing.radiusMedium)),
+                    )
+                    Text(
+                        text = stringResource(R.string.app_name),
+                        style = BrandText.title,
+                        color = BrandColor.textPrimary(),
+                    )
+                    Text(
+                        text = "${stringResource(R.string.settings_version)} ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+                        style = BrandText.footnote,
+                        color = BrandColor.textTertiary(),
+                    )
+                    Text(
+                        text = stringResource(R.string.about_tagline),
+                        style = BrandText.footnote,
+                        color = BrandColor.textSecondary(),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = Spacing.xs),
+                    )
+                    Text(
+                        text = stringResource(R.string.about_copyright),
+                        style = BrandText.caption,
+                        color = BrandColor.textTertiary(),
+                        modifier = Modifier.padding(top = Spacing.xs),
+                    )
+                    Text(
+                        text = "ozankilic.com",
+                        style = BrandText.caption,
+                        color = BrandColor.Primary,
+                        modifier = Modifier
+                            .padding(top = Spacing.xs)
+                            .clickable {
+                                runCatching {
+                                    context.startActivity(
+                                        Intent(Intent.ACTION_VIEW, Uri.parse("https://ozankilic.com"))
+                                    )
+                                }
+                            },
+                    )
+                }
+            }
             Spacer(Modifier.height(Spacing.md))
-            Text(
-                text = "${stringResource(R.string.settings_version)} ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
-                style = BrandText.footnote,
-                color = BrandColor.textTertiary(),
-                modifier = Modifier.fillMaxWidth().padding(Spacing.md),
-            )
         }
     }
 
