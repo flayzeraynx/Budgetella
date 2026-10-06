@@ -12,10 +12,12 @@ struct OnboardingCurrencyView: View {
     var vm: OnboardingViewModel
     @State private var appeared = false
 
-    // V1: TRY + USD only. EUR/GBP unlock with V2 multi-currency.
+    // Full currency set — kept in sync with Settings (TRY/USD/EUR/GBP).
     private let currencies: [(currency: AppCurrency, flag: String, nameKey: String)] = [
         (.tryLira, "🇹🇷", "Türk Lirası"),
         (.usd,     "🇺🇸", "US Dollar"),
+        (.eur,     "🇪🇺", "Euro"),
+        (.gbp,     "🇬🇧", "British Pound"),
     ]
 
     var body: some View {

@@ -136,6 +136,7 @@ struct QuickEntryView: View {
             }
         }
         .preferredColorScheme(preferredScheme)
+        .onAppear { EntryPerf.mark("QuickEntryView.onAppear (sheet content built)") }
     }
 }
 

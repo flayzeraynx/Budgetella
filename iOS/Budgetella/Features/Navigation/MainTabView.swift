@@ -17,6 +17,9 @@ struct MainTabView: View {
     @State private var showQuickEntry = false
     @State private var entryMode: EntryMode = .manual
     @State private var dragOffset: CGFloat = 0
+    // Settings is a full page rendered over the pages (the tab bar stays
+    // visible + tappable underneath the top bar) — parity with Android.
+    @State private var showSettings = false
     // Lazy tab mounting: only views that have been activated (or are adjacent
     // to the active tab) are rendered. Avoids the cost of evaluating all four
     // tab view-graphs eagerly at launch.
@@ -55,7 +58,17 @@ struct MainTabView: View {
             }
             .padding(.bottom, 72)
 
+            if showSettings {
+                SettingsView(onClose: {
+                    withAnimation(.spring(response: 0.34, dampingFraction: 0.86)) { showSettings = false }
+                })
+                .padding(.bottom, 72)
+                .transition(.move(edge: .trailing).combined(with: .opacity))
+                .zIndex(2)
+            }
+
             CustomTabBar(selected: $selectedTab, onModeSelect: { mode in
+                EntryPerf.begin("FAB tap → showQuickEntry (\(mode))")
                 entryMode = mode
                 showQuickEntry = true
             })
@@ -117,6 +130,8 @@ struct MainTabView: View {
         // selection extends the set so the next swipe finds the page ready.
         .onAppear { ensureAdjacentMounted(for: selectedTab) }
         .onChange(of: selectedTab) { _, newTab in
+            // Selecting any tab leaves Settings (parity with Android).
+            if showSettings { withAnimation(.easeInOut(duration: 0.2)) { showSettings = false } }
             ensureAdjacentMounted(for: newTab)
         }
     }
@@ -128,7 +143,9 @@ struct MainTabView: View {
         Group {
             if mountedTabs.contains(tab) {
                 switch tab {
-                case .home:  DashboardView()
+                case .home:  DashboardView(onShowSettings: {
+                    withAnimation(.spring(response: 0.34, dampingFraction: 0.86)) { showSettings = true }
+                })
                 case .list:  TransactionsView()
                 case .stats: StatsView()
                 case .ai:    BudgiView()
@@ -175,6 +192,7 @@ struct MainTabView: View {
         // clear ~24 pt and stay clearly horizontal start translating pages.
         DragGesture(minimumDistance: 24, coordinateSpace: .local)
             .onChanged { value in
+                guard !showSettings else { return }   // settings page owns the gestures
                 let dx = value.translation.width
                 let dy = value.translation.height
                 guard abs(dx) > abs(dy) * 1.5 else { return }
@@ -191,6 +209,17 @@ struct MainTabView: View {
             }
             .onEnded { value in
                 let dx = value.translation.width
+                let dy = value.translation.height
+                let snapAnimation: Animation = .spring(response: 0.34, dampingFraction: 0.86)
+
+                // Settings open, or a vertical-dominant drag (scrolling the page's
+                // list/chart) must NEVER switch tabs — otherwise an up/down scroll
+                // on the dashboard flicks over to the List tab.
+                guard !showSettings, abs(dx) > abs(dy) * 1.5 else {
+                    withAnimation(snapAnimation) { dragOffset = 0 }
+                    return
+                }
+
                 let velocity = value.velocity.width
                 let commitThreshold = screenWidth * 0.22
                 let flickThreshold: CGFloat = 480
@@ -199,7 +228,6 @@ struct MainTabView: View {
                 let goesPrev = dx >  commitThreshold || velocity >  flickThreshold
 
                 let tabs = AppTab.allCases
-                let snapAnimation: Animation = .spring(response: 0.34, dampingFraction: 0.86)
 
                 if goesNext, let idx = tabs.firstIndex(of: selectedTab), idx < tabs.count - 1 {
                     withAnimation(snapAnimation) {

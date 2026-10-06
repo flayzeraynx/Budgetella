@@ -29,6 +29,7 @@ public final class FirestoreService {
 
     private let db = Firestore.firestore()
 
+
     // Active snapshot listeners — torn down on sign-out or when observing a
     // different uid. Both collections (transactions + categories) get one
     // listener each so edits made on Android land in SwiftData within a
@@ -147,19 +148,8 @@ public final class FirestoreService {
     public func fetchAndSync(userId: String, modelContext: ModelContext) async throws {
         isSyncing = true
         defer { isSyncing = false }
-
-        // Purge any local data that belongs to a different user before proceeding.
-        // This guards against cross-user leaks when the auth session changes without
-        // a proper sign-out (e.g. token expiry, account switching).
-        let wrongTxs = ((try? modelContext.fetch(FetchDescriptor<Transaction>())) ?? [])
-            .filter { $0.userId != userId }
-        let wrongCats = ((try? modelContext.fetch(FetchDescriptor<Category>())) ?? [])
-            .filter { $0.userId != userId }
-        if !wrongTxs.isEmpty || !wrongCats.isEmpty {
-            wrongTxs.forEach { modelContext.delete($0) }
-            wrongCats.forEach { modelContext.delete($0) }
-            try? modelContext.save()
-        }
+        let syncStart = CFAbsoluteTimeGetCurrent()
+        EntryPerf.event("fetchAndSync START")
 
         async let txFetch  = transactionsRef(userId).getDocuments()
         async let catFetch = categoriesRef(userId).getDocuments()
@@ -187,34 +177,15 @@ public final class FirestoreService {
             return
         }
 
-        // Firestore'da veri var → lokal veriyi temizle ve Firestore'dan indir
-        let localTxsToDelete = (try? modelContext.fetch(FetchDescriptor<Transaction>())) ?? []
-        localTxsToDelete.forEach { modelContext.delete($0) }
-        try? modelContext.save()
-        let localCatsToDelete = (try? modelContext.fetch(FetchDescriptor<Category>())) ?? []
-        localCatsToDelete.forEach { modelContext.delete($0) }
-
-        // Kategorileri ekle + slug → Category map oluştur
-        var categoryBySlug: [String: Category] = [:]
-        for doc in catDocs.documents {
-            if let cat = category(from: doc.data(), userId: userId) {
-                modelContext.insert(cat)
-                if let slug = cat.slug, !slug.isEmpty {
-                    categoryBySlug[slug] = cat
-                }
-            }
-        }
-
-        // Transaksiyonları ekle, kategori ilişkisini slug üzerinden kur
-        for doc in txDocs.documents {
-            if let tx = transaction(from: doc.data(), userId: userId) {
-                let catSlug = doc.data()["categorySlug"] as? String ?? ""
-                tx.category = categoryBySlug[catSlug]
-                modelContext.insert(tx)
-            }
-        }
-
-        try? modelContext.save()
+        // Firestore'da veri var → merge'i ARKA PLAN aktöründe yap. Main thread
+        // hiç bloke olmaz (ilk açılışta bile klavye/scroll akıcı). Önce ucuz
+        // parse → Sendable DTO, sonra background ModelContext'te upsert+reconcile.
+        let parseStart = CFAbsoluteTimeGetCurrent()
+        let catDTOs = catDocs.documents.compactMap { catDTO(from: $0.data(), userId: userId) }
+        let txDTOs  = txDocs.documents.compactMap { txDTO(from: $0.data(), userId: userId) }
+        EntryPerf.event("parse done (MAIN) — \(catDTOs.count + txDTOs.count) dtos in \(Int((CFAbsoluteTimeGetCurrent() - parseStart) * 1000)) ms")
+        await SyncEngine.reconcile(container: modelContext.container, userId: userId, cats: catDTOs, txs: txDTOs)
+        EntryPerf.event("fetchAndSync END — cats=\(catDocs.documents.count) txs=\(txDocs.documents.count) in \(Int((CFAbsoluteTimeGetCurrent() - syncStart) * 1000)) ms")
         UserDefaults.standard.set(true, forKey: "categoriesSeeded")
     }
 
@@ -227,6 +198,7 @@ public final class FirestoreService {
         guard observingUid != userId else { return }
         stopObserving()
         observingUid = userId
+        let container = modelContext.container
 
         categoriesListener = categoriesRef(userId).addSnapshotListener { [weak self] snapshot, error in
             guard let self else { return }
@@ -235,16 +207,18 @@ public final class FirestoreService {
                 return
             }
             guard let snapshot else { return }
-            // Capture document changes off the main thread, then dispatch the
-            // tiny delta (typically 1–3 docs) to the main actor. Reading
-            // `snapshot.documentChanges` is the cheap way to avoid iterating
-            // all N rows on every listener firing — for the Ozan account
-            // that's ~2k transactions per snapshot and was triggering a
-            // detached-backing-data crash mid-render.
-            let changes = snapshot.documentChanges
-            Task { @MainActor in
-                self.applyCategoryChanges(changes, userId: userId, modelContext: modelContext)
+            // Parse the delta into Sendable DTOs here (off the main thread), then
+            // merge on the background engine — the main actor is never touched.
+            let deltas: [SyncChange<CatDTO>] = snapshot.documentChanges.compactMap { (ch) -> SyncChange<CatDTO>? in
+                let data = ch.document.data()
+                guard let idStr = data["id"] as? String, let id = UUID(uuidString: idStr) else { return nil }
+                switch ch.type {
+                case .removed: return .remove(id)
+                case .added, .modified: return self.catDTO(from: data, userId: userId).map { .upsert($0) }
+                @unknown default: return nil
+                }
             }
+            Task { await SyncEngine.applyCategoryChanges(container: container, deltas) }
         }
 
         transactionsListener = transactionsRef(userId).addSnapshotListener { [weak self] snapshot, error in
@@ -254,9 +228,20 @@ public final class FirestoreService {
                 return
             }
             guard let snapshot else { return }
-            let changes = snapshot.documentChanges
-            Task { @MainActor in
-                self.applyTransactionChanges(changes, userId: userId, modelContext: modelContext)
+            let applyStart = CFAbsoluteTimeGetCurrent()
+            let deltas: [SyncChange<TxDTO>] = snapshot.documentChanges.compactMap { (ch) -> SyncChange<TxDTO>? in
+                let data = ch.document.data()
+                guard let idStr = data["id"] as? String, let id = UUID(uuidString: idStr) else { return nil }
+                switch ch.type {
+                case .removed: return .remove(id)
+                case .added, .modified: return self.txDTO(from: data, userId: userId).map { .upsert($0) }
+                @unknown default: return nil
+                }
+            }
+            let count = deltas.count
+            Task {
+                await SyncEngine.applyTransactionChanges(container: container, deltas)
+                EntryPerf.event("listener TX apply — \(count) changes in \(Int((CFAbsoluteTimeGetCurrent() - applyStart) * 1000)) ms (bg)")
             }
         }
     }
@@ -286,13 +271,7 @@ public final class FirestoreService {
             switch change.type {
             case .added, .modified:
                 if let local = fetchCategory(by: uuid, in: modelContext) {
-                    if let name = data["name"] as? String { local.name = name }
-                    if let slug = data["slug"] as? String { local.slug = slug.isEmpty ? nil : slug }
-                    if let typeRaw = data["type"] as? String, let t = TransactionType(rawValue: typeRaw) { local.type = t }
-                    if let icon = data["iconName"] as? String { local.iconName = icon }
-                    if let color = data["colorHex"] as? String { local.colorHex = color }
-                    if let isDefault = data["isDefault"] as? Bool { local.isDefault = isDefault }
-                    if let sortOrder = data["sortOrder"] as? Int { local.sortOrder = sortOrder }
+                    applyCategoryFields(data, to: local)
                 } else if let cat = category(from: data, userId: userId) {
                     modelContext.insert(cat)
                 }
@@ -314,6 +293,7 @@ public final class FirestoreService {
         modelContext: ModelContext,
     ) {
         if changes.isEmpty { return }
+        let applyStart = CFAbsoluteTimeGetCurrent()
         // Build slug → Category lookup once for the batch. First-write-wins on
         // duplicate slugs to avoid Dictionary(uniqueKeysWithValues:) traps.
         let allCats = (try? modelContext.fetch(FetchDescriptor<Category>())) ?? []
@@ -324,6 +304,19 @@ public final class FirestoreService {
             }
         }
 
+        // Large batch (first snapshot = every doc as .added) → one bulk fetch
+        // into an id-map beats thousands of per-doc predicate fetches. Small
+        // live edits keep the cheap per-doc path (no map-build overhead).
+        let useMap = changes.count > 30
+        var txById: [UUID: Transaction] = [:]
+        if useMap {
+            let allTx = (try? modelContext.fetch(FetchDescriptor<Transaction>())) ?? []
+            for t in allTx { txById[t.id] = t }
+        }
+        func localTx(_ id: UUID) -> Transaction? {
+            useMap ? txById[id] : fetchTransaction(by: id, in: modelContext)
+        }
+
         for change in changes {
             let data = change.document.data()
             guard let idStr = data["id"] as? String, let uuid = UUID(uuidString: idStr) else { continue }
@@ -331,20 +324,26 @@ public final class FirestoreService {
             case .added, .modified:
                 let catSlug = data["categorySlug"] as? String ?? ""
                 let resolvedCat = catBySlug[catSlug]
-                if let local = fetchTransaction(by: uuid, in: modelContext) {
-                    if let amount = data["amount"] as? Double { local.amount = Decimal(amount) }
-                    if let typeRaw = data["type"] as? String, let t = TransactionType(rawValue: typeRaw) { local.type = t }
-                    if let note = data["note"] as? String { local.note = note }
-                    if let dateTS = data["date"] as? Timestamp { local.date = dateTS.dateValue() }
-                    if let statusRaw = data["status"] as? String, let s = TransactionStatus(rawValue: statusRaw) { local.status = s }
-                    if let currency = data["currency"] as? String { local.currency = currency }
-                    local.category = resolvedCat
+                if let local = localTx(uuid) {
+                    // Skip rows fetchAndSync already wrote this launch (unchanged)
+                    // → first snapshot becomes ~zero writes.
+                    let remoteUpdated = (data["updatedAt"] as? Timestamp)?.dateValue()
+                    let unchanged = remoteUpdated.map { abs(local.updatedAt.timeIntervalSince($0)) < 0.001 } ?? false
+                    if !unchanged {
+                        applyTransactionFields(data, to: local)
+                        local.category = resolvedCat
+                    } else if local.category !== resolvedCat {
+                        local.category = resolvedCat
+                    }
                 } else if let tx = transaction(from: data, userId: userId) {
+                    if let ts = data["updatedAt"] as? Timestamp { tx.updatedAt = ts.dateValue() }
+                    if let ts = data["createdAt"] as? Timestamp { tx.createdAt = ts.dateValue() }
                     tx.category = resolvedCat
                     modelContext.insert(tx)
+                    if useMap { txById[uuid] = tx }
                 }
             case .removed:
-                if let local = fetchTransaction(by: uuid, in: modelContext), local.userId == userId {
+                if let local = localTx(uuid), local.userId == userId {
                     modelContext.delete(local)
                 }
             @unknown default:
@@ -352,6 +351,7 @@ public final class FirestoreService {
             }
         }
         try? modelContext.save()
+        EntryPerf.event("listener TX apply — \(changes.count) changes in \(Int((CFAbsoluteTimeGetCurrent() - applyStart) * 1000)) ms")
     }
 
     @MainActor
@@ -364,6 +364,30 @@ public final class FirestoreService {
     private func fetchTransaction(by id: UUID, in modelContext: ModelContext) -> Transaction? {
         let descriptor = FetchDescriptor<Transaction>(predicate: #Predicate { $0.id == id })
         return (try? modelContext.fetch(descriptor))?.first
+    }
+
+    // Shared field-appliers — single source of truth for the upsert path used
+    // by both fetchAndSync (initial reconcile) and the live snapshot listeners.
+    private func applyCategoryFields(_ data: [String: Any], to local: Category) {
+        if let name = data["name"] as? String { local.name = name }
+        if let slug = data["slug"] as? String { local.slug = slug.isEmpty ? nil : slug }
+        if let typeRaw = data["type"] as? String, let t = TransactionType(rawValue: typeRaw) { local.type = t }
+        if let icon = data["iconName"] as? String { local.iconName = icon }
+        if let color = data["colorHex"] as? String { local.colorHex = color }
+        if let isDefault = data["isDefault"] as? Bool { local.isDefault = isDefault }
+        if let sortOrder = data["sortOrder"] as? Int { local.sortOrder = sortOrder }
+    }
+
+    private func applyTransactionFields(_ data: [String: Any], to local: Transaction) {
+        if let amount = data["amount"] as? Double { local.amount = Decimal(amount) }
+        if let typeRaw = data["type"] as? String, let t = TransactionType(rawValue: typeRaw) { local.type = t }
+        if let note = data["note"] as? String { local.note = note }
+        if let dateTS = data["date"] as? Timestamp { local.date = dateTS.dateValue() }
+        if let statusRaw = data["status"] as? String, let s = TransactionStatus(rawValue: statusRaw) { local.status = s }
+        if let currency = data["currency"] as? String { local.currency = currency }
+        // Keep local.updatedAt aligned with the server so the next launch's
+        // upsert can skip this row when nothing changed.
+        if let ts = data["updatedAt"] as? Timestamp { local.updatedAt = ts.dateValue() }
     }
 
     // MARK: - Delete User Data (hesap sil)
@@ -431,6 +455,45 @@ public final class FirestoreService {
             colorHex: color,
             isDefault: data["isDefault"] as? Bool ?? false,
             sortOrder: data["sortOrder"] as? Int ?? 0
+        )
+    }
+
+    // MARK: - DTO parsers ([String:Any] → Sendable, safe to hand to SyncEngine)
+    // nonisolated so the Firestore listener thread can parse before delegating.
+
+    nonisolated func catDTO(from data: [String: Any], userId: String) -> CatDTO? {
+        guard
+            let idStr = data["id"] as? String, let id = UUID(uuidString: idStr),
+            let name  = data["name"] as? String,
+            let type  = data["type"] as? String,
+            let icon  = data["iconName"] as? String,
+            let color = data["colorHex"] as? String
+        else { return nil }
+        let slug = (data["slug"] as? String).flatMap { $0.isEmpty ? nil : $0 }
+        return CatDTO(
+            id: id, userId: userId, name: name, slug: slug, type: type,
+            iconName: icon, colorHex: color,
+            isDefault: data["isDefault"] as? Bool ?? false,
+            sortOrder: data["sortOrder"] as? Int ?? 0
+        )
+    }
+
+    nonisolated func txDTO(from data: [String: Any], userId: String) -> TxDTO? {
+        guard
+            let idStr  = data["id"] as? String, let id = UUID(uuidString: idStr),
+            let type   = data["type"] as? String,
+            let amount = data["amount"] as? Double,
+            let note   = data["note"] as? String,
+            let dateTS = data["date"] as? Timestamp
+        else { return nil }
+        return TxDTO(
+            id: id, userId: userId, type: type, amount: amount,
+            currency: data["currency"] as? String ?? "TRY",
+            note: note, categorySlug: data["categorySlug"] as? String ?? "",
+            date: dateTS.dateValue(),
+            status: data["status"] as? String ?? "completed",
+            createdAt: (data["createdAt"] as? Timestamp)?.dateValue(),
+            updatedAt: (data["updatedAt"] as? Timestamp)?.dateValue()
         )
     }
 }

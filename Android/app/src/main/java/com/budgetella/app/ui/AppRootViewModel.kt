@@ -48,8 +48,9 @@ class AppRootViewModel @Inject constructor(
         .flatMapLatest { (auth, onboarded, _) ->
             when {
                 auth is AuthState.Unknown -> flowOf(AppRootState.Splash)
-                !onboarded -> flowOf(AppRootState.Onboarding)
-                auth is AuthState.SignedOut -> flowOf(AppRootState.Auth)
+                // Signed-in users NEVER see onboarding again. A returning user
+                // (persisted token) goes straight into the app; only a signed-out
+                // first run / reinstall reaches the onboarding carousel below.
                 auth is AuthState.SignedIn -> {
                     // Mirror the active uid so the rest of the data layer can
                     // read it without an extra FirebaseAuth call.
@@ -68,6 +69,8 @@ class AppRootViewModel @Inject constructor(
                         }
                     }
                 }
+                !onboarded -> flowOf(AppRootState.Onboarding)
+                auth is AuthState.SignedOut -> flowOf(AppRootState.Auth)
                 else -> flowOf(AppRootState.Splash)
             }
         }

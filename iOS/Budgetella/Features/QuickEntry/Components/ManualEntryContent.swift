@@ -22,6 +22,27 @@ struct ManualEntryContent: View {
     @FocusState private var amountFocused: Bool
     @State private var amountText: String = ""
 
+    /// Blinking caret next to the amount. The real text field is invisible
+    /// (it only feeds the system decimal pad), so without this the user can't
+    /// tell the amount is the active input — the note field gets a border, the
+    /// amount needs its own focus cue. Time-driven so it always blinks when
+    /// focused, with no state to fall out of sync.
+    private var caret: some View {
+        TimelineView(.periodic(from: .now, by: 0.55)) { context in
+            let secs = context.date.timeIntervalSinceReferenceDate
+            let on = Int(secs / 0.55) % 2 == 0
+            RoundedRectangle(cornerRadius: 1.5)
+                .fill(amountColor)
+                .frame(width: 2.5, height: 40)
+                .opacity(amountFocused && on ? 1 : 0)
+                .animation(.easeInOut(duration: 0.12), value: on)
+        }
+        .frame(width: 2.5, height: 40)
+        // Sit the caret on the number's baseline (bottom edge ~ baseline)
+        // instead of letting the HStack center it, which floated it high.
+        .alignmentGuide(.firstTextBaseline) { dims in dims[.bottom] - 4 }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
 
@@ -64,7 +85,8 @@ struct ManualEntryContent: View {
         }
         .animation(.spring(response: 0.3), value: isTyping)
         .task {
-            try? await Task.sleep(nanoseconds: 500_000_000)
+            // Small settle so focus doesn't fight the sheet's present animation.
+            try? await Task.sleep(nanoseconds: 250_000_000)
             amountFocused = true
         }
         .onAppear {
@@ -190,9 +212,13 @@ struct ManualEntryContent: View {
                             .font(.brand(.title))
                             .foregroundStyle(amountColor.opacity(0.7))
                     }
+                    // Blinking caret — the real text field is invisible, so this
+                    // makes it obvious the amount is the active input (the note
+                    // field gets a border highlight; the amount needs this cue).
+                    caret
                 }
             }
-            // Hidden text field captures numeric keyboard input
+            // Hidden text field captures the system decimal-pad input.
             TextField("", text: $amountText)
                 .keyboardType(.decimalPad)
                 .focused($amountFocused)
@@ -247,6 +273,11 @@ struct ManualEntryContent: View {
             RoundedRectangle(cornerRadius: radius, style: .continuous)
                 .strokeBorder(noteFieldFocused ? BrandColor.primary.opacity(0.5) : BrandColor.borderSubtle, lineWidth: 1)
         )
+        // Whole row is the tap target — previously only the (tiny, empty)
+        // TextField line was hittable, so users had to tap exactly on the
+        // placeholder text to focus the note.
+        .contentShape(Rectangle())
+        .onTapGesture { noteFieldFocused = true }
         .onChange(of: vm.note) { _, _ in vm.updateSuggestions() }
         .onChange(of: noteFieldFocused) { _, v in isTyping = v }
     }

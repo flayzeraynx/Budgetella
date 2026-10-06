@@ -126,6 +126,75 @@ import Foundation
         return years.sorted(by: >)
     }
 
+    // MARK: - Single-pass aggregates (perf)
+
+    /// Computes EVERY dashboard figure in ONE pass over the transactions, with
+    /// a single `dateComponents` call per row. The old per-figure methods each
+    /// re-filtered the whole list and called `Calendar.current.component` 2×
+    /// per row — for 2000+ rows that was tens of thousands of expensive Calendar
+    /// calls *per body evaluation*, which stalled the main thread on launch.
+    func aggregates(from txs: [Transaction]) -> DashboardAggregates {
+        let probeStart = CFAbsoluteTimeGetCurrent()
+        var a = DashboardAggregates()
+        let cal = Calendar.current
+        let yr = selectedYear, mo = selectedMonth
+        let now = Date.now
+
+        var sixKeys: [(Int, Int)] = []
+        for off in stride(from: 5, through: 0, by: -1) {
+            if let d = cal.date(byAdding: .month, value: -off, to: now) {
+                sixKeys.append((cal.component(.year, from: d), cal.component(.month, from: d)))
+            }
+        }
+        var sixIndex: [Int: Int] = [:]
+        for (i, k) in sixKeys.enumerated() { sixIndex[k.0 * 100 + k.1] = i }
+        var sixInc = [Decimal](repeating: 0, count: sixKeys.count)
+        var sixExp = [Decimal](repeating: 0, count: sixKeys.count)
+        var dailyInc: [Int: Decimal] = [:], dailyExp: [Int: Decimal] = [:]
+        var years = Set<Int>()
+
+        for tx in txs {
+            let c = cal.dateComponents([.year, .month, .day], from: tx.date)
+            let tY = c.year ?? 0, tM = c.month ?? 0, tD = c.day ?? 0
+            let isInc = tx.type == .income
+            let amt = tx.amount
+            years.insert(tY)
+            if tY == yr {
+                if isInc { a.yearIncome += amt } else { a.yearExpense += amt }
+                if tM == mo {
+                    if isInc {
+                        a.monthIncome += amt
+                        dailyInc[tD, default: 0] += amt
+                    } else {
+                        a.monthExpense += amt
+                        dailyExp[tD, default: 0] += amt
+                        if let cid = tx.category?.id { a.monthExpenseByCat[cid, default: 0] += amt }
+                    }
+                }
+            }
+            if let idx = sixIndex[tY * 100 + tM] {
+                if isInc { sixInc[idx] += amt } else { sixExp[idx] += amt }
+            }
+        }
+
+        if let selDate = cal.date(from: DateComponents(year: yr, month: mo)),
+           let days = cal.range(of: .day, in: .month, for: selDate)?.count {
+            for day in 1...days {
+                a.dailyData.append(DailyFlowPoint(day: day, kind: .income,  amount: ((dailyInc[day] ?? 0) as NSDecimalNumber).doubleValue))
+                a.dailyData.append(DailyFlowPoint(day: day, kind: .expense, amount: ((dailyExp[day] ?? 0) as NSDecimalNumber).doubleValue))
+            }
+        }
+        for (i, k) in sixKeys.enumerated() {
+            a.sixMonthData.append(MonthlyFlowPoint(year: k.0, month: k.1, kind: .income,  amount: (sixInc[i] as NSDecimalNumber).doubleValue))
+            a.sixMonthData.append(MonthlyFlowPoint(year: k.0, month: k.1, kind: .expense, amount: (sixExp[i] as NSDecimalNumber).doubleValue))
+        }
+        years.insert(cal.component(.year, from: now))
+        a.availableYears = years.sorted(by: >)
+
+        EntryPerf.event("dashboard aggregates — \(txs.count) txs in \(Int((CFAbsoluteTimeGetCurrent() - probeStart) * 1000)) ms")
+        return a
+    }
+
     // MARK: - Helpers
 
     private func calYear(_ tx: Transaction) -> Int {
@@ -135,6 +204,19 @@ import Foundation
     private func calMonth(_ tx: Transaction) -> Int {
         Calendar.current.component(.month, from: tx.date)
     }
+}
+
+// MARK: - Aggregated dashboard figures (one pass)
+
+struct DashboardAggregates {
+    var yearIncome: Decimal = 0
+    var yearExpense: Decimal = 0
+    var monthIncome: Decimal = 0
+    var monthExpense: Decimal = 0
+    var dailyData: [DailyFlowPoint] = []
+    var sixMonthData: [MonthlyFlowPoint] = []
+    var availableYears: [Int] = []
+    var monthExpenseByCat: [UUID: Decimal] = [:]
 }
 
 // MARK: - Chart data points

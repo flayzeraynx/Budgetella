@@ -17,7 +17,7 @@ import javax.inject.Singleton
 
 /**
  * Thin Ktor wrapper around Google's generativelanguage.googleapis.com
- * gemini-2.0-flash endpoint — same wire format the iOS BudgiChatService uses.
+ * gemini-2.5-flash endpoint — same wire format the iOS BudgiChatService uses.
  *
  * The API key comes from BuildConfig.GEMINI_API_KEY (populated from
  * gradle.properties / env at build time — see app/build.gradle.kts).
@@ -73,7 +73,7 @@ class GeminiChatService @Inject constructor() {
 
         return runCatching {
             val response = client.post(
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$key"
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$key"
             ) {
                 contentType(ContentType.Application.Json)
                 setBody(payload)
