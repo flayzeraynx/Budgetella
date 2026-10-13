@@ -103,7 +103,8 @@ iOS/
 ## Bundle Configuration
 
 - **Bundle ID:** `com.ozankilic.budgetella`
-- **Marketing version:** 1.0.0 / Build 15
+- **Marketing version:** 1.1.1 / Build 3 (App Store'da yayında, 2026-10)
+- **AI modeli:** Gemini 2.5 Flash
 - **Türkiye-only V1** (App Store availability)
 - **Pricing:** $4.99/ay + $39.99/yıl + 7 gün free trial; ayrı ₺TL tier
 - **iPhone only V1** (iPad V1.1'e ertelendi)
@@ -182,12 +183,19 @@ Ozzy'nin 4 yıllık verisi `~/Downloads/budgetella_backup_2026-05-01.json`'da. O
 - [x] TestFlight beta yayını
 - [x] App Store review'a gönderildi
 
-### v1.1 — Planlanan
+### v1.1.0 / v1.1.1 — Tamamlandı (2026-05-26 → 2026-10)
+- [x] Post-auth walkthrough (Lottie), Değerlendir / Paylaş
+- [x] Background incremental sync, Settings tam sayfa, Hakkında bölümü
+- [x] Xcode Cloud ci_post_clone
+- [x] Gemini 2.0 → 2.5 Flash
+
+### Sonraki — Planlanan
 - [ ] Insights feature (klasör hazır, içerik yok)
 - [ ] XCTest / XCUITest coverage
 - [ ] Claude API receipt OCR (Cloud Function proxy)
 - [ ] iPad desteği
-- [ ] EUR/GBP/JPY currency desteği
+- [ ] Ek para birimleri (TRY/USD/EUR/GBP mevcut; JPY vb.) + global rollout
+- [ ] Gemini çağrılarını Cloud Function proxy'ye taşı (API key + model adı istemciden çıksın)
 - [ ] Budgi AI chat asistanı (BudgiView altyapısı hazır)
 - [ ] Voice Input UI (altyapı V1'de hazır)
 
