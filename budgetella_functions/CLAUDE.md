@@ -16,8 +16,14 @@
 | `getSubscriptionStatus` | HTTPS | Bir kullanıcının mevcut abonelik durumunu döndürür |
 | `sendFeedback` | HTTPS | Feedback formundan gelen mesajı nodemailer ile mail atar |
 | `updateAllCategoryTranslations` | HTTPS | Tüm kullanıcıların kategorilerine TR/EN çevirilerini ekler (bir kerelik migration job) |
+| `playRtdnHandler` | Pub/Sub (`play-rtdn`) | Google Play RTDN — `subscriptionsv2.get` / `products.get` ile doğrular, `users/{uid}` entitlement yazar (`play-billing.js`) |
+| `verifyPlayPurchase` | HTTPS | Restore akışında senkron Play satın alma doğrulaması (`play-billing.js`) |
 
-> iOS uygulaması StoreKit 2 native kullandığı için Stripe akışı **sadece web** içindir. Android Play Billing kendi içinde yürütür.
+> **Ayrı codebase:** `../user-cleanup-functions/` (codebase `user-cleanup`, 1st-gen Auth trigger, europe-west3) → `clearUserDataOnDelete`: hesap silinince `users/{uid}` recursive + Storage `users/{uid}/` temizler. 2026-09-30'da deprecated Firebase Extension'ın yerine geldi. Deploy: `firebase deploy --only functions:user-cleanup`.
+
+> iOS uygulaması StoreKit 2 native kullandığı için Stripe akışı **sadece web** içindir. Android Play Billing satın almaları `play-billing.js` ile sunucuda doğrulanır. Kurulum: `Android/BILLING.md`.
+
+> ⚠️ Stripe anahtarları legacy `functions.config()`'te. Bu codebase'i gerekmedikçe toptan redeploy etme; tekil deploy kullan (`--only functions:<ad>`). Plan: `defineSecret` / Secret Manager'a taşımak + Node 22.
 
 ---
 
@@ -69,6 +75,7 @@ Detaylı deploy adımları: **`DEPLOY.md`**
 | `cors` | Web istemcisi için |
 | `dotenv` | Local geliştirme env |
 | `node-fetch` | HTTP istekler |
+| `googleapis` | Play Developer API (`androidpublisher` v3) |
 
 ---
 

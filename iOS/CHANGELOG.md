@@ -2,6 +2,31 @@
 
 ---
 
+## v1.1.1 (build 3) — 2026-10 (App Store'a ~2026-10-10 gönderildi, yayında)
+**Gemini model fix + performans/UX turu.**
+
+### Düzeltmeler
+- **Gemini 2.0 Flash → 2.5 Flash** (`GeminiInsightService`, `BudgiView`, `CameraEntryContent`). 2.0 Flash kapatıldığı için canlı 1.1.0'da Budgi / insight / fiş okuma çalışmıyordu. Fix 2026-06-10'da yazılmış ama `fix/android-ux-quartet` branch'inde kalmıştı; 2026-10-06'da PR #4 ile main'e alındı.
+- Onboarding para birimi seçicisi 4 birimi de gösteriyor (TRY/USD/EUR/GBP).
+- Sync sırasında giriş klavyesi/FAB bloklanmıyor; not alanı dokunma düzeltmesi; dikey kaydırmada istemsiz tab değişimi düzeltildi.
+- Tutar imleci rakam baseline'ına hizalandı; sistem decimal pad + prewarm (klavye soğuk başlatma donması giderildi).
+
+### Performans
+- Firestore→SwiftData sync arka planda (`ModelActor`, `Task.detached` + bg `ModelContext`).
+- Açılışta wipe+reinsert yerine incremental upsert-reconcile; içerik bazlı skip (ilk açılışta yeniden yazma fırtınası yok).
+- Dashboard tek geçişte hesaplanıyor.
+
+### Eklenenler
+- Settings tam sayfa (tab bar + push navigation), **Hakkında** bölümü (sürüm/build), ozankilic.com linki.
+- Walkthrough animasyonları cilalandı (gradient Lottie).
+
+### Altyapı
+- Xcode Cloud `ci_scripts/ci_post_clone.sh` (xcodegen + secret'lar env'den).
+- Build 2 beta Xcode ile yapıldığı için reddedildi → GM Xcode 26.5 ile yeniden; build 2 App Store Connect'te harcandığı için **build 3**.
+- `project.yml`: `MARKETING_VERSION: 1.1.1`, `CURRENT_PROJECT_VERSION: 3`
+
+---
+
 ## v1.1.0 (build 1) — 2026-05-26
 **Testers community feedback release — TestFlight.**
 

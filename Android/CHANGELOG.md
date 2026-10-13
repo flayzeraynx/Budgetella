@@ -1,5 +1,29 @@
 # Budgetella Android — Changelog
 
+## 1.1.4 (build 10) — 2026-10 · Gemini fix (submitted ~2026-10-10, live)
+
+- **Gemini 2.0 Flash → 2.5 Flash** (`GeminiChatService`). vc8/vc9 were built from `main` and shipped the retired 2.0 model, so Budgi chat was broken in production. The fix lived only on `fix/android-ux-quartet`; merged via PR #4 on 2026-10-06.
+- Brings in the 2026-05-29/30 UX quartet: onboarding gate, voice/camera i18n, Settings as a full page, biometric unbrick, greeting i18n, locale-aware legal links, Rate opens the Play listing directly, About section, polished walkthrough animations, dashboard + stats aggregation off the main thread, incremental sync.
+- Toolchain from 1.1.3 kept (API 36, Kotlin 2.3, Billing 9.1.0).
+
+## 1.1.3 (build 9) — 2026-08-28 · Play compliance republish
+
+- Republished to every active track before the 31 Aug Play deadline (stale Alpha vc5 was flagged for targetSdk 35 + Billing < 8).
+- Toolchain: AGP 8.7.3→8.13.2, Gradle 8.10.2→8.14.5, Kotlin 2.0.21→2.3.21, KSP→2.3.11, Hilt 2.52→2.58, Room 2.6.1→2.8.4, Compose BOM→2026.06.01, **Play Billing 8.0.0→9.1.0**.
+- Pinned ceilings: Hilt 2.58 (2.59+ needs AGP 9), Compose BOM 2026.06.01 (Compose 1.12 needs AGP 9.1 + compileSdk 37).
+- Kotlin 2.2+ removed `android { kotlinOptions }` → top-level `kotlin { compilerOptions }`.
+- Dropped deprecated edge-to-edge theme attributes.
+- ⚠️ Still shipped the retired Gemini 2.0 Flash model (fixed in 1.1.4).
+
+## 1.1.2 (build 8) — 2026-07-22 · Target API 36
+
+- compileSdk/targetSdk 35 → 36 (Android 16); minSdk 26 unchanged.
+- Play Billing 7.1.1 → 8.0.0 (no source changes).
+- versionCode 7 was already consumed on Play, so 6 → 8.
+- ⚠️ Shipped the retired Gemini 2.0 Flash model (fixed in 1.1.4).
+
+---
+
 ## 1.1.0 (build 6) — 2026-05-26 · Testers community feedback
 
 **TR-only TestFlight equivalent: closed/internal testing.**
