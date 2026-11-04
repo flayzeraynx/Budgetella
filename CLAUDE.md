@@ -10,7 +10,7 @@ Budgetella, Ozan Kılıç'ın geliştirdiği çok platformlu kişisel finans uyg
 
 | Klasör | Durum | Stack | Amaç |
 |---|---|---|---|
-| `iOS/` | **AKTİF — production** | Swift 6 + SwiftUI + SwiftData + Firebase | Native iOS uygulaması (canlı: v1.1.1 build 3, App Store) |
+| `iOS/` | **AKTİF — production** | Swift 6 + SwiftUI + SwiftData + Firebase | Native iOS uygulaması (canlı: v1.1.2 build 4, App Store) |
 | `Android/` | **AKTİF — production** | Kotlin + Compose + Hilt + Room + Firebase + Play Billing | iOS ile neredeyse tam parite native Android (canlı: v1.1.4 vc10, Google Play) |
 | `web/` | **AKTİF — yayında** | Statik HTML/CSS/JS | Pazarlama sitesi (budgetella.app, EN+TR), Firebase Hosting |
 | `budgetella_functions/` | **AKTİF — production backend** | Node.js 20 + Firebase Functions (1st-gen), codebase `default` | Stripe (web), Play Billing RTDN + doğrulama, feedback mail, kategori çeviri job'u |
