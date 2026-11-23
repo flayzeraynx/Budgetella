@@ -1,14 +1,6 @@
 <!doctype html>
 <html lang="en">
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-93JNEYMKHT"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-93JNEYMKHT');
-</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Budgetella — Know where your money goes.</title>
@@ -120,7 +112,7 @@
           "name": "\u00dccretsi\u0307z deneme s\u00fcres\u0307i ka\u00e7 g\u00fcn?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "7 g\u00fcn boyunca t\u00fcm Premium \u00f6zelliklerini \u00fccretsiz kullanabilirsin. Kredi kart\u0131 gerekmez. Deneme s\u00fcresi dolmadan istedi\u011fin zaman iptal edebilirsin, \u00fccret al\u0131nmaz."
+            "text": "7 g\u00fcn boyunca t\u00fcm Premium \u00f6zelliklerini \u00fccretsiz kullanabilirsin. Denemeyi ba\u015flatmak i\u00e7in App Store veya Google Play hesab\u0131nda kay\u0131tl\u0131 bir \u00f6deme y\u00f6ntemi gerekir. Deneme s\u00fcresi dolmadan iptal edersen \u00fccret al\u0131nmaz; iptal etmezsen se\u00e7ti\u011fin plan otomatik olarak ba\u015flar."
           }
         },
         {
@@ -144,7 +136,7 @@
           "name": "Aboneli\u011fi nas\u0131l iptal ederim?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "App Store \u2192 Hesab\u0131m \u2192 Abonelikler \u2192 Budgetella \u2192 \u0130ptal Et. \u0130ptal i\u015flemi, mevcut d\u00f6nem bitmeden yap\u0131lmal\u0131d\u0131r. \u0130ptal sonras\u0131 d\u00f6nem sonuna kadar Premium olarak kal\u0131rs\u0131n."
+            "text": "iPhone: App Store \u2192 Hesab\u0131m \u2192 Abonelikler \u2192 Budgetella \u2192 \u0130ptal Et. Android: Google Play \u2192 \u00d6demeler ve abonelikler \u2192 Abonelikler \u2192 Budgetella \u2192 Aboneli\u011fi iptal et. \u0130ptal i\u015flemi, mevcut d\u00f6nem bitmeden yap\u0131lmal\u0131d\u0131r. \u0130ptal sonras\u0131 d\u00f6nem sonuna kadar Premium olarak kal\u0131rs\u0131n."
           }
         },
         {
@@ -162,10 +154,9 @@
 </script>
 
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
 <link rel="stylesheet" href="/assets/style.css">
+<script src="/assets/consent.js" defer></script>
 <style>
 /* ─── Hero ─── */
 .hero {
@@ -503,6 +494,8 @@
 .pricing-feats li { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-secondary); }
 .pricing-feats .check { color: var(--success); font-size: 13px; font-weight: 700; }
 .pricing-cta { margin-top: auto; }
+.pricing-terms { max-width: 760px; margin: 28px auto 0; font-size: 13px; line-height: 1.65; color: var(--text-secondary); text-align: center; text-wrap: pretty; }
+.pricing-terms a { color: #B7A8FF; text-decoration: underline; text-underline-offset: 2px; }
 
 /* ─── FAQ ─── */
 .faq-list {
@@ -1017,14 +1010,14 @@
   <div class="container">
     <div class="section-head reveal" style="text-align:center;display:block">
       <h2>Simple, transparent pricing</h2>
-      <p class="lede" style="margin:16px auto 0;max-width:480px">Try free for 7 days. Love it or cancel — you won't be charged a cent.</p>
+      <p class="lede" style="margin:16px auto 0;max-width:480px">Try free for 7 days. Cancel before the trial ends and you won't be charged; otherwise your chosen plan starts.</p>
     </div>
     <div class="pricing-grid reveal">
       <!-- Monthly -->
       <div class="pricing-card">
         <div class="pricing-name">Monthly</div>
         <div class="pricing-price">$4<span>.99/mo</span></div>
-        <div class="pricing-period">Billed via App Store</div>
+        <div class="pricing-period">Billed via App Store or Google Play</div>
         <div class="pricing-note"></div>
         <ul class="pricing-feats">
           <li><span class="check">✓</span> All features</li>
@@ -1043,7 +1036,7 @@
         <div class="pricing-badge">MOST POPULAR · 33% off</div>
         <div class="pricing-name">Yearly</div>
         <div class="pricing-price">$39<span>.99/yr</span></div>
-        <div class="pricing-period">$3.33/mo · Billed via App Store</div>
+        <div class="pricing-period">$3.33/mo · App Store or Google Play</div>
         <div class="pricing-note" style="color:var(--success)">Save $19.89 vs monthly</div>
         <ul class="pricing-feats">
           <li><span class="check">✓</span> All features</li>
@@ -1068,13 +1061,14 @@
           <li><span class="check">✓</span> All future updates</li>
           <li><span class="check">✓</span> Priority support</li>
           <li><span class="check">✓</span> No subscription stress</li>
-          <li><span class="check">✓</span> App Store only</li>
+          <li><span class="check">✓</span> On App Store and Google Play</li>
         </ul>
         <div class="pricing-cta">
           <a href="#download" class="btn btn-outline" style="width:100%;justify-content:center">Get Lifetime</a>
         </div>
       </div>
     </div>
+    <p class="pricing-terms reveal">Monthly and yearly plans are subscriptions: they <strong>renew automatically</strong> at the price shown above at the end of each period until you cancel. The 7-day free trial converts to the paid plan you chose, and your payment method is charged, unless you cancel before it ends; starting the trial requires a payment method on your store account. To cancel: on iPhone, <a href="https://apps.apple.com/account/subscriptions" target="_blank" rel="noopener">App Store → Subscriptions</a>; on Android, <a href="https://play.google.com/store/account/subscriptions" target="_blank" rel="noopener">Google Play → Subscriptions</a>. Prices are shown in US dollars; the store shows the final local price including taxes before you buy. Lifetime is a one-time payment and does not renew. Details: <a href="/terms#billing">Terms of Use</a>.</p>
   </div>
 </section>
 
@@ -1117,7 +1111,7 @@
           How long is the free trial?
           <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
         </button>
-        <div class="faq-a">7 days of full Premium access, completely free. No credit card required. Cancel before the trial ends and you won't be charged anything.</div>
+        <div class="faq-a">7 days of full Premium access, completely free. Starting the trial requires a payment method on your App Store or Google Play account. Cancel before the trial ends and you won't be charged; if you don't cancel, the plan you chose starts automatically.</div>
       </div>
       <div class="faq-item">
         <button class="faq-q">
@@ -1138,7 +1132,7 @@
           How do I cancel my subscription?
           <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
         </button>
-        <div class="faq-a">App Store → Account → Subscriptions → Budgetella → Cancel. Cancel before the current period ends. You'll keep Premium access until the end of that period.</div>
+        <div class="faq-a">iPhone: App Store → Account → Subscriptions → Budgetella → Cancel. Android: Google Play → Payments &amp; subscriptions → Subscriptions → Budgetella → Cancel subscription. Cancel before the current period ends. You'll keep Premium access until the end of that period.</div>
       </div>
       <div class="faq-item">
         <button class="faq-q">
@@ -1153,8 +1147,8 @@
 
 <div id="mount-footer"></div>
 <script src="/assets/site.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="/assets/vendor/gsap.min.js"></script>
+<script src="/assets/vendor/ScrollTrigger.min.js"></script>
 <script>
   // Phone crossfade slideshow
   (function () {

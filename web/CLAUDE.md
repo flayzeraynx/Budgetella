@@ -22,7 +22,10 @@ web/
 ├── sitemap.xml
 └── assets/
     ├── style.css        Tüm sayfa stilleri
-    ├── site.js          Vanilla JS (nav, analytics tetikleyici, vs)
+    ├── site.js          Vanilla JS (nav + footer, scroll davranışları)
+    ├── consent.js       Çerez onayı; GA4'ü yalnızca kabul sonrası yükler
+    ├── fonts/           Self-hosted Geist / Geist Mono
+    ├── vendor/          Self-hosted GSAP 3.12.5
     ├── og-image.png     Open Graph görseli
     └── screenshots/     App store / pazarlama screenshotları
 ```
@@ -60,9 +63,11 @@ Firebase projesi: `budgetella-d1d41`.
 
 ---
 
-## Analytics
+## Analytics & çerez onayı
 
-Google Analytics 4 — measurement ID **`G-93JNEYMKHT`**. Tüm sayfalara aynı `gtag` snippet'i koyulur (`<head>` içinde).
+Google Analytics 4 — measurement ID **`G-93JNEYMKHT`**. **Sayfalara `gtag` snippet'i KOYMA.** GA yalnızca `assets/consent.js` üzerinden, ziyaretçi "Kabul et" dedikten sonra yüklenir (seçim `localStorage.budgetella_consent`). Her sayfanın `<head>`'inde `<script src="/assets/consent.js" defer></script>` olmalı. Footer'daki "Çerez tercihleri" (`[data-cookie-prefs]`) banner'ı yeniden açar. Banner stilleri `style.css` sonunda.
+
+Üçüncü taraf istek yok: fontlar `assets/fonts/`, GSAP 3.12.5 `assets/vendor/` altında self-hosted. Yeni CDN/Google Fonts linki ekleme.
 
 ---
 
@@ -85,5 +90,4 @@ Google Analytics 4 — measurement ID **`G-93JNEYMKHT`**. Tüm sayfalara aynı `
 
 ## Yakın İlişkili Dosyalar
 
-- Form submit'leri (varsa) → `budgetella_functions/index.js` içindeki `sendFeedback` HTTPS endpoint'ine POST eder.
 - Eski webapp linki → artık verilmiyor; native iOS App Store + Play Store linkleri öne çıkarılır.
