@@ -14,12 +14,13 @@
 | `handleStripeWebhook` | HTTPS | Stripe webhook'larını işler — abonelik durumu Firestore'a yazılır |
 | `cancelSubscription` | HTTPS | Kullanıcı aboneliğini iptal eder |
 | `getSubscriptionStatus` | HTTPS | Bir kullanıcının mevcut abonelik durumunu döndürür |
-| `sendFeedback` | HTTPS | Feedback formundan gelen mesajı nodemailer ile mail atar |
 | `updateAllCategoryTranslations` | HTTPS | Tüm kullanıcıların kategorilerine TR/EN çevirilerini ekler (bir kerelik migration job) |
 | `playRtdnHandler` | Pub/Sub (`play-rtdn`) | Google Play RTDN — `subscriptionsv2.get` / `products.get` ile doğrular, `users/{uid}` entitlement yazar (`play-billing.js`) |
 | `verifyPlayPurchase` | HTTPS | Restore akışında senkron Play satın alma doğrulaması (`play-billing.js`) |
 
 > **Ayrı codebase:** `../user-cleanup-functions/` (codebase `user-cleanup`, 1st-gen Auth trigger, europe-west3) → `clearUserDataOnDelete`: hesap silinince `users/{uid}` recursive + Storage `users/{uid}/` temizler. 2026-09-30'da deprecated Firebase Extension'ın yerine geldi. Deploy: `firebase deploy --only functions:user-cleanup`.
+
+> `sendFeedback` 2026-11'de koddan kaldırıldı (kimlik doğrulamasız açık mail relay'i; tek çağıranı arşivdeki `OLD/` webapp'ti). Deploy edilmiş kopya elle silinmeli: `firebase functions:delete sendFeedback --region us-central1`.
 
 > iOS uygulaması StoreKit 2 native kullandığı için Stripe akışı **sadece web** içindir. Android Play Billing satın almaları `play-billing.js` ile sunucuda doğrulanır. Kurulum: `Android/BILLING.md`.
 
@@ -71,7 +72,6 @@ Detaylı deploy adımları: **`DEPLOY.md`**
 | `firebase-functions` | 1st-gen Functions runtime |
 | `firebase-admin` | Firestore admin erişimi |
 | `stripe` | Checkout + webhook |
-| `nodemailer` | Feedback maili |
 | `cors` | Web istemcisi için |
 | `dotenv` | Local geliştirme env |
 | `node-fetch` | HTTP istekler |
@@ -83,7 +83,6 @@ Detaylı deploy adımları: **`DEPLOY.md`**
 
 - **Yeni endpoint** → `index.js`'e `exports.<name> = functions.https.onRequest(...)` ekle, deploy.
 - **Stripe webhook event'i ekleme** → `handleStripeWebhook` switch'ine yeni case.
-- **Feedback maili formatını değiştirme** → `sendFeedback` fonksiyonu içindeki `mailOptions.html` template'i.
 - **Kategori çeviri yenileme** → `npm run deploy` sonrası `updateAllCategoryTranslations` endpoint'ini bir kere çağır (veya `deploy-and-run-update.js`).
 - **Kategori migration'ı hakkında detay** → kök `README-CATEGORY-UPDATE.md` ve `TRANSLATE-CATEGORIES-README.md`.
 
