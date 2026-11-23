@@ -1451,12 +1451,12 @@
         }
       }
     },
-    "BUDGİ · AI" : {
+    "BUDGİ" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "BUDGI · AI"
+            "value" : "BUDGI"
           }
         }
       }
@@ -6142,6 +6142,166 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Weak"
+          }
+        }
+      }
+    },
+    "%%%lld İndirim" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld%% Off"
+          }
+        }
+      }
+    },
+    "Abone Ol" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subscribe"
+          }
+        }
+      }
+    },
+    "Satın Al" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buy"
+          }
+        }
+      }
+    },
+    "Özel Kategoriler" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom Categories"
+          }
+        }
+      }
+    },
+    "Ana Ekran Widget'ı" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home Screen Widget"
+          }
+        }
+      }
+    },
+    "Harcamaların hakkında soru sor, öneri al" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ask about your spending, get advice"
+          }
+        }
+      }
+    },
+    "Kendi kategorilerini oluştur" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create your own categories"
+          }
+        }
+      }
+    },
+    "Günlük özetin ana ekranında" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your daily summary on the home screen"
+          }
+        }
+      }
+    },
+    "Budgi, Premium'un bir parçası" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budgi is part of Premium"
+          }
+        }
+      }
+    },
+    "Budgi harcamalarını analiz eder, sorularını yanıtlar ve sana özel öneriler sunar. İşlem ekleme, bütçeler ve istatistikler her zaman ücretsiz." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budgi analyzes your spending, answers your questions and gives you tailored advice. Adding transactions, budgets and statistics are always free."
+          }
+        }
+      }
+    },
+    "7 gün ücretsiz. Deneme bitince abonelik %@ fiyatıyla başlar ve sen iptal edene kadar aynı fiyattan otomatik yenilenir. Ücret ödememek için deneme bitmeden en az 24 saat önce iptal et." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7 days free. When the trial ends, your subscription starts at %@ and renews automatically at the same price until you cancel. To avoid being charged, cancel at least 24 hours before the trial ends."
+          }
+        }
+      }
+    },
+    "Abonelik %@ fiyatıyla başlar ve sen iptal edene kadar aynı fiyattan otomatik yenilenir." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your subscription starts at %@ and renews automatically at the same price until you cancel."
+          }
+        }
+      }
+    },
+    "İstediğin zaman iptal edebilirsin: iPhone Ayarlar > adın > Abonelikler." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel anytime in iPhone Settings > your name > Subscriptions."
+          }
+        }
+      }
+    },
+    "Premium ile aç" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlock with Premium"
+          }
+        }
+      }
+    },
+    "Bu özellik Budgetella Premium'a dahil." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This feature is part of Budgetella Premium."
+          }
+        }
+      }
+    },
+    "AI asistan, fiş tarama ve daha fazlası" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI assistant, receipt scanning and more"
           }
         }
       }

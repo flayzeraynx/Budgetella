@@ -29,6 +29,8 @@ enum GeminiInsightService {
         transactions: [Transaction],
         categories:   [Category]
     ) async throws -> [AIInsight] {
+        // Billed per request — premium only, enforced here so no caller can skip it.
+        guard SubscriptionService.shared.isPremium else { throw InsightError.premiumRequired }
         guard UserDefaults.standard.bool(forKey: "aiDataConsentGiven") else {
             throw InsightError.consentRequired
         }
@@ -205,7 +207,7 @@ enum GeminiInsightService {
 // MARK: - Errors
 
 enum InsightError: LocalizedError {
-    case missingAPIKey, noData, invalidURL, serverError, parseError, consentRequired
+    case missingAPIKey, noData, invalidURL, serverError, parseError, consentRequired, premiumRequired
 
     var errorDescription: String? {
         switch self {
@@ -215,6 +217,7 @@ enum InsightError: LocalizedError {
         case .serverError:      return String(localized: "Sunucu hatası, lütfen tekrar dene.")
         case .parseError:       return String(localized: "AI yanıtı işlenemedi.")
         case .consentRequired:  return String(localized: "AI özelliklerini kullanmak için veri iznini kabul etmelisin.")
+        case .premiumRequired:  return String(localized: "Bu özellik Budgetella Premium'a dahil.")
         }
     }
 }

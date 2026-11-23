@@ -909,7 +909,7 @@ internal fun AIInsightCard(insight: BudgiInsight, onTap: () -> Unit) {
         Column(modifier = Modifier.weight(1f)) {
             Row {
                 Text(
-                    text = "BUDGI · AI",
+                    text = "BUDGI",
                     style = BrandText.caption2,
                     color = BrandColor.Primary,
                     modifier = Modifier.weight(1f),

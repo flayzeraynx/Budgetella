@@ -220,6 +220,9 @@ class AddEditTransactionViewModel @Inject constructor(
                 updatedAt = now,
             )
             transactionRepository.upsert(entity)
+            // Feeds the one-time "after 10th transaction" paywall, which
+            // MainScaffold shows only after this sheet has closed.
+            if (!f.isEditing) userPrefs.incrementSavedTxCount()
             _form.update { it.copy(saving = false) }
             onDone()
         }

@@ -1,5 +1,13 @@
 # Budgetella Android — Changelog
 
+## 1.1.5 (build 11) — in progress (branch `feat/premium-gating`, not submitted)
+
+- **Premium gating matches the paywall.** Locked for free users: Budgi chat, receipt scanning (camera). Custom categories stay locked. Single source: `ui/paywall/PremiumFeature.kt` — the paywall benefit list renders from it. Android has no home-screen widget, so it is not advertised here.
+- Free forever: unlimited manual entry, budgets, statistics, the rule-based Budgi insight card (Dashboard + Stats; label is now "BUDGI", no "AI"), voice entry, import and export, account deletion, biometric lock, themes, notifications.
+- Paywall copy is truthful: removed "unlimited categories + custom budgets", "voice entry", "multi-currency" and "Gemini insights" claims. Trial wording only when the purchase will really use a free-trial offer (Play only returns offers the account is eligible for); otherwise "Subscribe" / "Buy". Discount badge is computed from live Play prices.
+- Paywall legal copy (TR Law 6502 + Play subscription policy): directly under the buy button it states the price with its period, automatic renewal, trial-to-paid conversion and how to cancel. Privacy and Terms links added to the paywall (TR pages for Turkish).
+- Settings → Premium row now opens the paywall for free users (it was not tappable). Proactive paywall at most twice: first arrival after onboarding, and after the 10th saved transaction (never while an entry sheet is open).
+
 ## 1.1.4 (build 10) — 2026-10 · Gemini fix (submitted ~2026-10-10, live)
 
 - **Gemini 2.0 Flash → 2.5 Flash** (`GeminiChatService`). vc8/vc9 were built from `main` and shipped the retired 2.0 model, so Budgi chat was broken in production. The fix lived only on `fix/android-ux-quartet`; merged via PR #4 on 2026-10-06.

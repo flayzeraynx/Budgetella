@@ -648,7 +648,7 @@ struct AIInsightCard: View {
                 "Harcama verilerin analiz edilmeye hazır. Birkaç işlem ekledikten sonra kişisel öneriler buraya gelecek.",
                 value: "Your spending data is ready to be analyzed. Personalized insights will appear here after a few transactions."
             )
-            return ("BUDGİ · AI", fallback, BrandColor.primary)
+            return ("BUDGİ", fallback, BrandColor.primary)
         }
         return cachedInsights[pickedIndex % cachedInsights.count]
     }
@@ -687,7 +687,7 @@ struct AIInsightCard: View {
                         Image(systemName: "sparkles")
                             .font(.system(size: 11, weight: .semibold))
                             .foregroundStyle(BrandColor.primary)
-                        Text("BUDGİ · AI")
+                        Text("BUDGİ")
                             .font(.brand(.caption))
                             .foregroundStyle(BrandColor.primary)
                             .tracking(0.8)

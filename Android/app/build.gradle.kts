@@ -41,8 +41,8 @@ android {
         applicationId = "com.budgetella.app"
         minSdk = 26          // Android 8.0 — Compose-friendly + adaptive icons + biometric
         targetSdk = 36       // Android 16 — Play target-API requirement
-        versionCode = 10     // 1.1.4 — Gemini model fix (gemini-2.0-flash → 2.5-flash) restored; was lost on main
-        versionName = "1.1.4"
+        versionCode = 11     // 1.1.5 — Premium gating matches the paywall (Budgi, insights, receipt scan, export)
+        versionName = "1.1.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }

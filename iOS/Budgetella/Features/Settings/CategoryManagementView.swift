@@ -11,7 +11,7 @@ struct CategoryManagementView: View {
     @Query(sort: \Category.sortOrder) private var categories: [Category]
     @Environment(\.modelContext) private var modelContext
     @AppStorage("currentUserId") private var currentUserId = ""
-    @State private var subscriptionService = SubscriptionService()
+    private var subscriptionService: SubscriptionService { .shared }
     @State private var showAddSheet = false
     @State private var editingCategory: Category?
     @State private var showPaywall = false
@@ -67,7 +67,7 @@ struct CategoryManagementView: View {
             EditCategorySheet(category: cat)
         }
         .fullScreenCover(isPresented: $showPaywall) {
-            PaywallView()
+            PaywallView(context: .customCategories)
         }
         .brandAlert(
             title: "Kategoriyi Sil",

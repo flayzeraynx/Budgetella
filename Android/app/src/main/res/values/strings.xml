@@ -284,7 +284,7 @@
     <string name="settings_delete_confirm_body">This permanently removes your account and synced data. This action cannot be undone.</string>
     <string name="settings_premium_label">Premium</string>
     <string name="settings_premium_subtitle_active">Active subscription</string>
-    <string name="settings_premium_subtitle_inactive">Try 7 days free</string>
+    <string name="settings_premium_subtitle_inactive">AI assistant, receipt scanning and more</string>
     <string name="settings_version">Version</string>
     <string name="settings_section_about">About</string>
     <string name="about_tagline">Personal finance, beautifully simple.</string>
@@ -320,11 +320,7 @@
 
     <!-- Paywall -->
     <string name="paywall_title">Budgetella Premium</string>
-    <string name="paywall_subtitle">Unlock advanced insights, unlimited categories, and Budgi AI.</string>
-    <string name="paywall_feature_1">Unlimited categories + custom budgets</string>
-    <string name="paywall_feature_2">Voice + receipt scan transaction entry</string>
-    <string name="paywall_feature_3">Multi-currency support</string>
-    <string name="paywall_feature_4">Premium Budgi insights powered by Gemini</string>
+    <string name="paywall_subtitle">Budgi AI chat, receipt scanning and custom categories.</string>
     <string name="paywall_monthly">Monthly</string>
     <string name="paywall_yearly">Yearly · save 33%%</string>
     <string name="paywall_monthly_title">Monthly Plan</string>
@@ -332,15 +328,15 @@
     <string name="paywall_lifetime_title">Lifetime</string>
     <string name="paywall_lifetime_subtitle">Pay once, unlock forever</string>
     <string name="paywall_lifetime_badge">One-time</string>
-    <string name="paywall_save_badge">33%% off</string>
+    <string name="paywall_save_badge">%1$d%% off</string>
     <string name="paywall_per_month">/mo</string>
     <string name="paywall_per_year">/yr</string>
-    <string name="paywall_free_trial">7 days free, then %1$s</string>
-    <string name="paywall_free_trial_generic">7 days free, then auto-renews</string>
+    <string name="paywall_free_trial">7 days free. When the trial ends, your subscription starts at %1$s and renews automatically at the same price until you cancel. To avoid being charged, cancel before the trial ends.</string>
+    <string name="paywall_free_trial_generic">7 days free. When the trial ends, your subscription starts and renews automatically until you cancel. To avoid being charged, cancel before the trial ends.</string>
     <string name="paywall_lifetime_finePrint">One-time payment. No subscription, no renewal.</string>
     <string name="paywall_cta">Start free trial</string>
     <string name="paywall_cta_trial">Start 7-Day Free Trial</string>
-    <string name="paywall_cta_buy_now">Buy Now</string>
+    <string name="paywall_cta_buy_now">Buy</string>
     <string name="paywall_restore">Restore purchases</string>
     <string name="paywall_unavailable">Subscriptions aren\'t available in this build. Coming with the Play Store release.</string>
     <string name="paywall_error_title">Purchase Error</string>
@@ -418,5 +414,21 @@
     <string name="settings_share">Share with Friends</string>
     <string name="settings_share_message">I track my budget with Budgetella. Try it out: https://budgetella.app</string>
     <string name="settings_share_chooser">Share Budgetella</string>
+
+    <!-- Premium gating -->
+    <string name="premium_feature_budgi">Budgi AI Assistant</string>
+    <string name="premium_feature_budgi_sub">Ask about your spending, get advice</string>
+    <string name="premium_feature_receipt">Receipt Scanning</string>
+    <string name="premium_feature_receipt_sub">Add transactions from a photo of a receipt</string>
+    <string name="premium_feature_categories">Custom Categories</string>
+    <string name="premium_feature_categories_sub">Create your own categories</string>
+    <string name="premium_locked_cd">Premium feature</string>
+    <string name="paywall_cta_subscribe">Subscribe</string>
+    <string name="paywall_auto_renew">Your subscription starts at %1$s and renews automatically at the same price until you cancel.</string>
+    <string name="paywall_auto_renew_generic">Your subscription renews automatically until you cancel.</string>
+    <string name="paywall_cancel_how">Cancel anytime in Google Play > profile icon > Payments &amp; subscriptions > Subscriptions.</string>
+    <string name="budgi_locked_title">Budgi is part of Premium</string>
+    <string name="budgi_locked_body">Budgi analyzes your spending, answers your questions and gives you tailored advice. Adding transactions, budgets and statistics are always free.</string>
+    <string name="premium_unlock_cta">Unlock with Premium</string>
 
 </resources>

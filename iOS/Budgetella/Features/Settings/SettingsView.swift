@@ -28,7 +28,7 @@ struct SettingsView: View {
     @AppStorage("userPhotoURL") private var userPhotoURL = ""
 
     @State private var authService = AuthService()
-    @State private var subscriptionService = SubscriptionService()
+    private var subscriptionService: SubscriptionService { .shared }
 
     // Single source of truth for in-stack sub-page navigation (one reliable
     // navigationDestination(item:) instead of several isPresented bindings).
@@ -476,6 +476,13 @@ struct SettingsView: View {
 
     // MARK: - Premium row
 
+    /// Trial wording only when the yearly plan's intro offer is really redeemable.
+    private var premiumRowSubtitle: LocalizedStringKey {
+        subscriptionService.trialEligibleProductIDs.contains(SubscriptionService.ProductID.yearly)
+            ? "7 gün ücretsiz dene"
+            : "AI asistan, fiş tarama ve daha fazlası"
+    }
+
     private var premiumRow: some View {
         Button {
             if subscriptionService.isPremium {
@@ -501,7 +508,7 @@ struct SettingsView: View {
                         Text("Premium'a Geç")
                             .font(.brand(.body))
                             .foregroundStyle(BrandColor.primary)
-                        Text("7 gün ücretsiz dene")
+                        Text(premiumRowSubtitle)
                             .font(.brand(.caption))
                             .foregroundStyle(BrandColor.textTertiary)
                     }

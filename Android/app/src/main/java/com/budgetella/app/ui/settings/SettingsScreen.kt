@@ -1,5 +1,6 @@
 package com.budgetella.app.ui.settings
 
+import com.budgetella.app.ui.paywall.PremiumFeature
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.Image
@@ -91,6 +92,9 @@ fun SettingsScreen(
     onDeleteAccount: () -> Unit = {},
     onShowNotificationSettings: () -> Unit = {},
     onShowCategories: () -> Unit = {},
+    /** Entitlement from the paywall view model; null while still resolving. */
+    premium: Boolean? = null,
+    onShowPaywall: (PremiumFeature?) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val vm: SettingsViewModel = hiltViewModel()
@@ -138,6 +142,8 @@ fun SettingsScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        // Free users can reach the paywall from here (iOS parity).
+                        .clickable(enabled = premium == false) { onShowPaywall(null) }
                         .padding(vertical = Spacing.sm, horizontal = Spacing.md),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -151,7 +157,7 @@ fun SettingsScreen(
                         )
                         Text(
                             text = stringResource(
-                                if (state.isPremium) R.string.settings_premium_subtitle_active
+                                if (premium == true || state.isPremium) R.string.settings_premium_subtitle_active
                                 else R.string.settings_premium_subtitle_inactive
                             ),
                             style = BrandText.footnote,

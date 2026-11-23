@@ -32,6 +32,13 @@ struct BudgetellaApp: App {
         // Firebase — GoogleService-Info.plist'ten otomatik konfigürasyon
         FirebaseApp.configure()
 
+        // The one SubscriptionService: start its StoreKit transaction listener
+        // at launch so renewals/refunds arriving while closed are processed.
+        _ = SubscriptionService.shared
+        #if DEBUG
+        PaywallPrompt.selfCheck()
+        #endif
+
         // Notification delegates — UNUserNotificationCenter + FCM
         NotificationService.shared.configure()
 

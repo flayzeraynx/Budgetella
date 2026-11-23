@@ -13,7 +13,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -52,10 +54,50 @@ class PaywallViewModel @Inject constructor(
         .observeProducts()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /**
+     * `null` until the first entitlement snapshot arrives. Gates lock only on
+     * an explicit `false`, so paying users never see a locked flash or a
+     * proactive paywall while Firestore is still answering.
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
-    val isPremium: StateFlow<Boolean> = userPrefs.currentUserId
+    val premiumState: StateFlow<Boolean?> = userPrefs.currentUserId
         .flatMapLatest { uid -> subscriptionRepository.observeIsPremium(uid) }
+        .map<Boolean, Boolean?> { it }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    val isPremium: StateFlow<Boolean> = premiumState
+        .map { it == true }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
+    /**
+     * Proactive paywall that is due right now, if any. MainScaffold only
+     * exists once onboarding/auth are done, hence `onboardingDone = true`.
+     */
+    val duePrompt: StateFlow<PaywallPrompt?> = combine(
+        premiumState,
+        userPrefs.paywallShownAfterOnboarding,
+        userPrefs.savedTxCount,
+        userPrefs.paywallShownAfterTenTx,
+    ) { premium, shownOnboarding, txCount, shownAt10 ->
+        if (premium == null) null
+        else PaywallPrompt.next(
+            isPremium = premium,
+            onboardingDone = true,
+            shownOnboarding = shownOnboarding,
+            txCount = txCount,
+            shownAt10 = shownAt10,
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** Persist before presenting so a dismissal is final. */
+    fun markPromptShown(prompt: PaywallPrompt) {
+        viewModelScope.launch {
+            when (prompt) {
+                PaywallPrompt.AfterOnboarding -> userPrefs.markPaywallShownAfterOnboarding()
+                PaywallPrompt.AfterTenthTransaction -> userPrefs.markPaywallShownAfterTenTx()
+            }
+        }
+    }
 
     private val _selectedPlan = MutableStateFlow(PaywallPlan.Yearly)
     val selectedPlan: StateFlow<PaywallPlan> = _selectedPlan.asStateFlow()
@@ -72,11 +114,7 @@ class PaywallViewModel @Inject constructor(
         val plan = _selectedPlan.value
         viewModelScope.launch {
             _purchaseState.value = PurchaseState.Loading
-            val details = products.value.firstOrNull { it.productId == plan.productId }
-            val offerToken = details
-                ?.subscriptionOfferDetails
-                ?.firstOrNull()
-                ?.offerToken
+            val offerToken = offerFor(plan)?.offerToken
             val result = subscriptionRepository.startPurchase(
                 activity = activity,
                 productId = plan.productId,
@@ -116,8 +154,7 @@ class PaywallViewModel @Inject constructor(
                 // otherwise fall back to the first phase. The phase ordering
                 // is [free trial, recurring], so the last phase is always the
                 // real charge price.
-                details.subscriptionOfferDetails
-                    ?.firstOrNull()
+                offerFor(plan)
                     ?.pricingPhases
                     ?.pricingPhaseList
                     ?.lastOrNull()
@@ -125,5 +162,36 @@ class PaywallViewModel @Inject constructor(
             }
             PaywallPlan.Lifetime -> details.oneTimePurchaseOfferDetails?.formattedPrice
         }
+    }
+
+    /**
+     * The offer the purchase will actually use. Play only returns offers this
+     * account is eligible for, so a free-trial offer in the list means the
+     * trial is redeemable — prefer it, otherwise fall back to the base plan.
+     * CTA label, fine print and purchase all read from here so they agree.
+     */
+    private fun offerFor(plan: PaywallPlan): ProductDetails.SubscriptionOfferDetails? {
+        val offers = products.value
+            .firstOrNull { it.productId == plan.productId }
+            ?.subscriptionOfferDetails
+            ?: return null
+        return offers.firstOrNull { it.hasFreePhase() } ?: offers.firstOrNull()
+    }
+
+    private fun ProductDetails.SubscriptionOfferDetails.hasFreePhase(): Boolean =
+        pricingPhases.pricingPhaseList.any { it.priceAmountMicros == 0L }
+
+    /** True only when [plan] will be bought with a free-trial offer. */
+    fun hasFreeTrial(plan: PaywallPlan): Boolean = offerFor(plan)?.hasFreePhase() == true
+
+    /** Yearly saving vs. 12× monthly from live Play prices; null when unknown or not cheaper. */
+    fun yearlyDiscountPercent(): Int? {
+        fun micros(plan: PaywallPlan) =
+            offerFor(plan)?.pricingPhases?.pricingPhaseList?.lastOrNull()?.priceAmountMicros
+        val monthly = micros(PaywallPlan.Monthly) ?: return null
+        val yearly = micros(PaywallPlan.Yearly) ?: return null
+        if (monthly <= 0L) return null
+        val percent = Math.round((1 - yearly.toDouble() / (monthly * 12.0)) * 100).toInt()
+        return percent.takeIf { it > 0 }
     }
 }

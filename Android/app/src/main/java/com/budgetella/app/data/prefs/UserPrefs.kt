@@ -3,6 +3,7 @@ package com.budgetella.app.data.prefs
 import android.content.Context
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -34,6 +35,9 @@ class UserPrefs @Inject constructor(
         val HasCompletedOnboarding: Preferences.Key<Boolean> = booleanPreferencesKey("hasCompletedOnboarding")
         val HasSeenWalkthrough: Preferences.Key<Boolean> = booleanPreferencesKey("hasSeenWalkthrough")
         val CurrentUserId: Preferences.Key<String> = stringPreferencesKey("currentUserId")
+        val PaywallShownAfterOnboarding = booleanPreferencesKey("paywall.shownAfterOnboarding")
+        val PaywallShownAfterTenTx = booleanPreferencesKey("paywall.shownAfterTenTx")
+        val SavedTxCount = intPreferencesKey("paywall.savedTxCount")
     }
 
     val hasCompletedOnboarding: Flow<Boolean> =
@@ -44,6 +48,28 @@ class UserPrefs @Inject constructor(
 
     val currentUserId: Flow<String> =
         context.userPrefsDataStore.data.map { it[Keys.CurrentUserId] ?: DataInitializer.LOCAL_USER_ID }
+
+    // ── Proactive paywall (shown at most twice, ever) ──────────────────────
+    val paywallShownAfterOnboarding: Flow<Boolean> =
+        context.userPrefsDataStore.data.map { it[Keys.PaywallShownAfterOnboarding] ?: false }
+
+    val paywallShownAfterTenTx: Flow<Boolean> =
+        context.userPrefsDataStore.data.map { it[Keys.PaywallShownAfterTenTx] ?: false }
+
+    val savedTxCount: Flow<Int> =
+        context.userPrefsDataStore.data.map { it[Keys.SavedTxCount] ?: 0 }
+
+    suspend fun markPaywallShownAfterOnboarding() {
+        context.userPrefsDataStore.edit { it[Keys.PaywallShownAfterOnboarding] = true }
+    }
+
+    suspend fun markPaywallShownAfterTenTx() {
+        context.userPrefsDataStore.edit { it[Keys.PaywallShownAfterTenTx] = true }
+    }
+
+    suspend fun incrementSavedTxCount() {
+        context.userPrefsDataStore.edit { it[Keys.SavedTxCount] = (it[Keys.SavedTxCount] ?: 0) + 1 }
+    }
 
     suspend fun markOnboardingComplete() {
         context.userPrefsDataStore.edit { it[Keys.HasCompletedOnboarding] = true }

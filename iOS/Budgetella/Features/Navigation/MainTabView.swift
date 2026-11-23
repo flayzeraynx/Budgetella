@@ -20,6 +20,7 @@ struct MainTabView: View {
     // Settings is a full page rendered over the pages (the tab bar stays
     // visible + tappable underneath the top bar) — parity with Android.
     @State private var showSettings = false
+    @State private var paywallRequest: PaywallRequest?
     // Lazy tab mounting: only views that have been activated (or are adjacent
     // to the active tab) are rendered. Avoids the cost of evaluating all four
     // tab view-graphs eagerly at launch.
@@ -68,6 +69,11 @@ struct MainTabView: View {
             }
 
             CustomTabBar(selected: $selectedTab, onModeSelect: { mode in
+                // Receipt scanning is Premium — offer the paywall instead of the camera.
+                if mode == .camera && !SubscriptionService.shared.isPremium {
+                    paywallRequest = PaywallRequest(context: .receiptScan)
+                    return
+                }
                 EntryPerf.begin("FAB tap → showQuickEntry (\(mode))")
                 entryMode = mode
                 showQuickEntry = true
@@ -76,10 +82,21 @@ struct MainTabView: View {
         .environment(\.hideAmounts, hideAmounts)
         .preferredColorScheme(preferredScheme)
         .ignoresSafeArea(.keyboard)
-        .sheet(isPresented: $showQuickEntry, onDismiss: { entryMode = .manual }) {
+        .sheet(isPresented: $showQuickEntry, onDismiss: {
+            entryMode = .manual
+            presentProactivePaywallIfDue()   // after entry is finished, never during
+        }) {
             QuickEntryView(initialMode: entryMode)
                 .presentationDetents([.large])
                 .presentationDragIndicator(.hidden)
+        }
+        .fullScreenCover(item: $paywallRequest) { request in
+            PaywallView(context: request.context)
+        }
+        .task {
+            // Resolve entitlement first so a paying user is never prompted.
+            await SubscriptionService.shared.setup(userId: currentUserId)
+            presentProactivePaywallIfDue()
         }
         .task(id: currentUserId) {
             guard !currentUserId.isEmpty else { return }
@@ -134,6 +151,25 @@ struct MainTabView: View {
             if showSettings { withAnimation(.easeInOut(duration: 0.2)) { showSettings = false } }
             ensureAdjacentMounted(for: newTab)
         }
+    }
+
+    // MARK: - Proactive paywall
+
+    /// At most two unprompted paywalls ever: once on first arrival here after
+    /// onboarding, once after the 10th saved transaction. Flags persist before
+    /// presenting so a dismissal is final.
+    private func presentProactivePaywallIfDue() {
+        guard paywallRequest == nil, !showQuickEntry else { return }
+        let defaults = UserDefaults.standard
+        guard let prompt = PaywallPrompt.next(
+            isPremium: SubscriptionService.shared.isPremium,
+            onboardingDone: defaults.bool(forKey: "hasCompletedOnboarding"),
+            shownOnboarding: defaults.bool(forKey: PaywallPrompt.shownAfterOnboardingKey),
+            txCount: defaults.integer(forKey: PaywallPrompt.savedTxCountKey),
+            shownAt10: defaults.bool(forKey: PaywallPrompt.shownAfterTenTxKey)
+        ) else { return }
+        defaults.set(true, forKey: prompt.flagKey)
+        paywallRequest = PaywallRequest(context: nil)
     }
 
     // MARK: - Page layout
@@ -404,6 +440,14 @@ struct CustomTabBar: View {
                     .font(.system(size: 19, weight: .medium))
                     .foregroundStyle(isSelected ? .white : BrandColor.textSecondary)
                     .scaleEffect(isSelected ? 1.1 : 1.0)
+            }
+            .overlay(alignment: .topTrailing) {
+                if option == .camera && !SubscriptionService.shared.isPremium {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundStyle(isSelected ? .white : BrandColor.primary)
+                        .padding(4)
+                }
             }
             Text(label)
                 .font(.brand(.caption))

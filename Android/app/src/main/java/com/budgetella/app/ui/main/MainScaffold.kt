@@ -1,5 +1,12 @@
 package com.budgetella.app.ui.main
 
+import com.budgetella.app.ui.paywall.PremiumFeature
+import com.budgetella.app.ui.paywall.PaywallViewModel
+import com.budgetella.app.ui.paywall.PaywallScreen
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.ModalBottomSheet
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.spring
@@ -124,6 +131,30 @@ fun MainScaffold(
     // FAB blob menu — tap the (+) to expand into a 3-option row above the bar.
     var fabMenuVisible by remember { mutableStateOf(false) }
 
+    // ── Premium gating ─────────────────────────────────────────────────────
+    // `premium` is null until Firestore answers; gates lock only on an
+    // explicit false so paying users never see a locked flash.
+    val paywallVm: PaywallViewModel = hiltViewModel()
+    val premium by paywallVm.premiumState.collectAsStateWithLifecycle()
+    val locked = premium == false
+    var showPaywall by remember { mutableStateOf(false) }
+    var paywallContext by remember { mutableStateOf<PremiumFeature?>(null) }
+    val openPaywall: (PremiumFeature?) -> Unit = { feature ->
+        paywallContext = feature
+        showPaywall = true
+    }
+
+    // Proactive paywall — at most twice ever (after onboarding, after the 10th
+    // saved transaction), and never while an entry sheet is open.
+    val duePrompt by paywallVm.duePrompt.collectAsStateWithLifecycle()
+    val entryInProgress = sheetTrigger != null || showVoiceSheet || showCameraSheet
+    LaunchedEffect(duePrompt, entryInProgress) {
+        val prompt = duePrompt ?: return@LaunchedEffect
+        if (entryInProgress || showPaywall) return@LaunchedEffect
+        paywallVm.markPromptShown(prompt)
+        openPaywall(null)
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -145,7 +176,10 @@ fun MainScaffold(
                 )
                 AppTab.List -> TransactionsScreen(onEdit = { sheetTrigger = AddEditTrigger.Edit(it) })
                 AppTab.Stats -> StatsScreen()
-                AppTab.Ai -> BudgiScreen()
+                AppTab.Ai -> BudgiScreen(
+                    locked = locked,
+                    onUnlock = { openPaywall(PremiumFeature.Budgi) },
+                )
             }
         }
 
@@ -185,6 +219,8 @@ fun MainScaffold(
                         onDeleteAccount = { settingsStack = settingsStack + SettingsRoute.DeleteAccount },
                         onShowNotificationSettings = { settingsStack = settingsStack + SettingsRoute.NotificationSettings },
                         onShowCategories = { settingsStack = settingsStack + SettingsRoute.Categories },
+                        premium = premium,
+                        onShowPaywall = openPaywall,
                     )
                     SettingsRoute.Theme -> ThemePickerSheet(onDismiss = pop, onBack = pop)
                     SettingsRoute.Language -> LanguagePickerSheet(onDismiss = pop, onBack = pop)
@@ -237,9 +273,11 @@ fun MainScaffold(
                     fabMenuVisible = false
                     showVoiceSheet = true
                 },
+                cameraLocked = locked,
                 onPickCamera = {
                     fabMenuVisible = false
-                    showCameraSheet = true
+                    // Receipt scanning is Premium — offer the paywall instead.
+                    if (locked) openPaywall(PremiumFeature.ReceiptScan) else showCameraSheet = true
                 },
             )
         }
@@ -289,6 +327,18 @@ fun MainScaffold(
             )
         }
 
+        // Paywall — hosted here so every gate and the proactive prompt share it.
+        if (showPaywall) {
+            ModalBottomSheet(
+                onDismissRequest = { showPaywall = false },
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                containerColor = BrandColor.background(),
+                dragHandle = null,
+            ) {
+                PaywallScreen(onClose = { showPaywall = false }, context = paywallContext)
+            }
+        }
+
     }
 }
 
@@ -314,6 +364,7 @@ private fun FabBlobMenu(
     onPickManual: () -> Unit,
     onPickVoice: () -> Unit,
     onPickCamera: () -> Unit,
+    cameraLocked: Boolean = false,
 ) {
     Row(
         modifier = Modifier
@@ -338,6 +389,7 @@ private fun FabBlobMenu(
             icon = androidx.compose.material.icons.Icons.Filled.CameraAlt,
             label = stringResource(R.string.entry_mode_camera),
             onClick = onPickCamera,
+            locked = cameraLocked,
         )
     }
 }
@@ -348,6 +400,7 @@ private fun BlobOption(
     label: String,
     onClick: () -> Unit,
     primary: Boolean = false,
+    locked: Boolean = false,
 ) {
     Column(
         modifier = Modifier
@@ -369,6 +422,17 @@ private fun BlobOption(
                 tint = if (primary) Color.White else BrandColor.textSecondary(),
                 modifier = Modifier.size(22.dp),
             )
+            if (locked) {
+                androidx.compose.material3.Icon(
+                    imageVector = androidx.compose.material.icons.Icons.Filled.Lock,
+                    contentDescription = stringResource(R.string.premium_locked_cd),
+                    tint = BrandColor.Primary,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(4.dp)
+                        .size(11.dp),
+                )
+            }
         }
         Spacer(Modifier.height(4.dp))
         androidx.compose.material3.Text(

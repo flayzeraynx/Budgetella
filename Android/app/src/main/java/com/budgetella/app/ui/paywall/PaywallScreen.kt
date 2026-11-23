@@ -3,7 +3,10 @@ package com.budgetella.app.ui.paywall
 import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -70,11 +73,12 @@ import com.budgetella.app.core.design.Spacing
 @Composable
 fun PaywallScreen(
     onClose: () -> Unit,
+    /** Feature the user tapped to get here — listed first and highlighted. */
+    context: PremiumFeature? = null,
     viewModel: PaywallViewModel = hiltViewModel(),
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
-    val context = LocalContext.current
-    val activity = context as? Activity
+    val activity = LocalContext.current as? Activity
 
     val selectedPlan by viewModel.selectedPlan.collectAsStateWithLifecycle()
     val purchaseState by viewModel.purchaseState.collectAsStateWithLifecycle()
@@ -97,6 +101,10 @@ fun PaywallScreen(
             isPurchasing = purchaseState is PurchaseState.Loading,
             priceFor = { plan -> viewModel.formattedPrice(plan) },
             hasProducts = products.isNotEmpty(),
+            // `products` is read above, so these recompute when Play answers.
+            hasTrial = viewModel.hasFreeTrial(selectedPlan),
+            yearlyDiscount = viewModel.yearlyDiscountPercent(),
+            context = context,
             onSelectPlan = viewModel::selectPlan,
             onClose = onClose,
             onPurchaseClick = {
@@ -128,6 +136,9 @@ private fun PaywallBody(
     isPurchasing: Boolean,
     priceFor: (PaywallPlan) -> String?,
     hasProducts: Boolean,
+    hasTrial: Boolean,
+    yearlyDiscount: Int?,
+    context: PremiumFeature?,
     onSelectPlan: (PaywallPlan) -> Unit,
     onClose: () -> Unit,
     onPurchaseClick: () -> Unit,
@@ -150,16 +161,18 @@ private fun PaywallBody(
             Spacer(modifier = Modifier.height(Spacing.sm))
             Hero()
             Spacer(modifier = Modifier.height(Spacing.xl))
-            FeatureList()
+            FeatureList(context = context)
             Spacer(modifier = Modifier.height(Spacing.xl))
             PlanCards(
                 selected = selectedPlan,
+                yearlyDiscount = yearlyDiscount,
                 priceFor = priceFor,
                 onSelect = onSelectPlan,
             )
             Spacer(modifier = Modifier.height(Spacing.lg))
             CtaBlock(
                 plan = selectedPlan,
+                hasTrial = hasTrial,
                 priceFor = priceFor,
                 isPurchasing = isPurchasing,
                 enabled = hasProducts && !isPurchasing,
@@ -177,6 +190,7 @@ private fun PaywallBody(
                     color = BrandColor.textTertiary(),
                 )
             }
+            LegalLinks()
             Spacer(modifier = Modifier.height(Spacing.xl))
         }
     }
@@ -192,11 +206,11 @@ private fun CloseRow(onClose: () -> Unit) {
     ) {
         IconButton(
             onClick = onClose,
-            modifier = Modifier.size(40.dp),
+            modifier = Modifier.size(48.dp),
         ) {
             Icon(
                 imageVector = Icons.Filled.Close,
-                contentDescription = stringResource(R.string.common_cancel),
+                contentDescription = stringResource(R.string.common_close),
                 tint = BrandColor.textSecondary(),
             )
         }
@@ -256,27 +270,31 @@ private fun Hero() {
 }
 
 @Composable
-private fun FeatureList() {
-    val features = listOf(
-        R.string.paywall_feature_1,
-        R.string.paywall_feature_2,
-        R.string.paywall_feature_3,
-        R.string.paywall_feature_4,
-    )
+private fun FeatureList(context: PremiumFeature?) {
+    // Rendered from PremiumFeature — exactly what is locked, nothing else.
+    val features = listOfNotNull(context) + PremiumFeature.entries.filter { it != context }
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
-        features.forEach { resId ->
-            FeatureRow(label = stringResource(resId))
+        features.forEach { feature ->
+            FeatureRow(
+                label = stringResource(feature.title),
+                detail = stringResource(feature.subtitle),
+                highlighted = feature == context,
+            )
         }
     }
 }
 
 @Composable
-private fun FeatureRow(label: String) {
+private fun FeatureRow(label: String, detail: String, highlighted: Boolean) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(Spacing.radiusMedium))
+            .background(if (highlighted) BrandColor.Primary.copy(alpha = 0.12f) else Color.Transparent)
+            .padding(horizontal = if (highlighted) Spacing.sm else 0.dp, vertical = Spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
@@ -286,18 +304,25 @@ private fun FeatureRow(label: String) {
             modifier = Modifier.size(24.dp),
         )
         Spacer(modifier = Modifier.size(Spacing.md))
-        Text(
-            text = label,
-            style = BrandText.body,
-            color = BrandColor.textPrimary(),
-            modifier = Modifier.fillMaxWidth(),
-        )
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = label,
+                style = BrandText.body,
+                color = BrandColor.textPrimary(),
+            )
+            Text(
+                text = detail,
+                style = BrandText.caption,
+                color = BrandColor.textTertiary(),
+            )
+        }
     }
 }
 
 @Composable
 private fun PlanCards(
     selected: PaywallPlan,
+    yearlyDiscount: Int?,
     priceFor: (PaywallPlan) -> String?,
     onSelect: (PaywallPlan) -> Unit,
 ) {
@@ -321,7 +346,7 @@ private fun PlanCards(
             subtitle = null,
             price = priceFor(PaywallPlan.Yearly),
             period = stringResource(R.string.paywall_per_year),
-            badge = stringResource(R.string.paywall_save_badge),
+            badge = yearlyDiscount?.let { stringResource(R.string.paywall_save_badge, it) },
             isSelected = selected == PaywallPlan.Yearly,
             onClick = { onSelect(PaywallPlan.Yearly) },
         )
@@ -445,21 +470,37 @@ private fun PlanCard(
 @Composable
 private fun CtaBlock(
     plan: PaywallPlan,
+    hasTrial: Boolean,
     priceFor: (PaywallPlan) -> String?,
     isPurchasing: Boolean,
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
-    val ctaLabel = when (plan) {
-        PaywallPlan.Monthly, PaywallPlan.Yearly -> stringResource(R.string.paywall_cta_trial)
-        PaywallPlan.Lifetime -> stringResource(R.string.paywall_cta_buy_now)
-    }
+    // Trial wording only when this purchase will really use a free-trial offer.
+    val ctaLabel = stringResource(
+        when {
+            plan == PaywallPlan.Lifetime -> R.string.paywall_cta_buy_now
+            hasTrial -> R.string.paywall_cta_trial
+            else -> R.string.paywall_cta_subscribe
+        }
+    )
 
-    val finePrint = when (plan) {
-        PaywallPlan.Monthly, PaywallPlan.Yearly ->
-            priceFor(plan)?.let { stringResource(R.string.paywall_free_trial, it) }
+    // Pre-contract disclosure directly under the buy button (TR Law 6502 +
+    // Play subscription policy): price with period, renewal, trial, how to cancel.
+    val period = stringResource(
+        if (plan == PaywallPlan.Monthly) R.string.paywall_per_month else R.string.paywall_per_year
+    )
+    val price = priceFor(plan)?.let { it + period }
+    val finePrint = if (plan == PaywallPlan.Lifetime) {
+        stringResource(R.string.paywall_lifetime_finePrint)
+    } else {
+        val terms = when {
+            hasTrial -> price?.let { stringResource(R.string.paywall_free_trial, it) }
                 ?: stringResource(R.string.paywall_free_trial_generic)
-        PaywallPlan.Lifetime -> stringResource(R.string.paywall_lifetime_finePrint)
+            else -> price?.let { stringResource(R.string.paywall_auto_renew, it) }
+                ?: stringResource(R.string.paywall_auto_renew_generic)
+        }
+        terms + " " + stringResource(R.string.paywall_cancel_how)
     }
 
     Column(
@@ -492,8 +533,36 @@ private fun CtaBlock(
         Text(
             text = finePrint,
             style = BrandText.footnote,
-            color = BrandColor.textTertiary(),
+            color = BrandColor.textSecondary(),
             textAlign = TextAlign.Center,
         )
+    }
+}
+
+@Composable
+private fun LegalLinks() {
+    val context = LocalContext.current
+    // Turkish users get the Turkish legal pages (same rule as Settings).
+    val suffix = if (LocalConfiguration.current.locales[0].language == "tr") "-tr" else ""
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        listOf(
+            R.string.settings_privacy to "privacy",
+            R.string.settings_terms to "terms",
+        ).forEach { (label, page) ->
+            TextButton(onClick = {
+                context.startActivity(
+                    Intent(Intent.ACTION_VIEW, Uri.parse("https://budgetella.app/$page$suffix"))
+                )
+            }) {
+                Text(
+                    text = stringResource(label),
+                    style = BrandText.footnote,
+                    color = BrandColor.Primary,
+                )
+            }
+        }
     }
 }

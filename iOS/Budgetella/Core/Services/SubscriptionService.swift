@@ -26,7 +26,20 @@ public final class SubscriptionService {
     public var isLoading = false
     public var errorMessage: String?
 
-    public var isPremium: Bool { isSubscriptionActive || isLifetimePurchased }
+    /// Until the first StoreKit refresh lands, trust the last persisted state so
+    /// paying users never see a locked feature flash at launch.
+    public var isPremium: Bool {
+        isSubscriptionActive || isLifetimePurchased || (!hasRefreshed && cachedPremium)
+    }
+
+    /// Product IDs whose free-trial intro offer this Apple ID can still redeem.
+    public private(set) var trialEligibleProductIDs: Set<String> = []
+
+    private var hasRefreshed = false
+    private let cachedPremium = UserDefaults.standard.bool(forKey: "budgetella.isPremium")
+
+    /// Single app-wide instance — one `Transaction.updates` listener.
+    public static let shared = SubscriptionService()
 
     public var monthlyProduct:  Product?
     public var yearlyProduct:   Product?
@@ -58,7 +71,7 @@ public final class SubscriptionService {
 
     // MARK: - Init
 
-    public init() {
+    private init() {
         transactionListener = listenForTransactions()
     }
 
@@ -86,14 +99,34 @@ public final class SubscriptionService {
                 default: break
                 }
             }
+            await refreshTrialEligibility()
         } catch {
             errorMessage = String(format: String(localized: "Ürünler yüklenemedi: %@"), error.localizedDescription)
         }
     }
 
+    /// Trial wording may only be shown when the product has a free-trial intro
+    /// offer AND this Apple ID has not used one in the subscription group.
+    private func refreshTrialEligibility() async {
+        var eligible: Set<String> = []
+        for product in [monthlyProduct, yearlyProduct].compactMap({ $0 }) {
+            guard let sub = product.subscription,
+                  sub.introductoryOffer?.paymentMode == .freeTrial,
+                  await sub.isEligibleForIntroOffer else { continue }
+            eligible.insert(product.id)
+        }
+        trialEligibleProductIDs = eligible
+    }
+
     // MARK: - Status
 
     public func refreshStatus(userId: String = "") async {
+        defer { hasRefreshed = true }
+        // Shared instance: callers without a uid (purchase, restore, listener)
+        // must not drop the DEBUG dev override another screen established.
+        let userId = userId.isEmpty
+            ? (UserDefaults.standard.string(forKey: "currentUserId") ?? "")
+            : userId
         if !userId.isEmpty && Self.devPremiumUIDs.contains(userId) {
             isSubscriptionActive = true
             isLifetimePurchased  = false
@@ -175,6 +208,7 @@ public final class SubscriptionService {
             if case .verified(let tx) = verification {
                 await tx.finish()
                 await refreshStatus()
+                await refreshTrialEligibility()
             } else {
                 throw SubscriptionError.verificationFailed
             }

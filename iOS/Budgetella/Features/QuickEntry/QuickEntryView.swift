@@ -36,7 +36,10 @@ struct QuickEntryView: View {
     @State private var showDiscardAlert = false
 
     init(initialMode: EntryMode = .manual) {
-        _mode = State(initialValue: initialMode)
+        // Receipt scanning is Premium; callers gate it, this keeps a stray
+        // .camera request on the free manual form instead of a dead end.
+        let allowed = initialMode != .camera || SubscriptionService.shared.isPremium
+        _mode = State(initialValue: allowed ? initialMode : .manual)
     }
 
     private var hasContent: Bool {

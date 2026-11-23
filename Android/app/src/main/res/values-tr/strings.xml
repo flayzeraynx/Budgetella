@@ -280,7 +280,7 @@
     <string name="settings_delete_confirm_body">Bu işlem hesabını ve senkronize verilerini kalıcı olarak siler. Geri alınamaz.</string>
     <string name="settings_premium_label">Premium</string>
     <string name="settings_premium_subtitle_active">Aktif abonelik</string>
-    <string name="settings_premium_subtitle_inactive">7 gün ücretsiz dene</string>
+    <string name="settings_premium_subtitle_inactive">AI asistan, fiş tarama ve daha fazlası</string>
     <string name="settings_version">Sürüm</string>
     <string name="settings_section_about">Hakkında</string>
     <string name="about_tagline">Kişisel finans, zarif ve sade.</string>
@@ -316,11 +316,7 @@
 
     <!-- Paywall -->
     <string name="paywall_title">Budgetella Premium</string>
-    <string name="paywall_subtitle">Gelişmiş içgörüler, sınırsız kategori ve Budgi AI.</string>
-    <string name="paywall_feature_1">Sınırsız kategori + özel bütçeler</string>
-    <string name="paywall_feature_2">Sesli + fiş okuma ile işlem ekleme</string>
-    <string name="paywall_feature_3">Çoklu para birimi desteği</string>
-    <string name="paywall_feature_4">Gemini destekli Premium Budgi içgörüleri</string>
+    <string name="paywall_subtitle">Budgi AI sohbeti, fiş tarama ve özel kategoriler.</string>
     <string name="paywall_monthly">Aylık</string>
     <string name="paywall_yearly">Yıllık · %%33 indirim</string>
     <string name="paywall_monthly_title">Aylık Plan</string>
@@ -328,15 +324,15 @@
     <string name="paywall_lifetime_title">Ömür Boyu</string>
     <string name="paywall_lifetime_subtitle">Bir kez öde, sonsuza kadar kullan</string>
     <string name="paywall_lifetime_badge">Tek seferlik</string>
-    <string name="paywall_save_badge">%%33 indirim</string>
+    <string name="paywall_save_badge">%%%1$d indirim</string>
     <string name="paywall_per_month">/ay</string>
     <string name="paywall_per_year">/yıl</string>
-    <string name="paywall_free_trial">7 gün ücretsiz, sonra %1$s</string>
-    <string name="paywall_free_trial_generic">7 gün ücretsiz, sonra otomatik yenilenir</string>
+    <string name="paywall_free_trial">7 gün ücretsiz. Deneme bitince abonelik %1$s fiyatıyla başlar ve sen iptal edene kadar aynı fiyattan otomatik yenilenir. Ücret ödememek için deneme bitmeden iptal et.</string>
+    <string name="paywall_free_trial_generic">7 gün ücretsiz. Deneme bitince abonelik başlar ve sen iptal edene kadar otomatik yenilenir. Ücret ödememek için deneme bitmeden iptal et.</string>
     <string name="paywall_lifetime_finePrint">Tek seferlik ödeme. Abonelik yok, yenileme yok.</string>
     <string name="paywall_cta">Ücretsiz denemeyi başlat</string>
     <string name="paywall_cta_trial">7 Gün Ücretsiz Dene</string>
-    <string name="paywall_cta_buy_now">Hemen Satın Al</string>
+    <string name="paywall_cta_buy_now">Satın Al</string>
     <string name="paywall_restore">Satın alımları geri yükle</string>
     <string name="paywall_unavailable">Abonelikler bu sürümde yok. Play Store yayını ile gelecek.</string>
     <string name="paywall_error_title">Satın Alma Hatası</string>
@@ -415,5 +411,21 @@
     <string name="settings_share">Arkadaşlarınla Paylaş</string>
     <string name="settings_share_message">Bütçemi Budgetella ile takip ediyorum. Sen de dene: https://budgetella.app</string>
     <string name="settings_share_chooser">Budgetella\'yı Paylaş</string>
+
+    <!-- Premium gating -->
+    <string name="premium_feature_budgi">Budgi AI Asistan</string>
+    <string name="premium_feature_budgi_sub">Harcamaların hakkında soru sor, öneri al</string>
+    <string name="premium_feature_receipt">Fiş Tarama</string>
+    <string name="premium_feature_receipt_sub">Fiş fotoğrafından işlem ekle</string>
+    <string name="premium_feature_categories">Özel Kategoriler</string>
+    <string name="premium_feature_categories_sub">Kendi kategorilerini oluştur</string>
+    <string name="premium_locked_cd">Premium özellik</string>
+    <string name="paywall_cta_subscribe">Abone Ol</string>
+    <string name="paywall_auto_renew">Abonelik %1$s fiyatıyla başlar ve sen iptal edene kadar aynı fiyattan otomatik yenilenir.</string>
+    <string name="paywall_auto_renew_generic">Abonelik, sen iptal edene kadar otomatik yenilenir.</string>
+    <string name="paywall_cancel_how">İstediğin zaman iptal edebilirsin: Google Play > profil simgesi > Ödemeler ve abonelikler > Abonelikler.</string>
+    <string name="budgi_locked_title">Budgi, Premium\'un bir parçası</string>
+    <string name="budgi_locked_body">Budgi harcamalarını analiz eder, sorularını yanıtlar ve sana özel öneriler sunar. İşlem ekleme, bütçeler ve istatistikler her zaman ücretsiz.</string>
+    <string name="premium_unlock_cta">Premium ile aç</string>
 
 </resources>

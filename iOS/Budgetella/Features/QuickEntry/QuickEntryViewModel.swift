@@ -110,6 +110,11 @@ import SwiftData
         modelContext.insert(tx)
         try? modelContext.save()
         reset()
+        // Feeds the one-time "after 10th transaction" paywall (shown later by
+        // MainTabView once this sheet is gone — never during entry).
+        let defaults = UserDefaults.standard
+        defaults.set(defaults.integer(forKey: PaywallPrompt.savedTxCountKey) + 1,
+                     forKey: PaywallPrompt.savedTxCountKey)
         // Widget snapshot güncelle — UserDefaults'tan okur (SubscriptionService tarafından yazılır)
         let isPremium = UserDefaults.standard.bool(forKey: "budgetella.isPremium")
         WidgetDataManager.refresh(context: modelContext, isPremium: isPremium)

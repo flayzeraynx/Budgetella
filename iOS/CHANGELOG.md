@@ -2,6 +2,20 @@
 
 ---
 
+## v1.1.3 (build 5) — hazırlanıyor (branch `feat/premium-gating`, gönderilmedi)
+**Premium gating: paywall'ın sattığı şey = Premium'un açtığı şey.**
+
+- **Premium'a kilitlendi:** Budgi AI sohbeti, fiş tarama (kamera). Özel kategoriler + widget kilidi aynen duruyor. Tek kaynak: `Features/Paywall/PremiumFeature.swift` — paywall fayda listesi bu enum'dan çiziliyor.
+- **Ücretsiz kalır:** sınırsız manuel işlem, bütçeler, istatistikler, kural tabanlı Budgi içgörü kartı (Dashboard + Stats; etiketi artık "BUDGİ", "AI" ibaresi kaldırıldı), sesli giriş, yerel kategori önerisi, içe ve dışa aktarma, hesap silme, biyometrik kilit, temalar, bildirimler.
+- **Paywall dürüstleşti:** "Sınırsız İşlem" ve "Bütçe & Tahmin" iddiaları kaldırıldı; "7 Gün Ücretsiz Dene" yalnızca ürünün free-trial intro offer'ı varsa VE kullanıcı uygunsa (`isEligibleForIntroOffer`), aksi halde "Abone Ol" / "Satın Al". İndirim rozeti canlı fiyatlardan hesaplanıyor ve EN çevirisi var.
+- **Paywall yasal metni (6502 sayılı Kanun + App Store 3.1.2):** satın al butonunun hemen altında dönemli fiyat, otomatik yenileme, denemenin ücretliye dönüşmesi ve nasıl iptal edileceği yazıyor. Gizlilik/Koşullar linkleri Türkçe kullanıcıda `-tr` sayfalarına gidiyor.
+- **Proaktif paywall (toplam en fazla 2 kez):** onboarding sonrası ana ekrana ilk gelişte + 10. kayıtlı işlemden sonra (giriş sayfası kapandıktan sonra). `PaywallPrompt.next(...)` + DEBUG `selfCheck()`.
+- **Tek `SubscriptionService.shared`** (5 ayrı instance + 5 transaction listener yerine); listener app açılışında başlıyor. `budgetella.isPremium` UserDefaults aynası korunuyor.
+- Kullanılmayan `PaywallModalView` silindi.
+- `project.yml`: `MARKETING_VERSION: 1.1.3`, `CURRENT_PROJECT_VERSION: 5`
+
+---
+
 ## v1.1.1 (build 3) — 2026-10 (App Store'a ~2026-10-10 gönderildi, yayında)
 **Gemini model fix + performans/UX turu.**
 

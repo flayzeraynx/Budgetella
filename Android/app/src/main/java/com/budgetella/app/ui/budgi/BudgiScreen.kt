@@ -1,5 +1,11 @@
 package com.budgetella.app.ui.budgi
 
+import com.budgetella.app.ui.paywall.PremiumBadge
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Button
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -57,7 +63,11 @@ import com.budgetella.app.core.design.BrandText
 import com.budgetella.app.core.design.Spacing
 
 @Composable
-fun BudgiScreen(modifier: Modifier = Modifier) {
+fun BudgiScreen(
+    modifier: Modifier = Modifier,
+    locked: Boolean = false,
+    onUnlock: () -> Unit = {},
+) {
     val vm: BudgiViewModel = hiltViewModel()
     val messages by vm.messages.collectAsStateWithLifecycle()
     val isSending by vm.isSending.collectAsStateWithLifecycle()
@@ -83,6 +93,13 @@ fun BudgiScreen(modifier: Modifier = Modifier) {
             .statusBarsPadding()
     ) {
         Header()
+
+        if (locked) {
+            // Free tier: explain Budgi and offer one clear way in — no chat,
+            // no Gemini request.
+            LockedBudgi(onUnlock = onUnlock, modifier = Modifier.weight(1f))
+            return@Column
+        }
 
         LazyColumn(
             state = listState,
@@ -129,6 +146,61 @@ fun BudgiScreen(modifier: Modifier = Modifier) {
                 }
             },
         )
+    }
+}
+
+// ── Locked (free tier) ────────────────────────────────────────────────────
+
+@Composable
+private fun LockedBudgi(onUnlock: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = Spacing.xl, vertical = Spacing.xxl),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Spacing.lg),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(96.dp)
+                .clip(CircleShape)
+                .background(BrandColor.Primary.copy(alpha = 0.12f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Filled.AutoAwesome,
+                contentDescription = null,
+                tint = BrandColor.Primary,
+                modifier = Modifier.size(40.dp),
+            )
+        }
+        PremiumBadge()
+        Text(
+            text = stringResource(R.string.budgi_locked_title),
+            style = BrandText.title,
+            color = BrandColor.textPrimary(),
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            text = stringResource(R.string.budgi_locked_body),
+            style = BrandText.body,
+            color = BrandColor.textTertiary(),
+            textAlign = TextAlign.Center,
+        )
+        Button(
+            onClick = onUnlock,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp),
+            shape = RoundedCornerShape(Spacing.radiusMedium),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = BrandColor.Primary,
+                contentColor = Color.White,
+            ),
+        ) {
+            Text(text = stringResource(R.string.premium_unlock_cta), style = BrandText.subheadline)
+        }
     }
 }
 

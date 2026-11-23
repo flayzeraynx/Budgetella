@@ -75,6 +75,7 @@ import com.budgetella.app.data.local.entity.CategoryEntity
 import com.budgetella.app.data.model.CategorySlug
 import com.budgetella.app.data.model.TransactionType
 import com.budgetella.app.ui.paywall.PaywallScreen
+import com.budgetella.app.ui.paywall.PremiumFeature
 import com.budgetella.app.ui.transactions.iconForSlug
 
 // ── Icon + colour palettes ────────────────────────────────────────────────────
@@ -232,7 +233,7 @@ fun CategoryManagementSheet(
             containerColor   = BrandColor.background(),
             dragHandle       = null,
         ) {
-            PaywallScreen(onClose = { showPaywall = false })
+            PaywallScreen(onClose = { showPaywall = false }, context = PremiumFeature.CustomCategories)
         }
     }
 }

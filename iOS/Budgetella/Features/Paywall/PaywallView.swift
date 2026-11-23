@@ -12,7 +12,10 @@ struct PaywallView: View {
 
     @Environment(\.dismiss) private var dismiss
     @AppStorage("currentUserId") private var currentUserId = ""
-    @State private var subscriptionService = SubscriptionService()
+    /// Feature the user tapped to get here — listed first and highlighted.
+    var context: PremiumFeature? = nil
+
+    private var subscriptionService: SubscriptionService { .shared }
     @State private var selectedPlan: Plan = .yearly
     @State private var isPurchasing = false
     @State private var errorMessage: String?
@@ -41,10 +44,13 @@ struct PaywallView: View {
                                 .font(.system(size: 12, weight: .bold))
                                 .foregroundStyle(BrandColor.textTertiary)
                         }
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                     }
+                    .accessibilityLabel(Text("Kapat"))
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, Spacing.lg)
+                .padding(.horizontal, 14)
+                .padding(.top, Spacing.sm)
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: Spacing.xl) {
@@ -108,18 +114,23 @@ struct PaywallView: View {
 
     // MARK: - Feature list
 
+    /// Rendered from `PremiumFeature` — exactly what is locked, nothing else.
+    private var orderedFeatures: [PremiumFeature] {
+        guard let context else { return PremiumFeature.allCases }
+        return [context] + PremiumFeature.allCases.filter { $0 != context }
+    }
+
     private var featureList: some View {
         VStack(spacing: Spacing.sm) {
-            featureRow(icon: "wand.and.sparkles",       color: BrandColor.primary,
-                       title: "Budgi AI Asistan",       subtitle: "Harcamalarını analiz et, tavsiyeleri al")
-            featureRow(icon: "camera.viewfinder",        color: BrandColor.info,
-                       title: "Fiş OCR",                subtitle: "Kamerayla otomatik fiş kaydı")
-            featureRow(icon: "chart.bar.doc.horizontal", color: BrandColor.income,
-                       title: "Bütçe & Tahmin",         subtitle: "Aylık hedef koy, ay sonu tahmini gör")
-            featureRow(icon: "square.and.arrow.up",      color: BrandColor.warning,
-                       title: "Gelişmiş Dışa Aktarma",  subtitle: "Excel, PDF ve JSON formatları")
-            featureRow(icon: "infinity",                 color: BrandColor.primaryLight,
-                       title: "Sınırsız İşlem",         subtitle: "Geçmişe dair tüm veriler, sınırsız")
+            ForEach(orderedFeatures) { feature in
+                featureRow(icon: feature.icon, color: feature.color,
+                           title: feature.title, subtitle: feature.subtitle)
+                    .padding(feature == context ? Spacing.xs : 0)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(feature == context ? BrandColor.primary.opacity(0.12) : .clear)
+                    )
+            }
         }
         .padding(Spacing.md)
         .glassCard(cornerRadius: Spacing.radiusMedium)
@@ -167,7 +178,7 @@ struct PaywallView: View {
                 title: "Yıllık Plan",
                 price: yearlyDisplayPrice,
                 period: "yıl",
-                badge: "33% Off",
+                badge: yearlyDiscountBadge,
                 subPrice: monthlyEquivalentFromYearly
             )
             planCard(
@@ -175,7 +186,7 @@ struct PaywallView: View {
                 title: "Ömür Boyu",
                 price: lifetimeDisplayPrice,
                 period: nil,
-                badge: "Tek seferlik",
+                badge: LocaleHelper.string("Tek seferlik"),
                 subPrice: "Bir kez öde, sonsuza kadar kullan"
             )
         }
@@ -193,6 +204,33 @@ struct PaywallView: View {
         subscriptionService.lifetimeProduct.map { $0.displayPrice } ?? "$99.99"
     }
 
+    /// Discount of yearly vs. 12× monthly, from the live storefront prices
+    /// (TRY tiers differ from USD). Hidden when yearly isn't actually cheaper.
+    private var yearlyDiscountBadge: String? {
+        var percent = 33
+        if let m = subscriptionService.monthlyProduct, let y = subscriptionService.yearlyProduct, m.price > 0 {
+            let ratio = NSDecimalNumber(decimal: y.price / (m.price * 12)).doubleValue
+            percent = Int(((1 - ratio) * 100).rounded())
+        }
+        guard percent > 0 else { return nil }
+        return String(format: LocaleHelper.string("%%%lld İndirim"), percent)
+    }
+
+    private var selectedProduct: Product? {
+        switch selectedPlan {
+        case .monthly:  return subscriptionService.monthlyProduct
+        case .yearly:   return subscriptionService.yearlyProduct
+        case .lifetime: return subscriptionService.lifetimeProduct
+        }
+    }
+
+    /// True only when the selected product has a free-trial intro offer AND
+    /// this Apple ID is still eligible for it.
+    private var trialAvailable: Bool {
+        guard let id = selectedProduct?.id else { return false }
+        return subscriptionService.trialEligibleProductIDs.contains(id)
+    }
+
     private var monthlyEquivalentFromYearly: String {
         let perMonth = String(localized: "/ay")
         guard let p = subscriptionService.yearlyProduct else {
@@ -207,7 +245,7 @@ struct PaywallView: View {
         title: LocalizedStringKey,
         price: String,
         period: String?,
-        badge: LocalizedStringKey?,
+        badge: String?,
         subPrice: String?
     ) -> some View {
         let isSelected = selectedPlan == plan
@@ -310,6 +348,14 @@ struct PaywallView: View {
             }
             .disabled(isPurchasing)
 
+            // Pre-contract disclosure sits directly under the buy button
+            // (TR Law 6502 + App Store 3.1.2): price, renewal, trial, how to cancel.
+            Text(renewalNote)
+                .font(.brand(.caption))
+                .foregroundStyle(BrandColor.textSecondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+
             Button {
                 Task {
                     do { try await subscriptionService.restorePurchases() }
@@ -325,48 +371,47 @@ struct PaywallView: View {
     }
 
     private var ctaButtonTitle: LocalizedStringKey {
-        switch selectedPlan {
-        case .yearly, .monthly: return "7 Gün Ücretsiz Dene"
-        case .lifetime:         return "Hemen Satın Al"
+        if selectedPlan == .lifetime { return "Satın Al" }
+        return trialAvailable ? "7 Gün Ücretsiz Dene" : "Abone Ol"
+    }
+
+    /// "₺149,99/ay" — the selected subscription's price with its billing period.
+    private var selectedPriceWithPeriod: String {
+        selectedPlan == .monthly
+            ? monthlyDisplayPrice + LocaleHelper.string("/ay")
+            : yearlyDisplayPrice + LocaleHelper.string("/yıl")
+    }
+
+    private var renewalNote: String {
+        if selectedPlan == .lifetime {
+            return LocaleHelper.string("Tek seferlik ödeme. Abonelik yok, yenileme yok.")
         }
+        let terms = trialAvailable
+            ? "7 gün ücretsiz. Deneme bitince abonelik %@ fiyatıyla başlar ve sen iptal edene kadar aynı fiyattan otomatik yenilenir. Ücret ödememek için deneme bitmeden en az 24 saat önce iptal et."
+            : "Abonelik %@ fiyatıyla başlar ve sen iptal edene kadar aynı fiyattan otomatik yenilenir."
+        return String(format: LocaleHelper.string(terms), selectedPriceWithPeriod)
+            + " " + LocaleHelper.string("İstediğin zaman iptal edebilirsin: iPhone Ayarlar > adın > Abonelikler.")
     }
 
     // MARK: - Fine print
 
     private var finePrint: some View {
-        VStack(spacing: 4) {
-            if selectedPlan != .lifetime {
-                Text("Deneme süresi bittikten sonra seçtiğin plan fiyatından otomatik yenilenir.")
-                    .font(.brand(.caption))
-                    .foregroundStyle(BrandColor.textTertiary)
-                    .multilineTextAlignment(.center)
-            } else {
-                Text("Tek seferlik ödeme. Abonelik yok, yenileme yok.")
-                    .font(.brand(.caption))
-                    .foregroundStyle(BrandColor.textTertiary)
-                    .multilineTextAlignment(.center)
-            }
-            HStack(spacing: Spacing.md) {
-                Link("Gizlilik Politikası", destination: URL(string: "https://budgetella.app/privacy")!)
-                    .font(.brand(.caption))
-                    .foregroundStyle(BrandColor.primary.opacity(0.7))
-                Link("Kullanım Koşulları", destination: URL(string: "https://budgetella.app/terms")!)
-                    .font(.brand(.caption))
-                    .foregroundStyle(BrandColor.primary.opacity(0.7))
-            }
+        // Turkish users get the Turkish legal pages.
+        let suffix = LocaleHelper.isEnglish ? "" : "-tr"
+        return HStack(spacing: Spacing.md) {
+            Link("Gizlilik Politikası", destination: URL(string: "https://budgetella.app/privacy\(suffix)")!)
+                .font(.brand(.caption))
+                .foregroundStyle(BrandColor.primary.opacity(0.7))
+            Link("Kullanım Koşulları", destination: URL(string: "https://budgetella.app/terms\(suffix)")!)
+                .font(.brand(.caption))
+                .foregroundStyle(BrandColor.primary.opacity(0.7))
         }
     }
 
     // MARK: - Purchase
 
     private func startPurchase() async {
-        let product: Product?
-        switch selectedPlan {
-        case .monthly:  product = subscriptionService.monthlyProduct
-        case .yearly:   product = subscriptionService.yearlyProduct
-        case .lifetime: product = subscriptionService.lifetimeProduct
-        }
-        guard let product else {
+        guard let product = selectedProduct else {
             errorMessage = String(localized: "Ürün yüklenemedi. Lütfen tekrar deneyin.")
             return
         }

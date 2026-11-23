@@ -21,6 +21,7 @@ struct ManualEntryContent: View {
     @FocusState private var noteFieldFocused: Bool
     @FocusState private var amountFocused: Bool
     @State private var amountText: String = ""
+    @State private var showPaywall = false
 
     /// Blinking caret next to the amount. The real text field is invisible
     /// (it only feeds the system decimal pad), so without this the user can't
@@ -131,10 +132,17 @@ struct ManualEntryContent: View {
         .padding(3)
         .background(BrandColor.surface.opacity(0.4))
         .clipShape(Capsule())
+        .fullScreenCover(isPresented: $showPaywall) {
+            PaywallView(context: .receiptScan)
+        }
     }
 
     private func modePill(_ m: EntryMode, icon: String, label: String) -> some View {
-        Button {
+        // Receipt scanning is Premium: the pill stays visible with a lock and
+        // opens the paywall; the form underneath keeps whatever was typed.
+        let locked = m == .camera && !SubscriptionService.shared.isPremium
+        return Button {
+            if locked { showPaywall = true; return }
             withAnimation(.spring(response: 0.3)) { mode = m }
         } label: {
             HStack(spacing: 4) {
@@ -142,6 +150,12 @@ struct ManualEntryContent: View {
                     .font(.system(size: 11, weight: .semibold))
                 Text(label)
                     .font(.brand(.caption))
+                if locked {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundStyle(BrandColor.primary)
+                        .accessibilityLabel(Text("Premium özellik"))
+                }
             }
             .foregroundStyle(mode == m ? .white : BrandColor.textTertiary)
             .padding(.horizontal, Spacing.sm)

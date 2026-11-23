@@ -305,6 +305,11 @@ struct CameraEntryContent: View {
     }
 
     private func processImage(_ image: UIImage) async {
+        // Billed Gemini Vision request — entry points are gated, this is the backstop.
+        guard SubscriptionService.shared.isPremium else {
+            phase = .error(LocaleHelper.string("Bu özellik Budgetella Premium'a dahil."))
+            return
+        }
         phase = .processing
         guard let jpegData = image.jpegData(compressionQuality: 0.7) else {
             phase = .error("Görsel işlenemedi.")

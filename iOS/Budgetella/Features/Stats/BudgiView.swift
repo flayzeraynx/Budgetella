@@ -22,7 +22,8 @@ struct BudgiView: View {
     @State private var isSending         = false
     @State private var showConsentAlert  = false
     @State private var pendingSend       = false
-    @State private var subscriptionService = SubscriptionService()
+    @State private var showPaywall       = false
+    private var subscriptionService: SubscriptionService { .shared }
     @State private var scrollProxy:      ScrollViewProxy? = nil
     @FocusState private var isInputFocused: Bool
 
@@ -38,48 +39,20 @@ struct BudgiView: View {
                 VStack(spacing: 0) {
                     header
 
-                    ScrollViewReader { proxy in
-                        ScrollView(showsIndicators: false) {
-                            LazyVStack(alignment: .leading, spacing: Spacing.md) {
-                                ForEach(chatMessages) { msg in
-                                    messageBubble(msg)
-                                        .id(msg.id)
-                                }
-                                if isSending {
-                                    typingIndicator
-                                        .id("typing")
-                                }
-                            }
-                            .padding(.horizontal, 20)
-                            .padding(.top, Spacing.lg)
-                            .padding(.bottom, 20)
-                        }
-                        .scrollDismissesKeyboard(.interactively)
-                        .simultaneousGesture(TapGesture().onEnded { isInputFocused = false })
-                        .onAppear {
-                            scrollProxy = proxy
-                            buildInitialMessages()
-                        }
-                        .onChange(of: chatMessages.count) { _, _ in
-                            withAnimation(.easeOut(duration: 0.25)) {
-                                proxy.scrollTo(chatMessages.last?.id, anchor: .bottom)
-                            }
-                        }
-                        .onChange(of: isSending) { _, sending in
-                            if sending {
-                                withAnimation(.easeOut(duration: 0.25)) {
-                                    proxy.scrollTo("typing", anchor: .bottom)
-                                }
-                            }
-                        }
+                    if subscriptionService.isPremium {
+                        chatScroll
+                        chatInputBar
+                    } else {
+                        lockedContent
                     }
-
-                    chatInputBar
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
         }
         .task { await subscriptionService.setup(userId: currentUserId) }
+        .fullScreenCover(isPresented: $showPaywall) {
+            PaywallView(context: .budgi)
+        }
         .alert("AI Veri Bildirimi", isPresented: $showConsentAlert) {
             Button("Kabul Et") {
                 aiConsentGiven = true
@@ -97,6 +70,100 @@ struct BudgiView: View {
             UserDefaults.standard.removeObject(forKey: chatHistoryKey)
             chatMessages = []
             buildInitialMessages()
+        }
+    }
+
+    // MARK: - Chat (premium)
+
+    private var chatScroll: some View {
+        ScrollViewReader { proxy in
+            ScrollView(showsIndicators: false) {
+                LazyVStack(alignment: .leading, spacing: Spacing.md) {
+                    ForEach(chatMessages) { msg in
+                        messageBubble(msg)
+                            .id(msg.id)
+                    }
+                    if isSending {
+                        typingIndicator
+                            .id("typing")
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, Spacing.lg)
+                .padding(.bottom, 20)
+            }
+            .scrollDismissesKeyboard(.interactively)
+            .simultaneousGesture(TapGesture().onEnded { isInputFocused = false })
+            .onAppear {
+                scrollProxy = proxy
+                buildInitialMessages()
+            }
+            .onChange(of: chatMessages.count) { _, _ in
+                withAnimation(.easeOut(duration: 0.25)) {
+                    proxy.scrollTo(chatMessages.last?.id, anchor: .bottom)
+                }
+            }
+            .onChange(of: isSending) { _, sending in
+                if sending {
+                    withAnimation(.easeOut(duration: 0.25)) {
+                        proxy.scrollTo("typing", anchor: .bottom)
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Locked (free)
+
+    /// Free users see what Budgi is and one clear way to unlock it — no silent
+    /// redirect, no Gemini request.
+    private var lockedContent: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: Spacing.lg) {
+                ZStack {
+                    Circle()
+                        .fill(BrandColor.primary.opacity(0.12))
+                        .frame(width: 96, height: 96)
+                    Image(systemName: "wand.and.sparkles")
+                        .font(.system(size: 36, weight: .semibold))
+                        .foregroundStyle(BrandColor.primary)
+                }
+                .padding(.top, Spacing.xl)
+
+                PremiumBadge()
+
+                VStack(spacing: Spacing.xs) {
+                    Text("Budgi, Premium'un bir parçası")
+                        .font(.brand(.title))
+                        .foregroundStyle(BrandColor.textPrimary)
+                        .multilineTextAlignment(.center)
+                    Text("Budgi harcamalarını analiz eder, sorularını yanıtlar ve sana özel öneriler sunar. İşlem ekleme, bütçeler ve istatistikler her zaman ücretsiz.")
+                        .font(.brand(.body))
+                        .foregroundStyle(BrandColor.textTertiary)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Button {
+                    showPaywall = true
+                } label: {
+                    Text("Premium ile aç")
+                        .font(.brand(.headline))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                        .background(
+                            LinearGradient(
+                                colors: [BrandColor.primary, BrandColor.primaryLight],
+                                startPoint: .leading, endPoint: .trailing
+                            )
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: Spacing.radiusMedium, style: .continuous))
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, Spacing.xl)
         }
     }
 
@@ -344,6 +411,8 @@ struct BudgiView: View {
     private func sendMessage() async {
         let text = chatInput.trimmingCharacters(in: .whitespaces)
         guard !text.isEmpty, !isSending else { return }
+        // Every send is a billed Gemini request — never fire one for a free user.
+        guard subscriptionService.isPremium else { showPaywall = true; return }
 
         chatInput = ""
         chatMessages.append(BudgiMessage(role: .user, text: text, tag: nil, accent: "clear"))

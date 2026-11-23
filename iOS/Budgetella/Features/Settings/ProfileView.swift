@@ -15,7 +15,7 @@ struct ProfileView: View {
     @AppStorage("displayName")  private var displayName  = ""
     @AppStorage("userEmail")    private var userEmail    = ""
     @AppStorage("userPhotoURL") private var userPhotoURL = ""
-    @State private var subscriptionService = SubscriptionService()
+    private var subscriptionService: SubscriptionService { .shared }
     @AppStorage("currentUserId") private var currentUserId = ""
 
     @State private var showChangePassword = false
