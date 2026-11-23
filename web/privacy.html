@@ -1,8 +1,6 @@
 <!doctype html>
 <html lang="en">
 <head>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-93JNEYMKHT"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-93JNEYMKHT');</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privacy Policy — Budgetella</title>
@@ -18,10 +16,9 @@
 <meta name="robots" content="noindex, follow">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
 <link rel="stylesheet" href="/assets/style.css">
+<script src="/assets/consent.js" defer></script>
 <style>
 .legal-grid{display:grid;grid-template-columns:220px 1fr;gap:80px;max-width:1080px;margin:64px auto;padding:0 var(--gutter)}
 @media(max-width:900px){.legal-grid{grid-template-columns:1fr;gap:40px}.toc{position:static}}
@@ -41,105 +38,151 @@
     <div class="eyebrow">Legal</div>
     <h1>Privacy Policy</h1>
     <p class="lead" style="margin-top:12px;color:var(--muted);font-size:clamp(16px,1.5vw,19px);max-width:640px">Your data is yours. How Budgetella collects, uses, and protects your information — plain language, no jargon.</p>
-    <p style="margin-top:16px;font-size:13px;font-family:var(--font-mono);color:var(--muted)">Last updated: May 6, 2026 · Effective: May 1, 2026 · <a href="/privacy-tr" style="color:var(--brand-accent)">Türkçe için tıkla →</a></p>
+    <p style="margin-top:16px;font-size:13px;font-family:var(--font-mono);color:var(--muted)">Last updated: November 23, 2026 · <a href="/privacy-tr" style="color:var(--brand-accent)">Türkçe için tıkla →</a></p>
   </div>
 </section>
 <div class="legal-grid">
   <aside class="toc">
     <h4>Contents</h4>
     <ul>
-      <li><a href="#intro">1 · General</a></li>
-      <li><a href="#data">2 · Data we collect</a></li>
-      <li><a href="#use">3 · How we use it</a></li>
-      <li><a href="#share">4 · Sharing</a></li>
-      <li><a href="#storage">5 · Storage &amp; security</a></li>
-      <li><a href="#rights">6 · Your rights</a></li>
-      <li><a href="#ai">7 · AI &amp; Budgi</a></li>
+      <li><a href="#intro">1 · Data controller</a></li>
+      <li><a href="#data">2 · Data we process</a></li>
+      <li><a href="#use">3 · Purposes &amp; legal bases</a></li>
+      <li><a href="#share">4 · Transfers &amp; providers</a></li>
+      <li><a href="#ai">5 · AI features</a></li>
+      <li><a href="#storage">6 · Retention &amp; deletion</a></li>
+      <li><a href="#rights">7 · Your rights</a></li>
       <li><a href="#cookies">8 · Cookies</a></li>
       <li><a href="#changes">9 · Changes</a></li>
       <li><a href="#contact">10 · Contact</a></li>
     </ul>
   </aside>
   <main class="legal-content">
-    <h2 id="intro">1. General</h2>
-    <p>This Privacy Policy explains how personal data is processed through the Budgetella mobile application ("<strong>App</strong>") and the <strong>budgetella.app</strong> website. We act as "data controller" under applicable privacy law.</p>
-    <p><strong>In one sentence:</strong> We never touch your bank, we never sell your data, we never share it with third-party marketers.</p>
-
-    <h2 id="data">2. Data we collect</h2>
-    <h3>2.1 Account information</h3>
+    <h2 id="intro">1. Data controller</h2>
+    <p>This notice explains how personal data is processed in the Budgetella mobile app (the "<strong>App</strong>", iOS and Android) and on the <strong>budgetella.app</strong> website. For users in Türkiye it is the information notice required by Law No. 6698 on the Protection of Personal Data ("<strong>KVKK</strong>").</p>
     <ul>
-      <li>Email address (required)</li>
-      <li>Name / display name (optional)</li>
-      <li>Password — stored as a <strong>one-way bcrypt hash</strong>, never readable</li>
+      <li><strong>Data controller:</strong> Ozan Kılıç (individual developer)</li>
+      <li><strong>Address:</strong> 1321 Upland Dr. PMB 15278, Houston, TX 77043, USA</li>
+      <li><strong>E-mail:</strong> <a href="mailto:support@budgetella.app">support@budgetella.app</a></li>
     </ul>
-    <h3>2.2 Financial data (only what you enter)</h3>
+    <p><strong>In short:</strong> we do not connect to your bank, we do not sell your data, and we show no ads. What you enter is kept on your device and synced to your own account in the cloud.</p>
+
+    <h2 id="data">2. Data we process</h2>
+    <h3>2.1 Account</h3>
     <ul>
-      <li>Transactions you add manually: amount, category, date, note</li>
-      <li>Data extracted from receipt scans (OCR output)</li>
-      <li>Transaction text from voice entry</li>
-      <li>Your budget and goal settings</li>
+      <li>Your e-mail address and the name you give.</li>
+      <li>Your password is handled by Firebase Authentication (Google); we never see or store it in plain text.</li>
+      <li>If you use <strong>Sign in with Apple</strong> or <strong>Google Sign-In</strong>: the name, e-mail (Apple's private relay address if you choose it) and account identifier that provider passes to us.</li>
     </ul>
-    <p>We never collect bank account details, credit card numbers, or any open-banking data.</p>
-    <h3>2.3 Device &amp; usage</h3>
+    <h3>2.2 Financial entries you type in</h3>
     <ul>
-      <li>Device model, OS version, app version</li>
-      <li>Anonymous session duration, crash logs</li>
-      <li>IP address (security only, anonymized after 30 days)</li>
+      <li>Transactions: amount, currency, date, category, note, recurrence.</li>
+      <li>Your categories and app settings.</li>
+    </ul>
+    <p>These are stored on your device and synced, under your account, to Google's Cloud Firestore database. <strong>We do not collect bank account details, card numbers or open-banking data.</strong></p>
+    <h3>2.3 Notifications</h3>
+    <ul>
+      <li>If you allow notifications, your device's push token (Firebase Cloud Messaging / Apple Push) and platform are linked to your account.</li>
+    </ul>
+    <h3>2.4 Subscription and purchases</h3>
+    <ul>
+      <li>Apple (App Store) or Google (Google Play) takes the payment. We never receive your card or payment details.</li>
+      <li>On Android, the purchase token generated by Google Play, the product ID and the subscription status are verified on our server and saved to your account.</li>
+      <li>On iOS, subscription status is checked on your device through the App Store (StoreKit).</li>
+      <li>If you subscribed in the past through the old web app with Stripe, your Stripe customer and subscription identifiers may still be linked to your account. No new payments are taken on the web.</li>
+    </ul>
+    <h3>2.5 AI features (only with your consent)</h3>
+    <ul>
+      <li>The messages you write to Budgi and a summary of your spending (amounts and category totals).</li>
+      <li>On iOS, the receipt photo you take or pick for receipt scanning.</li>
+    </ul>
+    <p>See <a href="#ai">section 5</a> for details.</p>
+    <h3>2.6 Voice entry, camera, biometrics</h3>
+    <ul>
+      <li><strong>Voice entry:</strong> your speech is turned into text by your device's speech recognition service (Apple on iOS; on Android the device's speech provider, usually Google), which may process the audio on its servers. We do not store audio.</li>
+      <li><strong>Receipt scanning on Android:</strong> the text is read on the device (Google ML Kit); the photo is not sent to us.</li>
+      <li><strong>Face ID / fingerprint:</strong> biometric data stays in the operating system and never reaches us.</li>
+    </ul>
+    <h3>2.7 Diagnostics and usage data (Android only)</h3>
+    <ul>
+      <li>The Android app includes Firebase Crashlytics, Firebase Performance Monitoring and Google Analytics for Firebase: crash reports, performance measurements, an app-installation identifier, device model, OS and app version, and general usage events.</li>
+      <li>The iOS app does not include these tools.</li>
+    </ul>
+    <h3>2.8 Website</h3>
+    <ul>
+      <li>Firebase Hosting, which serves the site, processes standard server logs such as your IP address with each request.</li>
+      <li>Google Analytics loads only <strong>if you accept</strong> (see <a href="#cookies">section 8</a>).</li>
     </ul>
 
-    <h2 id="use">3. How we use your data</h2>
-    <p>We process your data only for:</p>
+    <h2 id="use">3. Purposes and legal bases</h2>
     <ul>
-      <li><strong>Service delivery:</strong> managing your account, storing transactions, calculating budgets.</li>
-      <li><strong>Personalized insights (Budgi):</strong> our AI assistant analyzes your data to provide spending summaries and suggestions.</li>
-      <li><strong>Security:</strong> detecting unauthorized access attempts.</li>
-      <li><strong>Communication:</strong> important account updates (mandatory), optional product news (if subscribed to newsletter).</li>
-      <li><strong>Legal obligations:</strong> responding to official court or regulatory requests.</li>
+      <li><strong>Creating your account, storing your entries and syncing them between your devices, verifying your subscription:</strong> entering into and performing the contract with you (KVKK Art. 5/2-c).</li>
+      <li><strong>Sending the notifications you allowed:</strong> performance of the contract and the permission you gave on your device.</li>
+      <li><strong>AI features (Budgi, insights, receipt scanning on iOS):</strong> your explicit consent (KVKK Art. 5/1), asked inside the app.</li>
+      <li><strong>Analytics cookies on the website:</strong> your explicit consent, asked in the cookie notice.</li>
+      <li><strong>Crash, performance and usage measurement on Android; security:</strong> legitimate interest in keeping the service working and secure (KVKK Art. 5/2-f).</li>
+      <li><strong>Requests from authorities:</strong> legal obligation (KVKK Art. 5/2-ç).</li>
     </ul>
-    <p>We <strong>never:</strong> sell your data to ad networks, share it with third-party marketers, or use it for audience targeting.</p>
+    <p>We do not sell your data to ad networks or share it with third parties for marketing. The app contains no advertising SDK. We do not send newsletters or marketing e-mail.</p>
 
-    <h2 id="share">4. Sharing</h2>
-    <p>We share your data in limited cases with the following processors:</p>
+    <h2 id="share">4. Transfers and service providers</h2>
+    <p>To provide the service, your data is processed by the providers below. Their servers are <strong>outside Türkiye</strong>, so your data is transferred abroad.</p>
     <ul>
-      <li><strong>Hosting &amp; infrastructure:</strong> Firebase (Google Cloud) — encrypted data storage and authentication.</li>
-      <li><strong>Google Gemini API (AI provider):</strong> When you use Budgi or receipt scanning, relevant data (anonymized spending summary or receipt photo) is sent to Google's Gemini API over an encrypted channel. This data is not used for model training and is not retained beyond 30 days. Data transfer only occurs after explicit consent.</li>
-      <li><strong>Crash reporting:</strong> Error logs with personal data filtered out.</li>
+      <li><strong>Google (Firebase):</strong> Authentication (account), Cloud Firestore (your entries), Cloud Messaging (notifications), Cloud Functions (purchase verification, account deletion), Hosting (website); on Android also Crashlytics, Performance Monitoring and Analytics.</li>
+      <li><strong>Google (Gemini API):</strong> only for the AI features you consented to.</li>
+      <li><strong>Google (Google Play, Google Sign-In, Google Analytics):</strong> Android purchases, signing in with a Google account and, if you accept, website analytics.</li>
+      <li><strong>Apple:</strong> App Store purchases, Sign in with Apple, Apple Push notifications, speech recognition on iOS.</li>
     </ul>
-    <p>All providers are bound by a Data Processing Agreement (DPA).</p>
+    <p>The providers' own privacy notices: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google</a>, <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebase</a>, <a href="https://www.apple.com/legal/privacy/" target="_blank" rel="noopener">Apple</a>. We do not share your data with anyone else unless the law requires it.</p>
 
-    <h2 id="storage">5. Storage &amp; security</h2>
+    <h2 id="ai">5. AI features</h2>
+    <p>AI features run on the <strong>Google Gemini API</strong>, and the app asks for your consent before first use. If you do not consent, nothing is sent and you can keep using the rest of the app.</p>
     <ul>
-      <li><strong>Location:</strong> Data is stored on Firebase infrastructure.</li>
-      <li><strong>Encryption:</strong> AES-256 at rest, TLS 1.3 in transit.</li>
-      <li><strong>Retention:</strong> If you delete your account, all your data is permanently deleted within 30 days.</li>
+      <li><strong>Budgi chat:</strong> your message and a summary of your spending (amounts and category totals) are sent to the Gemini API.</li>
+      <li><strong>Spending insights (iOS):</strong> your monthly spending summary is sent.</li>
+      <li><strong>Receipt scanning (iOS):</strong> the receipt photo is sent to extract the amount and merchant.</li>
     </ul>
+    <p>Requests go straight from your device to Google over an encrypted connection; they do not pass through our servers. Google processes this data under its <a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noopener">Gemini API terms</a>. Your chat history is stored only on your device. We recommend not writing sensitive information such as identity or health details in messages or receipts.</p>
 
-    <h2 id="rights">6. Your rights</h2>
-    <p>Depending on your jurisdiction, you have the right to:</p>
+    <h2 id="storage">6. Retention and deletion</h2>
     <ul>
-      <li>Know whether your personal data is being processed</li>
-      <li>Access a copy of your data</li>
-      <li>Correct inaccurate data</li>
-      <li>Request deletion of your data</li>
-      <li>Restrict or object to processing</li>
-      <li>Data portability (export as JSON via Settings)</li>
-      <li>Withdraw consent at any time</li>
+      <li><strong>Retention:</strong> your account and entries are kept until you delete your account.</li>
+      <li><strong>Deleting your account:</strong> in the app, <strong>Settings → Delete Account</strong>. This removes the data on your device and your sign-in account; when the account is deleted, an automatic server process permanently deletes all cloud records belonging to it (transactions, categories, settings, push tokens). If you cannot access the app, you can also request deletion at <a href="mailto:support@budgetella.app">support@budgetella.app</a>.</li>
+      <li><strong>Backups:</strong> deleted data may remain in Google's own backup systems for the limited period stated in Google's policies.</li>
+      <li><strong>Purchase records:</strong> kept by Apple and Google under their own policies.</li>
+      <li><strong>Export:</strong> you can save a copy of your entries as a file in the app with <strong>Settings → Data → Export</strong>.</li>
+      <li><strong>Security:</strong> data travels between your device and Google's servers over an encrypted (TLS) connection; cloud records can be accessed only with your own account.</li>
     </ul>
-    <p>To exercise any of these rights, email <a href="mailto:info@budgetella.app">info@budgetella.app</a>. We respond within 30 days at no charge.</p>
-    <p class="kvkk-note" id="kvkk">For users in Turkey: your rights are governed by Law No. 6698 (KVKK). All rights listed above apply under Article 11 of KVKK.</p>
 
-    <h2 id="ai">7. AI features &amp; third-party data sharing</h2>
-    <p>Budgetella's AI features (receipt scanning, voice entry categorization, Budgi insights) use the Google Gemini API. Only the minimum necessary data is sent, anonymized where possible, and never used for training. You can disable AI features in Settings.</p>
+    <h2 id="rights">7. Your rights</h2>
+    <p id="kvkk">Under Article 11 of KVKK you have the right to:</p>
+    <ul>
+      <li>learn whether your personal data is processed,</li>
+      <li>request information about it if it has been processed,</li>
+      <li>learn the purpose of processing and whether it is used for that purpose,</li>
+      <li>know the third parties, in Türkiye or abroad, to whom it is transferred,</li>
+      <li>request correction if it is incomplete or inaccurate,</li>
+      <li>request erasure or destruction under the conditions in Article 7 of KVKK,</li>
+      <li>request that correction and erasure be notified to third parties to whom the data was transferred,</li>
+      <li>object to a result against you arising from analysis of your data exclusively by automated systems,</li>
+      <li>claim compensation if you suffer damage from unlawful processing.</li>
+    </ul>
+    <p><strong>How to use them:</strong> send your request from the e-mail address registered on your account to <a href="mailto:support@budgetella.app">support@budgetella.app</a>, or in writing to the address above. We conclude requests within <strong>30 days</strong> at no charge. You can withdraw any consent you gave (AI features, analytics cookies) at any time. If you are not satisfied with our answer, you may complain to the Turkish Personal Data Protection Board. If you live elsewhere, you may also have rights under your local law; contact us the same way.</p>
 
-    <h2 id="cookies">8. Cookies &amp; tracking</h2>
-    <p>The marketing website (budgetella.app) uses Google Analytics (GA4) for anonymous traffic analysis — page views, session duration, referral sources. No cross-site tracking, no advertising cookies. The mobile app does not use cookies.</p>
+    <h2 id="cookies">8. Cookies and similar technologies</h2>
+    <ul>
+      <li><strong>Necessary:</strong> the site keeps settings such as your cookie choice in your browser's local storage. No cookie is set for this.</li>
+      <li><strong>Analytics (only with your consent):</strong> if you choose "Accept", Google Analytics 4 loads and sets the <code>_ga</code> and <code>_ga_*</code> cookies; the pages you visit, approximate location, and device and browser information are sent to Google. If you choose "Decline", Google Analytics never loads and no cookie is set.</li>
+      <li>We use no advertising cookies. Fonts and scripts are served from the site's own server.</li>
+    </ul>
+    <p>You can change your choice at any time: <button type="button" class="link-btn" data-cookie-prefs>Cookie preferences</button> (also at the bottom of every page).</p>
 
     <h2 id="changes">9. Changes to this policy</h2>
-    <p>If we make material changes, we'll notify you via in-app notification and/or email at least 14 days in advance. Continued use after the effective date constitutes acceptance.</p>
+    <p>When we update this notice, we publish the new version on this page with the date of the update.</p>
 
     <h2 id="contact">10. Contact</h2>
-    <p>Questions or requests: <a href="mailto:info@budgetella.app">info@budgetella.app</a><br>
-    We aim to respond within 2 business days.</p>
+    <p>Ozan Kılıç · 1321 Upland Dr. PMB 15278, Houston, TX 77043, USA<br>
+    <a href="mailto:support@budgetella.app">support@budgetella.app</a></p>
   </main>
 </div>
 <div id="mount-footer"></div>

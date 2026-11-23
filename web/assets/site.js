@@ -21,6 +21,7 @@
     blog_link:   'Blog',
     privacy_link:'Gizlilik Politikası',
     terms_link:  'Kullanım Şartları',
+    cookie_link: 'Çerez tercihleri',
     help_link:   'Yardım Merkezi',
     sub_link:    'Abonelik',
     home:        '/tr',
@@ -50,6 +51,7 @@
     blog_link:   'Blog',
     privacy_link:'Privacy Policy',
     terms_link:  'Terms of Use',
+    cookie_link: 'Cookie preferences',
     help_link:   'Help Center',
     sub_link:    'Subscription',
     home:        '/',
@@ -133,6 +135,7 @@
           <ul>
             <li><a href="${t.privacy_href}">${t.privacy_link}</a></li>
             <li><a href="${t.terms_href}">${t.terms_link}</a></li>
+            <li><button type="button" class="footer-link" data-cookie-prefs>${t.cookie_link}</button></li>
           </ul>
         </div>
         <div class="footer-col">
