@@ -26,7 +26,7 @@ struct OnboardingPermissionsView: View {
                 Text("Birkaç izin verir misin?")
                     .font(.brand(.largeTitle))
                     .foregroundStyle(BrandColor.textPrimary)
-                Text("Her şey cihazında kalır. Her zaman.")
+                Text("Verilerin kendi hesabınla senkronize olur. AI özellikleri yalnızca onayınla veri gönderir.")
                     .font(.brand(.body))
                     .foregroundStyle(BrandColor.textTertiary)
             }

@@ -54,10 +54,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.budgetella.app.R
@@ -184,12 +190,7 @@ private fun WelcomeScreen(
         }
 
         Spacer(Modifier.height(Spacing.lg))
-        Text(
-            text = stringResource(R.string.auth_terms_notice),
-            style = BrandText.caption,
-            color = BrandColor.textTertiary(),
-            textAlign = TextAlign.Center,
-        )
+        TermsNotice()
 
         // Inline error (Google sign-in failures, network, etc.).
         state.errorRes?.let { res ->
@@ -288,12 +289,7 @@ private fun SignUpScreen(state: AuthUiState, vm: AuthViewModel) {
             onClick = vm::submitSignUp,
         )
         Spacer(Modifier.height(Spacing.md))
-        Text(
-            text = stringResource(R.string.auth_terms_notice),
-            style = BrandText.caption,
-            color = BrandColor.textTertiary(),
-            textAlign = TextAlign.Center,
-        )
+        TermsNotice()
         Spacer(Modifier.height(Spacing.lg))
         AuthSwitchFooter(
             question = stringResource(R.string.auth_have_account_question),
@@ -498,3 +494,35 @@ private fun ErrorBanner(@androidx.annotation.StringRes messageRes: Int) {
     }
 }
 
+
+/**
+ * Sign-up consent line with the Terms and Privacy Policy as tappable links.
+ * ponytail: link words are matched inside the localized sentence (EN + TR only);
+ * an unmatched locale falls back to plain text. Move to per-locale label strings if a third language is added.
+ */
+@Composable
+private fun TermsNotice() {
+    val notice = stringResource(R.string.auth_terms_notice)
+    val links = listOf(
+        listOf("Kullanım Koşulları", "Terms") to "https://budgetella.app/terms",
+        listOf("Gizlilik Politikası", "Privacy Policy") to "https://budgetella.app/privacy",
+    )
+    val trSuffix = if (notice.contains("Kullanım Koşulları")) "-tr" else ""
+    val linkStyle = TextLinkStyles(
+        SpanStyle(fontWeight = FontWeight.SemiBold, textDecoration = TextDecoration.Underline),
+    )
+    val text = buildAnnotatedString {
+        append(notice)
+        links.forEach { (labels, url) ->
+            val label = labels.firstOrNull { notice.contains(it) } ?: return@forEach
+            val start = notice.indexOf(label)
+            addLink(LinkAnnotation.Url(url + trSuffix, linkStyle), start, start + label.length)
+        }
+    }
+    Text(
+        text = text,
+        style = BrandText.caption,
+        color = BrandColor.textTertiary(),
+        textAlign = TextAlign.Center,
+    )
+}
